@@ -1,12 +1,37 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required(VERSION 2.6)
 
-project (LDMicro)
+project(LDMicro)
 
-IF (NOT UNIX)
-    add_definitions (__WINDOWS_SYSTEM__)
-    set (PKG_CONFIG_PATH "C:/path/to/gtk/lib/pkgconfig")
-    set (PATH "C:/path/to/gtk/bin;%PATH%")
-ENDIF (NOT UNIX)
+IF(WIN32)
+    MESSAGE( STATUS "Building for Windows.." )
+    add_definitions(-D__WIN32__)
+    include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../common/win32")
+    MESSAGE( STATUS "Setting path" )
+    add_definitions(__WINDOWS_SYSTEM__)
+    set(PKG_CONFIG_PATH "C:/path/to/gtk/lib/pkgconfig")
+    set(PATH "C:/path/to/gtk/bin;%PATH%")
+    MESSAGE( STATUS "Setting path - done" )
+ENDIF(WIN32)
+
+IF(UNIX)
+    add_definitions(-D__UNIX__)
+    include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../common/linux")
+
+    MESSAGE( STATUS "Performing system check.." )
+    MESSAGE( STATUS "Identifing bitness of the platform.." )
+    add_definitions(-D__UNIX32)
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        add_definitions(-D__UNIX64)
+        MESSAGE( STATUS "Bitness of the platform: " 64)
+    else()
+        MESSAGE( STATUS "Bitness of the platform: " 36)
+    endif()
+    MESSAGE( STATUS "Performing system check - done" )
+ENDIF(UNIX)
+
+IF (MSVC)
+    add_definitions(-D__MSVC__)
+ENDIF (MSVC)
 
 MESSAGE ( STATUS "Searching for GTK+3.0..." )
 find_package (PkgConfig REQUIRED)
@@ -16,8 +41,18 @@ pkg_check_modules (GTK3 REQUIRED gtk+-3.0)
 set (LDMicro_VERSION_MAJOR 1)
 set (LDMicro_VERSION_MINOR 0)
 
-# Add GTK3 include files if GTK3 is found
+# configure a header file to pass some of the CMake settings
+# to the source code
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/includes")
+set(PROJECT_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/includes")
+CONFIGURE_FILE (
+    "${PROJECT_INCLUDE_DIR}/ldmicroVC.h.in"
+    "${PROJECT_INCLUDE_DIR}/ldmicroVC.h"
+)
+MESSAGE ( STATUS " PROJECT_INCLUDE_DIR: " ${PROJECT_INCLUDE_DIR} )
 
+
+# Add GTK3 include files if GTK3 is found
 IF ( GTK3_FOUND )
       include_directories (${GTK3_INCLUDE_DIRS})
       link_directories (${GTK3_LIBRARY_DIRS})
@@ -27,11 +62,9 @@ IF ( GTK3_FOUND )
       MESSAGE ( STATUS " GTK3_LIBRARIES: " ${GTK3_LIBRARIES} )
 ENDIF ( GTK3_FOUND)
 
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/includes")
-
-## Dummy compile to test linuxUI
-## to compile LDmicro uncomment the below line
-# add_executable (LDMicro ldmicro.cpp miscutil.cpp draw_outputdev.cpp)
+## Dummy compile and install to test linuxUI
+## to compile LDmicro uncomment the below 2 line2
+add_executable (LDMicro ldmicro.cpp)# miscutil.cpp draw_outputdev.cpp)
+# install (TARGETS LDMicro DESTINATION bin)
 add_executable (linuxUI linuxUI.cpp)
-
-install (TARGETS LDMicro DESTINATION bin)
+install (TARGETS linuxUI DESTINATION bin)

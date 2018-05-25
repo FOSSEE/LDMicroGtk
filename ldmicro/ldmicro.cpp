@@ -24,9 +24,14 @@
 // most of the UI logic relating to the main window.
 // Jonathan Westhues, Oct 2004
 //-----------------------------------------------------------------------------
+#ifdef __UNIX__
+#include "linuxUI/linuxUI.h"
+#elif defined(__WIN32__)
 #include <windows.h>
 #include <commctrl.h>
 #include <commdlg.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 

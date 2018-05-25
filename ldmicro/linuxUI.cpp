@@ -1,8 +1,7 @@
 #include "linuxUI/linuxUI.h"
 
-int main (int argc, char**argv)
+/// Wraper function for gtk_window_has_toplevel_focus
+BOOL isFocus(HWND window)
 {
-    int status = 0;
-    
-    return status;
+    return (BOOL) gtk_window_has_toplevel_focus(GTK_WINDOW(window));
 }

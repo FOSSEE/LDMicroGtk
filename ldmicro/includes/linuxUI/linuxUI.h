@@ -20,8 +20,10 @@ typedef bool BOOL;
 typedef GdkRGBA COLORREF;
 typedef unsigned char BYTE;
 typedef unsigned int DWORD;
+
+/// all handles will hold a GtkWindow* type
 typedef void* PVOID;
-typedef PVOID HANDLE;
+typedef GtkWindow* HANDLE;
 typedef HANDLE HINSTANCE;
 typedef HANDLE HWND;
 typedef HANDLE HDC;
@@ -48,3 +50,9 @@ typedef unsigned int UINT_PTR;
 #endif
  
 typedef UINT_PTR WPARAM;
+typedef unsigned int UINT;
+
+/// common windows referances for linux - end
+
+/// functions
+BOOL isFocus(HWND);

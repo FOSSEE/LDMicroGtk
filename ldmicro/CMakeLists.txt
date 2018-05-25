@@ -3,14 +3,8 @@ cmake_minimum_required(VERSION 2.6)
 project(LDMicro)
 
 IF(WIN32)
-    MESSAGE( STATUS "Building for Windows.." )
+    MESSAGE( FATAL_ERROR "Cannot build for windows, exiting" )
     add_definitions(-D__WIN32__)
-    include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../common/win32")
-    MESSAGE( STATUS "Setting path" )
-    add_definitions(__WINDOWS_SYSTEM__)
-    set(PKG_CONFIG_PATH "C:/path/to/gtk/lib/pkgconfig")
-    set(PATH "C:/path/to/gtk/bin;%PATH%")
-    MESSAGE( STATUS "Setting path - done" )
 ENDIF(WIN32)
 
 IF(UNIX)
@@ -30,6 +24,7 @@ IF(UNIX)
 ENDIF(UNIX)
 
 IF (MSVC)
+    MESSAGE( FATAL_ERROR "Cannot build for MacOS, exiting" )
     add_definitions(-D__MSVC__)
 ENDIF (MSVC)
 

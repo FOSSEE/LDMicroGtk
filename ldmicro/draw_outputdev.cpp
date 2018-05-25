@@ -21,6 +21,8 @@
 // stuff to write to a file, or all the routines concerned with drawing to
 // the screen.
 // Jonathan Westhues, Dec 2004
+// 
+// Ported to linus by: R Ramana, 2018
 //-----------------------------------------------------------------------------
 #include <windows.h>
 #include <stdio.h>
@@ -80,7 +82,7 @@ SyntaxHighlightingColours HighlightColours;
 //-----------------------------------------------------------------------------
 void CALLBACK BlinkCursor(HWND hwnd, UINT msg, UINT_PTR id, DWORD time)
 {
-    if(GetFocus() != MainWindow && !CursorDrawn) return;
+    if(!isFocus(MainWindow) && !CursorDrawn) return;
     if(Cursor.left == 0) return;
 
     PlcCursor c;

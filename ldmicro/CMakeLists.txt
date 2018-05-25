@@ -9,7 +9,7 @@ IF (NOT UNIX)
 ENDIF (NOT UNIX)
 
 MESSAGE ( STATUS "Searching for GTK+3.0..." )
-find_package() (PkgConfig REQUIRED)
+find_package (PkgConfig REQUIRED)
 pkg_check_modules (GTK3 REQUIRED gtk+-3.0)
 
 # Version control
@@ -29,6 +29,9 @@ ENDIF ( GTK3_FOUND)
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/includes")
 
-add_executable (LDMicro ldmicro.cpp miscutil.cpp draw_outputdev.cpp)
+## Dummy compile to test linuxUI
+## to compile LDmicro uncomment the below line
+# add_executable (LDMicro ldmicro.cpp miscutil.cpp draw_outputdev.cpp)
+add_executable (linuxUI linuxUI.cpp)
 
 install (TARGETS LDMicro DESTINATION bin)

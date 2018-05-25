@@ -1,4 +1,4 @@
 # exclude all files in build folder
-/build/*
+/ldmicro/build/*
 /.vscode
 

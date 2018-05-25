@@ -1,0 +1,4 @@
+# exclude all files in build folder
+/build/*
+/.vscode
+

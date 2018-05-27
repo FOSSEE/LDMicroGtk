@@ -1,3 +1,6 @@
+#ifndef __LINUX_UI__
+#define __LINUX_UI__
+
 /// includes
 #include <gtk/gtk.h>
 #include <linux/limits.h>
@@ -77,3 +80,5 @@ class COLORREF : public GdkRGBA{
 /// functions
 BOOL isFocus(HWND);
 COLORREF RGB(int, int, int);
+
+#endif

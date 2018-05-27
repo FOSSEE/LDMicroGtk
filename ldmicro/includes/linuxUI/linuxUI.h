@@ -17,17 +17,18 @@
 /// typedefs
 //typedef int64_t __int64;
 typedef bool BOOL;
-typedef GdkRGBA COLORREF;
 typedef unsigned char BYTE;
 typedef unsigned int DWORD;
 
 /// all handles will hold a GtkWindow* type
 typedef void* PVOID;
-typedef GtkWindow* HANDLE;
+typedef GtkWidget* HANDLE;
 typedef HANDLE HINSTANCE;
 typedef HANDLE HWND;
 typedef HANDLE HDC;
 typedef HANDLE HMENU;
+
+typedef GtkApplication* HAPP;
 
 /*
 /// Check if system is x64 or x86 using GCC
@@ -52,7 +53,27 @@ typedef unsigned int UINT_PTR;
 typedef UINT_PTR WPARAM;
 typedef unsigned int UINT;
 
+/// custom classes
+class COLORREF : public GdkRGBA{
+    public:
+    COLORREF()
+    {
+        this->red = 0.0;
+        this->green = 0.0;
+        this->blue = 0.0;
+        this->alpha = 1.0;
+    }
+    COLORREF(int r, int g, int b)
+    {
+        this->red = r/255.0;
+        this->green = g/255.0;
+        this->blue = b/255.0;
+        this->alpha = 1.0;
+    }
+};
+
 /// common windows referances for linux - end
 
 /// functions
 BOOL isFocus(HWND);
+COLORREF RGB(int, int, int);

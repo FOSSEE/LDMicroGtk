@@ -59,7 +59,7 @@ ENDIF ( GTK3_FOUND)
 
 ## Dummy compile and install to test linuxUI
 ## to compile LDmicro uncomment the below 2 line2
-add_executable (LDMicro ldmicro.cpp)# miscutil.cpp draw_outputdev.cpp)
+#add_executable (LDMicro ldmicro.cpp)# miscutil.cpp draw_outputdev.cpp)
 # install (TARGETS LDMicro DESTINATION bin)
 add_executable (linuxUI linuxUI.cpp)
 install (TARGETS linuxUI DESTINATION bin)

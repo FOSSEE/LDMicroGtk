@@ -10,6 +10,8 @@
 #ifndef __FREEZE_H
 #define __FREEZE_H
 
+#define LDMICRO_REGISTER "/usr/share/ldmicro"
+
 #ifndef FREEZE_SUBKEY
 #error must define FREEZE_SUBKEY to a string uniquely identifying the app
 #endif
@@ -35,14 +37,12 @@ void ThawStringF(char *val, int max, char *subKey, char *name);
 typedef union regKeyVal{
     int i;
     float f;
-    double d;
     bool b;
     DWORD D;
 } KeyVal;
 
 
 typedef struct regKeys{
-    char name[15];
     char type;
     KeyVal val;
 } Key;

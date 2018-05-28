@@ -18,13 +18,16 @@
  */
 void FreezeWindowPosF(HWND hwnd, char *subKey, char *name)
 {
-    if (-1 == system("mkdir -p /usr/share/ldmicro"))
+    char* moveToKeyLocatin = (char *)malloc(strlen(subKey) + 35);
+    if(!moveToKeyLocatin)
         return;
+    sprintf(moveToKeyLocatin, "mkdir -p %s/%s", LDMICRO_REGISTER, subKey);
+    system(moveToKeyLocatin);  
+    sprintf(moveToKeyLocatin, "cd %s/%s", LDMICRO_REGISTER, subKey);
+    if (-1 == system(moveToKeyLocatin))
+        return;
+    free(moveToKeyLocatin);
 
-    std::ofstream Register("binConf", std::ios::binary | std::ios::trunc);
-    if (!Register.is_open())
-        return;
-    
     char *keyName = (char *)malloc(strlen(name) + 30);
     if(!keyName)
         return;
@@ -34,39 +37,53 @@ void FreezeWindowPosF(HWND hwnd, char *subKey, char *name)
     int val;
 
     sprintf(keyName, "%s_width", name);
-    gtk_window_get_size(GTK_WINDOW(hwnd), &val, NULL);
-    newKey.name = keyName;
+    std::ofstream Register(keyName, std::ios::binary | std::ios::trunc);
+    if (!Register.is_open())
+        return;
+    gtk_window_get_size(GTK_WINDOW(gtk_widget_get_parent_window(GTK_WIDGET(hwnd))), &val, NULL);
     newKey.type = 'i';
-    newKey.val = val;
+    newKey.val.i = val;
     Register.write((char*) &newKey, sizeof(newKey));
+    Register.close();
 
     sprintf(keyName, "%s_height", name);
-    gtk_window_get_size(GTK_WINDOW(hwnd), NULL, &val);
-    newKey.name = keyName;
+    Register.open(keyName, std::ios::binary | std::ios::trunc);
+    if (!Register.is_open())
+        return;
+    gtk_window_get_size(GTK_WINDOW(gtk_widget_get_parent_window(GTK_WIDGET(hwnd))), NULL, &val);
     newKey.type = 'i';
-    newKey.val = val;
+    newKey.val.i = val;
     Register.write((char*) &newKey, sizeof(newKey));
-    
+    Register.close();
 
     sprintf(keyName, "%s_posX", name);
-    gtk_window_get_position(GTK_WINDOW(hwnd), &val, NULL);
-    newKey.name = keyName;
+    Register.open(keyName, std::ios::binary | std::ios::trunc);
+    if (!Register.is_open())
+        return;
+    gtk_window_get_position(GTK_WINDOW(gtk_widget_get_parent_window(GTK_WIDGET(hwnd))), &val, NULL);
     newKey.type = 'i';
-    newKey.val = val;
+    newKey.val.i = val;
     Register.write((char*) &newKey, sizeof(newKey));
+    Register.close();
     
     sprintf(keyName, "%s_posY", name);
-    gtk_window_get_position(GTK_WINDOW(hwnd), NULL, &val);
-    newKey.name = keyName;
+    Register.open(keyName, std::ios::binary | std::ios::trunc);
+    if (!Register.is_open())
+        return;
+    gtk_window_get_position(GTK_WINDOW(gtk_widget_get_parent_window(GTK_WIDGET(hwnd))), NULL, &val);
     newKey.type = 'i';
-    newKey.val = val;
+    newKey.val.i = val;
     Register.write((char*) &newKey, sizeof(newKey));
-    
+    Register.close();
+
     sprintf(keyName, "%s_maximized", name);
-    newKey.name = keyName;
+    Register.open(keyName, std::ios::binary | std::ios::trunc);
+    if (!Register.is_open())
+        return;
     newKey.type = 'b';
-    newKey.val = gtk_window_is_maximized(GTK_WINDOW(hwnd));
+    newKey.val.b = gtk_window_is_maximized(GTK_WINDOW(gtk_widget_get_parent_window(GTK_WIDGET(hwnd))));
     Register.write((char*) &newKey, sizeof(newKey));
+    Register.close();
 
     free(keyName);
 }
@@ -82,69 +99,68 @@ static void Clamp(LONG *v, LONG min, LONG max)
  */
 void ThawWindowPosF(HWND hwnd, char *subKey, char *name)
 {
-    HKEY software;
-    if(RegOpenKeyEx(HKEY_CURRENT_USER, "Software", 0, KEY_ALL_ACCESS, &software) != ERROR_SUCCESS)
+    char* moveToKeyLocatin = (char *)malloc(strlen(name) + 30);
+    if(!moveToKeyLocatin)
         return;
-
-    HKEY sub;
-    if(RegOpenKeyEx(software, subKey, 0, KEY_ALL_ACCESS, &sub) != ERROR_SUCCESS)
+    sprintf(moveToKeyLocatin, "cd %s/%s", LDMICRO_REGISTER, subKey);
+    if (-1 == system(moveToKeyLocatin))
         return;
-
+    free(moveToKeyLocatin);
+    
     char *keyName = (char *)malloc(strlen(name) + 30);
     if(!keyName)
         return;
 
-    DWORD l;
-    RECT  r;
+    Key newkey1,  newkey2;
 
-    sprintf(keyName, "%s_left", name);
-    l = sizeof(DWORD);
-    if(RegQueryValueEx(sub, keyName, NULL, NULL, (BYTE *)&(r.left), &l) != ERROR_SUCCESS)
+    /// set size
+    sprintf(keyName, "%s_width", name);
+    std::ifstream Register(keyName, std::ios::binary);
+    if (!Register.is_open())
         return;
+    Register.read((char*) &newKey1, sizeof(newKey1));
+    Register.close();
 
-    sprintf(keyName, "%s_right", name);
-    l = sizeof(DWORD);
-    if(RegQueryValueEx(sub, keyName, NULL, NULL, (BYTE *)&(r.right), &l) != ERROR_SUCCESS)
+    sprintf(keyName, "%s_height", name);
+    Register.open(keyName, std::ios::binary);
+    if (!Register.is_open())
         return;
+    Register.read((char*) &newKey2, sizeof(newKey2));
+    Register.close();
+    if (newKey1.type == 'i' && newKey2.type == 'i')
+        gtk_window_resize(GTK_WINDOW(gtk_widget_get_parent_window(GTK_WIDGET(hwnd))), &newKey1.val.i, &newKey2.val.i);
 
-    sprintf(keyName, "%s_top", name);
-    l = sizeof(DWORD);
-    if(RegQueryValueEx(sub, keyName, NULL, NULL, (BYTE *)&(r.top), &l) != ERROR_SUCCESS)
-        return;
 
-    sprintf(keyName, "%s_bottom", name);
-    l = sizeof(DWORD);
-    if(RegQueryValueEx(sub, keyName, NULL, NULL, (BYTE *)&(r.bottom), &l) != ERROR_SUCCESS)
+    /// set position
+    sprintf(keyName, "%s_posX", name);
+    Register.open(keyName, std::ios::binary);
+    if (!Register.is_open())
         return;
+    Register.read((char*) &newKey1, sizeof(newKey1));
+    Register.close();
+
+    sprintf(keyName, "%s_posY", name);
+    Register.open(keyName, std::ios::binary);
+    if (!Register.is_open())
+        return;
+    Register.read((char*) &newKey2, sizeof(newKey2));
+    Register.close();
+    if (newKey1.type == 'i' && newKey2.type == 'i')
+        gtk_window_move(GTK_WINDOW(gtk_widget_get_parent_window(GTK_WIDGET(hwnd))), &newKey1.val.i, &newKey2.val.i);
+
 
     sprintf(keyName, "%s_maximized", name);
-    DWORD v;
-    l = sizeof(DWORD);
-    if(RegQueryValueEx(sub, keyName, NULL, NULL, (BYTE *)&v, &l) != ERROR_SUCCESS)
+    Register.open(keyName, std::ios::binary);
+    if (!Register.is_open())
         return;
-    if(v)
-        ShowWindow(hwnd, SW_MAXIMIZE);
+    Register.read((char*) &newKey, sizeof(newKey));
+    Register.close();
+    if  (newKey.type == 'b')
+        if (newKey.val.b)
+            gtk_window_maximize(GTK_WINDOW(gtk_widget_get_parent_window(GTK_WIDGET(hwnd))));
 
-    RECT dr;
-    GetWindowRect(GetDesktopWindow(), &dr);
 
-    // If it somehow ended up off-screen, then put it back.
-    Clamp(&(r.left),   dr.left, dr.right);
-    Clamp(&(r.right),  dr.left, dr.right);
-    Clamp(&(r.top),    dr.top,  dr.bottom);
-    Clamp(&(r.bottom), dr.top,  dr.bottom);
-    if(r.right - r.left < 100) {
-        r.left -= 300; r.right += 300;
-    }
-    if(r.bottom - r.top < 100) {
-        r.top -= 300; r.bottom += 300;
-    }
-    Clamp(&(r.left),   dr.left, dr.right);
-    Clamp(&(r.right),  dr.left, dr.right);
-    Clamp(&(r.top),    dr.top,  dr.bottom);
-    Clamp(&(r.bottom), dr.top,  dr.bottom);
-
-    MoveWindow(hwnd, r.left, r.top, r.right - r.left, r.bottom - r.top, TRUE);
+    /// gtk_window_move handles off-screen window placement
 
     free(keyName);
 }
@@ -154,16 +170,22 @@ void ThawWindowPosF(HWND hwnd, char *subKey, char *name)
  */
 void FreezeDWORDF(DWORD val, char *subKey, char *name)
 {
-    HKEY software;
-    if(RegOpenKeyEx(HKEY_CURRENT_USER, "Software", 0, KEY_ALL_ACCESS, &software) != ERROR_SUCCESS)
+    char* moveToKeyLocatin = (char *)malloc(strlen(name) + 30);
+    if(!moveToKeyLocatin)
         return;
+    sprintf(moveToKeyLocatin, "mkdir -p %s/%s", LDMICRO_REGISTER, subKey);
+    system(moveToKeyLocatin);
+    sprintf(moveToKeyLocatin, "cd %s/%s", LDMICRO_REGISTER, subKey);
+    if (-1 == system(moveToKeyLocatin))
+        return;
+    free(moveToKeyLocatin);
 
-    HKEY sub;
-    if(RegCreateKeyEx(software, subKey, 0, "", REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &sub, NULL) != ERROR_SUCCESS)
-        return;
-  
-    if(RegSetValueEx(sub, name, 0, REG_DWORD, (BYTE *)&val, sizeof(DWORD)) != ERROR_SUCCESS)
-        return;
+    Key newKey;
+    newKey.type = 'D';
+    newKey.val.D = val;
+    std::ofstream Register(name, std::ios::binary | std::ios::trunc);
+    Register.write((char*) &newKey, sizeof(newKey));
+    Register.close();
 }
 
 /*
@@ -171,20 +193,26 @@ void FreezeDWORDF(DWORD val, char *subKey, char *name)
  */
 DWORD ThawDWORDF(DWORD val, char *subKey, char *name)
 {
-    HKEY software;
-    if(RegOpenKeyEx(HKEY_CURRENT_USER, "Software", 0, KEY_ALL_ACCESS, &software) != ERROR_SUCCESS)
+    char* moveToKeyLocatin = (char *)malloc(strlen(name) + 30);
+    if(!moveToKeyLocatin)
+        return val;
+    sprintf(moveToKeyLocatin, "cd %s/%s", LDMICRO_REGISTER, subKey);
+    if (-1 == system(moveToKeyLocatin))
+        return val;
+    free(moveToKeyLocatin);
+
+    Key newKey;
+
+    std::ifstream Register(name, std::ios::binary);
+    Register.read((char*) &newKey, sizeof(newKey));
+    Register.close();
+    if(Register.bad())
         return val;
 
-    HKEY sub;
-    if(RegOpenKeyEx(software, subKey, 0, KEY_ALL_ACCESS, &sub) != ERROR_SUCCESS)
+    if(newKey.type == 'D')
+        return newKey.val.D;
+    else
         return val;
-
-    DWORD l = sizeof(DWORD);
-    DWORD v;
-    if(RegQueryValueEx(sub, name, NULL, NULL, (BYTE *)&v, &l) != ERROR_SUCCESS)
-        return val;
-
-    return v;
 }
 
 /*
@@ -192,16 +220,20 @@ DWORD ThawDWORDF(DWORD val, char *subKey, char *name)
  */
 void FreezeStringF(char *val, char *subKey, char *name)
 {
-    HKEY software;
-    if(RegOpenKeyEx(HKEY_CURRENT_USER, "Software", 0, KEY_ALL_ACCESS, &software) != ERROR_SUCCESS)
-        return;
-
-    HKEY sub;
-    if(RegCreateKeyEx(software, subKey, 0, "", REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &sub, NULL) != ERROR_SUCCESS)
-        return;
-  
-    if(RegSetValueEx(sub, name, 0, REG_SZ, (BYTE *)val, strlen(val)+1) != ERROR_SUCCESS)
-        return;
+    char* moveToKeyLocatin = (char *)malloc(strlen(name) + 30);
+    if(!moveToKeyLocatin)
+        return val;
+    sprintf(moveToKeyLocatin, "mkdir -p %s/%s", LDMICRO_REGISTER, subKey);
+    system(moveToKeyLocatin);
+    sprintf(moveToKeyLocatin, "cd %s/%s", LDMICRO_REGISTER, subKey);
+    if (-1 == system(moveToKeyLocatin))
+        return val;
+    free(moveToKeyLocatin);
+    
+    std::ofstream Register(name, std::ios::trunc);
+    Register << strlen(val)+1 << "\n";
+    Register << val;
+    Register.close();
 }
 
 /*
@@ -209,20 +241,19 @@ void FreezeStringF(char *val, char *subKey, char *name)
  */
 void ThawStringF(char *val, int max, char *subKey, char *name)
 {
-    HKEY software;
-    if(RegOpenKeyEx(HKEY_CURRENT_USER, "Software", 0, KEY_ALL_ACCESS, &software) != ERROR_SUCCESS)
+    char* moveToKeyLocatin = (char *)malloc(strlen(name) + 30);
+    if(!moveToKeyLocatin)
         return;
-
-    HKEY sub;
-    if(RegOpenKeyEx(software, subKey, 0, KEY_ALL_ACCESS, &sub) != ERROR_SUCCESS)
+    sprintf(moveToKeyLocatin, "cd %s/%s", LDMICRO_REGISTER, subKey);
+    if (-1 == system(moveToKeyLocatin))
         return;
+    free(moveToKeyLocatin);
 
-    DWORD l = max;
-    if(RegQueryValueEx(sub, name, NULL, NULL, (BYTE *)val, &l) != ERROR_SUCCESS)
+    std::ifstream Register(name);
+    int l;
+    Register >> l;
+    if (l >= max)
         return;
-    if(l >= (DWORD)max) return;
-
-    val[l] = '\0';
-    return;
+    Register >> val;
 }
 

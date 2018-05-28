@@ -20,9 +20,11 @@ typedef unsigned int DWORD;
 typedef void* PVOID;
 typedef GtkWidget* HANDLE;
 typedef HANDLE HINSTANCE;
-typedef HANDLE HWND;
+typedef HANDLE HWID;
 typedef HANDLE HDC;
 typedef HANDLE HMENU;
+
+typedef GtkWindow* HWND;
 
 typedef GtkApplication* HAPP;
 

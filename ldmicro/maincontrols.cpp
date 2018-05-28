@@ -294,6 +294,8 @@ HMENU MakeMainWindowMenus(void)
     processor_menu_items = gtk_menu_item_new_with_label (SupportedMcus[i].mcuName);
     gtk_menu_shell_append (GTK_MENU_SHELL (ProcessorMenu), processor_menu_items);
   }
+  processor_menu_items = gtk_menu_item_new_with_label ("(no microcontroller)");
+  gtk_menu_shell_append (GTK_MENU_SHELL (ProcessorMenu), processor_menu_items);
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(settings_menu_items), ProcessorMenu);
 
   // Appending menu items to Instruction menu

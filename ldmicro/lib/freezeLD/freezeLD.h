@@ -12,15 +12,17 @@
 
 #define LDMICRO_REGISTER "/usr/share/ldmicro"
 
-#ifndef FREEZE_SUBKEY
-#error must define FREEZE_SUBKEY to a string uniquely identifying the app
-#endif
+#define FREEZE_SUBKEY "LDMicro"
+
+// #ifndef FREEZE_SUBKEY
+// #error must define FREEZE_SUBKEY to a string uniquely identifying the app
+// #endif
 
 #define FreezeWindowPos(hwnd) FreezeWindowPosF(hwnd, FREEZE_SUBKEY, #hwnd)
-void FreezeWindowPosF(HWND hWnd, char *subKey, char *name);
+void FreezeWindowPosF(HWID hWid, char *subKey, char *name);
 
 #define ThawWindowPos(hwnd) ThawWindowPosF(hwnd, FREEZE_SUBKEY, #hwnd)
-void ThawWindowPosF(HWND hWnd, char *subKey, char *name);
+void ThawWindowPosF(HWID hWid, char *subKey, char *name);
 
 #define FreezeDWORD(val) FreezeDWORDF(val, FREEZE_SUBKEY, #val)
 void FreezeDWORDF(DWORD val, char *subKey, char *name);

@@ -6,8 +6,8 @@
  * 
  * R Ramana, 2018
  */
-#include "freeze.h"
-#include <linuxUI/linuxUI.h>
+#include "linuxUI.h"
+#include "freezeLD.h"
 #include <cstdlib>
 #include <fstream>
 #include <stdlib.h>
@@ -16,8 +16,9 @@
 /*
  * store a window's position in the registry, or fail silently if the registry calls don't work
  */
-void FreezeWindowPosF(HWND hwnd, char *subKey, char *name)
+void FreezeWindowPosF(HWID hwid, char *subKey, char *name)
 {
+    g_print("freezing");
     char* moveToKeyLocatin = (char *)malloc(strlen(subKey) + 35);
     if(!moveToKeyLocatin)
         return;
@@ -32,60 +33,65 @@ void FreezeWindowPosF(HWND hwnd, char *subKey, char *name)
     if(!keyName)
         return;
 
-    Key newkey;
+    Key newKey;
 
     int val;
-
+    g_print("get width");
     sprintf(keyName, "%s_width", name);
     std::ofstream Register(keyName, std::ios::binary | std::ios::trunc);
     if (!Register.is_open())
         return;
-    gtk_window_get_size(GTK_WINDOW(gtk_widget_get_parent_window(GTK_WIDGET(hwnd))), &val, NULL);
+    gtk_window_get_size(GTK_WINDOW(hwid), &val, NULL);
     newKey.type = 'i';
     newKey.val.i = val;
     Register.write((char*) &newKey, sizeof(newKey));
     Register.close();
 
+    g_print("get height");
     sprintf(keyName, "%s_height", name);
     Register.open(keyName, std::ios::binary | std::ios::trunc);
     if (!Register.is_open())
         return;
-    gtk_window_get_size(GTK_WINDOW(gtk_widget_get_parent_window(GTK_WIDGET(hwnd))), NULL, &val);
+    gtk_window_get_size(GTK_WINDOW(hwid), NULL, &val);
     newKey.type = 'i';
     newKey.val.i = val;
     Register.write((char*) &newKey, sizeof(newKey));
     Register.close();
 
+    g_print("get posX");
     sprintf(keyName, "%s_posX", name);
     Register.open(keyName, std::ios::binary | std::ios::trunc);
     if (!Register.is_open())
         return;
-    gtk_window_get_position(GTK_WINDOW(gtk_widget_get_parent_window(GTK_WIDGET(hwnd))), &val, NULL);
+    gtk_window_get_position(GTK_WINDOW(hwid), &val, NULL);
     newKey.type = 'i';
     newKey.val.i = val;
     Register.write((char*) &newKey, sizeof(newKey));
     Register.close();
     
+    g_print("get posY");
     sprintf(keyName, "%s_posY", name);
     Register.open(keyName, std::ios::binary | std::ios::trunc);
     if (!Register.is_open())
         return;
-    gtk_window_get_position(GTK_WINDOW(gtk_widget_get_parent_window(GTK_WIDGET(hwnd))), NULL, &val);
+    gtk_window_get_position(GTK_WINDOW(hwid), NULL, &val);
     newKey.type = 'i';
     newKey.val.i = val;
     Register.write((char*) &newKey, sizeof(newKey));
     Register.close();
 
+    g_print("get max");
     sprintf(keyName, "%s_maximized", name);
     Register.open(keyName, std::ios::binary | std::ios::trunc);
     if (!Register.is_open())
         return;
     newKey.type = 'b';
-    newKey.val.b = gtk_window_is_maximized(GTK_WINDOW(gtk_widget_get_parent_window(GTK_WIDGET(hwnd))));
+    newKey.val.b = gtk_window_is_maximized(GTK_WINDOW(hwid));
     Register.write((char*) &newKey, sizeof(newKey));
     Register.close();
 
     free(keyName);
+    g_print("freezed");
 }
 
 static void Clamp(LONG *v, LONG min, LONG max)
@@ -97,7 +103,7 @@ static void Clamp(LONG *v, LONG min, LONG max)
 /*
  * retrieve a window's position from the registry, or do nothing if there is no info saved
  */
-void ThawWindowPosF(HWND hwnd, char *subKey, char *name)
+void ThawWindowPosF(HWID hwid, char *subKey, char *name)
 {
     char* moveToKeyLocatin = (char *)malloc(strlen(name) + 30);
     if(!moveToKeyLocatin)
@@ -111,7 +117,7 @@ void ThawWindowPosF(HWND hwnd, char *subKey, char *name)
     if(!keyName)
         return;
 
-    Key newkey1,  newkey2;
+    Key newKey1,  newKey2;
 
     /// set size
     sprintf(keyName, "%s_width", name);
@@ -128,7 +134,7 @@ void ThawWindowPosF(HWND hwnd, char *subKey, char *name)
     Register.read((char*) &newKey2, sizeof(newKey2));
     Register.close();
     if (newKey1.type == 'i' && newKey2.type == 'i')
-        gtk_window_resize(GTK_WINDOW(gtk_widget_get_parent_window(GTK_WIDGET(hwnd))), &newKey1.val.i, &newKey2.val.i);
+        gtk_window_resize(GTK_WINDOW(hwid), newKey1.val.i, newKey2.val.i);
 
 
     /// set position
@@ -146,18 +152,18 @@ void ThawWindowPosF(HWND hwnd, char *subKey, char *name)
     Register.read((char*) &newKey2, sizeof(newKey2));
     Register.close();
     if (newKey1.type == 'i' && newKey2.type == 'i')
-        gtk_window_move(GTK_WINDOW(gtk_widget_get_parent_window(GTK_WIDGET(hwnd))), &newKey1.val.i, &newKey2.val.i);
+        gtk_window_move(GTK_WINDOW(hwid), newKey1.val.i, newKey2.val.i);
 
 
     sprintf(keyName, "%s_maximized", name);
     Register.open(keyName, std::ios::binary);
     if (!Register.is_open())
         return;
-    Register.read((char*) &newKey, sizeof(newKey));
+    Register.read((char*) &newKey1, sizeof(newKey1));
     Register.close();
-    if  (newKey.type == 'b')
-        if (newKey.val.b)
-            gtk_window_maximize(GTK_WINDOW(gtk_widget_get_parent_window(GTK_WIDGET(hwnd))));
+    if  (newKey1.type == 'b')
+        if (newKey1.val.b)
+            gtk_window_maximize(GTK_WINDOW(hwid));
 
 
     /// gtk_window_move handles off-screen window placement
@@ -222,12 +228,12 @@ void FreezeStringF(char *val, char *subKey, char *name)
 {
     char* moveToKeyLocatin = (char *)malloc(strlen(name) + 30);
     if(!moveToKeyLocatin)
-        return val;
+        return;
     sprintf(moveToKeyLocatin, "mkdir -p %s/%s", LDMICRO_REGISTER, subKey);
     system(moveToKeyLocatin);
     sprintf(moveToKeyLocatin, "cd %s/%s", LDMICRO_REGISTER, subKey);
     if (-1 == system(moveToKeyLocatin))
-        return val;
+        return;
     free(moveToKeyLocatin);
     
     std::ofstream Register(name, std::ios::trunc);

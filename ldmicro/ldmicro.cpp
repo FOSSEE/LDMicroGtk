@@ -24,7 +24,7 @@
 // most of the UI logic relating to the main window.
 // Jonathan Westhues, Oct 2004
 //-----------------------------------------------------------------------------
-#include "linuxUI/linuxUI.h"
+#include "linuxUI.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,7 +36,7 @@
 
 
 HINSTANCE   Instance;
-HWND        MainWindow;
+HWID        MainWindow;
 HDC         Hdc;
 
 // parameters used to capture the mouse when implementing our totally non-

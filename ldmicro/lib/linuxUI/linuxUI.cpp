@@ -1,9 +1,9 @@
-#include "linuxUI/linuxUI.h"
+#include "linuxUI.h"
 
 /// Wraper function for gtk_window_has_toplevel_focus
-BOOL isFocus(HWND window)
+BOOL isFocus(HWID window)
 {
-    return (BOOL) gtk_window_has_toplevel_focus(GTK_WINDOW(window)));
+    return (BOOL) gtk_window_has_toplevel_focus(GTK_WINDOW(gtk_widget_get_parent_window(GTK_WIDGET(window))));
 }
 
 COLORREF RGB(int red, int green, int blue)

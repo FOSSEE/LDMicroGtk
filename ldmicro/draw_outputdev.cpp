@@ -25,7 +25,7 @@
 // Ported to linus by: R Ramana, 2018
 //-----------------------------------------------------------------------------
 
-#include "linuxUI/linuxUI.h"
+#include "linuxUI.h"
 #include <stdio.h>
 #include <stdlib.h>
 

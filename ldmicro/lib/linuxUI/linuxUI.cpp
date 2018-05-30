@@ -1,4 +1,4 @@
-#include "linuxUI/linuxUI.h"
+#include "linuxUI.h"
 
 /// Menu Variables
 HWID window;
@@ -39,7 +39,7 @@ int ScrollHeight;                                            // Height of scroll
 HWID IoList;                                                 // Window for list view
 
 /// Wraper function for gtk_window_has_toplevel_focus
-BOOL isFocus(HWND window)
+BOOL isFocus(HWID window)
 {
     return (BOOL) gtk_window_has_toplevel_focus(GTK_WINDOW(window));
 }

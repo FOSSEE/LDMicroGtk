@@ -501,7 +501,7 @@ typedef struct McuIoInfoTag {
 
 #define NUM_SUPPORTED_MCUS 16
 
-
+/*
 //-----------------------------------------------
 // Function prototypes
 
@@ -777,5 +777,5 @@ void CompileAnsiC(char *outFile);
 void CompileInterpreted(char *outFile);
 //Arduino.cpp
 void CompileArduino(char *outFile);
-
+*/
 #endif

@@ -6,14 +6,14 @@
 #include <linux/limits.h>
 #include <stdio.h>
 #include <inttypes.h>
-#include "linuxUI/linuxLD.h"
+#include "linuxLD.h"
 
 /// version control
 #define LDMicro_VERSION_MAJOR 1
 #define LDMicro_VERSION_MINOR 0
 
 /// functions
-BOOL isFocus(HWND);
+BOOL isFocus(HWID);
 COLORREF RGB(int, int, int);
 
 #endif

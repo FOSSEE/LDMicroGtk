@@ -1,7 +1,7 @@
 #ifndef __LINUX_LD__
 #define __LINUX_LD__
 
-#include "linuxUI/linuxUI.h"
+#include "linuxUI.h"
 
 /// common windows referances for linux
 
@@ -15,6 +15,7 @@
 typedef bool BOOL;
 typedef unsigned char BYTE;
 typedef unsigned int DWORD;
+typedef long LONG;
 
 /// all handles will hold a GtkWindow* type
 typedef void* PVOID;

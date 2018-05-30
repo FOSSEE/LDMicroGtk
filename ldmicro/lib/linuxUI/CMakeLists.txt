@@ -1,3 +1,3 @@
 project(LinuxUI)
 
-add_library(LinuxUI linuxUI.cpp)
+add_library(LinuxUI linuxUI.cpp linuxLD.cpp)

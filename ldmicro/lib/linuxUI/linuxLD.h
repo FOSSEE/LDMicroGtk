@@ -19,14 +19,13 @@ typedef long LONG;
 
 /// all handles will hold a GtkWindow* type
 typedef void* PVOID;
-typedef GtkWidget* HANDLE;
+typedef PVOID HANDLE;
 typedef HANDLE HINSTANCE;
-typedef HANDLE HWID;
 typedef HANDLE HDC;
-typedef HANDLE HMENU;
 
+typedef GtkWidget* HWID;
+typedef GtkWidget* HMENU;
 typedef GtkWindow* HWND;
-
 typedef GtkApplication* HAPP;
 
 /// Check if system is x64 or x86
@@ -57,5 +56,7 @@ class COLORREF : public GdkRGBA{
         this->alpha = 1.0;
     }
 };
+
+/// functions
 
 #endif

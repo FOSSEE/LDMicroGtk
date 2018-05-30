@@ -31,8 +31,8 @@ typedef signed long SDWORD;
 //-----------------------------------------------
 // `Configuration options.'
 
-// The library that I use to do registry stuff.
-#define FREEZE_SUBKEY "LDMicro"
+// The library that I use to do registry stuff. decleared in freezeLD.h due to build issues
+// #define FREEZE_SUBKEY "LDMicro"
 
 // Size of the font that we will use to draw the ladder diagrams, in pixels
 #define FONT_WIDTH   7
@@ -501,7 +501,7 @@ typedef struct McuIoInfoTag {
 
 #define NUM_SUPPORTED_MCUS 16
 
-
+/*
 //-----------------------------------------------
 // Function prototypes
 
@@ -777,5 +777,5 @@ void CompileAnsiC(char *outFile);
 void CompileInterpreted(char *outFile);
 //Arduino.cpp
 void CompileArduino(char *outFile);
-
+*/
 #endif

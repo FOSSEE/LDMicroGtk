@@ -90,18 +90,14 @@ void Error(char *str, ...)
     vsprintf(buf, str, f);
     if(RunningInBatchMode) {
         AttachConsoleDynamic(ATTACH_PARENT_PROCESS);
-        HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
-        DWORD written;
 
         // Indicate that it's an error, plus the output filename
-        char str[MAX_PATH+100];
-        sprintf(str, "compile error ('%s'): ", CurrentCompileFile);
-        WriteFile(h, str, strlen(str), &written, NULL);
+        printf("compile error ('%s'): ", CurrentCompileFile);
         // The error message itself
-        WriteFile(h, buf, strlen(buf), &written, NULL);
+        printf(buf);
         // And an extra newline to be safe.
         strcpy(str, "\n");
-        WriteFile(h, str, strlen(str), &written, NULL);
+        printf(str);
     } else {
         HWND h = GetForegroundWindow();
         MessageBox(h, buf, _("LDmicro Error"), MB_OK | MB_ICONERROR);

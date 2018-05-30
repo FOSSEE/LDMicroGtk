@@ -18,7 +18,7 @@
  */
 void FreezeWindowPosF(HWID hwid, char *subKey, char *name)
 {
-    g_print("freezing");
+    //g_print("freezing");
     char* moveToKeyLocatin = (char *)malloc(strlen(subKey) + 35);
     if(!moveToKeyLocatin)
         return;

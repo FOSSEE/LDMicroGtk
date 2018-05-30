@@ -89,8 +89,9 @@ void Error(char *str, ...)
     va_start(f, str);
     vsprintf(buf, str, f);
     if(RunningInBatchMode) {
-        AttachConsoleDynamic(ATTACH_PARENT_PROCESS);
-
+        /* Only required for windows
+        * AttachConsoleDynamic(ATTACH_PARENT_PROCESS);
+        */
         // Indicate that it's an error, plus the output filename
         printf("compile error ('%s'): ", CurrentCompileFile);
         // The error message itself

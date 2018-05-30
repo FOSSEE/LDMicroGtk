@@ -9,13 +9,28 @@
 #define MAX_PATH PATH_MAX
 /// CALLBACK or __stdcall os defined empty
 #define CALLBACK
-
+#define CONST const
 /// typedefs
 //typedef int64_t __int64;
 typedef bool BOOL;
 typedef unsigned char BYTE;
 typedef unsigned int DWORD;
 typedef long LONG;
+typedef wchar_t WCHAR;
+typedef char CHAR;
+typedef CONST WCHAR *LPCWSTR;
+typedef CONST CHAR *LPCSTR; /// should be __nullterminated
+#ifdef UNICODE
+ typedef LPCWSTR LPCTSTR; 
+#else
+ typedef LPCSTR LPCTSTR;
+#endif
+
+#ifdef UNICODE
+ typedef LPWSTR LPTSTR;
+#else
+ typedef LPSTR LPTSTR;
+#endif
 
 /// all handles will hold a GtkWindow* type
 typedef void* PVOID;

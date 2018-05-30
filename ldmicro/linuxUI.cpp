@@ -33,6 +33,10 @@ HWID edit_menu_separator;                                   // Edit menu separat
 HWID instruction_menu_separator;                            // Instruction menu separator
 HWID simulate_menu_separator;                               // Simulate menu separator
 
+//Scrollbars for the ladder logic area 
+int ScrollWidth;                                             // Width of scrolling
+int ScrollHeight;                                            // Height of scrolling
+HWID IoList;                                                 // Window for list view
 
 /// Wraper function for gtk_window_has_toplevel_focus
 BOOL isFocus(HWND window)

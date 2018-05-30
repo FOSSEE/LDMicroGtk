@@ -46,7 +46,6 @@ IF(UNIX)
     )
     MESSAGE ( STATUS " PROJECT_INCLUDE_DIR: " ${PROJECT_INCLUDE_DIR} )
 
-
     # Add GTK3 include files if GTK3 is found
     IF ( GTK3_FOUND )
         include_directories (${GTK3_INCLUDE_DIRS})

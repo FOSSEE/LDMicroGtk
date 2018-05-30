@@ -1,5 +1,5 @@
 # exclude all files in build folder
 /ldmicro/build/*
 /ldmicro/testMain.cpp
+/ldmicro/includes/testMain.h
 /.vscode
-

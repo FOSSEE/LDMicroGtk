@@ -512,13 +512,15 @@ void SetMenusEnabled(BOOL canNegate, BOOL canNormal, BOOL canResetOnly,
     BOOL canPushRungDown, BOOL canPushRungUp, BOOL canInsertComment);
 void SetUndoEnabled(BOOL undoEnabled, BOOL redoEnabled);
 void RefreshScrollbars(void);
-extern HINSTANCE Instance;
-extern HWND MainWindow;
+extern HINSTANCE Instance;*/
+extern HWID MainWindow;
+/*
 extern HDC Hdc;
 extern PlcProgram Prog;*/
 extern char CurrentSaveFile[MAX_PATH];
-/*extern char CurrentCompileFile[MAX_PATH];
+// extern char CurrentCompileFile[MAX_PATH];
 extern McuIoInfo SupportedMcus[NUM_SUPPORTED_MCUS];
+/*
 // memory debugging, because I often get careless; ok() will check that the
 // heap used for all the program storage is not yet corrupt, and oops() if
 // it is

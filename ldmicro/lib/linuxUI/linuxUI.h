@@ -33,8 +33,8 @@
 typedef struct OpenFileInfoData {
     DWORD         lStructSize;
     HWID          parentWindow;
-    LPCTSTR       lpstrFilter;
     LPTSTR        lpstrFile;
+    LPCTSTR       lpstrFilter;
     DWORD         nMaxFile;
     LPCTSTR       lpstrTitle;
     DWORD         Flags;
@@ -45,6 +45,6 @@ typedef struct OpenFileInfoData {
 BOOL isFocus(HWID);
 COLORREF RGB(int, int, int);
 void MessageBox(HWID, char*, char*, UINT);
-BOOL GetSaveFileName(HWID, char*);
+BOOL GetSaveFileName(OPENFILENAME* );
 
 #endif

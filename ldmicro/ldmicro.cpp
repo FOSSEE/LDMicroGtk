@@ -148,7 +148,7 @@ static void CompileProgram(BOOL compileAs)
 
         memset(&ofn, 0, sizeof(ofn));
         ofn.lStructSize = sizeof(ofn);
-        ofn.parentWindow = parentWindow;
+        ofn.parentWindow = NULL;
         ofn.lpstrTitle = _("Compile To");
         if(Prog.mcu && Prog.mcu->whichIsa == ISA_ANSIC) {
             ofn.lpstrFilter = C_PATTERN;

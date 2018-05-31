@@ -20,11 +20,15 @@ typedef wchar_t WCHAR;
 typedef char CHAR;
 typedef CONST WCHAR *LPCWSTR;
 typedef CONST CHAR *LPCSTR; /// should be __nullterminated
+
 #ifdef UNICODE
  typedef LPCWSTR LPCTSTR; 
 #else
  typedef LPCSTR LPCTSTR;
 #endif
+
+typedef WCHAR *LPWSTR;
+typedef CHAR *LPSTR;
 
 #ifdef UNICODE
  typedef LPWSTR LPTSTR;

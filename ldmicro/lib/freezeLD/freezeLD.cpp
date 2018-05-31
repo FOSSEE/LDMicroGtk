@@ -18,7 +18,7 @@
  */
 void FreezeWindowPosF(HWID hwid, char *subKey, char *name)
 {
-    g_print("freezing");
+    //g_print("freezing");
     char* moveToKeyLocatin = (char *)malloc(strlen(subKey) + 35);
     if(!moveToKeyLocatin)
         return;
@@ -36,7 +36,7 @@ void FreezeWindowPosF(HWID hwid, char *subKey, char *name)
     Key newKey;
 
     int val;
-    g_print("get width");
+    //g_print("get width");
     sprintf(keyName, "%s_width", name);
     std::ofstream Register(keyName, std::ios::binary | std::ios::trunc);
     if (!Register.is_open())
@@ -47,7 +47,7 @@ void FreezeWindowPosF(HWID hwid, char *subKey, char *name)
     Register.write((char*) &newKey, sizeof(newKey));
     Register.close();
 
-    g_print("get height");
+    //g_print("get height");
     sprintf(keyName, "%s_height", name);
     Register.open(keyName, std::ios::binary | std::ios::trunc);
     if (!Register.is_open())
@@ -58,7 +58,7 @@ void FreezeWindowPosF(HWID hwid, char *subKey, char *name)
     Register.write((char*) &newKey, sizeof(newKey));
     Register.close();
 
-    g_print("get posX");
+    //g_print("get posX");
     sprintf(keyName, "%s_posX", name);
     Register.open(keyName, std::ios::binary | std::ios::trunc);
     if (!Register.is_open())
@@ -69,7 +69,7 @@ void FreezeWindowPosF(HWID hwid, char *subKey, char *name)
     Register.write((char*) &newKey, sizeof(newKey));
     Register.close();
     
-    g_print("get posY");
+    //g_print("get posY");
     sprintf(keyName, "%s_posY", name);
     Register.open(keyName, std::ios::binary | std::ios::trunc);
     if (!Register.is_open())
@@ -80,7 +80,7 @@ void FreezeWindowPosF(HWID hwid, char *subKey, char *name)
     Register.write((char*) &newKey, sizeof(newKey));
     Register.close();
 
-    g_print("get max");
+    //g_print("get max");
     sprintf(keyName, "%s_maximized", name);
     Register.open(keyName, std::ios::binary | std::ios::trunc);
     if (!Register.is_open())
@@ -91,7 +91,7 @@ void FreezeWindowPosF(HWID hwid, char *subKey, char *name)
     Register.close();
 
     free(keyName);
-    g_print("freezed");
+    //g_print("freezed");
 }
 
 static void Clamp(LONG *v, LONG min, LONG max)

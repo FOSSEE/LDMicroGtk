@@ -30,7 +30,7 @@
 #include <stdlib.h>
 
 #include "ldmicro.h"
-#include "freeze.h"
+#include "freezeLD.h"
 #include "mcutable.h"
 #include "advanceddialog.h"
 
@@ -148,7 +148,7 @@ static void CompileProgram(BOOL compileAs)
 
         memset(&ofn, 0, sizeof(ofn));
         ofn.lStructSize = sizeof(ofn);
-        ofn.hInstance = Instance;
+        ofn.parentWindow = parentWindow;
         ofn.lpstrTitle = _("Compile To");
         if(Prog.mcu && Prog.mcu->whichIsa == ISA_ANSIC) {
             ofn.lpstrFilter = C_PATTERN;
@@ -1051,44 +1051,11 @@ static BOOL MakeWindowClass()
 //-----------------------------------------------------------------------------
 // Entry point into the program.
 //-----------------------------------------------------------------------------
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
-    LPSTR lpCmdLine, INT nCmdShow)
+int main(int argc, char** argv)
 {
-    Instance = hInstance;
-
-    MainHeap = HeapCreate(0, 1024*64, 0);
-
-    MakeWindowClass();
-    MakeDialogBoxClass();
-    MakeAdvancedDialogClass();
-    MakeAdvancedWorkspaceClass();
-    MakeComponentListClass();
-    MakeSmplDialogClass();
-    MakeNamingListClass();
-    HMENU top = MakeMainWindowMenus();
-
-    MainWindow = CreateWindowEx(0, "LDmicro", "",
-        WS_OVERLAPPED | WS_THICKFRAME | WS_CLIPCHILDREN | WS_MAXIMIZEBOX |
-        WS_MINIMIZEBOX | WS_SYSMENU | WS_SIZEBOX,
-        10, 10, 800, 600, NULL, top, Instance, NULL);
-    ThawWindowPos(MainWindow);
-    IoListHeight = 100;
-    ThawDWORD(IoListHeight);
-
-    InitCommonControls();
-    InitForDrawing();
-
-    MakeMainWindowControls();
-    MainWindowResized();
-    NewProgram();
-    strcpy(CurrentSaveFile, "");
-
     // Check if we're running in non-interactive mode; in that case we should
     // load the file, compile, and exit.
-    while(isspace(*lpCmdLine)) {
-        lpCmdLine++;
-    }
-    if(memcmp(lpCmdLine, "/c", 2)==0) {
+    if(argc >= 2) {
         RunningInBatchMode = TRUE;
 
         char *err =
@@ -1115,9 +1082,39 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
         }
         strcpy(CurrentCompileFile, dest);
         GenerateIoList(-1);
-        CompileProgram(FALSE);
+        CompileProgram(FALSE); /// Requires an open dialog to get file name
         exit(0);
     }
+
+    Instance = hInstance;
+
+    MainHeap = HeapCreate(0, 1024*64, 0);
+
+    // MakeWindowClass();
+    // MakeDialogBoxClass();
+    // MakeAdvancedDialogClass();
+    // MakeAdvancedWorkspaceClass();
+    // MakeComponentListClass();
+    // MakeSmplDialogClass();
+    // MakeNamingListClass();
+    HMENU top = MakeMainWindowMenus();
+
+    /// Make main window
+    // MainWindow = CreateWindowEx(0, "LDmicro", "",
+    //     WS_OVERLAPPED | WS_THICKFRAME | WS_CLIPCHILDREN | WS_MAXIMIZEBOX |
+    //     WS_MINIMIZEBOX | WS_SYSMENU | WS_SIZEBOX,
+    //     10, 10, 800, 600, NULL, top, Instance, NULL);
+    ThawWindowPos(MainWindow);
+    IoListHeight = 100;
+    ThawDWORD(IoListHeight);
+
+    InitCommonControls();
+    InitForDrawing();
+
+    MakeMainWindowControls();
+    MainWindowResized();
+    NewProgram();
+    strcpy(CurrentSaveFile, "");
 
     // We are running interactively, or we would already have exited. We
     // can therefore show the window now, and otherwise set up the GUI.

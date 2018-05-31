@@ -9,24 +9,38 @@
 #define MAX_PATH PATH_MAX
 /// CALLBACK or __stdcall os defined empty
 #define CALLBACK
-
+#define CONST const
 /// typedefs
 //typedef int64_t __int64;
 typedef bool BOOL;
 typedef unsigned char BYTE;
 typedef unsigned int DWORD;
 typedef long LONG;
+typedef wchar_t WCHAR;
+typedef char CHAR;
+typedef CONST WCHAR *LPCWSTR;
+typedef CONST CHAR *LPCSTR; /// should be __nullterminated
+#ifdef UNICODE
+ typedef LPCWSTR LPCTSTR; 
+#else
+ typedef LPCSTR LPCTSTR;
+#endif
+
+#ifdef UNICODE
+ typedef LPWSTR LPTSTR;
+#else
+ typedef LPSTR LPTSTR;
+#endif
 
 /// all handles will hold a GtkWindow* type
 typedef void* PVOID;
-typedef GtkWidget* HANDLE;
+typedef PVOID HANDLE;
 typedef HANDLE HINSTANCE;
-typedef HANDLE HWID;
 typedef HANDLE HDC;
-typedef HANDLE HMENU;
 
+typedef GtkWidget* HWID;
+typedef GtkWidget* HMENU;
 typedef GtkWindow* HWND;
-
 typedef GtkApplication* HAPP;
 
 /// Check if system is x64 or x86
@@ -57,5 +71,7 @@ class COLORREF : public GdkRGBA{
         this->alpha = 1.0;
     }
 };
+
+/// functions
 
 #endif

@@ -30,21 +30,21 @@
 
 
 /// data types
-// typedef struct OpenFileInfoData {
-//     DWORD         lStructSize;
-//     HWID          parentWindow;
-//     LPCTSTR       lpstrFilter;
-//     LPTSTR        lpstrFile;
-//     DWORD         nMaxFile;
-//     LPCTSTR       lpstrTitle;
-//     DWORD         Flags;
-//     LPCTSTR       lpstrDefExt;
-// } OPENFILENAME;
+typedef struct OpenFileInfoData {
+    DWORD         lStructSize;
+    HWID          parentWindow;
+    LPTSTR        lpstrFile;
+    LPCTSTR       lpstrFilter;
+    DWORD         nMaxFile;
+    LPCTSTR       lpstrTitle;
+    DWORD         Flags;
+    LPCTSTR       lpstrDefExt;
+} OPENFILENAME;
 
 /// functions
 BOOL isFocus(HWID);
 COLORREF RGB(int, int, int);
 void MessageBox(HWID, char*, char*, UINT);
-BOOL GetSaveFileName(HWID, char*);
+BOOL GetSaveFileName(OPENFILENAME* );
 
 #endif

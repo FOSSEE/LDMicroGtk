@@ -20,17 +20,21 @@ typedef wchar_t WCHAR;
 typedef char CHAR;
 typedef CONST WCHAR *LPCWSTR;
 typedef CONST CHAR *LPCSTR; /// should be __nullterminated
+
 #ifdef UNICODE
  typedef LPCWSTR LPCTSTR; 
 #else
  typedef LPCSTR LPCTSTR;
 #endif
 
-// #ifdef UNICODE
-//  typedef LPWSTR LPTSTR;
-// #else
-//  typedef LPSTR LPTSTR;
-// #endif
+typedef WCHAR *LPWSTR;
+typedef CHAR *LPSTR;
+
+#ifdef UNICODE
+ typedef LPWSTR LPTSTR;
+#else
+ typedef LPSTR LPTSTR;
+#endif
 
 /// all handles will hold a GtkWindow* type
 typedef void* PVOID;

@@ -747,7 +747,7 @@ void SetAdcShadow(char *name, SWORD val);
 SWORD GetAdcShadow(char *name);
 void DestroyUartSimulationWindow(void);
 void ShowUartSimulationWindow(void);
-extern BOOL InSimulationMode; 
+extern BOOL InSimulationMode;
 extern BOOL SimulateRedrawAfterNextCycle;
 
 // compilecommon.cpp

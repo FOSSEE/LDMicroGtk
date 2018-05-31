@@ -30,16 +30,16 @@
 
 
 /// data types
-typedef struct OpenFileInfoData {
-    DWORD         lStructSize;
-    HWID          parentWindow;
-    LPCTSTR       lpstrFilter;
-    LPTSTR        lpstrFile;
-    DWORD         nMaxFile;
-    LPCTSTR       lpstrTitle;
-    DWORD         Flags;
-    LPCTSTR       lpstrDefExt;
-} OPENFILENAME;
+// typedef struct OpenFileInfoData {
+//     DWORD         lStructSize;
+//     HWID          parentWindow;
+//     LPCTSTR       lpstrFilter;
+//     LPTSTR        lpstrFile;
+//     DWORD         nMaxFile;
+//     LPCTSTR       lpstrTitle;
+//     DWORD         Flags;
+//     LPCTSTR       lpstrDefExt;
+// } OPENFILENAME;
 
 /// functions
 BOOL isFocus(HWID);

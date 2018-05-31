@@ -38,6 +38,12 @@ int ScrollWidth;                                             // Width of scrolli
 int ScrollHeight;                                            // Height of scrolling
 HWID IoList;                                                 // Window for list view
 
+// ldmicro.cpp
+char CurrentSaveFile[MAX_PATH];
+
+// Simulation Mode
+BOOL InSimulationMode;
+
 /// Wraper function for gtk_window_has_toplevel_focus
 BOOL isFocus(HWID window)
 {
@@ -94,51 +100,51 @@ void MessageBox(HWID pWindow, char* message, char* title, UINT mFlags)
     gtk_widget_destroy (dialog);
  }
 
-BOOL GetSaveFileName(OPENFILENAME ofn)
-{
-    GtkWidget *dialog;
-    GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
+// BOOL GetSaveFileName(OPENFILENAME ofn)
+// {
+//     GtkWidget *dialog;
+//     GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
 
-    dialog = gtk_file_chooser_dialog_new ("Open File",
-                                        GTK_WINDOW(window),
-                                        action,
-                                        "_Cancel",
-                                        GTK_RESPONSE_CANCEL,
-                                        "_Open",
-                                        GTK_RESPONSE_ACCEPT,
-                                        NULL);
+//     dialog = gtk_file_chooser_dialog_new ("Open File",
+//                                         GTK_WINDOW(window),
+//                                         action,
+//                                         "_Cancel",
+//                                         GTK_RESPONSE_CANCEL,
+//                                         "_Open",
+//                                         GTK_RESPONSE_ACCEPT,
+//                                         NULL);
 
-    GtkFileFilter *filter = gtk_file_filter_new ();
-    gtk_file_filter_add_pattern (filter, "*");
-    gtk_file_filter_set_name (filter, "All files");
-    gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (dialog), filter);
+//     GtkFileFilter *filter = gtk_file_filter_new ();
+//     gtk_file_filter_add_pattern (filter, "*");
+//     gtk_file_filter_set_name (filter, "All files");
+//     gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (dialog), filter);
 
-    filter = gtk_file_filter_new ();
-    gtk_file_filter_add_pattern (filter, "*.c");
-    gtk_file_filter_add_pattern (filter, "*.cpp");
-    gtk_file_filter_set_name (filter, "C source files");
-    gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (dialog), filter);
+//     filter = gtk_file_filter_new ();
+//     gtk_file_filter_add_pattern (filter, "*.c");
+//     gtk_file_filter_add_pattern (filter, "*.cpp");
+//     gtk_file_filter_set_name (filter, "C source files");
+//     gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (dialog), filter);
 
-    filter = gtk_file_filter_new ();
-    gtk_file_filter_add_pattern (filter, "*.h");
-    gtk_file_filter_set_name (filter, "C hedder files");
-    gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (dialog), filter);
+//     filter = gtk_file_filter_new ();
+//     gtk_file_filter_add_pattern (filter, "*.h");
+//     gtk_file_filter_set_name (filter, "C hedder files");
+//     gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (dialog), filter);
     
-    filter = gtk_file_filter_new ();
-    gtk_file_filter_add_pattern (filter, "*.hex");
-    gtk_file_filter_set_name (filter, "hex files");
-    gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (dialog), filter);
+//     filter = gtk_file_filter_new ();
+//     gtk_file_filter_add_pattern (filter, "*.hex");
+//     gtk_file_filter_set_name (filter, "hex files");
+//     gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (dialog), filter);
     
-    filter = gtk_file_filter_new ();
-    gtk_file_filter_add_pattern (filter, "*.int");
-    gtk_file_filter_set_name (filter, "int files");
-    gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (dialog), filter);
-    gtk_file_chooser_set_filter (GTK_FILE_CHOOSER (dialog), filter);
+//     filter = gtk_file_filter_new ();
+//     gtk_file_filter_add_pattern (filter, "*.int");
+//     gtk_file_filter_set_name (filter, "int files");
+//     gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (dialog), filter);
+//     gtk_file_chooser_set_filter (GTK_FILE_CHOOSER (dialog), filter);
     
-    BOOL exitStatus = gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_ACCEPT;
-    if (exitStatus)
-        filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog));
-    gtk_widget_destroy (dialog);
+//     BOOL exitStatus = gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_ACCEPT;
+//     if (exitStatus)
+//         filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog));
+//     gtk_widget_destroy (dialog);
 
-    return exitStatus;
-}
+//     return exitStatus;
+// }

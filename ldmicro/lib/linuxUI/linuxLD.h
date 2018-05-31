@@ -26,11 +26,11 @@ typedef CONST CHAR *LPCSTR; /// should be __nullterminated
  typedef LPCSTR LPCTSTR;
 #endif
 
-#ifdef UNICODE
- typedef LPWSTR LPTSTR;
-#else
- typedef LPSTR LPTSTR;
-#endif
+// #ifdef UNICODE
+//  typedef LPWSTR LPTSTR;
+// #else
+//  typedef LPSTR LPTSTR;
+// #endif
 
 /// all handles will hold a GtkWindow* type
 typedef void* PVOID;

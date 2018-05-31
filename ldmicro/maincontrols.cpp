@@ -116,23 +116,24 @@ void MakeMainWindowControls(void)
 //-----------------------------------------------------------------------------
 void UpdateMainWindowTitleBar(void)
 {
-    char line[MAX_PATH+100];
+    char line[PATH_MAX+100];
     if(InSimulationMode) {
         if(RealTimeSimulationRunning) {
-            strcpy(line, _("LDmicro - Simulation (Running)"));
+            strcpy(line, "LDmicro - Simulation (Running)");
         } else {
-            strcpy(line, _("LDmicro - Simulation (Stopped)"));
+            strcpy(line, "LDmicro - Simulation (Stopped)");
         }
     } else {
-        strcpy(line, _("LDmicro - Program Editor"));
+        strcpy(line, "LDmicro - Program Editor");
     }
     if(strlen(CurrentSaveFile) > 0) {
         sprintf(line+strlen(line), " - %s", CurrentSaveFile);
     } else {
-        strcat(line, _(" - (not yet saved)"));
+        strcat(line, " - (not yet saved)");
     }
+    
+  gtk_window_set_title (GTK_WINDOW (window), line);
 
-    SetWindowText(MainWindow, line);
 }
 
 //-----------------------------------------------------------------------------

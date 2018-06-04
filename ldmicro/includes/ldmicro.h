@@ -501,7 +501,6 @@ typedef struct McuIoInfoTag {
 
 #define NUM_SUPPORTED_MCUS 16
 
-/*
 //-----------------------------------------------
 // Function prototypes
 
@@ -513,7 +512,7 @@ void SetMenusEnabled(BOOL canNegate, BOOL canNormal, BOOL canResetOnly,
 void SetUndoEnabled(BOOL undoEnabled, BOOL redoEnabled);
 void RefreshScrollbars(void);
 extern HINSTANCE Instance;
-extern HWND MainWindow;
+extern HWID MainWindow;
 extern HDC Hdc;
 extern PlcProgram Prog;
 extern char CurrentSaveFile[MAX_PATH];
@@ -554,14 +553,14 @@ extern BOOL SelectionActive;
 extern BOOL ThisHighlighted;
 
 // draw_outputdev.cpp
-extern void (*DrawChars)(int, int, char *);
-void CALLBACK BlinkCursor(HWND hwnd, UINT msg, UINT_PTR id, DWORD time);
-void PaintWindow(void);
-void ExportDrawingAsText(char *file);
-void InitForDrawing(void);
-void SetUpScrollbars(BOOL *horizShown, SCROLLINFO *horiz, SCROLLINFO *vert);
-int ScreenRowsAvailable(void);
-int ScreenColsAvailable(void);
+// extern void (*DrawChars)(int, int, char *);
+// void CALLBACK BlinkCursor(HWND hwnd, UINT msg, UINT_PTR id, DWORD time);
+// void PaintWindow(void);
+// void ExportDrawingAsText(char *file);
+// void InitForDrawing(void);
+// void SetUpScrollbars(BOOL *horizShown, SCROLLINFO *horiz, SCROLLINFO *vert);
+// int ScreenRowsAvailable(void);
+// int ScreenColsAvailable(void);
 extern HFONT FixedWidthFont;
 extern HFONT FixedWidthFontBold;
 extern int SelectedGxAfterNextPaint;
@@ -703,6 +702,7 @@ void ShowHelpDialog(BOOL about);
         Error("Internal error at line %d file '%s'\n", __LINE__, __FILE__); \
         exit(1); \
     }
+
 void dbp(char *str, ...);
 void Error(char *str, ...);
 void *CheckMalloc(size_t n);
@@ -777,5 +777,5 @@ void CompileAnsiC(char *outFile);
 void CompileInterpreted(char *outFile);
 //Arduino.cpp
 void CompileArduino(char *outFile);
-*/
+
 #endif

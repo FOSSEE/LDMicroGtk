@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <inttypes.h>
 #include "linuxLD.h"
+//#include "windows.h"
 
 /// version control
 #define LDMicro_VERSION_MAJOR 1

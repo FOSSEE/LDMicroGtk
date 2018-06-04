@@ -14,6 +14,7 @@
 //typedef int64_t __int64;
 typedef bool BOOL;
 typedef unsigned char BYTE;
+typedef unsigned short WORD;
 typedef unsigned int DWORD;
 typedef long LONG;
 typedef wchar_t WCHAR;
@@ -77,5 +78,4 @@ class COLORREF : public GdkRGBA{
 };
 
 /// functions
-
 #endif

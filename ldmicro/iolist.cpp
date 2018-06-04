@@ -26,7 +26,7 @@
 // Jonathan Westhues, Oct 2004
 //-----------------------------------------------------------------------------
 #include <windows.h>
-#include <commctrl.h>
+//#include <commctrl.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -42,21 +42,21 @@ static struct {
 } IoSeenPreviously[MAX_IO_SEEN_PREVIOUSLY];
 static int IoSeenPreviouslyCount;
 
-// stuff for the dialog box that lets you choose pin assignments
-static BOOL DialogDone;
-static BOOL DialogCancel;
+// // stuff for the dialog box that lets you choose pin assignments
+// static BOOL DialogDone;
+// static BOOL DialogCancel;
 
-static HWND IoDialog;
+// static HWND IoDialog;
 
-static HWND PinList;
-static HWND OkButton;
-static HWND CancelButton;
+// static HWND PinList;
+// static HWND OkButton;
+// static HWND CancelButton;
 
-// stuff for the popup that lets you set the simulated value of an analog in
-static HWND AnalogSliderMain;
-static HWND AnalogSliderTrackbar;
-static BOOL AnalogSliderDone;
-static BOOL AnalogSliderCancel;
+// // stuff for the popup that lets you set the simulated value of an analog in
+// static HWND AnalogSliderMain;
+// static HWND AnalogSliderTrackbar;
+// static BOOL AnalogSliderDone;
+// static BOOL AnalogSliderCancel;
 
 
 //-----------------------------------------------------------------------------
@@ -394,372 +394,372 @@ void SaveIoListToFile(FILE *f)
 // Dialog proc for the popup that lets you set the value of an analog input for
 // simulation.
 //-----------------------------------------------------------------------------
-static LRESULT CALLBACK AnalogSliderDialogProc(HWND hwnd, UINT msg,
-    WPARAM wParam, LPARAM lParam)
-{
-    switch (msg) {
-        case WM_CLOSE:
-        case WM_DESTROY:
-            AnalogSliderDone = TRUE;
-            AnalogSliderCancel = TRUE;
-            return 1;
+// static LRESULT CALLBACK AnalogSliderDialogProc(HWND hwnd, UINT msg,
+//     WPARAM wParam, LPARAM lParam)
+// {
+//     switch (msg) {
+//         case WM_CLOSE:
+//         case WM_DESTROY:
+//             AnalogSliderDone = TRUE;
+//             AnalogSliderCancel = TRUE;
+//             return 1;
 
-        default:
-            return DefWindowProc(hwnd, msg, wParam, lParam);
-    }
-}
+//         default:
+//             return DefWindowProc(hwnd, msg, wParam, lParam);
+//     }
+// }
 
 //-----------------------------------------------------------------------------
 // A little toolbar-style window that pops up to allow the user to set the
 // simulated value of an ADC pin.
 //-----------------------------------------------------------------------------
-void ShowAnalogSliderPopup(char *name)
-{
-    WNDCLASSEX wc;
-    memset(&wc, 0, sizeof(wc));
-    wc.cbSize = sizeof(wc);
+// void ShowAnalogSliderPopup(char *name)
+// {
+//     WNDCLASSEX wc;
+//     memset(&wc, 0, sizeof(wc));
+//     wc.cbSize = sizeof(wc);
 
-    wc.style            = CS_BYTEALIGNCLIENT | CS_BYTEALIGNWINDOW | CS_OWNDC |
-                            CS_DBLCLKS;
-    wc.lpfnWndProc      = (WNDPROC)AnalogSliderDialogProc;
-    wc.hInstance        = Instance;
-    wc.hbrBackground    = (HBRUSH)COLOR_BTNSHADOW;
-    wc.lpszClassName    = "LDmicroAnalogSlider";
-    wc.lpszMenuName     = NULL;
-    wc.hCursor          = LoadCursor(NULL, IDC_ARROW);
+//     wc.style            = CS_BYTEALIGNCLIENT | CS_BYTEALIGNWINDOW | CS_OWNDC |
+//                             CS_DBLCLKS;
+//     wc.lpfnWndProc      = (WNDPROC)AnalogSliderDialogProc;
+//     wc.hInstance        = Instance;
+//     wc.hbrBackground    = (HBRUSH)COLOR_BTNSHADOW;
+//     wc.lpszClassName    = "LDmicroAnalogSlider";
+//     wc.lpszMenuName     = NULL;
+//     wc.hCursor          = LoadCursor(NULL, IDC_ARROW);
 
-    RegisterClassEx(&wc);
+//     RegisterClassEx(&wc);
 
-    POINT pt;
-    GetCursorPos(&pt);
+//     POINT pt;
+//     GetCursorPos(&pt);
 
-    SWORD currentVal = GetAdcShadow(name);
+//     SWORD currentVal = GetAdcShadow(name);
 
-    SWORD maxVal;
-    if(Prog.mcu) {
-        maxVal = Prog.mcu->adcMax;
-    } else {
-        maxVal = 1023;
-    }
-    if(maxVal == 0) {
-        Error(_("No ADC or ADC not supported for selected micro."));
-        return;
-    }
+//     SWORD maxVal;
+//     if(Prog.mcu) {
+//         maxVal = Prog.mcu->adcMax;
+//     } else {
+//         maxVal = 1023;
+//     }
+//     if(maxVal == 0) {
+//         Error(_("No ADC or ADC not supported for selected micro."));
+//         return;
+//     }
 
-    int left = pt.x - 10;
-    // try to put the slider directly under the cursor (though later we might
-    // realize that that would put the popup off the screen)
-    int top = pt.y - (15 + (73*currentVal)/maxVal);
+//     int left = pt.x - 10;
+//     // try to put the slider directly under the cursor (though later we might
+//     // realize that that would put the popup off the screen)
+//     int top = pt.y - (15 + (73*currentVal)/maxVal);
 
-    RECT r;
-    SystemParametersInfo(SPI_GETWORKAREA, 0, &r, 0);
+//     RECT r;
+//     SystemParametersInfo(SPI_GETWORKAREA, 0, &r, 0);
 
-    if(top + 110 >= r.bottom) {
-        top = r.bottom - 110;
-    }
-    if(top < 0) top = 0;
+//     if(top + 110 >= r.bottom) {
+//         top = r.bottom - 110;
+//     }
+//     if(top < 0) top = 0;
     
-    AnalogSliderMain = CreateWindowClient(0, "LDmicroAnalogSlider", "I/O Pin",
-        WS_VISIBLE | WS_POPUP | WS_DLGFRAME,
-        left, top, 30, 100, NULL, NULL, Instance, NULL);
+//     AnalogSliderMain = CreateWindowClient(0, "LDmicroAnalogSlider", "I/O Pin",
+//         WS_VISIBLE | WS_POPUP | WS_DLGFRAME,
+//         left, top, 30, 100, NULL, NULL, Instance, NULL);
 
-    AnalogSliderTrackbar = CreateWindowEx(0, TRACKBAR_CLASS, "", WS_CHILD |
-        TBS_AUTOTICKS | TBS_VERT | TBS_TOOLTIPS | WS_CLIPSIBLINGS | WS_VISIBLE, 
-        0, 0, 30, 100, AnalogSliderMain, NULL, Instance, NULL);
-    SendMessage(AnalogSliderTrackbar, TBM_SETRANGE, FALSE,
-        MAKELONG(0, maxVal));
-    SendMessage(AnalogSliderTrackbar, TBM_SETTICFREQ, (maxVal + 1)/8, 0);
-    SendMessage(AnalogSliderTrackbar, TBM_SETPOS, TRUE, currentVal);
+//     AnalogSliderTrackbar = CreateWindowEx(0, TRACKBAR_CLASS, "", WS_CHILD |
+//         TBS_AUTOTICKS | TBS_VERT | TBS_TOOLTIPS | WS_CLIPSIBLINGS | WS_VISIBLE, 
+//         0, 0, 30, 100, AnalogSliderMain, NULL, Instance, NULL);
+//     SendMessage(AnalogSliderTrackbar, TBM_SETRANGE, FALSE,
+//         MAKELONG(0, maxVal));
+//     SendMessage(AnalogSliderTrackbar, TBM_SETTICFREQ, (maxVal + 1)/8, 0);
+//     SendMessage(AnalogSliderTrackbar, TBM_SETPOS, TRUE, currentVal);
 
-    EnableWindow(MainWindow, FALSE);
-    ShowWindow(AnalogSliderMain, TRUE);
-    SetFocus(AnalogSliderTrackbar);
+//     EnableWindow(MainWindow, FALSE);
+//     ShowWindow(AnalogSliderMain, TRUE);
+//     SetFocus(AnalogSliderTrackbar);
 
-    DWORD ret;
-    MSG msg;
-    AnalogSliderDone = FALSE;
-    AnalogSliderCancel = FALSE;
+//     DWORD ret;
+//     MSG msg;
+//     AnalogSliderDone = FALSE;
+//     AnalogSliderCancel = FALSE;
 
-    SWORD orig = GetAdcShadow(name);
+//     SWORD orig = GetAdcShadow(name);
 
-    while(!AnalogSliderDone && (ret = GetMessage(&msg, NULL, 0, 0))) {
-        SWORD v = (SWORD)SendMessage(AnalogSliderTrackbar, TBM_GETPOS, 0, 0);
+//     while(!AnalogSliderDone && (ret = GetMessage(&msg, NULL, 0, 0))) {
+//         SWORD v = (SWORD)SendMessage(AnalogSliderTrackbar, TBM_GETPOS, 0, 0);
 
-        if(msg.message == WM_KEYDOWN) {
-            if(msg.wParam == VK_RETURN) {
-                AnalogSliderDone = TRUE;
-                break;
-            } else if(msg.wParam == VK_ESCAPE) {
-                AnalogSliderDone = TRUE;
-                AnalogSliderCancel = TRUE;
-                break;
-            }
-        } else if(msg.message == WM_LBUTTONUP) {
-            if(v != orig) {
-                AnalogSliderDone = TRUE;
-            }
-        }
-        SetAdcShadow(name, v);
+//         if(msg.message == WM_KEYDOWN) {
+//             if(msg.wParam == VK_RETURN) {
+//                 AnalogSliderDone = TRUE;
+//                 break;
+//             } else if(msg.wParam == VK_ESCAPE) {
+//                 AnalogSliderDone = TRUE;
+//                 AnalogSliderCancel = TRUE;
+//                 break;
+//             }
+//         } else if(msg.message == WM_LBUTTONUP) {
+//             if(v != orig) {
+//                 AnalogSliderDone = TRUE;
+//             }
+//         }
+//         SetAdcShadow(name, v);
 
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-    }
+//         TranslateMessage(&msg);
+//         DispatchMessage(&msg);
+//     }
 
-    if(!AnalogSliderCancel) {
-        SWORD v = (SWORD)SendMessage(AnalogSliderTrackbar, TBM_GETPOS, 0, 0);
-        SetAdcShadow(name, v);
-    }
+//     if(!AnalogSliderCancel) {
+//         SWORD v = (SWORD)SendMessage(AnalogSliderTrackbar, TBM_GETPOS, 0, 0);
+//         SetAdcShadow(name, v);
+//     }
 
-    EnableWindow(MainWindow, TRUE);
-    DestroyWindow(AnalogSliderMain);
-    ListView_RedrawItems(IoList, 0, Prog.io.count - 1);
-}
+//     EnableWindow(MainWindow, TRUE);
+//     DestroyWindow(AnalogSliderMain);
+//     ListView_RedrawItems(IoList, 0, Prog.io.count - 1);
+// }
 
 //-----------------------------------------------------------------------------
 // Window proc for the contacts dialog box
 //-----------------------------------------------------------------------------
-static LRESULT CALLBACK IoDialogProc(HWND hwnd, UINT msg, WPARAM wParam,
-    LPARAM lParam)
-{
-    switch (msg) {
-        case WM_COMMAND: {
-            HWND h = (HWND)lParam;
-            if(h == OkButton && wParam == BN_CLICKED) {
-                DialogDone = TRUE;
-            } else if(h == CancelButton && wParam == BN_CLICKED) {
-                DialogDone = TRUE;
-                DialogCancel = TRUE;
-            } else if(h == PinList && HIWORD(wParam) == LBN_DBLCLK) {
-                DialogDone = TRUE;
-            }
-            break;
-        }
+// static LRESULT CALLBACK IoDialogProc(HWND hwnd, UINT msg, WPARAM wParam,
+//     LPARAM lParam)
+// {
+//     switch (msg) {
+//         case WM_COMMAND: {
+//             HWND h = (HWND)lParam;
+//             if(h == OkButton && wParam == BN_CLICKED) {
+//                 DialogDone = TRUE;
+//             } else if(h == CancelButton && wParam == BN_CLICKED) {
+//                 DialogDone = TRUE;
+//                 DialogCancel = TRUE;
+//             } else if(h == PinList && HIWORD(wParam) == LBN_DBLCLK) {
+//                 DialogDone = TRUE;
+//             }
+//             break;
+//         }
 
-        case WM_CLOSE:
-        case WM_DESTROY:
-            DialogDone = TRUE;
-            DialogCancel = TRUE;
-            return 1;
+//         case WM_CLOSE:
+//         case WM_DESTROY:
+//             DialogDone = TRUE;
+//             DialogCancel = TRUE;
+//             return 1;
 
-        default:
-            return DefWindowProc(hwnd, msg, wParam, lParam);
-    }
+//         default:
+//             return DefWindowProc(hwnd, msg, wParam, lParam);
+//     }
 
-    return 1;
-}
+//     return 1;
+// }
 
 //-----------------------------------------------------------------------------
 // Create our window class; nothing exciting.
 //-----------------------------------------------------------------------------
-static BOOL MakeWindowClass()
-{
-    WNDCLASSEX wc;
-    memset(&wc, 0, sizeof(wc));
-    wc.cbSize = sizeof(wc);
+// static BOOL MakeWindowClass()
+// {
+//     WNDCLASSEX wc;
+//     memset(&wc, 0, sizeof(wc));
+//     wc.cbSize = sizeof(wc);
 
-    wc.style            = CS_BYTEALIGNCLIENT | CS_BYTEALIGNWINDOW | CS_OWNDC |
-                            CS_DBLCLKS;
-    wc.lpfnWndProc      = (WNDPROC)IoDialogProc;
-    wc.hInstance        = Instance;
-    wc.hbrBackground    = (HBRUSH)COLOR_BTNSHADOW;
-    wc.lpszClassName    = "LDmicroIo";
-    wc.lpszMenuName     = NULL;
-    wc.hCursor          = LoadCursor(NULL, IDC_ARROW);
-    wc.hIcon            = (HICON)LoadImage(Instance, MAKEINTRESOURCE(4000),
-                            IMAGE_ICON, 32, 32, 0);
-    wc.hIconSm          = (HICON)LoadImage(Instance, MAKEINTRESOURCE(4000),
-                            IMAGE_ICON, 16, 16, 0);
+//     wc.style            = CS_BYTEALIGNCLIENT | CS_BYTEALIGNWINDOW | CS_OWNDC |
+//                             CS_DBLCLKS;
+//     wc.lpfnWndProc      = (WNDPROC)IoDialogProc;
+//     wc.hInstance        = Instance;
+//     wc.hbrBackground    = (HBRUSH)COLOR_BTNSHADOW;
+//     wc.lpszClassName    = "LDmicroIo";
+//     wc.lpszMenuName     = NULL;
+//     wc.hCursor          = LoadCursor(NULL, IDC_ARROW);
+//     wc.hIcon            = (HICON)LoadImage(Instance, MAKEINTRESOURCE(4000),
+//                             IMAGE_ICON, 32, 32, 0);
+//     wc.hIconSm          = (HICON)LoadImage(Instance, MAKEINTRESOURCE(4000),
+//                             IMAGE_ICON, 16, 16, 0);
 
-    return RegisterClassEx(&wc);
-}
+//     return RegisterClassEx(&wc);
+// }
 
-static void MakeControls(void)
-{
-    HWND textLabel = CreateWindowEx(0, WC_STATIC, _("Assign:"),
-        WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE,
-        6, 1, 80, 17, IoDialog, NULL, Instance, NULL);
-    NiceFont(textLabel);
+// static void MakeControls(void)
+// {
+//     HWND textLabel = CreateWindowEx(0, WC_STATIC, _("Assign:"),
+//         WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE,
+//         6, 1, 80, 17, IoDialog, NULL, Instance, NULL);
+//     NiceFont(textLabel);
 
-    PinList = CreateWindowEx(WS_EX_CLIENTEDGE, WC_LISTBOX, "",
-        WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE | WS_VSCROLL |
-        LBS_NOTIFY, 6, 18, 95, 320, IoDialog, NULL, Instance, NULL);
-    FixedFont(PinList);
+//     PinList = CreateWindowEx(WS_EX_CLIENTEDGE, WC_LISTBOX, "",
+//         WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE | WS_VSCROLL |
+//         LBS_NOTIFY, 6, 18, 95, 320, IoDialog, NULL, Instance, NULL);
+//     FixedFont(PinList);
 
-    OkButton = CreateWindowEx(0, WC_BUTTON, _("OK"),
-        WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE | BS_DEFPUSHBUTTON,
-        6, 325, 95, 23, IoDialog, NULL, Instance, NULL); 
-    NiceFont(OkButton);
+//     OkButton = CreateWindowEx(0, WC_BUTTON, _("OK"),
+//         WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE | BS_DEFPUSHBUTTON,
+//         6, 325, 95, 23, IoDialog, NULL, Instance, NULL); 
+//     NiceFont(OkButton);
 
-    CancelButton = CreateWindowEx(0, WC_BUTTON, _("Cancel"),
-        WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE,
-        6, 356, 95, 23, IoDialog, NULL, Instance, NULL); 
-    NiceFont(CancelButton);
-}
+//     CancelButton = CreateWindowEx(0, WC_BUTTON, _("Cancel"),
+//         WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE,
+//         6, 356, 95, 23, IoDialog, NULL, Instance, NULL); 
+//     NiceFont(CancelButton);
+// }
 
-void ShowIoDialog(int item)
-{
-    if(!Prog.mcu) {
-        MessageBox(MainWindow,
-            _("No microcontroller has been selected. You must select a "
-            "microcontroller before you can assign I/O pins.\r\n\r\n"
-            "Select a microcontroller under the Settings menu and try "
-            "again."), _("I/O Pin Assignment"), MB_OK | MB_ICONWARNING);
-        return;
-    }
+// void ShowIoDialog(int item)
+// {
+//     if(!Prog.mcu) {
+//         MessageBox(MainWindow,
+//             _("No microcontroller has been selected. You must select a "
+//             "microcontroller before you can assign I/O pins.\r\n\r\n"
+//             "Select a microcontroller under the Settings menu and try "
+//             "again."), _("I/O Pin Assignment"), MB_OK | MB_ICONWARNING);
+//         return;
+//     }
 
-    if(Prog.mcu->whichIsa == ISA_ANSIC) {
-        Error(_("Can't specify I/O assignment for ANSI C target; compile and "
-            "see comments in generated source code."));
-        return;
-    }
+//     if(Prog.mcu->whichIsa == ISA_ANSIC) {
+//         Error(_("Can't specify I/O assignment for ANSI C target; compile and "
+//             "see comments in generated source code."));
+//         return;
+//     }
 
-    if(Prog.mcu->whichIsa == ISA_INTERPRETED) {
-        Error(_("Can't specify I/O assignment for interpretable target; see "
-            "comments in reference implementation of interpreter."));
-        return;
-    }
+//     if(Prog.mcu->whichIsa == ISA_INTERPRETED) {
+//         Error(_("Can't specify I/O assignment for interpretable target; see "
+//             "comments in reference implementation of interpreter."));
+//         return;
+//     }
 
-    if(Prog.io.assignment[item].name[0] != 'X' && 
-       Prog.io.assignment[item].name[0] != 'Y' &&
-       Prog.io.assignment[item].name[0] != 'A')
-    {
-        Error(_("Can only assign pin number to input/output pins (Xname or "
-            "Yname or Aname)."));
-        return;
-    }
+//     if(Prog.io.assignment[item].name[0] != 'X' && 
+//        Prog.io.assignment[item].name[0] != 'Y' &&
+//        Prog.io.assignment[item].name[0] != 'A')
+//     {
+//         Error(_("Can only assign pin number to input/output pins (Xname or "
+//             "Yname or Aname)."));
+//         return;
+//     }
 
-    if(Prog.io.assignment[item].name[0] == 'A' && Prog.mcu->adcCount == 0) {
-        Error(_("No ADC or ADC not supported for this micro."));
-        return;
-    }
+//     if(Prog.io.assignment[item].name[0] == 'A' && Prog.mcu->adcCount == 0) {
+//         Error(_("No ADC or ADC not supported for this micro."));
+//         return;
+//     }
 
-    if(strcmp(Prog.io.assignment[item].name+1, "new")==0) {
-        Error(_("Rename I/O from default name ('%s') before assigning "
-            "MCU pin."), Prog.io.assignment[item].name);
-        return;
-    }
+//     if(strcmp(Prog.io.assignment[item].name+1, "new")==0) {
+//         Error(_("Rename I/O from default name ('%s') before assigning "
+//             "MCU pin."), Prog.io.assignment[item].name);
+//         return;
+//     }
 
-    MakeWindowClass();
+//     MakeWindowClass();
 
-    // We need the TOOLWINDOW style, or else the window will be forced to
-    // a minimum width greater than our current width. And without the
-    // APPWINDOW style, it becomes impossible to get the window back (by
-    // Alt+Tab or taskbar).
-    IoDialog = CreateWindowClient(WS_EX_TOOLWINDOW | WS_EX_APPWINDOW,
-        "LDmicroIo", _("I/O Pin"),
-        WS_OVERLAPPED | WS_SYSMENU,
-        100, 100, 107, 387, NULL, NULL, Instance, NULL);
+//     // We need the TOOLWINDOW style, or else the window will be forced to
+//     // a minimum width greater than our current width. And without the
+//     // APPWINDOW style, it becomes impossible to get the window back (by
+//     // Alt+Tab or taskbar).
+//     IoDialog = CreateWindowClient(WS_EX_TOOLWINDOW | WS_EX_APPWINDOW,
+//         "LDmicroIo", _("I/O Pin"),
+//         WS_OVERLAPPED | WS_SYSMENU,
+//         100, 100, 107, 387, NULL, NULL, Instance, NULL);
 
-    MakeControls();
+//     MakeControls();
 
-    SendMessage(PinList, LB_ADDSTRING, 0, (LPARAM)_("(no pin)"));
-    int i;
-    for(i = 0; i < Prog.mcu->pinCount; i++) {
-        int j;
-        for(j = 0; j < Prog.io.count; j++) {
-            if(j == item) continue;
-            if(Prog.io.assignment[j].pin == Prog.mcu->pinInfo[i].pin) {
-                goto cant_use_this_io;
-            }
-        }
+//     SendMessage(PinList, LB_ADDSTRING, 0, (LPARAM)_("(no pin)"));
+//     int i;
+//     for(i = 0; i < Prog.mcu->pinCount; i++) {
+//         int j;
+//         for(j = 0; j < Prog.io.count; j++) {
+//             if(j == item) continue;
+//             if(Prog.io.assignment[j].pin == Prog.mcu->pinInfo[i].pin) {
+//                 goto cant_use_this_io;
+//             }
+//         }
 
-        if(UartFunctionUsed() && Prog.mcu &&
-                ((Prog.mcu->pinInfo[i].pin == Prog.mcu->uartNeeds.rxPin) ||
-                 (Prog.mcu->pinInfo[i].pin == Prog.mcu->uartNeeds.txPin)))
-        {
-            goto cant_use_this_io;
-        }
+//         if(UartFunctionUsed() && Prog.mcu &&
+//                 ((Prog.mcu->pinInfo[i].pin == Prog.mcu->uartNeeds.rxPin) ||
+//                  (Prog.mcu->pinInfo[i].pin == Prog.mcu->uartNeeds.txPin)))
+//         {
+//             goto cant_use_this_io;
+//         }
 
-        if(PwmFunctionUsed() && 
-            Prog.mcu->pinInfo[i].pin == Prog.mcu->pwmNeedsPin)
-        {
-            goto cant_use_this_io;
-        }
+//         if(PwmFunctionUsed() && 
+//             Prog.mcu->pinInfo[i].pin == Prog.mcu->pwmNeedsPin)
+//         {
+//             goto cant_use_this_io;
+//         }
 
-        if(Prog.io.assignment[item].name[0] == 'A') {
-            for(j = 0; j < Prog.mcu->adcCount; j++) {
-                if(Prog.mcu->adcInfo[j].pin == Prog.mcu->pinInfo[i].pin) {
-                    // okay; we know how to connect it up to the ADC
-                    break;
-                }
-            }
-            if(j == Prog.mcu->adcCount) {
-                goto cant_use_this_io;
-            }
-        }
+//         if(Prog.io.assignment[item].name[0] == 'A') {
+//             for(j = 0; j < Prog.mcu->adcCount; j++) {
+//                 if(Prog.mcu->adcInfo[j].pin == Prog.mcu->pinInfo[i].pin) {
+//                     // okay; we know how to connect it up to the ADC
+//                     break;
+//                 }
+//             }
+//             if(j == Prog.mcu->adcCount) {
+//                 goto cant_use_this_io;
+//             }
+//         }
 
-        char buf[40];
-        if(Prog.mcu->pinCount <= 21) {
-            sprintf(buf, "%3d   %c%c%d", Prog.mcu->pinInfo[i].pin,
-                Prog.mcu->portPrefix, Prog.mcu->pinInfo[i].port,
-                Prog.mcu->pinInfo[i].bit);
-        } else {
-            sprintf(buf, "%3d  %c%c%d", Prog.mcu->pinInfo[i].pin,
-                Prog.mcu->portPrefix, Prog.mcu->pinInfo[i].port,
-                Prog.mcu->pinInfo[i].bit);
-        }
-        SendMessage(PinList, LB_ADDSTRING, 0, (LPARAM)buf);
-cant_use_this_io:;
-    }
+//         char buf[40];
+//         if(Prog.mcu->pinCount <= 21) {
+//             sprintf(buf, "%3d   %c%c%d", Prog.mcu->pinInfo[i].pin,
+//                 Prog.mcu->portPrefix, Prog.mcu->pinInfo[i].port,
+//                 Prog.mcu->pinInfo[i].bit);
+//         } else {
+//             sprintf(buf, "%3d  %c%c%d", Prog.mcu->pinInfo[i].pin,
+//                 Prog.mcu->portPrefix, Prog.mcu->pinInfo[i].port,
+//                 Prog.mcu->pinInfo[i].bit);
+//         }
+//         SendMessage(PinList, LB_ADDSTRING, 0, (LPARAM)buf);
+// cant_use_this_io:;
+//     }
 
-    EnableWindow(MainWindow, FALSE);
-    ShowWindow(IoDialog, TRUE);
-    SetFocus(PinList);
+//     EnableWindow(MainWindow, FALSE);
+//     ShowWindow(IoDialog, TRUE);
+//     SetFocus(PinList);
 
-    MSG msg;
-    DWORD ret;
-    DialogDone = FALSE;
-    DialogCancel = FALSE;
-    while((ret = GetMessage(&msg, NULL, 0, 0)) && !DialogDone) {
-        if(msg.message == WM_KEYDOWN) {
-            if(msg.wParam == VK_RETURN) {
-                DialogDone = TRUE;
-                break;
-            } else if(msg.wParam == VK_ESCAPE) {
-                DialogDone = TRUE;
-                DialogCancel = TRUE;
-                break;
-            }
-        }
+//     MSG msg;
+//     DWORD ret;
+//     DialogDone = FALSE;
+//     DialogCancel = FALSE;
+//     while((ret = GetMessage(&msg, NULL, 0, 0)) && !DialogDone) {
+//         if(msg.message == WM_KEYDOWN) {
+//             if(msg.wParam == VK_RETURN) {
+//                 DialogDone = TRUE;
+//                 break;
+//             } else if(msg.wParam == VK_ESCAPE) {
+//                 DialogDone = TRUE;
+//                 DialogCancel = TRUE;
+//                 break;
+//             }
+//         }
 
-        if(IsDialogMessage(IoDialog, &msg)) continue;
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-    }
+//         if(IsDialogMessage(IoDialog, &msg)) continue;
+//         TranslateMessage(&msg);
+//         DispatchMessage(&msg);
+//     }
 
-    if(!DialogCancel) {
-        int sel = SendMessage(PinList, LB_GETCURSEL, 0, 0);
-        char pin[16];
-        SendMessage(PinList, LB_GETTEXT, (WPARAM)sel, (LPARAM)pin);
-        if(strcmp(pin, _("(no pin)"))==0) {
-            int i;
-            for(i = 0; i < IoSeenPreviouslyCount; i++) {
-                if(strcmp(IoSeenPreviously[i].name,
-                    Prog.io.assignment[item].name)==0)
-                {
-                    IoSeenPreviously[i].pin = NO_PIN_ASSIGNED;
-                }
-            }
-            Prog.io.assignment[item].pin = NO_PIN_ASSIGNED;
-        } else {
-            Prog.io.assignment[item].pin = atoi(pin);
-            // Only one name can be bound to each pin; make sure that there's
-            // not another entry for this pin in the IoSeenPreviously list,
-            // that might get used if the user creates a new pin with that
-            // name.
-            int i;
-            for(i = 0; i < IoSeenPreviouslyCount; i++) {
-                if(IoSeenPreviously[i].pin == atoi(pin)) {
-                    IoSeenPreviously[i].pin = NO_PIN_ASSIGNED;
-                }
-            }
-        }
-    }
+//     if(!DialogCancel) {
+//         int sel = SendMessage(PinList, LB_GETCURSEL, 0, 0);
+//         char pin[16];
+//         SendMessage(PinList, LB_GETTEXT, (WPARAM)sel, (LPARAM)pin);
+//         if(strcmp(pin, _("(no pin)"))==0) {
+//             int i;
+//             for(i = 0; i < IoSeenPreviouslyCount; i++) {
+//                 if(strcmp(IoSeenPreviously[i].name,
+//                     Prog.io.assignment[item].name)==0)
+//                 {
+//                     IoSeenPreviously[i].pin = NO_PIN_ASSIGNED;
+//                 }
+//             }
+//             Prog.io.assignment[item].pin = NO_PIN_ASSIGNED;
+//         } else {
+//             Prog.io.assignment[item].pin = atoi(pin);
+//             // Only one name can be bound to each pin; make sure that there's
+//             // not another entry for this pin in the IoSeenPreviously list,
+//             // that might get used if the user creates a new pin with that
+//             // name.
+//             int i;
+//             for(i = 0; i < IoSeenPreviouslyCount; i++) {
+//                 if(IoSeenPreviously[i].pin == atoi(pin)) {
+//                     IoSeenPreviously[i].pin = NO_PIN_ASSIGNED;
+//                 }
+//             }
+//         }
+//     }
 
-    EnableWindow(MainWindow, TRUE);
-    DestroyWindow(IoDialog);
-    return;
-}
+//     EnableWindow(MainWindow, TRUE);
+//     DestroyWindow(IoDialog);
+//     return;
+// }
 
 //-----------------------------------------------------------------------------
 // Called in response to a notify for the listview. Handles click, text-edit
@@ -767,119 +767,119 @@ cant_use_this_io:;
 // where (LPSTR_TEXTCALLBACK); that way we don't have two parallel copies of
 // the I/O list to keep in sync.
 //-----------------------------------------------------------------------------
-void IoListProc(NMHDR *h)
-{
-    switch(h->code) {
-        case LVN_GETDISPINFO: {
-            NMLVDISPINFO *i = (NMLVDISPINFO *)h;
-            int item = i->item.iItem;
-            switch(i->item.iSubItem) {
-                case LV_IO_PIN:
-                    // Don't confuse people by displaying bogus pin assignments
-                    // for the C target.
-                    if(Prog.mcu && (Prog.mcu->whichIsa == ISA_ANSIC ||
-                                    Prog.mcu->whichIsa == ISA_INTERPRETED) )
-                    {
-                        strcpy(i->item.pszText, "");
-                        break;
-                    }
+// void IoListProc(NMHDR *h)
+// {
+//     switch(h->code) {
+//         case LVN_GETDISPINFO: {
+//             NMLVDISPINFO *i = (NMLVDISPINFO *)h;
+//             int item = i->item.iItem;
+//             switch(i->item.iSubItem) {
+//                 case LV_IO_PIN:
+//                     // Don't confuse people by displaying bogus pin assignments
+//                     // for the C target.
+//                     if(Prog.mcu && (Prog.mcu->whichIsa == ISA_ANSIC ||
+//                                     Prog.mcu->whichIsa == ISA_INTERPRETED) )
+//                     {
+//                         strcpy(i->item.pszText, "");
+//                         break;
+//                     }
 
-                    PinNumberForIo(i->item.pszText,
-                        &(Prog.io.assignment[item]));
-                    break;
+//                     PinNumberForIo(i->item.pszText,
+//                         &(Prog.io.assignment[item]));
+//                     break;
 
-                case LV_IO_TYPE: {
-                    char *s = IoTypeToString(Prog.io.assignment[item].type);
-                    strcpy(i->item.pszText, s);
-                    break;
-                }
-                case LV_IO_NAME:
-                    strcpy(i->item.pszText, Prog.io.assignment[item].name);
-                    break;
+//                 case LV_IO_TYPE: {
+//                     char *s = IoTypeToString(Prog.io.assignment[item].type);
+//                     strcpy(i->item.pszText, s);
+//                     break;
+//                 }
+//                 case LV_IO_NAME:
+//                     strcpy(i->item.pszText, Prog.io.assignment[item].name);
+//                     break;
 
-                case LV_IO_PORT: {
-                    // Don't confuse people by displaying bogus pin assignments
-                    // for the C target.
-                    if(Prog.mcu && Prog.mcu->whichIsa == ISA_ANSIC) {
-                        strcpy(i->item.pszText, "");
-                        break;
-                    }
+//                 case LV_IO_PORT: {
+//                     // Don't confuse people by displaying bogus pin assignments
+//                     // for the C target.
+//                     if(Prog.mcu && Prog.mcu->whichIsa == ISA_ANSIC) {
+//                         strcpy(i->item.pszText, "");
+//                         break;
+//                     }
 
-                    int type = Prog.io.assignment[item].type;
-                    if(type != IO_TYPE_DIG_INPUT && type != IO_TYPE_DIG_OUTPUT
-                        && type != IO_TYPE_READ_ADC)
-                    {
-                        strcpy(i->item.pszText, "");
-                        break;
-                    }
+//                     int type = Prog.io.assignment[item].type;
+//                     if(type != IO_TYPE_DIG_INPUT && type != IO_TYPE_DIG_OUTPUT
+//                         && type != IO_TYPE_READ_ADC)
+//                     {
+//                         strcpy(i->item.pszText, "");
+//                         break;
+//                     }
 
-                    int pin = Prog.io.assignment[item].pin;
-                    if(pin == NO_PIN_ASSIGNED || !Prog.mcu) {
-                        strcpy(i->item.pszText, "");
-                        break;
-                    }
+//                     int pin = Prog.io.assignment[item].pin;
+//                     if(pin == NO_PIN_ASSIGNED || !Prog.mcu) {
+//                         strcpy(i->item.pszText, "");
+//                         break;
+//                     }
 
-                    if(UartFunctionUsed() && Prog.mcu) {
-                        if((Prog.mcu->uartNeeds.rxPin == pin) ||
-                           (Prog.mcu->uartNeeds.txPin == pin))
-                        {
-                            strcpy(i->item.pszText, _("<UART needs!>"));
-                            break;
-                        }
-                    }
+//                     if(UartFunctionUsed() && Prog.mcu) {
+//                         if((Prog.mcu->uartNeeds.rxPin == pin) ||
+//                            (Prog.mcu->uartNeeds.txPin == pin))
+//                         {
+//                             strcpy(i->item.pszText, _("<UART needs!>"));
+//                             break;
+//                         }
+//                     }
 
-                    if(PwmFunctionUsed() && Prog.mcu) {
-                        if(Prog.mcu->pwmNeedsPin == pin) {
-                            strcpy(i->item.pszText, _("<PWM needs!>"));
-                            break;
-                        }
-                    }
+//                     if(PwmFunctionUsed() && Prog.mcu) {
+//                         if(Prog.mcu->pwmNeedsPin == pin) {
+//                             strcpy(i->item.pszText, _("<PWM needs!>"));
+//                             break;
+//                         }
+//                     }
 
-                    int j;
-                    for(j = 0; j < Prog.mcu->pinCount; j++) {
-                        if(Prog.mcu->pinInfo[j].pin == pin) {
-                            sprintf(i->item.pszText, "%c%c%d",
-                                Prog.mcu->portPrefix,
-                                Prog.mcu->pinInfo[j].port,
-                                Prog.mcu->pinInfo[j].bit);
-                            break;
-                        }
-                    }
-                    if(j == Prog.mcu->pinCount) {
-                        sprintf(i->item.pszText, _("<not an I/O!>"));
-                    }
-                    break;
-                }
+//                     int j;
+//                     for(j = 0; j < Prog.mcu->pinCount; j++) {
+//                         if(Prog.mcu->pinInfo[j].pin == pin) {
+//                             sprintf(i->item.pszText, "%c%c%d",
+//                                 Prog.mcu->portPrefix,
+//                                 Prog.mcu->pinInfo[j].port,
+//                                 Prog.mcu->pinInfo[j].bit);
+//                             break;
+//                         }
+//                     }
+//                     if(j == Prog.mcu->pinCount) {
+//                         sprintf(i->item.pszText, _("<not an I/O!>"));
+//                     }
+//                     break;
+//                 }
 
-                case LV_IO_STATE: {
-                    if(InSimulationMode) {
-                        char *name = Prog.io.assignment[item].name;
-                        DescribeForIoList(name, i->item.pszText);
-                    } else {
-                        strcpy(i->item.pszText, "");
-                    }
-                    break;
-                }
+//                 case LV_IO_STATE: {
+//                     if(InSimulationMode) {
+//                         char *name = Prog.io.assignment[item].name;
+//                         DescribeForIoList(name, i->item.pszText);
+//                     } else {
+//                         strcpy(i->item.pszText, "");
+//                     }
+//                     break;
+//                 }
 
-            }
-            break;
-        }
-        case LVN_ITEMACTIVATE: {
-            NMITEMACTIVATE *i = (NMITEMACTIVATE *)h;
-            if(InSimulationMode) {
-                char *name = Prog.io.assignment[i->iItem].name;
-                if(name[0] == 'X') {
-                    SimulationToggleContact(name);
-                } else if(name[0] == 'A') {
-                    ShowAnalogSliderPopup(name);
-                }
-            } else {
-                UndoRemember();
-                ShowIoDialog(i->iItem);
-                ProgramChanged();
-                InvalidateRect(MainWindow, NULL, FALSE);
-            }
-            break;
-        }
-    }
-}
+//             }
+//             break;
+//         }
+//         case LVN_ITEMACTIVATE: {
+//             NMITEMACTIVATE *i = (NMITEMACTIVATE *)h;
+//             if(InSimulationMode) {
+//                 char *name = Prog.io.assignment[i->iItem].name;
+//                 if(name[0] == 'X') {
+//                     SimulationToggleContact(name);
+//                 } else if(name[0] == 'A') {
+//                     ShowAnalogSliderPopup(name);
+//                 }
+//             } else {
+//                 UndoRemember();
+//                 ShowIoDialog(i->iItem);
+//                 ProgramChanged();
+//                 InvalidateRect(MainWindow, NULL, FALSE);
+//             }
+//             break;
+//         }
+//     }
+// }

@@ -2,6 +2,8 @@
 #define __LINUX_LD__
 
 #include "linuxUI.h"
+#include <vector>
+#include <algorithm>
 
 /// common windows referances for linux
 
@@ -10,12 +12,16 @@
 /// CALLBACK or __stdcall os defined empty
 #define CALLBACK
 #define CONST const
+
+#define HEAP_ZERO_MEMORY 0x00000008
+
 /// typedefs
 //typedef int64_t __int64;
 typedef bool BOOL;
 typedef unsigned char BYTE;
 typedef unsigned short WORD;
 typedef unsigned int DWORD;
+typedef size_t SIZE_T;
 typedef long LONG;
 typedef wchar_t WCHAR;
 typedef char CHAR;
@@ -38,15 +44,16 @@ typedef CHAR *LPSTR;
 #endif
 
 /// all handles will hold a GtkWindow* type
-typedef void* PVOID;
+typedef void *PVOID;
+typedef void *LPVOID;
 typedef PVOID HANDLE;
 typedef HANDLE HINSTANCE;
 typedef HANDLE HDC;
 
-typedef GtkWidget* HWID;
-typedef GtkWidget* HMENU;
-typedef GtkWindow* HWND;
-typedef GtkApplication* HAPP;
+typedef GtkWidget *HWID;
+typedef GtkWidget *HMENU;
+typedef GtkWindow *HWND;
+typedef GtkApplication *HAPP;
 
 /// Check if system is x64 or x86
 #if defined(__UNIX64)
@@ -77,5 +84,36 @@ class COLORREF : public GdkRGBA{
     }
 };
 
+/// Custom structures
+typedef struct HeapRecordChunckTag{
+    PVOID Chunck;
+    SIZE_T dwSize;
+} HEAPCHUNCK;
+typedef struct HeapRecordTag{
+    PVOID hHeap;
+    DWORD HeapID;
+    std::vector<HEAPCHUNCK> Element;
+    SIZE_T dwMaximumSize;
+    SIZE_T dwSize;
+    SIZE_T dwAllocatedSizeOffset;
+} HEAPRECORD;
+/// Variables
+extern std::vector<HEAPRECORD> HeapRecord;
+
 /// functions
+HANDLE HeapCreate(
+    DWORD  flOptions,
+    SIZE_T dwInitialSize,
+    SIZE_T dwMaximumSize);
+
+LPVOID HeapAlloc(
+    HANDLE hHeap,
+    DWORD  dwFlags,
+    SIZE_T dwBytes);
+
+BOOL HeapFree(
+    HANDLE hHeap,
+    DWORD  dwFlags,
+    LPVOID lpMem);
+
 #endif

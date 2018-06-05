@@ -93,7 +93,7 @@ IF(UNIX)
                             maincontrols.cpp
                             ldmicro.cpp)
     
-    add_executable (LDMicro ${COMPILE_CPP_SOURCES})#windows.cpp arduino.cpp avr.cpp pic16.cpp interpreted.cpp ansic.cpp lang.cpp miscutil.cpp circuit.cpp draw_outputdev.cpp ldmicro.cpp
+    add_executable (LDMicro ${COMPILE_CPP_SOURCES})
     install (TARGETS LDMicro DESTINATION bin)
     #add_executable (testMain testMain.cpp)
     target_link_libraries (LDMicro LinuxUI)

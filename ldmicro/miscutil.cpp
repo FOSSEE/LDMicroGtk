@@ -159,13 +159,13 @@ void CheckHeap(char *file, int line)
 void *CheckMalloc(size_t n)
 {
     ok();
-    // void *p = HeapAlloc(MainHeap, HEAP_ZERO_MEMORY, n);
+    void *p = HeapAlloc(MainHeap, HEAP_ZERO_MEMORY, n);
     return NULL;
 }
 void CheckFree(void *p)
 {
     ok();
-    //HeapFree(MainHeap, 0, p);
+    HeapFree(MainHeap, 0, p);
 }
 
 

@@ -30,12 +30,12 @@ IF(UNIX)
     find_package (PkgConfig REQUIRED)
     pkg_check_modules (GTK3 REQUIRED gtk+-3.0)
 
-    # Version control
+    ## Version control
     set (LDMicro_VERSION_MAJOR 1)
     set (LDMicro_VERSION_MINOR 0)
 
-    # configure a header file to pass some of the CMake settings
-    # to the source code
+    ## configure a header file to pass some of the CMake settings
+    ## to the source code
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/lib/linuxUI")
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/lib/freezeLD")
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/includes")
@@ -46,7 +46,7 @@ IF(UNIX)
     )
     MESSAGE ( STATUS " PROJECT_INCLUDE_DIR: " ${PROJECT_INCLUDE_DIR} )
 
-    # Add GTK3 include files if GTK3 is found
+    ## Add GTK3 include files if GTK3 is found
     IF ( GTK3_FOUND )
         include_directories (${GTK3_INCLUDE_DIRS})
         link_directories (${GTK3_LIBRARY_DIRS})
@@ -60,8 +60,7 @@ IF(UNIX)
     
     ## Dummy compile and install to test linuxUI
     ## to compile LDmicro uncomment the below 2 line2
-    set (COMPILE_CPP_SOURCES #naminglist.cpp
-                            arduino.cpp
+    set (COMPILE_CPP_SOURCES arduino.cpp
                             avr.cpp
                             pic16.cpp
                             interpreted.cpp
@@ -71,21 +70,21 @@ IF(UNIX)
                             lang.cpp
                             miscutil.cpp
                             iolist.cpp
-                            #confdialog.cpp
-                            #lutdialog.cpp
-                            #resetdialog.cpp
-                            #simpledialog.cpp
-                            #coildialog.cpp
-                            #contactsdialog.cpp
-                            #commentdialog.cpp
-                            #simulate.cpp
+                            confdialog.cpp
+                            lutdialog.cpp
+                            resetdialog.cpp
+                            simpledialog.cpp
+                            coildialog.cpp
+                            contactsdialog.cpp
+                            commentdialog.cpp
+                            simulate.cpp
                             loadsave.cpp
                             undoredo.cpp
                             circuit.cpp
                             draw_outputdev.cpp
-                            #draw.cpp
+                            draw.cpp
                             schematic.cpp
-                            #helpdialog.cpp
+                            helpdialog.cpp
                             maincontrols.cpp
                             ldmicro.cpp)
     

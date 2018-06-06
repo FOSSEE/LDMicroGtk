@@ -38,111 +38,111 @@ static LONG_PTR PrevNameProc;
 //-----------------------------------------------------------------------------
 // Don't allow any characters other than A-Za-z0-9_ in the name.
 //-----------------------------------------------------------------------------
-static LRESULT CALLBACK MyNameProc(HWND hwnd, UINT msg, WPARAM wParam,
-    LPARAM lParam)
-{
-    if(msg == WM_CHAR) {
-        if(!(isalpha(wParam) || isdigit(wParam) || wParam == '_' ||
-            wParam == '\b'))
-        {
-            return 0;
-        }
-    }
+// static LRESULT CALLBACK MyNameProc(HWND hwnd, UINT msg, WPARAM wParam,
+//     LPARAM lParam)
+// {
+//     if(msg == WM_CHAR) {
+//         if(!(isalpha(wParam) || isdigit(wParam) || wParam == '_' ||
+//             wParam == '\b'))
+//         {
+//             return 0;
+//         }
+//     }
 
-    return CallWindowProc((WNDPROC)PrevNameProc, hwnd, msg, wParam, lParam);
-}
+//     return CallWindowProc((WNDPROC)PrevNameProc, hwnd, msg, wParam, lParam);
+// }
 
-static void MakeControls(void)
-{
-    HWND grouper = CreateWindowEx(0, WC_BUTTON, _("Type"),
-        WS_CHILD | BS_GROUPBOX | WS_VISIBLE,
-        7, 3, 120, 65, ResetDialog, NULL, Instance, NULL);
-    NiceFont(grouper);
+// static void MakeControls(void)
+// {
+//     HWND grouper = CreateWindowEx(0, WC_BUTTON, _("Type"),
+//         WS_CHILD | BS_GROUPBOX | WS_VISIBLE,
+//         7, 3, 120, 65, ResetDialog, NULL, Instance, NULL);
+//     NiceFont(grouper);
 
-    TypeTimerRadio = CreateWindowEx(0, WC_BUTTON, _("Timer"),
-        WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE,
-        16, 21, 100, 20, ResetDialog, NULL, Instance, NULL);
-    NiceFont(TypeTimerRadio);
+//     TypeTimerRadio = CreateWindowEx(0, WC_BUTTON, _("Timer"),
+//         WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE,
+//         16, 21, 100, 20, ResetDialog, NULL, Instance, NULL);
+//     NiceFont(TypeTimerRadio);
 
-    TypeCounterRadio = CreateWindowEx(0, WC_BUTTON, _("Counter"),
-        WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE,
-        16, 41, 100, 20, ResetDialog, NULL, Instance, NULL);
-    NiceFont(TypeCounterRadio);
+//     TypeCounterRadio = CreateWindowEx(0, WC_BUTTON, _("Counter"),
+//         WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE,
+//         16, 41, 100, 20, ResetDialog, NULL, Instance, NULL);
+//     NiceFont(TypeCounterRadio);
 
-    HWND textLabel = CreateWindowEx(0, WC_STATIC, _("Name:"),
-        WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE | SS_RIGHT,
-        135, 16, 50, 21, ResetDialog, NULL, Instance, NULL);
-    NiceFont(textLabel);
+//     HWND textLabel = CreateWindowEx(0, WC_STATIC, _("Name:"),
+//         WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE | SS_RIGHT,
+//         135, 16, 50, 21, ResetDialog, NULL, Instance, NULL);
+//     NiceFont(textLabel);
 
-    NameTextbox = CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "",
-        WS_CHILD | ES_AUTOHSCROLL | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE,
-        190, 16, 115, 21, ResetDialog, NULL, Instance, NULL);
-    FixedFont(NameTextbox);
+//     NameTextbox = CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "",
+//         WS_CHILD | ES_AUTOHSCROLL | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE,
+//         190, 16, 115, 21, ResetDialog, NULL, Instance, NULL);
+//     FixedFont(NameTextbox);
 
-    OkButton = CreateWindowEx(0, WC_BUTTON, _("OK"),
-        WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE | BS_DEFPUSHBUTTON,
-        321, 10, 70, 23, ResetDialog, NULL, Instance, NULL); 
-    NiceFont(OkButton);
+//     OkButton = CreateWindowEx(0, WC_BUTTON, _("OK"),
+//         WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE | BS_DEFPUSHBUTTON,
+//         321, 10, 70, 23, ResetDialog, NULL, Instance, NULL); 
+//     NiceFont(OkButton);
 
-    CancelButton = CreateWindowEx(0, WC_BUTTON, _("Cancel"),
-        WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE,
-        321, 40, 70, 23, ResetDialog, NULL, Instance, NULL); 
-    NiceFont(CancelButton);
+//     CancelButton = CreateWindowEx(0, WC_BUTTON, _("Cancel"),
+//         WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE,
+//         321, 40, 70, 23, ResetDialog, NULL, Instance, NULL); 
+//     NiceFont(CancelButton);
 
-    PrevNameProc = SetWindowLongPtr(NameTextbox, GWLP_WNDPROC, 
-        (LONG_PTR)MyNameProc);
-}
+//     PrevNameProc = SetWindowLongPtr(NameTextbox, GWLP_WNDPROC, 
+//         (LONG_PTR)MyNameProc);
+// }
 
-void ShowResetDialog(char *name)
-{
-    ResetDialog = CreateWindowClient(0, "LDmicroDialog",
-        _("Reset"), WS_OVERLAPPED | WS_SYSMENU,
-        100, 100, 404, 75, NULL, NULL, Instance, NULL);
+// void ShowResetDialog(char *name)
+// {
+//     ResetDialog = CreateWindowClient(0, "LDmicroDialog",
+//         _("Reset"), WS_OVERLAPPED | WS_SYSMENU,
+//         100, 100, 404, 75, NULL, NULL, Instance, NULL);
 
-    MakeControls();
+//     MakeControls();
    
-    if(name[0] == 'T') {
-        SendMessage(TypeTimerRadio, BM_SETCHECK, BST_CHECKED, 0);
-    } else {
-        SendMessage(TypeCounterRadio, BM_SETCHECK, BST_CHECKED, 0);
-    }
-    SendMessage(NameTextbox, WM_SETTEXT, 0, (LPARAM)(name + 1));
+//     if(name[0] == 'T') {
+//         SendMessage(TypeTimerRadio, BM_SETCHECK, BST_CHECKED, 0);
+//     } else {
+//         SendMessage(TypeCounterRadio, BM_SETCHECK, BST_CHECKED, 0);
+//     }
+//     SendMessage(NameTextbox, WM_SETTEXT, 0, (LPARAM)(name + 1));
 
-    EnableWindow(MainWindow, FALSE);
-    ShowWindow(ResetDialog, TRUE);
-    SetFocus(NameTextbox);
-    SendMessage(NameTextbox, EM_SETSEL, 0, -1);
+//     EnableWindow(MainWindow, FALSE);
+//     ShowWindow(ResetDialog, TRUE);
+//     SetFocus(NameTextbox);
+//     SendMessage(NameTextbox, EM_SETSEL, 0, -1);
 
-    MSG msg;
-    DWORD ret;
-    DialogDone = FALSE;
-    DialogCancel = FALSE;
-    while((ret = GetMessage(&msg, NULL, 0, 0)) && !DialogDone) {
-        if(msg.message == WM_KEYDOWN) {
-            if(msg.wParam == VK_RETURN) {
-                DialogDone = TRUE;
-                break;
-            } else if(msg.wParam == VK_ESCAPE) {
-                DialogDone = TRUE;
-                DialogCancel = TRUE;
-                break;
-            }
-        }
+//     MSG msg;
+//     DWORD ret;
+//     DialogDone = FALSE;
+//     DialogCancel = FALSE;
+//     while((ret = GetMessage(&msg, NULL, 0, 0)) && !DialogDone) {
+//         if(msg.message == WM_KEYDOWN) {
+//             if(msg.wParam == VK_RETURN) {
+//                 DialogDone = TRUE;
+//                 break;
+//             } else if(msg.wParam == VK_ESCAPE) {
+//                 DialogDone = TRUE;
+//                 DialogCancel = TRUE;
+//                 break;
+//             }
+//         }
 
-        if(IsDialogMessage(ResetDialog, &msg)) continue;
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-    }
+//         if(IsDialogMessage(ResetDialog, &msg)) continue;
+//         TranslateMessage(&msg);
+//         DispatchMessage(&msg);
+//     }
 
-    if(!DialogCancel) {
-        if(SendMessage(TypeTimerRadio, BM_GETSTATE, 0, 0) & BST_CHECKED) {
-            name[0] = 'T';
-        } else {
-            name[0] = 'C';
-        }
-        SendMessage(NameTextbox, WM_GETTEXT, (WPARAM)16, (LPARAM)(name+1));
-    }
+//     if(!DialogCancel) {
+//         if(SendMessage(TypeTimerRadio, BM_GETSTATE, 0, 0) & BST_CHECKED) {
+//             name[0] = 'T';
+//         } else {
+//             name[0] = 'C';
+//         }
+//         SendMessage(NameTextbox, WM_GETTEXT, (WPARAM)16, (LPARAM)(name+1));
+//     }
 
-    EnableWindow(MainWindow, TRUE);
-    DestroyWindow(ResetDialog);
-}
+//     EnableWindow(MainWindow, TRUE);
+//     DestroyWindow(ResetDialog);
+// }

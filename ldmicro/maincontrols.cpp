@@ -29,6 +29,79 @@
 #include <stdlib.h>
 #include "ldmicro.h"
 
+// Menu IDs
+ HMENU MNU_NEW;
+HMENU MNU_OPEN;
+HMENU MNU_SAVE;
+HMENU MNU_SAVE_AS;
+HMENU MNU_EXPORT;
+HMENU MNU_EXIT;
+
+HMENU MNU_UNDO;
+HMENU MNU_REDO;
+HMENU MNU_PUSH_RUNG_UP;
+HMENU MNU_PUSH_RUNG_DOWN;
+HMENU MNU_INSERT_RUNG_BEFORE;
+HMENU MNU_INSERT_RUNG_AFTER;
+HMENU MNU_DELETE_ELEMENT;
+HMENU MNU_DELETE_RUNG;
+
+HMENU MNU_INSERT_COMMENT;
+HMENU MNU_INSERT_CONTACTS;
+HMENU MNU_INSERT_COIL;
+HMENU MNU_INSERT_TON;
+HMENU MNU_INSERT_TOF;
+HMENU MNU_INSERT_RTO;
+HMENU MNU_INSERT_RES;
+HMENU MNU_INSERT_OSR;
+HMENU MNU_INSERT_OSF;
+HMENU MNU_INSERT_CTU;
+HMENU MNU_INSERT_CTD;
+HMENU MNU_INSERT_CTC;
+HMENU MNU_INSERT_ADD;
+HMENU MNU_INSERT_SUB;
+HMENU MNU_INSERT_MUL;
+HMENU MNU_INSERT_DIV;
+HMENU MNU_INSERT_MOV;
+HMENU MNU_INSERT_READ_ADC;
+HMENU MNU_INSERT_SET_PWM;
+HMENU MNU_INSERT_UART_SEND;
+HMENU MNU_INSERT_UART_RECV;
+HMENU MNU_INSERT_EQU;
+HMENU MNU_INSERT_NEQ;
+HMENU MNU_INSERT_GRT;
+HMENU MNU_INSERT_GEQ;
+HMENU MNU_INSERT_LES;
+HMENU MNU_INSERT_LEQ;
+HMENU MNU_INSERT_OPEN;
+HMENU MNU_INSERT_SHORT;
+HMENU MNU_INSERT_MASTER_RLY;
+HMENU MNU_INSERT_SHIFT_REG;
+HMENU MNU_INSERT_LUT;
+HMENU MNU_INSERT_FMTD_STR;
+HMENU MNU_INSERT_PERSIST;
+HMENU MNU_MAKE_NORMAL;
+HMENU MNU_NEGATE;
+HMENU MNU_MAKE_SET_ONLY;
+HMENU MNU_MAKE_RESET_ONLY;
+HMENU MNU_INSERT_PWL;
+
+HMENU MNU_MCU_SETTINGS;
+HMENU MNU_PROCESSOR_0;
+
+HMENU MNU_SIMULATION_MODE;
+HMENU MNU_START_SIMULATION;
+HMENU MNU_STOP_SIMULATION;
+HMENU MNU_SINGLE_CYCLE;
+
+HMENU MNU_COMPILE;
+HMENU MNU_COMPILE_AS;
+
+HMENU MNU_MANUAL;
+HMENU MNU_ABOUT;
+
+HMENU MNU_ADV_SIMULATION;
+
 // scrollbars for the ladder logic area
 static HWND         HorizScrollBar;
 static HWND         VertScrollBar;
@@ -64,50 +137,91 @@ static BOOL         RealTimeSimulationRunning;
 //-----------------------------------------------------------------------------
 void MakeMainWindowControls(void)
 {
-    LVCOLUMN lvc;
-    lvc.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM;
-    lvc.fmt = LVCFMT_LEFT;
-#define LV_ADD_COLUMN(hWnd, i, w, s) do { \
-        lvc.iSubItem = i; \
-        lvc.pszText = s; \
-        lvc.iOrder = 0; \
-        lvc.cx = w; \
-        ListView_InsertColumn(hWnd, i, &lvc); \
-    } while(0)
-    IoList = CreateWindowEx(WS_EX_CLIENTEDGE, WC_LISTVIEW, "", WS_CHILD |
-        LVS_REPORT | LVS_NOSORTHEADER | LVS_SHOWSELALWAYS | WS_TABSTOP |
-        LVS_SINGLESEL | WS_CLIPSIBLINGS, 
-        12, 25, 300, 300, MainWindow, NULL, Instance, NULL);
-    ListView_SetExtendedListViewStyle(IoList, LVS_EX_FULLROWSELECT);
+    GtkWidget* PackBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    GtkWidget* grid = gtk_grid_new();
+    GtkWidget* pane = gtk_paned_new (GTK_ORIENTATION_VERTICAL);
+    GtkListStore* IoList = gtk_list_store_new (5, 
+                                    G_TYPE_STRING,   
+                                    G_TYPE_STRING,    
+                                    G_TYPE_STRING,
+                                    G_TYPE_STRING,
+                                    G_TYPE_STRING); 
+    GtkWidget* view;
+    GtkTreeViewColumn* column;
 
     int typeWidth = 85;
     int pinWidth = 100;
     int portWidth = 90;
-    
-    LV_ADD_COLUMN(IoList, LV_IO_NAME,  250,       _("Name"));
-    LV_ADD_COLUMN(IoList, LV_IO_TYPE,  typeWidth, _("Type"));
-    LV_ADD_COLUMN(IoList, LV_IO_STATE, 100,       _("State"));
-    LV_ADD_COLUMN(IoList, LV_IO_PIN,   pinWidth,  _("Pin on Processor"));
-    LV_ADD_COLUMN(IoList, LV_IO_PORT,  portWidth, _("MCU Port"));
 
-    HorizScrollBar = CreateWindowEx(0, WC_SCROLLBAR, "", WS_CHILD |
-        SBS_HORZ | SBS_BOTTOMALIGN | WS_VISIBLE | WS_CLIPSIBLINGS, 
-        100, 100, 100, 100, MainWindow, NULL, Instance, NULL);
-    VertScrollBar = CreateWindowEx(0, WC_SCROLLBAR, "", WS_CHILD |
-        SBS_VERT | SBS_LEFTALIGN | WS_VISIBLE | WS_CLIPSIBLINGS, 
-        200, 100, 100, 100, MainWindow, NULL, Instance, NULL);
-    RECT scroll;
-    GetWindowRect(HorizScrollBar, &scroll);
-    ScrollHeight = scroll.bottom - scroll.top;
-    GetWindowRect(VertScrollBar, &scroll);
-    ScrollWidth = scroll.right - scroll.left;
+    // Creating a list
+    view = gtk_tree_view_new_with_model (GTK_TREE_MODEL(IoList));
+    gtk_tree_view_set_model (GTK_TREE_VIEW (view), GTK_TREE_MODEL (IoList));
 
-    StatusBar = CreateStatusWindow(WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS, 
-        "LDmicro started", MainWindow, 0);
-    int edges[] = { 250, 370, -1 };
-    SendMessage(StatusBar, SB_SETPARTS, 3, (LPARAM)edges);
+    column = gtk_tree_view_column_new_with_attributes("Name",
+                                                    gtk_cell_renderer_text_new(),
+                                                    "text", LV_IO_NAME,
+                                                    NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
+    gtk_tree_view_column_set_min_width (column, 250);
 
-    ShowWindow(IoList, SW_SHOW);
+    column = gtk_tree_view_column_new_with_attributes("Type",
+                                                    gtk_cell_renderer_spin_new(),
+                                                    "text", LV_IO_TYPE,
+                                                    NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
+    gtk_tree_view_column_set_min_width (column, typeWidth);
+
+    column = gtk_tree_view_column_new_with_attributes("State",
+                                                    gtk_cell_renderer_text_new(),
+                                                    "text", LV_IO_STATE,
+                                                    NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
+    gtk_tree_view_column_set_min_width (column, 100);
+
+    column = gtk_tree_view_column_new_with_attributes("Pin on Processor",
+                                                    gtk_cell_renderer_text_new(),
+                                                    "text", LV_IO_PIN,
+                                                    NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
+    gtk_tree_view_column_set_min_width (column, pinWidth);
+
+    column = gtk_tree_view_column_new_with_attributes("MCU Port",
+                                                    gtk_cell_renderer_text_new(),
+                                                    "text", LV_IO_PORT,
+                                                    NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
+    gtk_tree_view_column_set_min_width (column, portWidth);
+
+    // Appending Menus to grid
+    gtk_grid_attach (GTK_GRID (grid), MakeMainWindowMenus(), 0, 0, 1, 1);
+
+    // Creating Scrolled Window
+    GtkWidget* ScrollWindow = gtk_scrolled_window_new (NULL, NULL);
+    gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (ScrollWindow),
+				                          GTK_POLICY_AUTOMATIC, 
+				                          GTK_POLICY_ALWAYS);
+
+    // Creating a pane to separate Scrolled Window and other widgets
+    gtk_paned_add1 (GTK_PANED (pane), ScrollWindow);
+    gtk_paned_set_position (GTK_PANED (pane), 0);
+    gtk_widget_set_vexpand (ScrollWindow, TRUE);
+    gtk_widget_set_hexpand (ScrollWindow, TRUE);
+
+    // Appending tree view to pane and pane to grid
+    gtk_paned_add2 (GTK_PANED(pane), view);
+    gtk_paned_set_position (GTK_PANED (pane), 250);
+    gtk_grid_attach (GTK_GRID (grid), pane, 0, 0, 1, 1); 
+
+    // Creating Status Bar and attaching to grid
+    StatusBar = gtk_statusbar_new();
+    gtk_statusbar_push (GTK_STATUSBAR (StatusBar),
+                        gtk_statusbar_get_context_id (GTK_STATUSBAR (StatusBar), "Introduction"), 
+                        "LDMicro Started");
+
+    // Appneding Status Bar to box which is then added to Main Window
+    gtk_box_pack_start(GTK_BOX(PackBox), grid, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(PackBox), StatusBar, FALSE, FALSE, 0);
+    gtk_container_add(GTK_CONTAINER(MainWindow), PackBox);
 }
 
 //-----------------------------------------------------------------------------
@@ -221,258 +335,275 @@ void SetUndoEnabled(BOOL undoEnabled, BOOL redoEnabled)
 //-----------------------------------------------------------------------------
 
 HMENU MakeMainWindowMenus(void)
-{ 
-    HMENU settings, compile, help;                                    // Menus
-  HMENU  menu_box;                                                  // Box for alignment
-  HMENU  packed_menu_box;                                           // Stores the packed box
-  HMENU  menu_bar;                                                  // Menu Bar
-  HWID  file_label;                                                 // File menu label
-  HWID  edit_label;                                                 // Edit menu label
-  HWID  instruction_label;                                          // Instruction menu label
-  HWID  settings_label;                                             // Settings menu label
-  HWID  compile_label;                                              // Compile menu label
-  HWID  help_label;                                                 // Help menu label
-  HWID  simulate_label;                                             // Simulate menu label
-  HMENU  file_menu_items;                                           // File menu item
-  HMENU  edit_menu_items;                                           // Edit menu item
-  HMENU  instruction_menu_items;                                    // Instruction menu item
-  HMENU  settings_menu_items;                                       // Settings menu item
-  HMENU  processor_menu_items;                                      // Processor menu items
-  HMENU  compile_menu_items;                                        // Compile menu item
-  HMENU  help_menu_items;                                           // Help menu item
-  HMENU  simulate_menu_items;                                       // Simulate menu item
-  HMENU  file_menu_separator;                                       // File menu separator
-  HMENU  edit_menu_separator;                                       // Edit menu separator
-  HMENU  instruction_menu_separator;                                // Instruction menu separator
-  HMENU  simulate_menu_separator;                                   // Simulate menu separator
+{   
+    HMENU  MenuBox;                                                 // Box for alignment
+    HMENU  PackedMenuBox;                                           // Stores the packed box
+    HMENU  TopMenu;                                                 // Menu Bar
+    HWID  FileLabel;                                                // File menu label
+    HWID  EditLabel;                                                // Edit menu label
+    HWID  InstructionLabel;                                         // Instruction menu label
+    HWID  SettingsLabel;                                            // Settings menu label
+    HWID  CompileLabel;                                             // Compile menu label
+    HWID  HelpLabel;                                                // Help menu label
+    HWID  SimulateLabel;                                            // Simulate menu label
+    // HMENU  file_menu_items;                                      // File menu item
+    // HMENU  edit_menu_items;                                      // Edit menu item
+    // HMENU  instruction_menu_items;                               // Instruction menu item
+    // HMENU  settings_menu_items;                                  // Settings menu item
+    HMENU ProcessorMenuItems;                                       // Processor menu items
+    // HMENU  compile_menu_items;                                   // Compile menu item
+    // HMENU  help_menu_items;                                      // Help menu item
+    // HMENU  simulate_menu_items;                                  // Simulate menu item
+    HMENU  FileMenuSeparator;                                       // File menu separator
+    HMENU  EditMenuSeparator;                                       // Edit menu separator
+    HMENU  InstructionMenuSeparator;                                // Instruction menu separator
+    HMENU  SimulateMenuSeparator;                                   // Simulate menu separator
 
-  int i;
-  // Creating a box for desired orientation
-  menu_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    int i;
+    // Creating a box for desired orientation
+    MenuBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
-  // Create new menu bar to hold menu and add it to window
-  menu_bar = gtk_menu_bar_new();
+    // Create new menu bar to hold menu and add it to window
+    TopMenu = gtk_menu_bar_new();
 
-  // Creating various menus
-  FileMenu = gtk_menu_new();
-  file_label = gtk_menu_item_new_with_label("File");
-  EditMenu = gtk_menu_new();
-  edit_label = gtk_menu_item_new_with_label("Edit");
-  settings = gtk_menu_new();
-  settings_label = gtk_menu_item_new_with_label("Settings");
-  ProcessorMenu = gtk_menu_new();
-  InstructionMenu = gtk_menu_new();
-  instruction_label = gtk_menu_item_new_with_label("Instructions");
-  SimulateMenu = gtk_menu_new();
-  simulate_label = gtk_menu_item_new_with_label("Simulate");
-  compile = gtk_menu_new();
-  compile_label = gtk_menu_item_new_with_label("Compile");
-  help = gtk_menu_new();
-  help_label = gtk_menu_item_new_with_label("Help");
+    // Creating various menus
+    FileMenu = gtk_menu_new();
+    EditMenu = gtk_menu_new();
+    settings = gtk_menu_new();
+    ProcessorMenu = gtk_menu_new();
+    InstructionMenu = gtk_menu_new();
+    SimulateMenu = gtk_menu_new();
+    compile = gtk_menu_new();
+    help = gtk_menu_new();
 
-  // Appending menu items to File menu
-  file_menu_items = gtk_menu_item_new_with_label("New");                   // Create a new menu item with a name
-  gtk_menu_shell_append(GTK_MENU_SHELL (FileMenu), file_menu_items);       // Appending menu items
-  file_menu_items = gtk_menu_item_new_with_label("Open");
-  gtk_menu_shell_append(GTK_MENU_SHELL (FileMenu), file_menu_items);
-  file_menu_items = gtk_menu_item_new_with_label("Save");
-  gtk_menu_shell_append(GTK_MENU_SHELL (FileMenu), file_menu_items);
-  file_menu_items = gtk_menu_item_new_with_label("Save As");
-  gtk_menu_shell_append(GTK_MENU_SHELL (FileMenu), file_menu_items);
-  file_menu_separator = gtk_separator_menu_item_new();
-  gtk_menu_shell_append(GTK_MENU_SHELL(FileMenu), file_menu_separator);
-  file_menu_items = gtk_menu_item_new_with_label("Export As Text");
-  gtk_menu_shell_append(GTK_MENU_SHELL (FileMenu), file_menu_items);
-  file_menu_separator = gtk_separator_menu_item_new();
-  gtk_menu_shell_append(GTK_MENU_SHELL(FileMenu), file_menu_separator);
-  file_menu_items = gtk_menu_item_new_with_label("Exit");
-  gtk_menu_shell_append(GTK_MENU_SHELL (FileMenu), file_menu_items);
+    // Creating labels for each menu
+    FileLabel = gtk_menu_item_new_with_label("File");
+    EditLabel = gtk_menu_item_new_with_label("Edit");
+    SettingsLabel = gtk_menu_item_new_with_label("Settings");  
+    InstructionLabel = gtk_menu_item_new_with_label("Instructions");
+    SimulateLabel = gtk_menu_item_new_with_label("Simulate");
+    CompileLabel = gtk_menu_item_new_with_label("Compile");
+    HelpLabel = gtk_menu_item_new_with_label("Help");
 
-  // Appending menu items to Edit menu
-  edit_menu_items = gtk_menu_item_new_with_label("Undo");
-  gtk_menu_shell_append(GTK_MENU_SHELL (EditMenu), edit_menu_items);
-  edit_menu_items = gtk_menu_item_new_with_label("Redo");
-  gtk_menu_shell_append(GTK_MENU_SHELL (EditMenu), edit_menu_items);
-  edit_menu_separator = gtk_separator_menu_item_new();
-  gtk_menu_shell_append(GTK_MENU_SHELL(EditMenu), edit_menu_separator);
-  edit_menu_items = gtk_menu_item_new_with_label("Insert rung Before");
-  gtk_menu_shell_append(GTK_MENU_SHELL (EditMenu), edit_menu_items);
-  edit_menu_items = gtk_menu_item_new_with_label("Insert Rung After");
-  gtk_menu_shell_append(GTK_MENU_SHELL (EditMenu), edit_menu_items);
-  edit_menu_items = gtk_menu_item_new_with_label("Move Selected Rung Up");
-  gtk_menu_shell_append(GTK_MENU_SHELL (EditMenu), edit_menu_items);
-  edit_menu_items = gtk_menu_item_new_with_label("Move Selected Rung Down");
-  gtk_menu_shell_append(GTK_MENU_SHELL (EditMenu), edit_menu_items);
-  edit_menu_separator = gtk_separator_menu_item_new();
-  gtk_menu_shell_append(GTK_MENU_SHELL(EditMenu), edit_menu_separator);
-  edit_menu_items = gtk_menu_item_new_with_label("Delete Selected Element");
-  gtk_menu_shell_append(GTK_MENU_SHELL (EditMenu), edit_menu_items);
-  edit_menu_items = gtk_menu_item_new_with_label("Delete Rung");
-  gtk_menu_shell_append(GTK_MENU_SHELL (EditMenu), edit_menu_items);
+    // Creating labels for File Menu
+    MNU_NEW = gtk_menu_item_new_with_label("New");
+    MNU_OPEN = gtk_menu_item_new_with_label("Open");
+    MNU_SAVE = gtk_menu_item_new_with_label("Save");
+    MNU_SAVE_AS = gtk_menu_item_new_with_label("Save As");
+    MNU_EXPORT = gtk_menu_item_new_with_label("Export As Text");
+    MNU_EXIT = gtk_menu_item_new_with_label("Exit");
+  
+    // Appending menu items (labels) to File menu and adding separators
+    gtk_menu_shell_append(GTK_MENU_SHELL (FileMenu), MNU_NEW);       // Appending menu items
+    gtk_menu_shell_append(GTK_MENU_SHELL (FileMenu), MNU_OPEN);
+    gtk_menu_shell_append(GTK_MENU_SHELL (FileMenu), MNU_SAVE);
+    gtk_menu_shell_append(GTK_MENU_SHELL (FileMenu), MNU_SAVE_AS);
+    FileMenuSeparator = gtk_separator_menu_item_new();
+    gtk_menu_shell_append(GTK_MENU_SHELL (FileMenu), FileMenuSeparator);
+    gtk_menu_shell_append(GTK_MENU_SHELL (FileMenu), MNU_EXPORT);
+    FileMenuSeparator = gtk_separator_menu_item_new();
+    gtk_menu_shell_append(GTK_MENU_SHELL (FileMenu), FileMenuSeparator);
+    gtk_menu_shell_append(GTK_MENU_SHELL (FileMenu), MNU_EXIT);
 
-  // Appending menu items to Settings menu
-  settings_menu_items = gtk_menu_item_new_with_label ("MCU Parameters...");
-  gtk_menu_shell_append (GTK_MENU_SHELL (settings), settings_menu_items);
-  settings_menu_items = gtk_menu_item_new_with_label ("Microcontroller");
-  gtk_menu_shell_append (GTK_MENU_SHELL (settings), settings_menu_items);
-  for (i = 0; i < NUM_SUPPORTED_MCUS; i++){
-    processor_menu_items = gtk_menu_item_new_with_label (SupportedMcus[i].mcuName);
-    gtk_menu_shell_append (GTK_MENU_SHELL (ProcessorMenu), processor_menu_items);
-  }
-  processor_menu_items = gtk_menu_item_new_with_label ("(no microcontroller)");
-  gtk_menu_shell_append (GTK_MENU_SHELL (ProcessorMenu), processor_menu_items);
-  gtk_menu_item_set_submenu(GTK_MENU_ITEM(settings_menu_items), ProcessorMenu);
+    // Creating labels for Edit Menu
+    MNU_UNDO = gtk_menu_item_new_with_label("Undo");
+    MNU_REDO = gtk_menu_item_new_with_label("Redo");
+    MNU_INSERT_RUNG_BEFORE = gtk_menu_item_new_with_label("Insert rung Before");
+    MNU_INSERT_RUNG_AFTER = gtk_menu_item_new_with_label("Insert Rung After");
+    MNU_PUSH_RUNG_UP = gtk_menu_item_new_with_label("Move Selected Rung Up");
+    MNU_PUSH_RUNG_DOWN = gtk_menu_item_new_with_label("Move Selected Rung Down");
+    MNU_DELETE_ELEMENT = gtk_menu_item_new_with_label("Delete Selected Element");
+    MNU_DELETE_RUNG = gtk_menu_item_new_with_label("Delete Rung");
 
-  // Appending menu items to Instruction menu
-  instruction_menu_items = gtk_menu_item_new_with_label("Insert Comment");
-  gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), instruction_menu_items);
-  instruction_menu_separator = gtk_separator_menu_item_new();
-  gtk_menu_shell_append(GTK_MENU_SHELL(InstructionMenu), instruction_menu_separator);
-  instruction_menu_items = gtk_menu_item_new_with_label("Insert Contacts");
-  gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), instruction_menu_items);
-  instruction_menu_separator = gtk_separator_menu_item_new();
-  gtk_menu_shell_append(GTK_MENU_SHELL(InstructionMenu), instruction_menu_separator);
-  instruction_menu_items = gtk_menu_item_new_with_label("Insert OSR (One Shot Rising)");
-  gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), instruction_menu_items);
-  instruction_menu_items = gtk_menu_item_new_with_label("Insert OSF (One Shot Falling)");
-  instruction_menu_separator = gtk_separator_menu_item_new();
-  gtk_menu_shell_append(GTK_MENU_SHELL(InstructionMenu), instruction_menu_separator);
-  gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), instruction_menu_items);
-  instruction_menu_items = gtk_menu_item_new_with_label("Insert TON (Delayed Turn On)");
-  gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), instruction_menu_items);
-  instruction_menu_items = gtk_menu_item_new_with_label("Insert TOF (Delayed Turn Off)");
-  gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), instruction_menu_items);
-  instruction_menu_items = gtk_menu_item_new_with_label("Insert RTO (Retentive Delayed Turn On)");
-  gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), instruction_menu_items);
-  instruction_menu_separator = gtk_separator_menu_item_new();
-  gtk_menu_shell_append(GTK_MENU_SHELL(InstructionMenu), instruction_menu_separator);
-  instruction_menu_items = gtk_menu_item_new_with_label("Insert CTU (Count Up)");
-  gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), instruction_menu_items);
-  instruction_menu_items = gtk_menu_item_new_with_label("Insert CTD (Count Down)");
-  gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), instruction_menu_items);
-  instruction_menu_items = gtk_menu_item_new_with_label("Insert CTC (Count Circular)");
-  gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), instruction_menu_items);
-  instruction_menu_separator = gtk_separator_menu_item_new();
-  gtk_menu_shell_append(GTK_MENU_SHELL(InstructionMenu), instruction_menu_separator);
-  instruction_menu_items = gtk_menu_item_new_with_label("Insert EQU (Compare for Equals)");
-  gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), instruction_menu_items);
-  instruction_menu_items = gtk_menu_item_new_with_label("Insert NEQ (Compare for Not Equals)");
-  gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), instruction_menu_items);
-  instruction_menu_items = gtk_menu_item_new_with_label("Insert GRT (Compare for Greater Than)");
-  gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), instruction_menu_items);
-  instruction_menu_items = gtk_menu_item_new_with_label("Insert GEQ (Compare for Greater Than or Equal)");
-  gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), instruction_menu_items);
-  instruction_menu_items = gtk_menu_item_new_with_label("Insert LES (Compare for Less Than)");
-  gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), instruction_menu_items);
-  instruction_menu_items = gtk_menu_item_new_with_label("Insert LEQ (Compare for Less Than or Equal)");
-  gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), instruction_menu_items);
-  instruction_menu_separator = gtk_separator_menu_item_new();
-  gtk_menu_shell_append(GTK_MENU_SHELL(InstructionMenu), instruction_menu_separator);
-  instruction_menu_items = gtk_menu_item_new_with_label("Insert Open Circuit");
-  gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), instruction_menu_items);
-  instruction_menu_items = gtk_menu_item_new_with_label("Insert Short Circuit");
-  gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), instruction_menu_items);
-  instruction_menu_items = gtk_menu_item_new_with_label("Insert Master Control Relay");
-  gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), instruction_menu_items);
-  instruction_menu_separator = gtk_separator_menu_item_new();
-  gtk_menu_shell_append(GTK_MENU_SHELL(InstructionMenu), instruction_menu_separator);
-  instruction_menu_items = gtk_menu_item_new_with_label("Insert Coil");
-  gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), instruction_menu_items);
-  instruction_menu_items = gtk_menu_item_new_with_label("Insert RES (Counter/RTO Reset)");
-  gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), instruction_menu_items);
-  instruction_menu_separator = gtk_separator_menu_item_new();
-  gtk_menu_shell_append(GTK_MENU_SHELL(InstructionMenu), instruction_menu_separator);
-  instruction_menu_items = gtk_menu_item_new_with_label("Insert MOV (Move)");
-  gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), instruction_menu_items);
-  instruction_menu_items = gtk_menu_item_new_with_label("Insert ADD (16-bit Integer Ad)");
-  gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), instruction_menu_items);
-  instruction_menu_items = gtk_menu_item_new_with_label("Insert SUB (16-bit Integer Subtract)");
-  gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), instruction_menu_items);
-  instruction_menu_items = gtk_menu_item_new_with_label("Insert MUL (16-bit Integer Multiply)");
-  gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), instruction_menu_items);
-  instruction_menu_items = gtk_menu_item_new_with_label("Insert DIV (16-bit Integer Division)");
-  gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), instruction_menu_items);
-  instruction_menu_separator = gtk_separator_menu_item_new();
-  gtk_menu_shell_append(GTK_MENU_SHELL(InstructionMenu), instruction_menu_separator);
-  instruction_menu_items = gtk_menu_item_new_with_label("Insert Shift Register");
-  gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), instruction_menu_items);
-  instruction_menu_items = gtk_menu_item_new_with_label("Insert Look-Up Table");
-  gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), instruction_menu_items);
-  instruction_menu_items = gtk_menu_item_new_with_label("Insert Piecewise Linear");
-  gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), instruction_menu_items);
-  instruction_menu_items = gtk_menu_item_new_with_label("Insert Formatted String Over UART");
-  gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), instruction_menu_items);
-  instruction_menu_separator = gtk_separator_menu_item_new();
-  gtk_menu_shell_append(GTK_MENU_SHELL(InstructionMenu), instruction_menu_separator);
-  instruction_menu_items = gtk_menu_item_new_with_label("Insert UART Send");
-  gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), instruction_menu_items);
-  instruction_menu_items = gtk_menu_item_new_with_label("Insert UART Receive");
-  gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), instruction_menu_items);
-  instruction_menu_items = gtk_menu_item_new_with_label("Insert Set PWM Output");
-  gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), instruction_menu_items);
-  instruction_menu_items = gtk_menu_item_new_with_label("Insert A/D Converter Read");
-  gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), instruction_menu_items);
-  instruction_menu_items = gtk_menu_item_new_with_label("Insert Make Persistent");
-  gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), instruction_menu_items);
-  instruction_menu_separator = gtk_separator_menu_item_new();
-  gtk_menu_shell_append(GTK_MENU_SHELL(InstructionMenu), instruction_menu_separator);
-  instruction_menu_items = gtk_menu_item_new_with_label("Make Normal");
-  gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), instruction_menu_items);
-  instruction_menu_items = gtk_menu_item_new_with_label("Make Negated");
-  gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), instruction_menu_items);
-  instruction_menu_items = gtk_menu_item_new_with_label("Make Set-Only");
-  gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), instruction_menu_items);
-  instruction_menu_items = gtk_menu_item_new_with_label("Make Reset-Only");
-  gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), instruction_menu_items);
+    // Appending menu items to Edit menu and adding separators
+    gtk_menu_shell_append(GTK_MENU_SHELL (EditMenu), MNU_UNDO);    
+    gtk_menu_shell_append(GTK_MENU_SHELL (EditMenu), MNU_REDO);
+    EditMenuSeparator = gtk_separator_menu_item_new();
+    gtk_menu_shell_append(GTK_MENU_SHELL(EditMenu), EditMenuSeparator);    
+    gtk_menu_shell_append(GTK_MENU_SHELL (EditMenu), MNU_INSERT_RUNG_BEFORE);    
+    gtk_menu_shell_append(GTK_MENU_SHELL (EditMenu), MNU_INSERT_RUNG_AFTER);    
+    gtk_menu_shell_append(GTK_MENU_SHELL (EditMenu), MNU_PUSH_RUNG_UP);    
+    gtk_menu_shell_append(GTK_MENU_SHELL (EditMenu), MNU_PUSH_RUNG_DOWN);
+    EditMenuSeparator = gtk_separator_menu_item_new();
+    gtk_menu_shell_append(GTK_MENU_SHELL(EditMenu), EditMenuSeparator);    
+    gtk_menu_shell_append(GTK_MENU_SHELL (EditMenu), MNU_DELETE_ELEMENT);    
+    gtk_menu_shell_append(GTK_MENU_SHELL (EditMenu), MNU_DELETE_RUNG);
 
-  // Appending menu items to Compile menu
-  compile_menu_items = gtk_menu_item_new_with_label("Compile");
-  gtk_menu_shell_append(GTK_MENU_SHELL (compile), compile_menu_items);
-  compile_menu_items = gtk_menu_item_new_with_label("Compile As...");
-  gtk_menu_shell_append(GTK_MENU_SHELL (compile), compile_menu_items);
+    // Creating labels for Settings Menu
+    MNU_MCU_SETTINGS = gtk_menu_item_new_with_label ("MCU Parameters...");
+    MNU_PROCESSOR_0 = gtk_menu_item_new_with_label ("Microcontroller");
 
-  // Appending menu items to Help menu
-  help_menu_items = gtk_menu_item_new_with_label("Manual...");
-  gtk_menu_shell_append(GTK_MENU_SHELL (help), help_menu_items);
-  help_menu_items = gtk_menu_item_new_with_label("About...");
-  gtk_menu_shell_append(GTK_MENU_SHELL (help), help_menu_items);
+    // Appending menu items to Settings menu
+    gtk_menu_shell_append (GTK_MENU_SHELL (settings), MNU_MCU_SETTINGS);
+    gtk_menu_shell_append (GTK_MENU_SHELL (settings), MNU_PROCESSOR_0);
 
-  // Appending menu items to Simulate menu
-  simulate_menu_items = gtk_menu_item_new_with_label("Simulation Mode");
-  gtk_menu_shell_append(GTK_MENU_SHELL (SimulateMenu), simulate_menu_items);
-  simulate_menu_items = gtk_menu_item_new_with_label("Start Real-Time Simulation");
-  gtk_menu_shell_append(GTK_MENU_SHELL (SimulateMenu), simulate_menu_items);
-  simulate_menu_items = gtk_menu_item_new_with_label("Halt Simulation");
-  gtk_menu_shell_append(GTK_MENU_SHELL (SimulateMenu), simulate_menu_items);
-  simulate_menu_items = gtk_menu_item_new_with_label("Single Cycle");
-  gtk_menu_shell_append(GTK_MENU_SHELL (SimulateMenu), simulate_menu_items);
-  simulate_menu_items = gtk_menu_item_new_with_label("Advanced Simulation");
-  gtk_menu_shell_append(GTK_MENU_SHELL (SimulateMenu), simulate_menu_items);
-  simulate_menu_separator = gtk_separator_menu_item_new();
-  gtk_menu_shell_append(GTK_MENU_SHELL(SimulateMenu), simulate_menu_separator);
+    for (i = 0; i < NUM_SUPPORTED_MCUS; i++){
+    ProcessorMenuItems = gtk_check_menu_item_new_with_label (SupportedMcus[i].mcuName);
+    gtk_menu_shell_append (GTK_MENU_SHELL (ProcessorMenu), ProcessorMenuItems);
+    }
 
-  // Creating submenus for each menu   
-  gtk_menu_item_set_submenu(GTK_MENU_ITEM(file_label), FileMenu);
-  gtk_menu_item_set_submenu(GTK_MENU_ITEM(edit_label), EditMenu);
-  gtk_menu_item_set_submenu(GTK_MENU_ITEM(settings_label), settings);
-  gtk_menu_item_set_submenu(GTK_MENU_ITEM(instruction_label), InstructionMenu);
-  gtk_menu_item_set_submenu(GTK_MENU_ITEM(simulate_label), SimulateMenu);
-  gtk_menu_item_set_submenu(GTK_MENU_ITEM(compile_label), compile);
-  gtk_menu_item_set_submenu(GTK_MENU_ITEM(help_label), help);
+    ProcessorMenuItems = gtk_check_menu_item_new_with_label ("(no microcontroller)");
+    gtk_menu_shell_append (GTK_MENU_SHELL (ProcessorMenu), ProcessorMenuItems);
+    gtk_menu_item_set_submenu(GTK_MENU_ITEM(MNU_PROCESSOR_0), ProcessorMenu);
 
-  // Appending the menu item to the menu bar
-  gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), file_label);
-  gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), edit_label);
-  gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), settings_label);
-  gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), instruction_label);
-  gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), simulate_label);
-  gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), compile_label);
-  gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), help_label);
+    // Creating labels for Instruction Menu and adding separators
+    MNU_INSERT_COMMENT = gtk_menu_item_new_with_label("Insert Comment");
+    MNU_INSERT_CONTACTS = gtk_menu_item_new_with_label("Insert Contacts");
+    MNU_INSERT_OSR = gtk_menu_item_new_with_label("Insert OSR (One Shot Rising)");
+    MNU_INSERT_OSF = gtk_menu_item_new_with_label("Insert OSF (One Shot Falling)");
+    MNU_INSERT_TON = gtk_menu_item_new_with_label("Insert TON (Delayed Turn On)");
+    MNU_INSERT_TOF = gtk_menu_item_new_with_label("Insert TOF (Delayed Turn Off)");
+    MNU_INSERT_RTO = gtk_menu_item_new_with_label("Insert RTO (Retentive Delayed Turn On)");
+    MNU_INSERT_CTU = gtk_menu_item_new_with_label("Insert CTU (Count Up)");
+    MNU_INSERT_CTD = gtk_menu_item_new_with_label("Insert CTD (Count Down)");
+    MNU_INSERT_CTC = gtk_menu_item_new_with_label("Insert CTC (Count Circular)");
+    MNU_INSERT_EQU = gtk_menu_item_new_with_label("Insert EQU (Compare for Equals)");
+    MNU_INSERT_NEQ = gtk_menu_item_new_with_label("Insert NEQ (Compare for Not Equals)");
+    MNU_INSERT_GRT = gtk_menu_item_new_with_label("Insert GRT (Compare for Greater Than)");
+    MNU_INSERT_GEQ = gtk_menu_item_new_with_label("Insert GEQ (Compare for Greater Than or Equal)");
+    MNU_INSERT_LES = gtk_menu_item_new_with_label("Insert LES (Compare for Less Than)");
+    MNU_INSERT_LEQ = gtk_menu_item_new_with_label("Insert LEQ (Compare for Less Than or Equal)");
+    MNU_INSERT_OPEN = gtk_menu_item_new_with_label("Insert Open Circuit");
+    MNU_INSERT_SHORT = gtk_menu_item_new_with_label("Insert Short Circuit");
+    MNU_INSERT_MASTER_RLY = gtk_menu_item_new_with_label("Insert Master Control Relay");
+    MNU_INSERT_COIL = gtk_menu_item_new_with_label("Insert Coil");
+    MNU_INSERT_RES = gtk_menu_item_new_with_label("Insert RES (Counter/RTO Reset)");
+    MNU_INSERT_MOV = gtk_menu_item_new_with_label("Insert MOV (Move)");
+    MNU_INSERT_ADD = gtk_menu_item_new_with_label("Insert ADD (16-bit Integer Ad)");
+    MNU_INSERT_SUB = gtk_menu_item_new_with_label("Insert SUB (16-bit Integer Subtract)");
+    MNU_INSERT_MUL = gtk_menu_item_new_with_label("Insert MUL (16-bit Integer Multiply)");
+    MNU_INSERT_DIV = gtk_menu_item_new_with_label("Insert DIV (16-bit Integer Division)");
+    MNU_INSERT_SHIFT_REG = gtk_menu_item_new_with_label("Insert Shift Register");
+    MNU_INSERT_LUT = gtk_menu_item_new_with_label("Insert Look-Up Table");
+    MNU_INSERT_PWL = gtk_menu_item_new_with_label("Insert Piecewise Linear");
+    MNU_INSERT_FMTD_STR = gtk_menu_item_new_with_label("Insert Formatted String Over UART");
+    MNU_INSERT_UART_SEND = gtk_menu_item_new_with_label("Insert UART Send");
+    MNU_INSERT_UART_RECV = gtk_menu_item_new_with_label("Insert UART Receive");
+    MNU_INSERT_SET_PWM = gtk_menu_item_new_with_label("Insert Set PWM Output");
+    MNU_INSERT_READ_ADC = gtk_menu_item_new_with_label("Insert A/D Converter Read");
+    MNU_INSERT_PERSIST = gtk_menu_item_new_with_label("Insert Make Persistent");
+    MNU_MAKE_NORMAL = gtk_menu_item_new_with_label("Make Normal");
+    MNU_NEGATE = gtk_menu_item_new_with_label("Make Negated");
+    MNU_MAKE_SET_ONLY = gtk_menu_item_new_with_label("Make Set-Only");
+    MNU_MAKE_RESET_ONLY = gtk_menu_item_new_with_label("Make Reset-Only");
 
-  // Packing the menu bar into the box for alignment
-  gtk_box_pack_start(GTK_BOX(menu_box), menu_bar, FALSE, FALSE, 0);
+    // Appending menu items to Instruction menu and adding separators
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_INSERT_COMMENT);
+    InstructionMenuSeparator = gtk_separator_menu_item_new();
+    gtk_menu_shell_append (GTK_MENU_SHELL(InstructionMenu), InstructionMenuSeparator);
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_INSERT_CONTACTS);
+    InstructionMenuSeparator = gtk_separator_menu_item_new();
+    gtk_menu_shell_append (GTK_MENU_SHELL(InstructionMenu), InstructionMenuSeparator);
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_INSERT_OSR);
+    InstructionMenuSeparator = gtk_separator_menu_item_new();
+    gtk_menu_shell_append (GTK_MENU_SHELL(InstructionMenu), InstructionMenuSeparator);
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_INSERT_OSF);
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_INSERT_TON);
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_INSERT_TOF);
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_INSERT_RTO);
+    InstructionMenuSeparator = gtk_separator_menu_item_new();
+    gtk_menu_shell_append (GTK_MENU_SHELL(InstructionMenu), InstructionMenuSeparator);
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_INSERT_CTU);
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_INSERT_CTD);
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_INSERT_CTC);
+    InstructionMenuSeparator = gtk_separator_menu_item_new();
+    gtk_menu_shell_append (GTK_MENU_SHELL(InstructionMenu), InstructionMenuSeparator);
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_INSERT_EQU);
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_INSERT_NEQ);
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_INSERT_GRT);
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_INSERT_GEQ);
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_INSERT_LES);
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_INSERT_LEQ);
+    InstructionMenuSeparator = gtk_separator_menu_item_new();
+    gtk_menu_shell_append (GTK_MENU_SHELL(InstructionMenu), InstructionMenuSeparator);
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_INSERT_OPEN);
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_INSERT_SHORT);
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_INSERT_MASTER_RLY);
+    InstructionMenuSeparator = gtk_separator_menu_item_new();
+    gtk_menu_shell_append (GTK_MENU_SHELL(InstructionMenu), InstructionMenuSeparator);
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_INSERT_COIL);
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_INSERT_RES);
+    InstructionMenuSeparator = gtk_separator_menu_item_new();
+    gtk_menu_shell_append (GTK_MENU_SHELL(InstructionMenu), InstructionMenuSeparator);
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_INSERT_MOV);
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_INSERT_ADD);
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_INSERT_SUB);
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_INSERT_MUL);
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_INSERT_DIV);
+    InstructionMenuSeparator = gtk_separator_menu_item_new();
+    gtk_menu_shell_append (GTK_MENU_SHELL(InstructionMenu), InstructionMenuSeparator);
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_INSERT_SHIFT_REG);
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_INSERT_LUT);
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_INSERT_PWL);
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_INSERT_FMTD_STR);
+    InstructionMenuSeparator = gtk_separator_menu_item_new();
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), InstructionMenuSeparator);
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_INSERT_UART_SEND);
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_INSERT_UART_RECV);
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_INSERT_SET_PWM);
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_INSERT_READ_ADC);
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_INSERT_PERSIST);
+    InstructionMenuSeparator = gtk_separator_menu_item_new();
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), InstructionMenuSeparator);
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_MAKE_NORMAL);
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_NEGATE);
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_MAKE_SET_ONLY);
+    gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_MAKE_RESET_ONLY);
 
-  return menu_box;
+    // Creating labels for Simulation Menu
+    MNU_COMPILE = gtk_menu_item_new_with_label("Compile");
+    MNU_COMPILE_AS = gtk_menu_item_new_with_label("Compile As...");
+
+    // Appending menu items to Compile menu
+    gtk_menu_shell_append(GTK_MENU_SHELL (compile), MNU_COMPILE);
+    gtk_menu_shell_append(GTK_MENU_SHELL (compile), MNU_COMPILE_AS);
+
+    // Creating labels for Simulation Menu
+    MNU_MANUAL = gtk_menu_item_new_with_label("Manual...");
+    MNU_ABOUT = gtk_menu_item_new_with_label("About...");
+
+    // Appending menu items to Help menu
+    gtk_menu_shell_append(GTK_MENU_SHELL (help), MNU_MANUAL);
+    gtk_menu_shell_append(GTK_MENU_SHELL (help), MNU_ABOUT);
+
+    // Creating labels for Simulation Menu
+    MNU_SIMULATION_MODE = gtk_check_menu_item_new_with_label("Simulation Mode");
+    MNU_START_SIMULATION = gtk_menu_item_new_with_label("Start Real-Time Simulation");
+    MNU_STOP_SIMULATION = gtk_menu_item_new_with_label("Halt Simulation");
+    MNU_SINGLE_CYCLE = gtk_menu_item_new_with_label("Single Cycle");
+    MNU_ADV_SIMULATION = gtk_menu_item_new_with_label("Advanced Simulation");
+
+    // Appending menu items to Simulate menu and adding separators
+    gtk_menu_shell_append(GTK_MENU_SHELL (SimulateMenu), MNU_SIMULATION_MODE);
+    gtk_menu_shell_append(GTK_MENU_SHELL (SimulateMenu), MNU_START_SIMULATION);
+    gtk_menu_shell_append(GTK_MENU_SHELL (SimulateMenu), MNU_STOP_SIMULATION);
+    gtk_menu_shell_append(GTK_MENU_SHELL (SimulateMenu), MNU_SINGLE_CYCLE);
+    SimulateMenuSeparator = gtk_separator_menu_item_new();
+    gtk_menu_shell_append(GTK_MENU_SHELL(SimulateMenu), SimulateMenuSeparator);
+    gtk_menu_shell_append(GTK_MENU_SHELL (SimulateMenu), MNU_ADV_SIMULATION);
+
+    // Creating submenus for each menu  
+    gtk_menu_item_set_submenu(GTK_MENU_ITEM(FileLabel), FileMenu);
+    gtk_menu_item_set_submenu(GTK_MENU_ITEM(EditLabel), EditMenu);
+    gtk_menu_item_set_submenu(GTK_MENU_ITEM(SettingsLabel), settings);
+    gtk_menu_item_set_submenu(GTK_MENU_ITEM(InstructionLabel), InstructionMenu);
+    gtk_menu_item_set_submenu(GTK_MENU_ITEM(SimulateLabel), SimulateMenu);
+    gtk_menu_item_set_submenu(GTK_MENU_ITEM(CompileLabel), compile);
+    gtk_menu_item_set_submenu(GTK_MENU_ITEM(HelpLabel), help);
+
+    // Appending the menu item to the menu bar
+    gtk_menu_shell_append(GTK_MENU_SHELL(TopMenu), FileLabel);
+    gtk_menu_shell_append(GTK_MENU_SHELL(TopMenu), EditLabel);
+    gtk_menu_shell_append(GTK_MENU_SHELL(TopMenu), SettingsLabel);
+    gtk_menu_shell_append(GTK_MENU_SHELL(TopMenu), InstructionLabel);
+    gtk_menu_shell_append(GTK_MENU_SHELL(TopMenu), SimulateLabel);
+    gtk_menu_shell_append(GTK_MENU_SHELL(TopMenu), CompileLabel);
+    gtk_menu_shell_append(GTK_MENU_SHELL(TopMenu), HelpLabel);
+
+    // Packing the menu bar into the box for alignment
+    gtk_box_pack_start(GTK_BOX(MenuBox), TopMenu, FALSE, FALSE, 0);
+
+    return MenuBox;
 }
 
 //-----------------------------------------------------------------------------
@@ -688,9 +819,14 @@ void RefreshControlsToSettings(void)
 void GenerateIoListDontLoseSelection(void)
 {
     int i;
+    GtkTreeIter* iter;
+    GtkTreeModel **IoListPtr = (GtkTreeModel**)GTK_TREE_MODEL (IoList);
+    gtk_tree_selection_set_mode(gtk_tree_view_get_selection(GTK_TREE_VIEW(view)),
+                                    GTK_SELECTION_SINGLE);
     IoListSelectionPoint = -1;
     for(i = 0; i < Prog.io.count; i++) {
-        if(ListView_GetItemState(IoList, i, LVIS_SELECTED)) {
+        if(gtk_tree_selection_get_selected (gtk_tree_view_get_selection(GTK_TREE_VIEW(view)),
+                                        IoListPtr, iter)) {
             IoListSelectionPoint = i;
             break;
         }

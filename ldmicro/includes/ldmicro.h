@@ -28,6 +28,8 @@
 typedef signed short SWORD;
 typedef signed long SDWORD;
 
+// #include "linuxUI.h"
+
 //-----------------------------------------------
 // `Configuration options.'
 
@@ -38,84 +40,87 @@ typedef signed long SDWORD;
 #define FONT_WIDTH   7
 #define FONT_HEIGHT 13
 
+// Timer IDs associated with the main window.
+#define TIMER_BLINK_CURSOR      1
+#define TIMER_SIMULATE          2
 
 //-----------------------------------------------
 // Constants for the GUI. We have drop-down menus, a listview for the I/Os,
 // etc.
 
 // Menu IDs
+extern HMENU MNU_NEW;
+extern HMENU MNU_OPEN;
+extern HMENU MNU_SAVE;
+extern HMENU MNU_SAVE_AS;
+extern HMENU MNU_EXPORT;
+extern HMENU MNU_EXIT;
 
-#define MNU_NEW                 0x01
-#define MNU_OPEN                0x02
-#define MNU_SAVE                0x03
-#define MNU_SAVE_AS             0x04
-#define MNU_EXPORT              0x05
-#define MNU_EXIT                0x06
+extern HMENU MNU_UNDO;
+extern HMENU MNU_REDO;
+extern HMENU MNU_PUSH_RUNG_UP;
+extern HMENU MNU_PUSH_RUNG_DOWN;
+extern HMENU MNU_INSERT_RUNG_BEFORE;
+extern HMENU MNU_INSERT_RUNG_AFTER;
+extern HMENU MNU_DELETE_ELEMENT;
+extern HMENU MNU_DELETE_RUNG;
 
-#define MNU_UNDO                0x10
-#define MNU_REDO                0x11
-#define MNU_PUSH_RUNG_UP        0x12
-#define MNU_PUSH_RUNG_DOWN      0x13
-#define MNU_INSERT_RUNG_BEFORE  0x14
-#define MNU_INSERT_RUNG_AFTER   0x15
-#define MNU_DELETE_ELEMENT      0x16
-#define MNU_DELETE_RUNG         0x17
+extern HMENU MNU_INSERT_COMMENT;
+extern HMENU MNU_INSERT_CONTACTS;
+extern HMENU MNU_INSERT_COIL;
+extern HMENU MNU_INSERT_TON;
+extern HMENU MNU_INSERT_TOF;
+extern HMENU MNU_INSERT_RTO;
+extern HMENU MNU_INSERT_RES;
+extern HMENU MNU_INSERT_OSR;
+extern HMENU MNU_INSERT_OSF;
+extern HMENU MNU_INSERT_CTU;
+extern HMENU MNU_INSERT_CTD;
+extern HMENU MNU_INSERT_CTC;
+extern HMENU MNU_INSERT_ADD;
+extern HMENU MNU_INSERT_SUB;
+extern HMENU MNU_INSERT_MUL;
+extern HMENU MNU_INSERT_DIV;
+extern HMENU MNU_INSERT_MOV;
+extern HMENU MNU_INSERT_READ_ADC;
+extern HMENU MNU_INSERT_SET_PWM;
+extern HMENU MNU_INSERT_UART_SEND;
+extern HMENU MNU_INSERT_UART_RECV;
+extern HMENU MNU_INSERT_EQU;
+extern HMENU MNU_INSERT_NEQ;
+extern HMENU MNU_INSERT_GRT;
+extern HMENU MNU_INSERT_GEQ;
+extern HMENU MNU_INSERT_LES;
+extern HMENU MNU_INSERT_LEQ;
+extern HMENU MNU_INSERT_OPEN;
+extern HMENU MNU_INSERT_SHORT;
+extern HMENU MNU_INSERT_MASTER_RLY;
+extern HMENU MNU_INSERT_SHIFT_REG;
+extern HMENU MNU_INSERT_LUT;
+extern HMENU MNU_INSERT_FMTD_STR;
+extern HMENU MNU_INSERT_PERSIST;
+extern HMENU MNU_MAKE_NORMAL;
+extern HMENU MNU_NEGATE;
+extern HMENU MNU_MAKE_SET_ONLY;
+extern HMENU MNU_MAKE_RESET_ONLY;
+extern HMENU MNU_INSERT_PWL;
 
-#define MNU_INSERT_COMMENT      0x20
-#define MNU_INSERT_CONTACTS     0x21
-#define MNU_INSERT_COIL         0x22
-#define MNU_INSERT_TON          0x23
-#define MNU_INSERT_TOF          0x24
-#define MNU_INSERT_RTO          0x25
-#define MNU_INSERT_RES          0x26
-#define MNU_INSERT_OSR          0x27
-#define MNU_INSERT_OSF          0x28
-#define MNU_INSERT_CTU          0x29
-#define MNU_INSERT_CTD          0x2a
-#define MNU_INSERT_CTC          0x2b
-#define MNU_INSERT_ADD          0x2c
-#define MNU_INSERT_SUB          0x2d
-#define MNU_INSERT_MUL          0x2e
-#define MNU_INSERT_DIV          0x2f
-#define MNU_INSERT_MOV          0x30
-#define MNU_INSERT_READ_ADC     0x31
-#define MNU_INSERT_SET_PWM      0x32
-#define MNU_INSERT_UART_SEND    0x33
-#define MNU_INSERT_UART_RECV    0x34
-#define MNU_INSERT_EQU          0x35
-#define MNU_INSERT_NEQ          0x36
-#define MNU_INSERT_GRT          0x37
-#define MNU_INSERT_GEQ          0x38
-#define MNU_INSERT_LES          0x39
-#define MNU_INSERT_LEQ          0x3a
-#define MNU_INSERT_OPEN         0x3b
-#define MNU_INSERT_SHORT        0x3c
-#define MNU_INSERT_MASTER_RLY   0x3d
-#define MNU_INSERT_SHIFT_REG    0x3e
-#define MNU_INSERT_LUT          0x3f
-#define MNU_INSERT_FMTD_STR     0x40
-#define MNU_INSERT_PERSIST      0x41
-#define MNU_MAKE_NORMAL         0x42
-#define MNU_NEGATE              0x43
-#define MNU_MAKE_SET_ONLY       0x44
-#define MNU_MAKE_RESET_ONLY     0x45
-#define MNU_INSERT_PWL          0x46
+extern HMENU MNU_MCU_SETTINGS;
+extern HMENU MNU_PROCESSOR_0;
 
-#define MNU_MCU_SETTINGS        0x50
-#define MNU_PROCESSOR_0         0xa0
+extern HMENU MNU_SIMULATION_MODE;
+extern HMENU MNU_START_SIMULATION;
+extern HMENU MNU_STOP_SIMULATION;
+extern HMENU MNU_SINGLE_CYCLE;
 
-#define MNU_SIMULATION_MODE     0x60
-#define MNU_START_SIMULATION    0x61
-#define MNU_STOP_SIMULATION     0x62
-#define MNU_SINGLE_CYCLE        0x63
+extern HMENU MNU_COMPILE;
+extern HMENU MNU_COMPILE_AS;
 
-#define MNU_COMPILE             0x70
-#define MNU_COMPILE_AS          0x71
+extern HMENU MNU_MANUAL;
+extern HMENU MNU_ABOUT;
 
-#define MNU_MANUAL              0x80
-#define MNU_ABOUT               0x81
+extern HMENU MNU_ADV_SIMULATION;
 
-#define MNU_ADV_SIMULATION      0x82
 
 // Columns within the I/O etc. listview.
 #define LV_IO_NAME              0x00
@@ -123,11 +128,6 @@ typedef signed long SDWORD;
 #define LV_IO_STATE             0x02
 #define LV_IO_PIN               0x03
 #define LV_IO_PORT              0x04
-
-// Timer IDs associated with the main window.
-#define TIMER_BLINK_CURSOR      1
-#define TIMER_SIMULATE          2
-
 //-----------------------------------------------
 // Data structures for the actual ladder logic. A rung on the ladder
 // is a series subcircuit. A series subcircuit contains elements or
@@ -507,16 +507,17 @@ typedef struct McuIoInfoTag {
 
 // ldmicro.cpp
 void ProgramChanged(void);
+*/
 void SetMenusEnabled(BOOL canNegate, BOOL canNormal, BOOL canResetOnly,
     BOOL canSetOnly, BOOL canDelete, BOOL canInsertEnd, BOOL canInsertOther,
     BOOL canPushRungDown, BOOL canPushRungUp, BOOL canInsertComment);
+/*
 void SetUndoEnabled(BOOL undoEnabled, BOOL redoEnabled);
 void RefreshScrollbars(void);
 extern HINSTANCE Instance;*/
 extern HWID MainWindow;
-/*
 extern HDC Hdc;
-extern PlcProgram Prog;*/
+extern PlcProgram Prog;
 extern char CurrentSaveFile[MAX_PATH];
 // extern char CurrentCompileFile[MAX_PATH];
 extern McuIoInfo SupportedMcus[NUM_SUPPORTED_MCUS];

@@ -1,8 +1,5 @@
 #include "linuxUI.h"
 
-/// Menu Variables
- HWID  window;
-
 /// EnableMenuItem Variables
 const UINT MF_ENABLED = 0;
 const UINT MF_GRAYED = 1;

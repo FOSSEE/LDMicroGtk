@@ -1,0 +1,15 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "/home/rohit/Rohit/Personal/Internships/Fossee/LDMicro-linux-1"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"hash_map": "cpp"
+		}
+	}
+}

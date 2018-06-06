@@ -30,7 +30,7 @@
 #include "ldmicro.h"
 
 // Menu IDs
- HMENU MNU_NEW;
+HMENU MNU_NEW;
 HMENU MNU_OPEN;
 HMENU MNU_SAVE;
 HMENU MNU_SAVE_AS;
@@ -122,7 +122,7 @@ static HMENU        TopMenu;
 
 // listview used to maintain the list of I/O pins with symbolic names, plus
 // the internal relay too
-HWND                IoList;
+HLIST               IoList;
 static int          IoListSelectionPoint;
 static BOOL         IoListOutOfSync;
 int                 IoListHeight;
@@ -346,14 +346,7 @@ HMENU MakeMainWindowMenus(void)
     HWID  CompileLabel;                                             // Compile menu label
     HWID  HelpLabel;                                                // Help menu label
     HWID  SimulateLabel;                                            // Simulate menu label
-    // HMENU  file_menu_items;                                      // File menu item
-    // HMENU  edit_menu_items;                                      // Edit menu item
-    // HMENU  instruction_menu_items;                               // Instruction menu item
-    // HMENU  settings_menu_items;                                  // Settings menu item
     HMENU ProcessorMenuItems;                                       // Processor menu items
-    // HMENU  compile_menu_items;                                   // Compile menu item
-    // HMENU  help_menu_items;                                      // Help menu item
-    // HMENU  simulate_menu_items;                                  // Simulate menu item
     HMENU  FileMenuSeparator;                                       // File menu separator
     HMENU  EditMenuSeparator;                                       // Edit menu separator
     HMENU  InstructionMenuSeparator;                                // Instruction menu separator
@@ -639,104 +632,6 @@ void RefreshScrollbars(void)
 }
 
 //-----------------------------------------------------------------------------
-// Respond to a WM_VSCROLL sent to the main window, presumably by the one and
-// only vertical scrollbar that it has as a child.
-//-----------------------------------------------------------------------------
-void VscrollProc(WPARAM wParam)
-{
-    int prevY = ScrollYOffset;
-    switch(LOWORD(wParam)) {
-        case SB_LINEUP:
-        case SB_PAGEUP:
-            if(ScrollYOffset > 0) {
-                ScrollYOffset--;
-            }
-            break;
-
-        case SB_LINEDOWN:
-        case SB_PAGEDOWN:
-            if(ScrollYOffset < ScrollYOffsetMax) {
-                ScrollYOffset++;
-            }
-            break;
-
-        case SB_TOP:
-            ScrollYOffset = 0;
-            break;
-
-        case SB_BOTTOM:
-            ScrollYOffset = ScrollYOffsetMax;
-            break;
-
-        case SB_THUMBTRACK:
-        case SB_THUMBPOSITION:
-            ScrollYOffset = HIWORD(wParam);
-            break;
-    }
-    if(prevY != ScrollYOffset) {
-        SCROLLINFO si;
-        si.cbSize = sizeof(si);
-        si.fMask = SIF_POS;
-        si.nPos = ScrollYOffset;
-        SetScrollInfo(VertScrollBar, SB_CTL, &si, TRUE);
-
-        InvalidateRect(MainWindow, NULL, FALSE);
-    }
-}
-
-//-----------------------------------------------------------------------------
-// Respond to a WM_HSCROLL sent to the main window, presumably by the one and
-// only horizontal scrollbar that it has as a child.
-//-----------------------------------------------------------------------------
-void HscrollProc(WPARAM wParam)
-{
-    int prevX = ScrollXOffset;
-    switch(LOWORD(wParam)) {
-        case SB_LINEUP:
-            ScrollXOffset -= FONT_WIDTH;
-            break;
-
-        case SB_PAGEUP:
-            ScrollXOffset -= POS_WIDTH*FONT_WIDTH;
-            break;
-
-        case SB_LINEDOWN:
-            ScrollXOffset += FONT_WIDTH;
-            break;
-
-        case SB_PAGEDOWN:
-            ScrollXOffset += POS_WIDTH*FONT_WIDTH;
-            break;
-
-        case SB_TOP:
-            ScrollXOffset = 0;
-            break;
-
-        case SB_BOTTOM:
-            ScrollXOffset = ScrollXOffsetMax;
-            break;
-
-        case SB_THUMBTRACK:
-        case SB_THUMBPOSITION:
-            ScrollXOffset = HIWORD(wParam);
-            break;
-    }
-
-    if(ScrollXOffset > ScrollXOffsetMax) ScrollXOffset = ScrollXOffsetMax;
-    if(ScrollXOffset < 0) ScrollXOffset = 0;
-
-    if(prevX != ScrollXOffset) {
-        SCROLLINFO si;
-        si.cbSize = sizeof(si);
-        si.fMask = SIF_POS;
-        si.nPos = ScrollXOffset;
-        SetScrollInfo(HorizScrollBar, SB_CTL, &si, TRUE);
-
-        InvalidateRect(MainWindow, NULL, FALSE);
-    }
-}
-
-//-----------------------------------------------------------------------------
 // Cause the status bar and the list view to be in sync with the actual data
 // structures describing the settings and the I/O configuration. Listview
 // does callbacks to get the strings it displays, so it just needs to know
@@ -744,72 +639,7 @@ void HscrollProc(WPARAM wParam)
 //-----------------------------------------------------------------------------
 void RefreshControlsToSettings(void)
 {
-    int i;
 
-    if(!IoListOutOfSync) {
-        IoListSelectionPoint = -1;
-        for(i = 0; i < Prog.io.count; i++) {
-            if(ListView_GetItemState(IoList, i, LVIS_SELECTED)) {
-                IoListSelectionPoint = i;
-                break;
-            }
-        }
-    }
-
-    ListView_DeleteAllItems(IoList);
-    for(i = 0; i < Prog.io.count; i++) {
-        LVITEM lvi;
-        lvi.mask        = LVIF_TEXT | LVIF_PARAM | LVIF_STATE;
-        lvi.state       = lvi.stateMask = 0;
-        lvi.iItem       = i;
-        lvi.iSubItem    = 0;
-        lvi.pszText     = LPSTR_TEXTCALLBACK;
-        lvi.lParam      = i;
-
-        if(ListView_InsertItem(IoList, &lvi) < 0) oops();
-    }
-    if(IoListSelectionPoint >= 0) {
-        for(i = 0; i < Prog.io.count; i++) {
-            ListView_SetItemState(IoList, i, 0, LVIS_SELECTED);
-        }
-        ListView_SetItemState(IoList, IoListSelectionPoint, LVIS_SELECTED,
-            LVIS_SELECTED);
-        ListView_EnsureVisible(IoList, IoListSelectionPoint, FALSE);
-    }
-    IoListOutOfSync = FALSE;
-
-    if(Prog.mcu) {
-        SendMessage(StatusBar, SB_SETTEXT, 0, (LPARAM)Prog.mcu->mcuName);
-    } else {
-        SendMessage(StatusBar, SB_SETTEXT, 0, (LPARAM)_("no MCU selected"));
-    }
-    char buf[256];
-    sprintf(buf, _("cycle time %.2f ms"), (double)Prog.cycleTime/1000.0);
-    SendMessage(StatusBar, SB_SETTEXT, 1, (LPARAM)buf);
-
-    if(Prog.mcu && (Prog.mcu->whichIsa == ISA_ANSIC ||
-        Prog.mcu->whichIsa == ISA_INTERPRETED))
-    {
-        strcpy(buf, "");
-    } else {
-        sprintf(buf, _("processor clock %.4f MHz"),
-            (double)Prog.mcuClock/1000000.0);
-    }
-    SendMessage(StatusBar, SB_SETTEXT, 2, (LPARAM)buf);
-
-    for(i = 0; i < NUM_SUPPORTED_MCUS; i++) {
-        if(&SupportedMcus[i] == Prog.mcu) {
-            CheckMenuItem(ProcessorMenu, MNU_PROCESSOR_0+i, MF_CHECKED);
-        } else {
-            CheckMenuItem(ProcessorMenu, MNU_PROCESSOR_0+i, MF_UNCHECKED);
-        }
-    }
-    // `(no microcontroller)' setting
-    if(!Prog.mcu) {
-        CheckMenuItem(ProcessorMenu, MNU_PROCESSOR_0+i, MF_CHECKED);
-    } else {
-        CheckMenuItem(ProcessorMenu, MNU_PROCESSOR_0+i, MF_UNCHECKED);
-    }
 }
 
 //-----------------------------------------------------------------------------
@@ -836,40 +666,6 @@ void GenerateIoListDontLoseSelection(void)
     // new selection point might be out of range till we refill it
     IoListOutOfSync = TRUE;
     RefreshControlsToSettings();
-}
-
-//-----------------------------------------------------------------------------
-// Called when the main window has been resized. Adjust the size of the
-// status bar and the listview to reflect the new window size.
-//-----------------------------------------------------------------------------
-void MainWindowResized(void)
-{
-    RECT main;
-    GetClientRect(MainWindow, &main);
-
-    RECT status;
-    GetWindowRect(StatusBar, &status);
-    int statusHeight = status.bottom - status.top;
-
-    MoveWindow(StatusBar, 0, main.bottom - statusHeight, main.right,
-        statusHeight, TRUE);
-
-    // Make sure that the I/O list can't disappear entirely.
-    if(IoListHeight < 30) {
-        IoListHeight = 30;
-    }
-    IoListTop = main.bottom - IoListHeight - statusHeight;
-    // Make sure that we can't drag the top of the I/O list above the
-    // bottom of the menu bar, because it then becomes inaccessible.
-    if(IoListTop < 5) {
-        IoListHeight = main.bottom - statusHeight - 5;
-        IoListTop = main.bottom - IoListHeight - statusHeight;
-    }
-    MoveWindow(IoList, 0, IoListTop, main.right, IoListHeight, TRUE);
-
-    RefreshScrollbars();
-
-    InvalidateRect(MainWindow, NULL, FALSE);
 }
 
 //-----------------------------------------------------------------------------

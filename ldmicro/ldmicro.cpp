@@ -1048,126 +1048,140 @@ static BOOL MakeWindowClass()
     return RegisterClassEx(&wc);
 }
 
+int main (int argc, char *argv[])
+{
+    GtkApplication *app;
+    int status;
+  
+    app = gtk_application_new ("org.gtk.new", G_APPLICATION_FLAGS_NONE);
+    g_signal_connect (app, "activate", G_CALLBACK (Activate_App), NULL);
+    status = g_application_run (G_APPLICATION (app), argc, argv);
+
+    g_object_unref (app);
+
+    return status;
+}
+
 //-----------------------------------------------------------------------------
 // Entry point into the program.
 //-----------------------------------------------------------------------------
-int main(int argc, char** argv)
-{
-    // Check if we're running in non-interactive mode; in that case we should
-    // load the file, compile, and exit.
-    if(argc >= 2) {
-        RunningInBatchMode = TRUE;
+// int main(int argc, char** argv)
+// {
+//     // Check if we're running in non-interactive mode; in that case we should
+//     // load the file, compile, and exit.
+//     if(argc >= 2) {
+//         RunningInBatchMode = TRUE;
 
-        char *err =
-            "Bad command line arguments: run 'ldmicro /c src.ld dest.hex'";
+//         char *err =
+//             "Bad command line arguments: run 'ldmicro /c src.ld dest.hex'";
 
-        char *source = lpCmdLine + 2;
-        while(isspace(*source)) {
-            source++;
-        }
-        if(*source == '\0') { Error(err); exit(-1); }
-        char *dest = source;
-        while(!isspace(*dest) && *dest) {
-            dest++;
-        }
-        if(*dest == '\0') { Error(err); exit(-1); }
-        *dest = '\0'; dest++;
-        while(isspace(*dest)) {
-            dest++;
-        }
-        if(*dest == '\0') { Error(err); exit(-1); }
-        if(!LoadProjectFromFile(source)) {
-            Error("Couldn't open '%s', running non-interactively.", source);
-            exit(-1);
-        }
-        strcpy(CurrentCompileFile, dest);
-        GenerateIoList(-1);
-        CompileProgram(FALSE); /// Requires an open dialog to get file name
-        exit(0);
-    }
+//         char *source = lpCmdLine + 2;
+//         while(isspace(*source)) {
+//             source++;
+//         }
+//         if(*source == '\0') { Error(err); exit(-1); }
+//         char *dest = source;
+//         while(!isspace(*dest) && *dest) {
+//             dest++;
+//         }
+//         if(*dest == '\0') { Error(err); exit(-1); }
+//         *dest = '\0'; dest++;
+//         while(isspace(*dest)) {
+//             dest++;
+//         }
+//         if(*dest == '\0') { Error(err); exit(-1); }
+//         if(!LoadProjectFromFile(source)) {
+//             Error("Couldn't open '%s', running non-interactively.", source);
+//             exit(-1);
+//         }
+//         strcpy(CurrentCompileFile, dest);
+//         GenerateIoList(-1);
+//         CompileProgram(FALSE); /// Requires an open dialog to get file name
+//         exit(0);
+//     }
 
-    Instance = hInstance;
+//     Instance = hInstance;
 
-    MainHeap = HeapCreate(0, 1024*64, 0);
+//     MainHeap = HeapCreate(0, 1024*64, 0);
 
-    // MakeWindowClass();
-    // MakeDialogBoxClass();
-    // MakeAdvancedDialogClass();
-    // MakeAdvancedWorkspaceClass();
-    // MakeComponentListClass();
-    // MakeSmplDialogClass();
-    // MakeNamingListClass();
-    HMENU top = MakeMainWindowMenus();
+//     // MakeWindowClass();
+//     // MakeDialogBoxClass();
+//     // MakeAdvancedDialogClass();
+//     // MakeAdvancedWorkspaceClass();
+//     // MakeComponentListClass();
+//     // MakeSmplDialogClass();
+//     // MakeNamingListClass();
+//     HMENU top = MakeMainWindowMenus();
 
-    /// Make main window
-    // MainWindow = CreateWindowEx(0, "LDmicro", "",
-    //     WS_OVERLAPPED | WS_THICKFRAME | WS_CLIPCHILDREN | WS_MAXIMIZEBOX |
-    //     WS_MINIMIZEBOX | WS_SYSMENU | WS_SIZEBOX,
-    //     10, 10, 800, 600, NULL, top, Instance, NULL);
-    ThawWindowPos(MainWindow);
-    IoListHeight = 100;
-    ThawDWORD(IoListHeight);
+//     /// Make main window
+//     // MainWindow = CreateWindowEx(0, "LDmicro", "",
+//     //     WS_OVERLAPPED | WS_THICKFRAME | WS_CLIPCHILDREN | WS_MAXIMIZEBOX |
+//     //     WS_MINIMIZEBOX | WS_SYSMENU | WS_SIZEBOX,
+//     //     10, 10, 800, 600, NULL, top, Instance, NULL);
+//     ThawWindowPos(MainWindow);
+//     IoListHeight = 100;
+//     ThawDWORD(IoListHeight);
 
-    InitCommonControls();
-    InitForDrawing();
+//     InitCommonControls();
+//     InitForDrawing();
 
-    MakeMainWindowControls();
-    MainWindowResized();
-    NewProgram();
-    strcpy(CurrentSaveFile, "");
+//     MakeMainWindowControls();
+//     MainWindowResized();
+//     NewProgram();
+//     strcpy(CurrentSaveFile, "");
 
-    // We are running interactively, or we would already have exited. We
-    // can therefore show the window now, and otherwise set up the GUI.
+//     // We are running interactively, or we would already have exited. We
+//     // can therefore show the window now, and otherwise set up the GUI.
 
-    ShowWindow(MainWindow, SW_SHOW);
-    SetTimer(MainWindow, TIMER_BLINK_CURSOR, 800, BlinkCursor);
+//     ShowWindow(MainWindow, SW_SHOW);
+//     SetTimer(MainWindow, TIMER_BLINK_CURSOR, 800, BlinkCursor);
     
-    if(strlen(lpCmdLine) > 0) {
-        char line[MAX_PATH];
-        if(*lpCmdLine == '"') { 
-            strcpy(line, lpCmdLine+1);
-        } else {
-            strcpy(line, lpCmdLine);
-        }
-        if(strchr(line, '"')) *strchr(line, '"') = '\0';
+//     if(strlen(lpCmdLine) > 0) {
+//         char line[MAX_PATH];
+//         if(*lpCmdLine == '"') { 
+//             strcpy(line, lpCmdLine+1);
+//         } else {
+//             strcpy(line, lpCmdLine);
+//         }
+//         if(strchr(line, '"')) *strchr(line, '"') = '\0';
 
-        char *s;
-        GetFullPathName(line, sizeof(CurrentSaveFile), CurrentSaveFile, &s);
-        if(!LoadProjectFromFile(CurrentSaveFile)) {
-            NewProgram();
-            Error(_("Couldn't open '%s'."), CurrentSaveFile);
-            CurrentSaveFile[0] = '\0';
-        }
-        UndoFlush();
-    }
+//         char *s;
+//         GetFullPathName(line, sizeof(CurrentSaveFile), CurrentSaveFile, &s);
+//         if(!LoadProjectFromFile(CurrentSaveFile)) {
+//             NewProgram();
+//             Error(_("Couldn't open '%s'."), CurrentSaveFile);
+//             CurrentSaveFile[0] = '\0';
+//         }
+//         UndoFlush();
+//     }
 
-    GenerateIoListDontLoseSelection();
-    RefreshScrollbars();
-    UpdateMainWindowTitleBar();
+//     GenerateIoListDontLoseSelection();
+//     RefreshScrollbars();
+//     UpdateMainWindowTitleBar();
 
-    MSG msg;
-    DWORD ret;
-    while(ret = GetMessage(&msg, NULL, 0, 0)) {
-        if(msg.hwnd == IoList && msg.message == WM_KEYDOWN) {
-            if(msg.wParam == VK_TAB) {
-                SetFocus(MainWindow);
-                continue;
-            }
-        }
-        if(msg.message == WM_KEYDOWN && msg.wParam != VK_UP &&
-            msg.wParam != VK_DOWN && msg.wParam != VK_RETURN && msg.wParam
-            != VK_SHIFT)
-        {
-            if(msg.hwnd == IoList) {
-                msg.hwnd = MainWindow;
-                SetFocus(MainWindow);
-            }
-        }
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-    }
-    FreezeWindowPos(MainWindow);
-    FreezeDWORD(IoListHeight);
+//     MSG msg;
+//     DWORD ret;
+//     while(ret = GetMessage(&msg, NULL, 0, 0)) {
+//         if(msg.hwnd == IoList && msg.message == WM_KEYDOWN) {
+//             if(msg.wParam == VK_TAB) {
+//                 SetFocus(MainWindow);
+//                 continue;
+//             }
+//         }
+//         if(msg.message == WM_KEYDOWN && msg.wParam != VK_UP &&
+//             msg.wParam != VK_DOWN && msg.wParam != VK_RETURN && msg.wParam
+//             != VK_SHIFT)
+//         {
+//             if(msg.hwnd == IoList) {
+//                 msg.hwnd = MainWindow;
+//                 SetFocus(MainWindow);
+//             }
+//         }
+//         TranslateMessage(&msg);
+//         DispatchMessage(&msg);
+//     }
+//     FreezeWindowPos(MainWindow);
+//     FreezeDWORD(IoListHeight);
 
-    return 0;
-}
+//     return 0;
+// }

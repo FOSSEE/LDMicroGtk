@@ -526,7 +526,7 @@ extern McuIoInfo SupportedMcus[NUM_SUPPORTED_MCUS];
 // heap used for all the program storage is not yet corrupt, and oops() if
 // it is
 void CheckHeap(char *file, int line);
-#define ok() CheckHeap(__FILE__, __LINE__)
+#define ok() CheckHeap(__FILE__, __LINE__)*/
 
 // maincontrols.cpp
 void MakeMainWindowControls(void);
@@ -543,10 +543,11 @@ void UpdateMainWindowTitleBar(void);
 extern int ScrollWidth;
 extern int ScrollHeight;
 extern BOOL NeedHoriz;
-extern HWND IoList;
+extern HLIST IoList;
 extern int IoListTop;
 extern int IoListHeight;
 
+/*
 // draw.cpp
 int ProgCountWidestRow(void);
 int CountHeightOfElement(int which, void *elem);

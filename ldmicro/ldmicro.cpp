@@ -1082,10 +1082,11 @@ int main(int argc, char** argv)
         }
         strcpy(CurrentCompileFile, dest);
         GenerateIoList(-1);
-        CompileProgram(FALSE); /// Requires an open dialog to get file name
+        CompileProgram(FALSE);
         exit(0);
     }
 
+    /// ~~~
     Instance = hInstance;
 
     MainHeap = HeapCreate(0, 1024*64, 0);

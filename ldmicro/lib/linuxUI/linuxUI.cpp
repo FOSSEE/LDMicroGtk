@@ -1,43 +1,18 @@
 #include "linuxUI.h"
 
 /// Menu Variables
-HWID window;
-HWID menu_box;                                              // Box for alignment
-HWID packed_menu_box;                                       // Stores the packed box
-HWID FileMenu;                                              // File Menu
-HWID EditMenu;                                              // Edit Menu
-HWID settings;                                              // Settings Menu
-HWID ProcessorMenu;                                         // Processor Menu
-HWID InstructionMenu;                                       // Instruction Menu
-HWID compile;                                               // Compile Menu
-HWID help;                                                  // Help Menu
-HWID SimulateMenu;                                          // Simulate Menu
-HWID menu_bar;                                              // Menu Bar
-HWID file_label;                                            // File menu label
-HWID edit_label;                                            // Edit menu label
-HWID instruction_label;                                     // Instruction menu label
-HWID settings_label;                                        // Settings menu label
-HWID compile_label;                                         // Compile menu label
-HWID help_label;                                            // Help menu label
-HWID simulate_label;                                        // Simulate menu label
-HWID file_menu_items;                                       // File menu item
-HWID edit_menu_items;                                       // Edit menu item
-HWID instruction_menu_items;                                // Instruction menu item
-HWID settings_menu_items;                                   // Settings menu item
-HWID processor_menu_items;                                  // Processor menu items
-HWID compile_menu_items;                                    // Compile menu item
-HWID help_menu_items;                                       // Help menu item
-HWID simulate_menu_items;                                   // Simulate menu item
-HWID file_menu_separator;                                   // File menu separator
-HWID edit_menu_separator;                                   // Edit menu separator
-HWID instruction_menu_separator;                            // Instruction menu separator
-HWID simulate_menu_separator;                               // Simulate menu separator
+ HWID  window;
 
-//Scrollbars for the ladder logic area 
-int ScrollWidth;                                             // Width of scrolling
-int ScrollHeight;                                            // Height of scrolling
-HWID IoList;                                                 // Window for list view
+/// EnableMenuItem Variables
+const UINT MF_ENABLED = 0;
+const UINT MF_GRAYED = 1;
+const UINT MF_CHECKED = 2;
+const UINT MF_UNCHECKED = 3;
 
+/// ListStore
+GtkWidget* view;
+GtkTreeViewColumn* column;
+ 
 /// Wraper function for gtk_window_has_toplevel_focus
 BOOL isFocus(HWID window)
 {
@@ -178,4 +153,26 @@ BOOL GetSaveFileName(OPENFILENAME *ofn)
     //g_print("exit\n");
 
     return exitStatus;
+}
+
+void EnableMenuItem(HMENU MenuName, HMENU MenuItem, UINT CheckEnabledItem) {
+    switch (CheckEnabledItem){
+        case MF_ENABLED :
+           gtk_widget_set_sensitive (MenuItem, true);
+        break;
+        case MF_GRAYED :
+           gtk_widget_set_sensitive (MenuItem, false);
+        break; 
+    }
+}
+
+void CheckMenuItem(HMENU MenuName, HMENU MenuItem, UINT Check){
+    switch (Check){
+        case MF_CHECKED :
+            gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM(MenuItem), true);
+        break;
+        case MF_UNCHECKED :
+            gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM(MenuItem), false);
+        break;
+    }
 }

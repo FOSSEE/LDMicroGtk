@@ -34,6 +34,15 @@
 #define OFN_HIDEREADONLY 0x00000200L
 #define OFN_OVERWRITEPROMPT 0x00000400L
 
+/// EnableMenuItem variables
+extern const UINT MF_ENABLED;
+extern const UINT MF_GRAYED;
+extern const UINT MF_CHECKED;
+extern const UINT MF_UNCHECKED;
+
+/// ListStore
+extern GtkWidget* view;
+extern GtkTreeViewColumn* column;
 
 /// data types
 typedef struct OpenFileInfoData {
@@ -52,5 +61,7 @@ BOOL isFocus(HWID);
 COLORREF RGB(int, int, int);
 int MessageBox(HWID, char*, char*, UINT);
 BOOL GetSaveFileName(OPENFILENAME* );
+void EnableMenuItem(HMENU, HMENU, UINT);
+void CheckMenuItem(HMENU, HMENU, UINT);
 
 #endif

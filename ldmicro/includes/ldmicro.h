@@ -518,9 +518,9 @@ extern HWID MainWindow;
 extern HDC Hdc;
 extern PlcProgram Prog;
 extern char CurrentSaveFile[MAX_PATH];
-// extern char CurrentCompileFile[MAX_PATH];
+extern char CurrentCompileFile[MAX_PATH];
 extern McuIoInfo SupportedMcus[NUM_SUPPORTED_MCUS];
-/*
+
 // memory debugging, because I often get careless; ok() will check that the
 // heap used for all the program storage is not yet corrupt, and oops() if
 // it is
@@ -666,16 +666,6 @@ void ShowContactsDialog(BOOL *negated, char *name);
 // coildialog.cpp
 void ShowCoilDialog(BOOL *negated, BOOL *setOnly, BOOL *resetOnly, char *name);
 
-//advanceddialog.cpp
-void ShowAdvancedDialog(void);
-void MakeAdvancedDialogClass(void);
-void MakeAdvancedWorkspaceClass(void);
-void TranslateState(char *name, BOOL state);
-void MCUPinState(char *name, BOOL state);
-void StartAdvSimulation(void);
-void StopAdvSimulation(void);
-extern BOOL AdvancedWindowOpen;
-
 //naminglist.cpp
 void   MakeSmplDialogClass(void);
 
@@ -749,9 +739,9 @@ void SimulationResetContact(char* name);
 void SetAdcShadow(char *name, SWORD val);
 SWORD GetAdcShadow(char *name);
 void DestroyUartSimulationWindow(void);
-void ShowUartSimulationWindow(void);*/
+void ShowUartSimulationWindow(void);
 extern BOOL InSimulationMode;
-/*extern BOOL SimulateRedrawAfterNextCycle;
+extern BOOL SimulateRedrawAfterNextCycle;
 
 // compilecommon.cpp
 void AllocStart(void);

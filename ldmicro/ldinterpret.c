@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
 #include <stdio.h>
 #include <ctype.h>
-#include <windows.h>
+#include "linuxUI.h"
 
 #define INTCODE_H_CONSTANTS_ONLY
 #include "intcode.h"

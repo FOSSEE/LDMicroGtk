@@ -21,9 +21,9 @@
 // encourage people to write it the way it will look on the diagram.
 // Jonathan Westhues, Jun 2005
 //-----------------------------------------------------------------------------
-#include <windows.h>
+#include <linuxUI.h>
 #include <stdio.h>
-#include <commctrl.h>
+//#include <commctrl.h>
 
 #include "ldmicro.h"
 

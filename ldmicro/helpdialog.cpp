@@ -23,10 +23,10 @@
 // colours.
 // Jonathan Westhues, Dec 2004
 //-----------------------------------------------------------------------------
-#include <windows.h>
+#include "linuxUI.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <commctrl.h>
+//#include <commctrl.h>
 #include <richedit.h>
 
 #include "ldmicro.h"

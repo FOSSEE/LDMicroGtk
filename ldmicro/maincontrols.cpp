@@ -100,8 +100,6 @@ HMENU MNU_COMPILE_AS;
 HMENU MNU_MANUAL;
 HMENU MNU_ABOUT;
 
-HMENU MNU_ADV_SIMULATION;
-
 // scrollbars for the ladder logic area
 // static HWND         HorizScrollBar;
 // static HWND         VertScrollBar;
@@ -569,7 +567,6 @@ HMENU MakeMainWindowMenus(void)
     MNU_START_SIMULATION = gtk_menu_item_new_with_label("Start Real-Time Simulation");
     MNU_STOP_SIMULATION = gtk_menu_item_new_with_label("Halt Simulation");
     MNU_SINGLE_CYCLE = gtk_menu_item_new_with_label("Single Cycle");
-    MNU_ADV_SIMULATION = gtk_menu_item_new_with_label("Advanced Simulation");
 
     // Appending menu items to Simulate menu and adding separators
     gtk_menu_shell_append(GTK_MENU_SHELL (SimulateMenu), MNU_SIMULATION_MODE);
@@ -578,7 +575,6 @@ HMENU MakeMainWindowMenus(void)
     gtk_menu_shell_append(GTK_MENU_SHELL (SimulateMenu), MNU_SINGLE_CYCLE);
     SimulateMenuSeparator = gtk_separator_menu_item_new();
     gtk_menu_shell_append(GTK_MENU_SHELL(SimulateMenu), SimulateMenuSeparator);
-    gtk_menu_shell_append(GTK_MENU_SHELL (SimulateMenu), MNU_ADV_SIMULATION);
 
     // Creating submenus for each menu  
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(FileLabel), FileMenu);

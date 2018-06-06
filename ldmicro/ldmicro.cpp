@@ -31,7 +31,6 @@
 #include "ldmicro.h"
 #include "freezeLD.h"
 #include "mcutable.h"
-#include "advanceddialog.h"
 
 
 HINSTANCE   Instance;
@@ -279,11 +278,6 @@ static void CompileProgram(BOOL compileAs)
 //     ProgramChangedNotSaved = TRUE;
 //     GenerateIoListDontLoseSelection();
 //     RefreshScrollbars();
-//     if(AdvancedWindowOpen)
-//     {
-//         FlushPinNames();
-//         PopulateNamingList();
-//     }
 // }
 // #define CHANGING_PROGRAM(x) { \
 //         UndoRemember(); \
@@ -556,17 +550,14 @@ static void CompileProgram(BOOL compileAs)
 
 //         case MNU_SIMULATION_MODE:
 //             ToggleSimulationMode();
-//             ToggleAdvancedSimulationMode();
 //             break;
 
 //         case MNU_START_SIMULATION:
 //             StartSimulation();
-//             StartAdvSimulation();
 //             break;
 
 //         case MNU_STOP_SIMULATION:
 //             StopSimulation();
-//             StopAdvSimulation();
 //             break;
 
 //         case MNU_SINGLE_CYCLE:
@@ -588,9 +579,6 @@ static void CompileProgram(BOOL compileAs)
 //         case MNU_ABOUT:
 //             ShowHelpDialog(TRUE);
 //             break;
-
-//         case MNU_ADV_SIMULATION:
-//             ShowAdvancedDialog();
 //     }
 // }
 
@@ -645,7 +633,6 @@ static void CompileProgram(BOOL compileAs)
 //             if(wParam == 'M') {
 //                 if(GetAsyncKeyState(VK_CONTROL) & 0x8000) {
 //                     ToggleSimulationMode();
-//                     ToggleAdvancedSimulationMode();
 //                     break;
 //                 }
 //             } else if(wParam == VK_TAB) {
@@ -657,13 +644,6 @@ static void CompileProgram(BOOL compileAs)
 //                 break;
 //             }
 
-//             if(wParam == 'A') {
-//                 if(GetAsyncKeyState(VK_CONTROL) & 0x8000) {
-//                     ShowAdvancedDialog();
-//                     break;
-//                 }
-//             }
-
 //             if(InSimulationMode) {
 //                 switch(wParam) {
 //                     case ' ':
@@ -673,13 +653,11 @@ static void CompileProgram(BOOL compileAs)
 //                     case 'R':
 //                         if(GetAsyncKeyState(VK_CONTROL) & 0x8000)
 //                             StartSimulation();
-//                             StartAdvSimulation();
 //                         break;
 
 //                     case 'H':
 //                         if(GetAsyncKeyState(VK_CONTROL) & 0x8000)
 //                             StopSimulation();
-//                             StopAdvSimulation();
 //                         break;
 
 //                     case VK_DOWN:
@@ -718,6 +696,7 @@ static void CompileProgram(BOOL compileAs)
 //                 }
 //                 break;
 //             }
+
 
 //             switch(wParam) {
 //                 case VK_F5:
@@ -1015,6 +994,7 @@ static void CompileProgram(BOOL compileAs)
 
 //             PostQuitMessage(0);
 //             return 1;
+
 //         default:
 //             return DefWindowProc(hwnd, msg, wParam, lParam);
 //     }
@@ -1121,8 +1101,6 @@ int main(int argc, char** argv)
 
     // // MakeWindowClass();
     // // MakeDialogBoxClass();
-    // // MakeAdvancedDialogClass();
-    // // MakeAdvancedWorkspaceClass();
     // // MakeComponentListClass();
     // // MakeSmplDialogClass();
     // // MakeNamingListClass();

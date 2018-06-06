@@ -14,19 +14,25 @@
 
 /// Flags
 /// message box
-#define MB_OK 0x00000000L
-#define MB_OKCANCEL 0x00000001L
+#define MB_OK 0x00000001L
+#define MB_OKCANCEL 0x00000002L
 #define MB_YESNO 0x00000004L
+#define MB_YESNOCANCEL 0x00000008L
+
+#define IDOK 1
+#define IDCANCEL 2
+#define IDYES 3
+#define IDNO 4
 
 #define MB_ICONERROR 0x00000010L
 #define MB_ICONQUESTION 0x00000020L
-#define MB_ICONWARNING 0x00000030L
-#define MB_ICONINFORMATION 0x00000040L
+#define MB_ICONWARNING 0x00000040L
+#define MB_ICONINFORMATION 0x00000080L
 
 /// open/save file
-#define OFN_PATHMUSTEXIST 0x00000800
-#define OFN_HIDEREADONLY 0x00000004
-#define OFN_OVERWRITEPROMPT 0x00000002
+#define OFN_PATHMUSTEXIST 0x00000100L
+#define OFN_HIDEREADONLY 0x00000200L
+#define OFN_OVERWRITEPROMPT 0x00000400L
 
 /// EnableMenuItem variables
 extern const UINT MF_ENABLED;
@@ -53,7 +59,7 @@ typedef struct OpenFileInfoData {
 /// functions
 BOOL isFocus(HWID);
 COLORREF RGB(int, int, int);
-void MessageBox(HWID, char*, char*, UINT);
+int MessageBox(HWID, char*, char*, UINT);
 BOOL GetSaveFileName(OPENFILENAME* );
 void EnableMenuItem(HMENU, HMENU, UINT);
 void CheckMenuItem(HMENU, HMENU, UINT);

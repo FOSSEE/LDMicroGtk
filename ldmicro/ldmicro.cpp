@@ -1059,6 +1059,7 @@ int main (int argc, char *argv[])
 
     g_object_unref (app);
 
+<<<<<<< HEAD
     return status;
 }
 
@@ -1135,6 +1136,69 @@ int main (int argc, char *argv[])
 
 //     ShowWindow(MainWindow, SW_SHOW);
 //     SetTimer(MainWindow, TIMER_BLINK_CURSOR, 800, BlinkCursor);
+=======
+        char *source = lpCmdLine + 2;
+        while(isspace(*source)) {
+            source++;
+        }
+        if(*source == '\0') { Error(err); exit(-1); }
+        char *dest = source;
+        while(!isspace(*dest) && *dest) {
+            dest++;
+        }
+        if(*dest == '\0') { Error(err); exit(-1); }
+        *dest = '\0'; dest++;
+        while(isspace(*dest)) {
+            dest++;
+        }
+        if(*dest == '\0') { Error(err); exit(-1); }
+        if(!LoadProjectFromFile(source)) {
+            Error("Couldn't open '%s', running non-interactively.", source);
+            exit(-1);
+        }
+        strcpy(CurrentCompileFile, dest);
+        GenerateIoList(-1);
+        CompileProgram(FALSE);
+        exit(0);
+    }
+
+    /// ~~~
+    Instance = hInstance;
+
+    MainHeap = HeapCreate(0, 1024*64, 0);
+
+    // MakeWindowClass();
+    // MakeDialogBoxClass();
+    // MakeAdvancedDialogClass();
+    // MakeAdvancedWorkspaceClass();
+    // MakeComponentListClass();
+    // MakeSmplDialogClass();
+    // MakeNamingListClass();
+    HMENU top = MakeMainWindowMenus();
+
+    /// Make main window
+    // MainWindow = CreateWindowEx(0, "LDmicro", "",
+    //     WS_OVERLAPPED | WS_THICKFRAME | WS_CLIPCHILDREN | WS_MAXIMIZEBOX |
+    //     WS_MINIMIZEBOX | WS_SYSMENU | WS_SIZEBOX,
+    //     10, 10, 800, 600, NULL, top, Instance, NULL);
+    ThawWindowPos(MainWindow);
+    IoListHeight = 100;
+    ThawDWORD(IoListHeight);
+
+    InitCommonControls();
+    InitForDrawing();
+
+    MakeMainWindowControls();
+    MainWindowResized();
+    NewProgram();
+    strcpy(CurrentSaveFile, "");
+
+    // We are running interactively, or we would already have exited. We
+    // can therefore show the window now, and otherwise set up the GUI.
+
+    ShowWindow(MainWindow, SW_SHOW);
+    SetTimer(MainWindow, TIMER_BLINK_CURSOR, 800, BlinkCursor);
+>>>>>>> 42f0b6abf37b6afc278a218b8301b7d4f1f6b2cc
     
 //     if(strlen(lpCmdLine) > 0) {
 //         char line[MAX_PATH];

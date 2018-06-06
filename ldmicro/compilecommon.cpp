@@ -20,7 +20,7 @@
 // Routines common to the code generators for all processor architectures.
 // Jonathan Westhues, Nov 2004
 //-----------------------------------------------------------------------------
-#include <windows.h>
+#include <linuxUI.h>
 #include <stdio.h>
 #include <stdlib.h>
 

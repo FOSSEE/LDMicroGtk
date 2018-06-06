@@ -22,7 +22,7 @@
 // for interpretation.
 // Jonathan Westhues, Aug 2005
 //-----------------------------------------------------------------------------
-#include <windows.h>
+#include "linuxUI.h"
 #include <stdio.h>
 #include <setjmp.h>
 #include <stdlib.h>

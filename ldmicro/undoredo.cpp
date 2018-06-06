@@ -22,7 +22,7 @@
 // the entire program at all times.
 // Jonathan Westhues, split May 2005
 //-----------------------------------------------------------------------------
-#include <windows.h>
+#include "linuxUI.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -198,9 +198,9 @@ void UndoUndo(void)
     } else {
         SetUndoEnabled(FALSE, TRUE);
     }
-    RefreshControlsToSettings(); 
-    RefreshScrollbars();
-    InvalidateRect(MainWindow, NULL, FALSE);
+   // RefreshControlsToSettings(); 
+   // RefreshScrollbars();
+   // InvalidateRect(MainWindow, NULL, FALSE);
 }
 
 //-----------------------------------------------------------------------------
@@ -221,9 +221,9 @@ void UndoRedo(void)
     } else {
         SetUndoEnabled(TRUE, FALSE);
     }
-    RefreshControlsToSettings(); 
-    RefreshScrollbars();
-    InvalidateRect(MainWindow, NULL, FALSE);
+    //RefreshControlsToSettings(); 
+    //RefreshScrollbars();
+    //InvalidateRect(MainWindow, NULL, FALSE);
 }
 
 //-----------------------------------------------------------------------------

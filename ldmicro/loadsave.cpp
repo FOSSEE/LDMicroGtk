@@ -20,7 +20,7 @@
 // Load/save the circuit from/to a file in a nice ASCII format.
 // Jonathan Westhues, Nov 2004
 //-----------------------------------------------------------------------------
-#include <windows.h>
+#include "linuxUI.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -62,12 +62,10 @@ static BOOL LoadLeafFromFile(char *line, void **any, int *which)
         }
         l->d.comment.str[i++] = '\0';
         *which = ELEM_COMMENT;
-    } else if(sscanf(line, "CONTACTS %s %d", l->d.contacts.name, 
-        &l->d.contacts.negated)==2)
+    } else if(sscanf(line, "CONTACTS %s %d", l->d.contacts.name, &l->d.contacts.negated)==2)
     {
         *which = ELEM_CONTACTS;
-    } else if(sscanf(line, "COIL %s %d %d %d", l->d.coil.name,
-        &l->d.coil.negated, &l->d.coil.setOnly, &l->d.coil.resetOnly)==4)
+    } else if(sscanf(line, "COIL %s %d %d %d", l->d.coil.name, &l->d.coil.negated, &l->d.coil.setOnly, &l->d.coil.resetOnly)==4)
     {
         *which = ELEM_COIL;
     } else if(memcmp(line, "PLACEHOLDER", 11)==0) {
@@ -78,56 +76,45 @@ static BOOL LoadLeafFromFile(char *line, void **any, int *which)
         *which = ELEM_OPEN;
     } else if(memcmp(line, "MASTER_RELAY", 12)==0) {
         *which = ELEM_MASTER_RELAY;
-    } else if(sscanf(line, "SHIFT_REGISTER %s %d", l->d.shiftRegister.name,
-        &(l->d.shiftRegister.stages))==2)
+    } else if(sscanf(line, "SHIFT_REGISTER %s %d", l->d.shiftRegister.name, &(l->d.shiftRegister.stages))==2)
     {
         *which = ELEM_SHIFT_REGISTER;
     } else if(memcmp(line, "OSR", 3)==0) {
         *which = ELEM_ONE_SHOT_RISING;
     } else if(memcmp(line, "OSF", 3)==0) {
         *which = ELEM_ONE_SHOT_FALLING;
-    } else if((sscanf(line, "TON %s %d", l->d.timer.name,
-        &l->d.timer.delay)==2))
+    } else if((sscanf(line, "TON %s %d", l->d.timer.name, &l->d.timer.delay)==2))
     {
         *which = ELEM_TON;
-    } else if((sscanf(line, "TOF %s %d", l->d.timer.name,
-        &l->d.timer.delay)==2))
+    } else if((sscanf(line, "TOF %s %d", l->d.timer.name, &l->d.timer.delay)==2))
     {
         *which = ELEM_TOF;
-    } else if((sscanf(line, "RTO %s %d", l->d.timer.name,
-        &l->d.timer.delay)==2))
+    } else if((sscanf(line, "RTO %s %d", l->d.timer.name, &l->d.timer.delay)==2))
     {
         *which = ELEM_RTO;
-    } else if((sscanf(line, "CTD %s %d", l->d.counter.name,
-        &l->d.counter.max)==2))
+    } else if((sscanf(line, "CTD %s %d", l->d.counter.name, &l->d.counter.max)==2))
     {
         *which = ELEM_CTD;
-    } else if((sscanf(line, "CTU %s %d", l->d.counter.name,
-        &l->d.counter.max)==2))
+    } else if((sscanf(line, "CTU %s %d", l->d.counter.name, &l->d.counter.max)==2))
     {
         *which = ELEM_CTU;
-    } else if((sscanf(line, "CTC %s %d", l->d.counter.name,
-        &l->d.counter.max)==2))
+    } else if((sscanf(line, "CTC %s %d", l->d.counter.name, &l->d.counter.max)==2))
     {
         *which = ELEM_CTC;
     } else if(sscanf(line, "RES %s", l->d.reset.name)==1) {
         *which = ELEM_RES;
     } else if(sscanf(line, "MOVE %s %s", l->d.move.dest, l->d.move.src)==2) {
         *which = ELEM_MOVE;
-    } else if(sscanf(line, "ADD %s %s %s", l->d.math.dest, l->d.math.op1,
-        l->d.math.op2)==3)
+    } else if(sscanf(line, "ADD %s %s %s", l->d.math.dest, l->d.math.op1, l->d.math.op2)==3)
     {
         *which = ELEM_ADD;
-    } else if(sscanf(line, "SUB %s %s %s", l->d.math.dest, l->d.math.op1,
-        l->d.math.op2)==3)
+    } else if(sscanf(line, "SUB %s %s %s", l->d.math.dest, l->d.math.op1, l->d.math.op2)==3)
     {
         *which = ELEM_SUB;
-    } else if(sscanf(line, "MUL %s %s %s", l->d.math.dest, l->d.math.op1,
-        l->d.math.op2)==3)
+    } else if(sscanf(line, "MUL %s %s %s", l->d.math.dest, l->d.math.op1, l->d.math.op2)==3)
     {
         *which = ELEM_MUL;
-    } else if(sscanf(line, "DIV %s %s %s", l->d.math.dest, l->d.math.op1,
-        l->d.math.op2)==3)
+    } else if(sscanf(line, "DIV %s %s %s", l->d.math.dest, l->d.math.op1, l->d.math.op2)==3)
     {
         *which = ELEM_DIV;
     } else if(sscanf(line, "EQU %s %s", l->d.cmp.op1, l->d.cmp.op2)==2) {
@@ -144,8 +131,7 @@ static BOOL LoadLeafFromFile(char *line, void **any, int *which)
         *which = ELEM_LES;
     } else if(sscanf(line, "READ_ADC %s", l->d.readAdc.name)==1) {
         *which = ELEM_READ_ADC;
-    } else if(sscanf(line, "SET_PWM %s %d", l->d.setPwm.name, 
-        &(l->d.setPwm.targetFreq))==2)
+    } else if(sscanf(line, "SET_PWM %s %d", l->d.setPwm.name, &(l->d.setPwm.targetFreq))==2)
     {
         *which = ELEM_SET_PWM;
     } else if(sscanf(line, "UART_RECV %s", l->d.uart.name)==1) {
@@ -154,8 +140,7 @@ static BOOL LoadLeafFromFile(char *line, void **any, int *which)
         *which = ELEM_UART_SEND;
     } else if(sscanf(line, "PERSIST %s", l->d.persist.var)==1) {
         *which = ELEM_PERSIST;
-    } else if(sscanf(line, "FORMATTED_STRING %s %d", l->d.fmtdStr.var, 
-        &x)==2)
+    } else if(sscanf(line, "FORMATTED_STRING %s %d", l->d.fmtdStr.var, &x)==2)
     {
         if(strcmp(l->d.fmtdStr.var, "(none)")==0) {
             strcpy(l->d.fmtdStr.var, "");
@@ -228,6 +213,7 @@ static BOOL LoadLeafFromFile(char *line, void **any, int *which)
         return FALSE;
     }
     *any = l;
+
     return TRUE;
 }
 
@@ -283,16 +269,23 @@ static ElemSubcktSeries *LoadSeriesFromFile(FILE *f)
     int which;
 
     ElemSubcktSeries *ret = AllocSubcktSeries();
+
     int cnt = 0;
     
     for(;;) {
+
         if(!fgets(line, sizeof(line), f)) return NULL;
+
         char *s = line;
+        
+
         while(isspace(*s)) s++;
 
         if(strcmp(s, "PARALLEL\n")==0) {
+
             which = ELEM_PARALLEL_SUBCKT;
             any = LoadParallelFromFile(f);
+
             if(!any) return NULL;
 
         } else if(LoadLeafFromFile(s, &any, &which)) {
@@ -303,9 +296,11 @@ static ElemSubcktSeries *LoadSeriesFromFile(FILE *f)
         } else {
             return NULL;
         }
+
         ret->contents[cnt].which = which;
         ret->contents[cnt].d.any = any;
         cnt++;
+
         if(cnt >= MAX_ELEMENTS_IN_SUBCKT) return NULL;
     }
 }
@@ -364,10 +359,14 @@ BOOL LoadProjectFromFile(char *filename)
     int rung;
     for(rung = 0;;) {
         if(!fgets(line, sizeof(line), f)) break;
+
         if(strcmp(line, "RUNG\n")!=0) goto failed;
 
         Prog.rungs[rung] = LoadSeriesFromFile(f);
-        if(!Prog.rungs[rung]) goto failed;
+
+        if(!Prog.rungs[rung]) 
+            goto failed;
+
         rung++;
     }
     Prog.numRungs = rung;

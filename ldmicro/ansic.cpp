@@ -22,7 +22,7 @@
 // responsible for calling us with appropriate timing.
 // Jonathan Westhues, Oct 2004
 //-----------------------------------------------------------------------------
-#include <windows.h>
+#include "linuxUI.h"
 #include <stdio.h>
 #include <setjmp.h>
 #include <stdlib.h>

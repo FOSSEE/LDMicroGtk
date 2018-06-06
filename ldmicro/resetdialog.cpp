@@ -21,9 +21,9 @@
 // which can be that of either a timer or a counter.
 // Jonathan Westhues, Nov 2004
 //-----------------------------------------------------------------------------
-#include <windows.h>
+#include "linuxUI.h"
 #include <stdio.h>
-#include <commctrl.h>
+//#include <commctrl.h>
 
 #include "ldmicro.h"
 

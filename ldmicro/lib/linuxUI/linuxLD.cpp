@@ -15,7 +15,7 @@ HANDLE HeapCreate(DWORD  flOptions, SIZE_T dwInitialSize, SIZE_T dwMaximumSize)
     hHeapRecord.dwSize = dwInitialSize;
     hHeapRecord.hHeap = hHeap;
     hHeapRecord.dwAllocatedSizeOffset = 0;
-    hHeapRecord.HeapID = hHeapRecords.size()+1;
+    hHeapRecord.HeapID = HeapRecords.size()+1;
     HeapRecords.push_back(hHeapRecord);
 
     return hHeap;
@@ -23,6 +23,13 @@ HANDLE HeapCreate(DWORD  flOptions, SIZE_T dwInitialSize, SIZE_T dwMaximumSize)
 
 LPVOID HeapAlloc(HANDLE hHeap, DWORD  dwFlags, SIZE_T dwBytes)
 {
+    if (hHeap == NULL)
+    {
+        printf("Alloc**********NULL HEAP***************\n");
+        LPVOID p = malloc(dwBytes);
+        return p;
+    }
+
     auto it = std::find_if(HeapRecords.begin(), HeapRecords.end(),  [&hHeap](HEAPRECORD &Record) { return Record.hHeap == hHeap; });
     
     if (it == HeapRecords.end())
@@ -40,9 +47,13 @@ LPVOID HeapAlloc(HANDLE hHeap, DWORD  dwFlags, SIZE_T dwBytes)
 
     /// HEAP_ZERO_MEMORY is set by default
     DWORD flags = MAP_ANONYMOUS;
-    if ( (dwFlags & HEAP_ZERO_MEMORY) == HEAP_ZERO_MEMORY)
-        flags = MAP_ANONYMOUS | MAP_UNINITIALIZED;
-    //void * memset ( void * ptr, int value, size_t num );
+
+    // if ( !((dwFlags & HEAP_ZERO_MEMORY) == HEAP_ZERO_MEMORY) )
+    //     flags = MAP_ANONYMOUS | MAP_UNINITIALIZED;
+
+    /* Use for setting a meamory chunck with some value
+     * void * memset ( void * ptr, int value, size_t num );
+    */
     LPVOID p = mmap(hHeap + (*it).dwAllocatedSizeOffset, dwBytes, PROT_EXEC, flags, -1, 0);
 
     if (p == NULL)
@@ -59,15 +70,22 @@ LPVOID HeapAlloc(HANDLE hHeap, DWORD  dwFlags, SIZE_T dwBytes)
 
 BOOL HeapFree(HANDLE hHeap, DWORD  dwFlags, LPVOID lpMem)
 {
+    /// if NULL free()
+    if (hHeap == NULL)
+    {
+        printf("free*********NULL HEAP***************\n");
+        free(lpMem);
+        return TRUE;
+    }
     auto heap_it = std::find_if(HeapRecords.begin(), HeapRecords.end(),  [&hHeap](HEAPRECORD &Record) { return Record.hHeap == hHeap; });
-    
+
     if (heap_it == HeapRecords.end())
-        return NULL;
+        return FALSE;
     
     auto chunck_it = std::find_if((*heap_it).Element.begin(), (*heap_it).Element.end(),  [&lpMem](HEAPCHUNCK &Chunck) { return Chunck.Chunck == lpMem; });
     
     if (chunck_it == (*heap_it).Element.end())
-        return NULL;
+        return FALSE;
     
     int result = munmap((*chunck_it).Chunck, (*chunck_it).dwSize);
 

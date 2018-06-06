@@ -4,6 +4,7 @@
 #include "linuxUI.h"
 #include <vector>
 #include <algorithm>
+#include <sys/mman.h>
 
 /// common windows referances for linux
 

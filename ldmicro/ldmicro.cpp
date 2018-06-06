@@ -1054,16 +1054,13 @@ int main(int argc, char** argv)
 {
     /// Check if we're running in non-interactive mode; in that case we should
     /// load the file, compile, and exit.
-    // printf("argc: %d\n", argc);
-    // printf("arg[0]: %s\n", argv[0]);
-    // printf("arg[1]: %s\n", argv[1]);
-    // printf("Compile command check...\n");
+
     if(argc >= 2) {
         RunningInBatchMode = TRUE;
-        // printf("Compile command check...\n");
+
         char *err =
             "Bad command line arguments: run 'ldmicro /c src.ld dest.hex'";
-        // printf("error line gen...\n");
+
         if (argc < 4)
         { 
             printf("throwing error...\n");
@@ -1073,7 +1070,7 @@ int main(int argc, char** argv)
 
         char *source = (char*)malloc(strlen(argv[2]) + strlen(argv[3]) + 2);
         sprintf(source, "%s %s", argv[2], argv[3]);
-        // printf("check source......\n");
+
         while(isspace(*source)) {
             source++;
         }
@@ -1083,7 +1080,7 @@ int main(int argc, char** argv)
             free(source);
             exit(-1); 
         }
-        // printf("check dest......\n");
+
         char *dest = source;
         while(!isspace(*dest) && *dest) {
             dest++;
@@ -1098,26 +1095,23 @@ int main(int argc, char** argv)
         while(isspace(*dest)) {
             dest++;
         }
-        // printf("Source: %s\n", source);
-        // printf("Dest.: %s\n", dest);
-        // printf("source checked......\n");
-        // printf("dest checked......\n");
+
         if(*dest == '\0') 
         { 
             Error(err); 
             free(source);
             exit(-1); 
         }
-        printf("loading project...\n");
+        
         if(!LoadProjectFromFile(source)) {
             Error("Couldn't open '%s', running non-interactively.\n", source);
             free(source);
             exit(-1);
         }
-    //     strcpy(CurrentCompileFile, dest);
-    //     GenerateIoList(-1);
-    //     CompileProgram(FALSE);
-    //     exit(0);
+        strcpy(CurrentCompileFile, dest);
+        GenerateIoList(-1);
+        CompileProgram(FALSE);
+        exit(0);
     }
 
     // /// ~~~

@@ -160,7 +160,7 @@ void *CheckMalloc(size_t n)
 {
     ok();
     void *p = HeapAlloc(MainHeap, HEAP_ZERO_MEMORY, n);
-    return NULL;
+    return p;
 }
 void CheckFree(void *p)
 {

@@ -24,7 +24,7 @@
 // table. If it fails then it just returns the English.
 // Jonathan Westhues, Apr 2007
 //-----------------------------------------------------------------------------
-#include <windows.h>
+#include "linuxUI.h"
 #include <stdio.h>
 #include <stdlib.h>
 

@@ -25,7 +25,7 @@
 // will not be forgotten. Also the dialog box for assigning I/O pins.
 // Jonathan Westhues, Oct 2004
 //-----------------------------------------------------------------------------
-#include <windows.h>
+#include "linuxUI.h"
 //#include <commctrl.h>
 #include <stdio.h>
 #include <stdlib.h>

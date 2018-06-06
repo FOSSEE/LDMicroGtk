@@ -24,7 +24,7 @@
 // most of the UI logic relating to the main window.
 // Jonathan Westhues, Oct 2004
 //-----------------------------------------------------------------------------
-#include "windows.h"
+#include "linuxUI.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1102,7 +1102,7 @@ int main(int argc, char** argv)
             free(source);
             exit(-1); 
         }
-        
+
         if(!LoadProjectFromFile(source)) {
             Error("Couldn't open '%s', running non-interactively.\n", source);
             free(source);

@@ -22,7 +22,7 @@
 // which is configurable, plus the MCU clock (i.e. crystal frequency).
 // Jonathan Westhues, Nov 2004
 //-----------------------------------------------------------------------------
-#include <windows.h>
+#include <linuxUI.h>
 #include <stdio.h>
 #include <stdlib.h>
 //#include <commctrl.h>

@@ -1,6 +1,6 @@
 
-#include <windows.h>
-#include <commctrl.h>
+#include <linuxUI.h>
+//#include <commctrl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <wincodec.h>

@@ -2,6 +2,7 @@
 #define __LINUX_LD__
 
 #include "linuxUI.h"
+#include <ctype.h>
 #include <vector>
 #include <algorithm>
 #include <sys/mman.h>
@@ -16,16 +17,18 @@
 
 #define HEAP_ZERO_MEMORY 0x00000008
 
-/// typedefs
+/// Typedefs
 //typedef int64_t __int64;
 typedef bool BOOL;
 typedef unsigned char BYTE;
 typedef unsigned short WORD;
 typedef unsigned int DWORD;
+typedef unsigned int UINT;
 typedef size_t SIZE_T;
 typedef long LONG;
 typedef wchar_t WCHAR;
 typedef char CHAR;
+
 typedef CONST WCHAR *LPCWSTR;
 typedef CONST CHAR *LPCSTR; /// should be __nullterminated
 
@@ -44,9 +47,13 @@ typedef CHAR *LPSTR;
  typedef LPSTR LPTSTR;
 #endif
 
-/// all handles will hold a GtkWindow* type
 typedef void *PVOID;
 typedef void *LPVOID;
+typedef PVOID HFONT;
+typedef PVOID HMODULE;
+typedef PVOID HHOOK;
+typedef PVOID HBRUSH;
+typedef PVOID HFONT;
 typedef PVOID HANDLE;
 typedef HANDLE HINSTANCE;
 typedef HANDLE HDC;
@@ -64,9 +71,17 @@ typedef unsigned int UINT_PTR;
 #endif
  
 typedef UINT_PTR WPARAM;
-typedef unsigned int UINT;
 
-/// custom classes
+#if defined(__UNIX64)
+ typedef __int64_t LONG_PTR; 
+#else
+ typedef long LONG_PTR;
+#endif
+
+typedef LONG_PTR LPARAM;
+typedef LONG_PTR LRESULT;
+
+/// Custom classes
 class COLORREF : public GdkRGBA{
     public:
     COLORREF()
@@ -90,6 +105,7 @@ typedef struct HeapRecordChunckTag{
     PVOID Chunck;
     SIZE_T dwSize;
 } HEAPCHUNCK;
+
 typedef struct HeapRecordTag{
     PVOID hHeap;
     DWORD HeapID;
@@ -98,10 +114,27 @@ typedef struct HeapRecordTag{
     SIZE_T dwSize;
     SIZE_T dwAllocatedSizeOffset;
 } HEAPRECORD;
+
+typedef struct tagSCROLLINFO {
+  UINT cbSize;
+  UINT fMask;
+  int  nMin;
+  int  nMax;
+  UINT nPage;
+  int  nPos;
+  int  nTrackPos;
+} SCROLLINFO, *LPCSCROLLINFO;
+
+typedef struct tagNMHDR {
+  HWND     hwndFrom;
+  UINT_PTR idFrom;
+  UINT     code;
+} NMHDR;
+
 /// Variables
 extern std::vector<HEAPRECORD> HeapRecord;
 
-/// functions
+/// Functions
 HANDLE HeapCreate(
     DWORD  flOptions,
     SIZE_T dwInitialSize,
@@ -116,5 +149,9 @@ BOOL HeapFree(
     HANDLE hHeap,
     DWORD  dwFlags,
     LPVOID lpMem);
+
+/// functions to be ported
+void OutputDebugString(char*);
+double GetTickCount(void);
 
 #endif

@@ -21,7 +21,7 @@
 // Actual manipulation of circuit elements happens in circuit.cpp, though.
 // Jonathan Westhues, Oct 2004
 //-----------------------------------------------------------------------------
-#include <windows.h>
+#include "linuxUI.h"
 #include <stdio.h>
 #include <stdlib.h>
 

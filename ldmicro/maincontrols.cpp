@@ -22,7 +22,7 @@
 // scrolling, I/O list, menus.
 // Jonathan Westhues, Nov 2004
 //-----------------------------------------------------------------------------
-#include <windows.h>
+#include "linuxUI.h"
 //#include <commctrl.h>
 //#include <commdlg.h>
 #include <stdio.h>

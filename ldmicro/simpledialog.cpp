@@ -22,8 +22,8 @@
 // operands. Try to reuse code a bit.
 // Jonathan Westhues, Nov 2004
 //-----------------------------------------------------------------------------
-#include <windows.h>
-#include <commctrl.h>
+#include "linuxUI.h"
+//#include <commctrl.h>
 #include <stdio.h>
 #include <stdlib.h>
 

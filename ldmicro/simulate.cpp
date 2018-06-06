@@ -24,7 +24,7 @@
 // timers, etc.
 // Jonathan Westhues, Nov 2004
 //-----------------------------------------------------------------------------
-#include <windows.h>
+#include "linuxUI.h"
 //#include <commctrl.h>
 #include <stdio.h>
 #include <stdlib.h>

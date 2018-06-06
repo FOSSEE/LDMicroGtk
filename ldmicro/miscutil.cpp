@@ -20,7 +20,7 @@
 // Miscellaneous utility functions that don't fit anywhere else. IHEX writing,
 // verified memory allocator, other junk.
 //-----------------------------------------------------------------------------
-#include <windows.h>
+#include "linuxUI.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -65,19 +65,19 @@ void dbp(char *str, ...)
 //-----------------------------------------------------------------------------
 #define ATTACH_PARENT_PROCESS ((DWORD)-1) // defined in WinCon.h, but only if
                                           // _WIN32_WINNT >= 0x500
-BOOL AttachConsoleDynamic(DWORD base)
-{
-    typedef BOOL WINAPI fptr_acd(DWORD base);
-    fptr_acd *fp;
+// BOOL AttachConsoleDynamic(DWORD base)
+// {
+//     typedef BOOL WINAPI fptr_acd(DWORD base);
+//     fptr_acd *fp;
 
-    HMODULE hm = LoadLibrary("kernel32.dll");
-    if(!hm) return FALSE;
+//     HMODULE hm = LoadLibrary("kernel32.dll");
+//     if(!hm) return FALSE;
 
-    fp = (fptr_acd *)GetProcAddress(hm, "AttachConsole");
-    if(!fp) return FALSE;
+//     fp = (fptr_acd *)GetProcAddress(hm, "AttachConsole");
+//     if(!fp) return FALSE;
 
-    return fp(base);
-}
+//     return fp(base);
+// }
 
 //-----------------------------------------------------------------------------
 // For error messages to the user; printf-like, to a message box.
@@ -88,20 +88,19 @@ void Error(char *str, ...)
     char buf[1024];
     va_start(f, str);
     vsprintf(buf, str, f);
+    va_end(f);
     if(RunningInBatchMode) {
+        printf("print batch mode");
         /* Only required for windows
         * AttachConsoleDynamic(ATTACH_PARENT_PROCESS);
         */
         // Indicate that it's an error, plus the output filename
-        printf("compile error ('%s'): ", CurrentCompileFile);
-        // The error message itself
-        printf(buf);
-        // And an extra newline to be safe.
-        strcpy(str, "\n");
-        printf(str);
+        printf("compile error ('%s'): \n", CurrentCompileFile);
+        // The error message itself and an extra newline to be safe.
+        printf("%s\n", buf);
     } else {
-        HWND h = GetForegroundWindow();
-        MessageBox(h, buf, _("LDmicro Error"), MB_OK | MB_ICONERROR);
+        //HWND h = GetForegroundWindow();
+        //MessageBox(h, buf, _("LDmicro Error"), MB_OK | MB_ICONERROR);
     }
 }
 
@@ -113,12 +112,12 @@ void CompileSuccessfulMessage(char *str)
 {
     if(RunningInBatchMode) {
         char str[MAX_PATH+100];
-        sprintf(str, "compiled okay, wrote '%s'\n", CurrentCompileFile);
+        printf("compiled okay, wrote '%s'\n", CurrentCompileFile);
 
-        AttachConsoleDynamic(ATTACH_PARENT_PROCESS);
-        HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
-        DWORD written;
-        WriteFile(h, str, strlen(str), &written, NULL);
+        //AttachConsoleDynamic(ATTACH_PARENT_PROCESS);
+        //HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+        //DWORD written;
+        //riteFile(h, str, strlen(str), &written, NULL);
     } else {
         MessageBox(MainWindow, str, _("Compile Successful"),
             MB_OK | MB_ICONINFORMATION);
@@ -146,11 +145,11 @@ void CheckHeap(char *file, int line)
     SkippedCalls = 0;
     LastCallTime = now;
 
-    if(!HeapValidate(MainHeap, 0, NULL)) {
-        dbp("file %s line %d", file, line);
-        Error("Noticed memory corruption at file '%s' line %d.", file, line);
-        oops();
-    }
+    // if(!HeapValidate(MainHeap, 0, NULL)) {
+    //     dbp("file %s line %d", file, line);
+    //     Error("Noticed memory corruption at file '%s' line %d.", file, line);
+    //     oops();
+    // }
 }
 
 //-----------------------------------------------------------------------------
@@ -207,17 +206,17 @@ HWND CreateWindowClient(DWORD exStyle, char *className, char *windowName,
     DWORD style, int x, int y, int width, int height, HWND parent,
     HMENU menu, HINSTANCE instance, void *param)
 {
-    HWND h = CreateWindowEx(exStyle, className, windowName, style, x, y,
-        width, height, parent, menu, instance, param);
+    // HWND h = CreateWindowEx(exStyle, className, windowName, style, x, y,
+    //     width, height, parent, menu, instance, param);
 
-    RECT r;
-    GetClientRect(h, &r);
-    width = width - (r.right - width);
-    height = height - (r.bottom - height);
+    // RECT r;
+    // GetClientRect(h, &r);
+    // width = width - (r.right - width);
+    // height = height - (r.bottom - height);
     
-    SetWindowPos(h, HWND_TOP, x, y, width, height, 0);
+    // SetWindowPos(h, HWND_TOP, x, y, width, height, 0);
 
-    return h;
+    return NULL;
 }
 
 //-----------------------------------------------------------------------------
@@ -227,30 +226,30 @@ HWND CreateWindowClient(DWORD exStyle, char *className, char *windowName,
 static LRESULT CALLBACK DialogProc(HWND hwnd, UINT msg, WPARAM wParam,
     LPARAM lParam)
 {
-    switch (msg) {
-        case WM_NOTIFY:
-            break;
+    // switch (msg) {
+    //     case WM_NOTIFY:
+    //         break;
 
-        case WM_COMMAND: {
-            HWND h = (HWND)lParam;
-            if(h == OkButton && wParam == BN_CLICKED) {
-                DialogDone = TRUE;
-            } else if(h == CancelButton && wParam == BN_CLICKED) {
-                DialogDone = TRUE;
-                DialogCancel = TRUE;
-            }
-            break;
-        }
+    //     case WM_COMMAND: {
+    //         HWND h = (HWND)lParam;
+    //         if(h == OkButton && wParam == BN_CLICKED) {
+    //             DialogDone = TRUE;
+    //         } else if(h == CancelButton && wParam == BN_CLICKED) {
+    //             DialogDone = TRUE;
+    //             DialogCancel = TRUE;
+    //         }
+    //         break;
+    //     }
 
-        case WM_CLOSE:
-        case WM_DESTROY:
-            DialogDone = TRUE;
-            DialogCancel = TRUE;
-            break;
+    //     case WM_CLOSE:
+    //     case WM_DESTROY:
+    //         DialogDone = TRUE;
+    //         DialogCancel = TRUE;
+    //         break;
 
-        default:
-            return DefWindowProc(hwnd, msg, wParam, lParam);
-    }
+    //     default:
+    //         return DefWindowProc(hwnd, msg, wParam, lParam);
+    // }
 
     return 1;
 }
@@ -262,7 +261,7 @@ static LRESULT CALLBACK DialogProc(HWND hwnd, UINT msg, WPARAM wParam,
 //-----------------------------------------------------------------------------
 void NiceFont(HWND h)
 {
-    SendMessage(h, WM_SETFONT, (WPARAM)MyNiceFont, TRUE);
+//    SendMessage(h, WM_SETFONT, (WPARAM)MyNiceFont, TRUE);
 }
 
 //-----------------------------------------------------------------------------
@@ -271,7 +270,7 @@ void NiceFont(HWND h)
 //-----------------------------------------------------------------------------
 void FixedFont(HWND h)
 {
-    SendMessage(h, WM_SETFONT, (WPARAM)MyFixedFont, TRUE);
+  //  SendMessage(h, WM_SETFONT, (WPARAM)MyFixedFont, TRUE);
 }
 
 //-----------------------------------------------------------------------------
@@ -279,36 +278,36 @@ void FixedFont(HWND h)
 //-----------------------------------------------------------------------------
 void MakeDialogBoxClass(void)
 {
-    WNDCLASSEX wc;
-    memset(&wc, 0, sizeof(wc));
-    wc.cbSize = sizeof(wc);
+    // WNDCLASSEX wc;
+    // memset(&wc, 0, sizeof(wc));
+    // wc.cbSize = sizeof(wc);
 
-    wc.style            = CS_BYTEALIGNCLIENT | CS_BYTEALIGNWINDOW | CS_OWNDC |
-                          CS_DBLCLKS;
-    wc.lpfnWndProc      = (WNDPROC)DialogProc;
-    wc.hInstance        = Instance;
-    wc.hbrBackground    = (HBRUSH)COLOR_BTNSHADOW;
-    wc.lpszClassName    = "LDmicroDialog";
-    wc.lpszMenuName     = NULL;
-    wc.hCursor          = LoadCursor(NULL, IDC_ARROW);
-    wc.hIcon            = (HICON)LoadImage(Instance, MAKEINTRESOURCE(4000),
-                            IMAGE_ICON, 32, 32, 0);
-    wc.hIconSm          = (HICON)LoadImage(Instance, MAKEINTRESOURCE(4000),
-                            IMAGE_ICON, 16, 16, 0);
+    // wc.style            = CS_BYTEALIGNCLIENT | CS_BYTEALIGNWINDOW | CS_OWNDC |
+    //                       CS_DBLCLKS;
+    // wc.lpfnWndProc      = (WNDPROC)DialogProc;
+    // wc.hInstance        = Instance;
+    // wc.hbrBackground    = (HBRUSH)COLOR_BTNSHADOW;
+    // wc.lpszClassName    = "LDmicroDialog";
+    // wc.lpszMenuName     = NULL;
+    // wc.hCursor          = LoadCursor(NULL, IDC_ARROW);
+    // wc.hIcon            = (HICON)LoadImage(Instance, MAKEINTRESOURCE(4000),
+    //                         IMAGE_ICON, 32, 32, 0);
+    // wc.hIconSm          = (HICON)LoadImage(Instance, MAKEINTRESOURCE(4000),
+    //                         IMAGE_ICON, 16, 16, 0);
 
-    RegisterClassEx(&wc);
+    // RegisterClassEx(&wc);
 
-    MyNiceFont = CreateFont(16, 0, 0, 0, FW_REGULAR, FALSE, FALSE, FALSE,
-        ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
-        FF_DONTCARE, "Tahoma");
-    if(!MyNiceFont)
-        MyNiceFont = (HFONT)GetStockObject(SYSTEM_FONT);
+    // MyNiceFont = CreateFont(16, 0, 0, 0, FW_REGULAR, FALSE, FALSE, FALSE,
+    //     ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
+    //     FF_DONTCARE, "Tahoma");
+    // if(!MyNiceFont)
+    //     MyNiceFont = (HFONT)GetStockObject(SYSTEM_FONT);
 
-    MyFixedFont = CreateFont(14, 0, 0, 0, FW_REGULAR, FALSE, FALSE, FALSE,
-        ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
-        FF_DONTCARE, "Lucida Console");
-    if(!MyFixedFont)
-        MyFixedFont = (HFONT)GetStockObject(SYSTEM_FONT);
+    // MyFixedFont = CreateFont(14, 0, 0, 0, FW_REGULAR, FALSE, FALSE, FALSE,
+    //     ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
+    //     FF_DONTCARE, "Lucida Console");
+    // if(!MyFixedFont)
+    //     MyFixedFont = (HFONT)GetStockObject(SYSTEM_FONT);
 }
 
 //-----------------------------------------------------------------------------

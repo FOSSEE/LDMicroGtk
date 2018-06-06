@@ -60,10 +60,39 @@ IF(UNIX)
     
     ## Dummy compile and install to test linuxUI
     ## to compile LDmicro uncomment the below 2 line2
-    #add_executable (LDMicro ldmicro.cpp)# miscutil.cpp draw_outputdev.cpp)
-    # install (TARGETS LDMicro DESTINATION bin)
-    add_executable (testMain testMain.cpp)
-    target_link_libraries (testMain LinuxUI)
-    target_link_libraries (testMain FreezeLD)
-    install (TARGETS testMain DESTINATION bin)
+    set (COMPILE_CPP_SOURCES #naminglist.cpp
+                            arduino.cpp
+                            avr.cpp
+                            pic16.cpp
+                            interpreted.cpp
+                            ansic.cpp
+                            compilecommon.cpp
+                            intcode.cpp
+                            lang.cpp
+                            miscutil.cpp
+                            iolist.cpp
+                            #confdialog.cpp
+                            #lutdialog.cpp
+                            #resetdialog.cpp
+                            #simpledialog.cpp
+                            #coildialog.cpp
+                            #contactsdialog.cpp
+                            #commentdialog.cpp
+                            #simulate.cpp
+                            loadsave.cpp
+                            undoredo.cpp
+                            circuit.cpp
+                            draw_outputdev.cpp
+                            #draw.cpp
+                            schematic.cpp
+                            #helpdialog.cpp
+                            maincontrols.cpp
+                            ldmicro.cpp)
+    
+    add_executable (LDMicro ${COMPILE_CPP_SOURCES})
+    install (TARGETS LDMicro DESTINATION bin)
+    target_link_libraries (LDMicro LinuxUI)
+    target_link_libraries (LDMicro FreezeLD)
+    #add_executable (testMain testMain.cpp)
+    #install (TARGETS testMain DESTINATION bin)
 ENDIF(UNIX)

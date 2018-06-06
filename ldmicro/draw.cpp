@@ -23,7 +23,7 @@
 // with wires.
 // Jonathan Westhues, Oct 2004
 //-----------------------------------------------------------------------------
-#include <windows.h>
+#include "linuxUI.h"
 #include <stdio.h>
 #include <stdlib.h>
 

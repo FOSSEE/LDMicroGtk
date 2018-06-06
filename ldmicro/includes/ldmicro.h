@@ -501,27 +501,26 @@ typedef struct McuIoInfoTag {
 
 #define NUM_SUPPORTED_MCUS 16
 
-/*
 //-----------------------------------------------
 // Function prototypes
 
 // ldmicro.cpp
 void ProgramChanged(void);
-*/
+
 void SetMenusEnabled(BOOL canNegate, BOOL canNormal, BOOL canResetOnly,
     BOOL canSetOnly, BOOL canDelete, BOOL canInsertEnd, BOOL canInsertOther,
     BOOL canPushRungDown, BOOL canPushRungUp, BOOL canInsertComment);
-/*
+
 void SetUndoEnabled(BOOL undoEnabled, BOOL redoEnabled);
 void RefreshScrollbars(void);
-extern HINSTANCE Instance;*/
+extern HINSTANCE Instance;
 extern HWID MainWindow;
 extern HDC Hdc;
 extern PlcProgram Prog;
 extern char CurrentSaveFile[MAX_PATH];
-// extern char CurrentCompileFile[MAX_PATH];
+extern char CurrentCompileFile[MAX_PATH];
 extern McuIoInfo SupportedMcus[NUM_SUPPORTED_MCUS];
-/*
+
 // memory debugging, because I often get careless; ok() will check that the
 // heap used for all the program storage is not yet corrupt, and oops() if
 // it is
@@ -557,14 +556,14 @@ extern BOOL SelectionActive;
 extern BOOL ThisHighlighted;
 
 // draw_outputdev.cpp
-extern void (*DrawChars)(int, int, char *);
-void CALLBACK BlinkCursor(HWND hwnd, UINT msg, UINT_PTR id, DWORD time);
-void PaintWindow(void);
-void ExportDrawingAsText(char *file);
-void InitForDrawing(void);
-void SetUpScrollbars(BOOL *horizShown, SCROLLINFO *horiz, SCROLLINFO *vert);
-int ScreenRowsAvailable(void);
-int ScreenColsAvailable(void);
+// extern void (*DrawChars)(int, int, char *);
+// void CALLBACK BlinkCursor(HWND hwnd, UINT msg, UINT_PTR id, DWORD time);
+// void PaintWindow(void);
+// void ExportDrawingAsText(char *file);
+// void InitForDrawing(void);
+// void SetUpScrollbars(BOOL *horizShown, SCROLLINFO *horiz, SCROLLINFO *vert);
+// int ScreenRowsAvailable(void);
+// int ScreenColsAvailable(void);
 extern HFONT FixedWidthFont;
 extern HFONT FixedWidthFontBold;
 extern int SelectedGxAfterNextPaint;
@@ -667,16 +666,6 @@ void ShowContactsDialog(BOOL *negated, char *name);
 // coildialog.cpp
 void ShowCoilDialog(BOOL *negated, BOOL *setOnly, BOOL *resetOnly, char *name);
 
-//advanceddialog.cpp
-void ShowAdvancedDialog(void);
-void MakeAdvancedDialogClass(void);
-void MakeAdvancedWorkspaceClass(void);
-void TranslateState(char *name, BOOL state);
-void MCUPinState(char *name, BOOL state);
-void StartAdvSimulation(void);
-void StopAdvSimulation(void);
-extern BOOL AdvancedWindowOpen;
-
 //naminglist.cpp
 void   MakeSmplDialogClass(void);
 
@@ -706,6 +695,7 @@ void ShowHelpDialog(BOOL about);
         Error("Internal error at line %d file '%s'\n", __LINE__, __FILE__); \
         exit(1); \
     }
+
 void dbp(char *str, ...);
 void Error(char *str, ...);
 void *CheckMalloc(size_t n);
@@ -749,9 +739,9 @@ void SimulationResetContact(char* name);
 void SetAdcShadow(char *name, SWORD val);
 SWORD GetAdcShadow(char *name);
 void DestroyUartSimulationWindow(void);
-void ShowUartSimulationWindow(void);*/
+void ShowUartSimulationWindow(void);
 extern BOOL InSimulationMode;
-/*extern BOOL SimulateRedrawAfterNextCycle;
+extern BOOL SimulateRedrawAfterNextCycle;
 
 // compilecommon.cpp
 void AllocStart(void);
@@ -780,5 +770,5 @@ void CompileAnsiC(char *outFile);
 void CompileInterpreted(char *outFile);
 //Arduino.cpp
 void CompileArduino(char *outFile);
-*/
+
 #endif

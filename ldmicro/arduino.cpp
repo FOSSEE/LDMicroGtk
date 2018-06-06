@@ -4,7 +4,7 @@
 // runtime needed to schedule the cycles.
 // Jonathan Westhues, Oct 2004
 //-----------------------------------------------------------------------------
-#include <windows.h>
+#include <linuxUI.h>
 #include <stdio.h>
 #include <setjmp.h>
 #include <stdlib.h>

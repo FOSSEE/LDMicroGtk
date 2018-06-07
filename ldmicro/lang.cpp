@@ -43,7 +43,6 @@ typedef struct LangTag {
 // These are the actual translation tables, so should be included in just
 // one place.
 #include "obj/lang-tables.h"
-#define LDLANG_EN
 
 char *_(char *in)
 {

@@ -7,4 +7,4 @@ make
 
 To run program in linux use the following command:
 
-`./LDmicro`
+`./LDmicro /c <.ld file to compile> <.hex destination file>`

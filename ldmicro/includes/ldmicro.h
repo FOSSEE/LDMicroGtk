@@ -547,7 +547,7 @@ extern HLIST IoList;
 extern int IoListTop;
 extern int IoListHeight;
 
-/*
+
 // draw.cpp
 int ProgCountWidestRow(void);
 int CountHeightOfElement(int which, void *elem);
@@ -728,7 +728,7 @@ extern BOOL DialogCancel;
 
 // lang.cpp
 char *_(char *in);
-*/
+
 
 // simulate.cpp
 void SimulateOneCycle(BOOL forceRefresh);
@@ -744,7 +744,7 @@ SWORD GetAdcShadow(char *name);
 void DestroyUartSimulationWindow(void);
 void ShowUartSimulationWindow(void);
 extern BOOL InSimulationMode;
-/*
+
 extern BOOL SimulateRedrawAfterNextCycle;
 
 // compilecommon.cpp
@@ -773,6 +773,6 @@ void CompileAnsiC(char *outFile);
 // interpreted.c
 void CompileInterpreted(char *outFile);
 //Arduino.cpp
-void CompileArduino(char *outFile);*/
+void CompileArduino(char *outFile);
 
 #endif

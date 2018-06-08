@@ -139,64 +139,64 @@ PlcProgram Prog;
 // Compile the program to a hex file for the target micro. Get the output
 // file name if necessary, then call the micro-specific compile routines.
 //-----------------------------------------------------------------------------
-// static void CompileProgram(BOOL compileAs)
-// {
-//     if(compileAs || strlen(CurrentCompileFile)==0) {
-//         OPENFILENAME ofn;
+static void CompileProgram(BOOL compileAs)
+{
+    if(compileAs || strlen(CurrentCompileFile)==0) {
+        OPENFILENAME ofn;
 
-//         memset(&ofn, 0, sizeof(ofn));
-//         ofn.lStructSize = sizeof(ofn);
-//         ofn.parentWindow = NULL;
-//         ofn.lpstrTitle = _("Compile To");
-//         if(Prog.mcu && Prog.mcu->whichIsa == ISA_ANSIC) {
-//             ofn.lpstrFilter = C_PATTERN;
-//             ofn.lpstrDefExt = "c";
-//         } else if(Prog.mcu && Prog.mcu->whichIsa == ISA_INTERPRETED) {
-//             ofn.lpstrFilter = INTERPRETED_PATTERN;
-//             ofn.lpstrDefExt = "int";
-//         } else {
-//             ofn.lpstrFilter = HEX_PATTERN;
-//             ofn.lpstrDefExt = "hex";
-//         }
-//         ofn.lpstrFile = CurrentCompileFile;
-//         ofn.nMaxFile = sizeof(CurrentCompileFile);
-//         ofn.Flags = OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
+        memset(&ofn, 0, sizeof(ofn));
+        ofn.lStructSize = sizeof(ofn);
+        ofn.parentWindow = NULL;
+        ofn.lpstrTitle = _("Compile To");
+        if(Prog.mcu && Prog.mcu->whichIsa == ISA_ANSIC) {
+            ofn.lpstrFilter = C_PATTERN;
+            ofn.lpstrDefExt = "c";
+        } else if(Prog.mcu && Prog.mcu->whichIsa == ISA_INTERPRETED) {
+            ofn.lpstrFilter = INTERPRETED_PATTERN;
+            ofn.lpstrDefExt = "int";
+        } else {
+            ofn.lpstrFilter = HEX_PATTERN;
+            ofn.lpstrDefExt = "hex";
+        }
+        ofn.lpstrFile = CurrentCompileFile;
+        ofn.nMaxFile = sizeof(CurrentCompileFile);
+        ofn.Flags = OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
 
-//         if(!GetSaveFileName(&ofn))
-//             return;
+        if(!GetSaveFileName(&ofn))
+            return;
 
-//         // hex output filename is stored in the .ld file
-//         ProgramChangedNotSaved = TRUE;
-//     }
+        // hex output filename is stored in the .ld file
+        ProgramChangedNotSaved = TRUE;
+    }
 
-//     if(!GenerateIntermediateCode()) return;
+    if(!GenerateIntermediateCode()) return;
 
-//     if(Prog.mcu == NULL) {
-//         Error(_("Must choose a target microcontroller before compiling."));
-//         return;
-//     } 
+    if(Prog.mcu == NULL) {
+        Error(_("Must choose a target microcontroller before compiling."));
+        return;
+    } 
 
-//     if(UartFunctionUsed() && Prog.mcu->uartNeeds.rxPin == 0) {
-//         Error(_("UART function used but not supported for this micro."));
-//         return;
-//     }
+    if(UartFunctionUsed() && Prog.mcu->uartNeeds.rxPin == 0) {
+        Error(_("UART function used but not supported for this micro."));
+        return;
+    }
     
-//     if(PwmFunctionUsed() && Prog.mcu->pwmNeedsPin == 0) {
-//         Error(_("PWM function used but not supported for this micro."));
-//         return;
-//     }
+    if(PwmFunctionUsed() && Prog.mcu->pwmNeedsPin == 0) {
+        Error(_("PWM function used but not supported for this micro."));
+        return;
+    }
   
-//     switch(Prog.mcu->whichIsa) {
-//         case ISA_AVR:           CompileAvr(CurrentCompileFile); break;
-//         case ISA_PIC16:         CompilePic16(CurrentCompileFile); break;
-//         case ISA_ANSIC:         CompileAnsiC(CurrentCompileFile); break;
-//         case ISA_INTERPRETED:   CompileInterpreted(CurrentCompileFile); break;
-//         case ISA_ARDUINO:   CompileArduino(CurrentCompileFile); break;
+    switch(Prog.mcu->whichIsa) {
+        case ISA_AVR:           CompileAvr(CurrentCompileFile); break;
+        case ISA_PIC16:         CompilePic16(CurrentCompileFile); break;
+        case ISA_ANSIC:         CompileAnsiC(CurrentCompileFile); break;
+        case ISA_INTERPRETED:   CompileInterpreted(CurrentCompileFile); break;
+        case ISA_ARDUINO:   CompileArduino(CurrentCompileFile); break;
 
-//         default: oops();
-//     }
-// //    IntDumpListing("t.pl");
-// }
+        default: oops();
+    }
+   IntDumpListing("t.pl");
+}
 
 //-----------------------------------------------------------------------------
 // If the program has been modified then give the user the option to save it
@@ -1026,7 +1026,13 @@ PlcProgram Prog;
 
 //     return RegisterClassEx(&wc);
 // }
+void LDMicro_close(HWND window)
+{
+    FreezeWindowPos(MainWindow);
+    FreezeDWORD(IoListHeight);
 
+    gtk_main_quit();
+}
 //-----------------------------------------------------------------------------
 // Entry point into the program.
 //-----------------------------------------------------------------------------
@@ -1098,10 +1104,15 @@ int main(int argc, char** argv)
 
     MainWindow=gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW(MainWindow), "LDMicro");
-    gtk_widget_show(MainWindow);
-
+    g_signal_connect (MainWindow, "delete_event", G_CALLBACK (LDMicro_close), NULL);
     gtk_window_set_default_size (GTK_WINDOW (MainWindow), 600, 400);
-
+    gtk_window_resize (GTK_WINDOW (MainWindow), 600, 400);
+    
+    ThawWindowPos(MainWindow);
+    ThawDWORD(IoListHeight);
+    
+    gtk_widget_show(MainWindow);
+    
     // Title bar
     UpdateMainWindowTitleBar();
 
@@ -1202,8 +1213,7 @@ int main(int argc, char** argv)
     //     TranslateMessage(&msg);
     //     DispatchMessage(&msg);
     // }
-    // FreezeWindowPos(MainWindow);
-    // FreezeDWORD(IoListHeight);
+
   
-    return status;
+    return EXIT_SUCCESS;
 }

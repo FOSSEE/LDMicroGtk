@@ -61,16 +61,16 @@ IF(UNIX)
     ## Dummy compile and install to test linuxUI
     ## to compile LDmicro uncomment the below 2 line2
     set (COMPILE_CPP_SOURCES #naminglist.cpp
-                            arduino.cpp
-                            avr.cpp
-                            pic16.cpp
-                            interpreted.cpp
-                            ansic.cpp
-                            compilecommon.cpp
-                            intcode.cpp
-                            lang.cpp
-                            miscutil.cpp
-                            iolist.cpp
+                            #arduino.cpp
+                            #avr.cpp
+                            #pic16.cpp
+                            #interpreted.cpp
+                            #ansic.cpp
+                            #compilecommon.cpp
+                            #intcode.cpp
+                            #lang.cpp
+                            #miscutil.cpp
+                            #iolist.cpp
                             #confdialog.cpp
                             #lutdialog.cpp
                             #resetdialog.cpp
@@ -78,13 +78,13 @@ IF(UNIX)
                             #coildialog.cpp
                             #contactsdialog.cpp
                             #commentdialog.cpp
-                            #simulate.cpp
-                            loadsave.cpp
-                            undoredo.cpp
-                            circuit.cpp
-                            draw_outputdev.cpp
+                            simulate.cpp
+                            #loadsave.cpp
+                            #undoredo.cpp
+                            #circuit.cpp
+                            #draw_outputdev.cpp
                             #draw.cpp
-                            schematic.cpp
+                            #schematic.cpp
                             #helpdialog.cpp
                             maincontrols.cpp
                             ldmicro.cpp)
@@ -95,4 +95,7 @@ IF(UNIX)
     target_link_libraries (LDMicro FreezeLD)
     #add_executable (testMain testMain.cpp)
     #install (TARGETS testMain DESTINATION bin)
+    #target_link_libraries (testMain LinuxUI)
+    #target_link_libraries (testMain FreezeLD)
+    
 ENDIF(UNIX)

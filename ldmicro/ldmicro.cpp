@@ -139,64 +139,64 @@ PlcProgram Prog;
 // Compile the program to a hex file for the target micro. Get the output
 // file name if necessary, then call the micro-specific compile routines.
 //-----------------------------------------------------------------------------
-static void CompileProgram(BOOL compileAs)
-{
-    if(compileAs || strlen(CurrentCompileFile)==0) {
-        OPENFILENAME ofn;
+// static void CompileProgram(BOOL compileAs)
+// {
+//     if(compileAs || strlen(CurrentCompileFile)==0) {
+//         OPENFILENAME ofn;
 
-        memset(&ofn, 0, sizeof(ofn));
-        ofn.lStructSize = sizeof(ofn);
-        ofn.parentWindow = NULL;
-        ofn.lpstrTitle = _("Compile To");
-        if(Prog.mcu && Prog.mcu->whichIsa == ISA_ANSIC) {
-            ofn.lpstrFilter = C_PATTERN;
-            ofn.lpstrDefExt = "c";
-        } else if(Prog.mcu && Prog.mcu->whichIsa == ISA_INTERPRETED) {
-            ofn.lpstrFilter = INTERPRETED_PATTERN;
-            ofn.lpstrDefExt = "int";
-        } else {
-            ofn.lpstrFilter = HEX_PATTERN;
-            ofn.lpstrDefExt = "hex";
-        }
-        ofn.lpstrFile = CurrentCompileFile;
-        ofn.nMaxFile = sizeof(CurrentCompileFile);
-        ofn.Flags = OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
+//         memset(&ofn, 0, sizeof(ofn));
+//         ofn.lStructSize = sizeof(ofn);
+//         ofn.parentWindow = NULL;
+//         ofn.lpstrTitle = _("Compile To");
+//         if(Prog.mcu && Prog.mcu->whichIsa == ISA_ANSIC) {
+//             ofn.lpstrFilter = C_PATTERN;
+//             ofn.lpstrDefExt = "c";
+//         } else if(Prog.mcu && Prog.mcu->whichIsa == ISA_INTERPRETED) {
+//             ofn.lpstrFilter = INTERPRETED_PATTERN;
+//             ofn.lpstrDefExt = "int";
+//         } else {
+//             ofn.lpstrFilter = HEX_PATTERN;
+//             ofn.lpstrDefExt = "hex";
+//         }
+//         ofn.lpstrFile = CurrentCompileFile;
+//         ofn.nMaxFile = sizeof(CurrentCompileFile);
+//         ofn.Flags = OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
 
-        if(!GetSaveFileName(&ofn))
-            return;
+//         if(!GetSaveFileName(&ofn))
+//             return;
 
-        // hex output filename is stored in the .ld file
-        ProgramChangedNotSaved = TRUE;
-    }
+//         // hex output filename is stored in the .ld file
+//         ProgramChangedNotSaved = TRUE;
+//     }
 
-    if(!GenerateIntermediateCode()) return;
+//     if(!GenerateIntermediateCode()) return;
 
-    if(Prog.mcu == NULL) {
-        Error(_("Must choose a target microcontroller before compiling."));
-        return;
-    } 
+//     if(Prog.mcu == NULL) {
+//         Error(_("Must choose a target microcontroller before compiling."));
+//         return;
+//     } 
 
-    if(UartFunctionUsed() && Prog.mcu->uartNeeds.rxPin == 0) {
-        Error(_("UART function used but not supported for this micro."));
-        return;
-    }
+//     if(UartFunctionUsed() && Prog.mcu->uartNeeds.rxPin == 0) {
+//         Error(_("UART function used but not supported for this micro."));
+//         return;
+//     }
     
-    if(PwmFunctionUsed() && Prog.mcu->pwmNeedsPin == 0) {
-        Error(_("PWM function used but not supported for this micro."));
-        return;
-    }
+//     if(PwmFunctionUsed() && Prog.mcu->pwmNeedsPin == 0) {
+//         Error(_("PWM function used but not supported for this micro."));
+//         return;
+//     }
   
-    switch(Prog.mcu->whichIsa) {
-        case ISA_AVR:           CompileAvr(CurrentCompileFile); break;
-        case ISA_PIC16:         CompilePic16(CurrentCompileFile); break;
-        case ISA_ANSIC:         CompileAnsiC(CurrentCompileFile); break;
-        case ISA_INTERPRETED:   CompileInterpreted(CurrentCompileFile); break;
-        case ISA_ARDUINO:   CompileArduino(CurrentCompileFile); break;
+//     switch(Prog.mcu->whichIsa) {
+//         case ISA_AVR:           CompileAvr(CurrentCompileFile); break;
+//         case ISA_PIC16:         CompilePic16(CurrentCompileFile); break;
+//         case ISA_ANSIC:         CompileAnsiC(CurrentCompileFile); break;
+//         case ISA_INTERPRETED:   CompileInterpreted(CurrentCompileFile); break;
+//         case ISA_ARDUINO:   CompileArduino(CurrentCompileFile); break;
 
-        default: oops();
-    }
-//    IntDumpListing("t.pl");
-}
+//         default: oops();
+//     }
+// //    IntDumpListing("t.pl");
+// }
 
 //-----------------------------------------------------------------------------
 // If the program has been modified then give the user the option to save it
@@ -1027,6 +1027,31 @@ static void CompileProgram(BOOL compileAs)
 //     return RegisterClassEx(&wc);
 // }
 
+void Activate_App (GtkApplication* app,  gpointer user_data){
+    MainWindow = gtk_application_window_new (app);
+    gtk_window_set_default_size (GTK_WINDOW (MainWindow), 600, 400);
+
+    // Title bar
+    UpdateMainWindowTitleBar();
+
+    // Splitting the window
+    MakeMainWindowControls();
+
+    // Calling the Simulation functions
+    
+    StartSimulation();
+    SetMenusEnabled(true, true, false,
+    true, false, false, false,
+    true, true, true);
+    // ToggleSimulationMode();
+    // GenerateIoListDontLoseSelection();
+    StopSimulation();
+
+    // Displaying the window
+    gtk_widget_show_all(MainWindow);
+
+}
+
 //-----------------------------------------------------------------------------
 // Entry point into the program.
 //-----------------------------------------------------------------------------
@@ -1035,64 +1060,64 @@ int main(int argc, char** argv)
     /// Check if we're running in non-interactive mode; in that case we should
     /// load the file, compile, and exit.
 
-    if(argc >= 2) {
-        RunningInBatchMode = TRUE;
+    // if(argc >= 2) {
+    //     RunningInBatchMode = TRUE;
 
-        char *err =
-            "Bad command line arguments: run 'ldmicro /c src.ld dest.hex'";
+    //     char *err =
+    //         "Bad command line arguments: run 'ldmicro /c src.ld dest.hex'";
 
-        if (argc < 4)
-        { 
-            printf("throwing error...\n");
-            Error(err); 
-            exit(-1);
-        }
+    //     if (argc < 4)
+    //     { 
+    //         printf("throwing error...\n");
+    //         Error(err); 
+    //         exit(-1);
+    //     }
 
-        char *source = (char*)malloc(strlen(argv[2]) + strlen(argv[3]) + 2);
-        sprintf(source, "%s %s", argv[2], argv[3]);
+    //     char *source = (char*)malloc(strlen(argv[2]) + strlen(argv[3]) + 2);
+    //     sprintf(source, "%s %s", argv[2], argv[3]);
 
-        while(isspace(*source)) {
-            source++;
-        }
-        if(*source == '\0') 
-        { 
-            Error(err); 
-            free(source);
-            exit(-1); 
-        }
+    //     while(isspace(*source)) {
+    //         source++;
+    //     }
+    //     if(*source == '\0') 
+    //     { 
+    //         Error(err); 
+    //         free(source);
+    //         exit(-1); 
+    //     }
 
-        char *dest = source;
-        while(!isspace(*dest) && *dest) {
-            dest++;
-        }
-        if(*dest == '\0') 
-        { 
-            Error(err); 
-            free(source);
-            exit(-1); 
-        }
-        *dest = '\0'; dest++;
-        while(isspace(*dest)) {
-            dest++;
-        }
+    //     char *dest = source;
+    //     while(!isspace(*dest) && *dest) {
+    //         dest++;
+    //     }
+    //     if(*dest == '\0') 
+    //     { 
+    //         Error(err); 
+    //         free(source);
+    //         exit(-1); 
+    //     }
+    //     *dest = '\0'; dest++;
+    //     while(isspace(*dest)) {
+    //         dest++;
+    //     }
 
-        if(*dest == '\0') 
-        { 
-            Error(err); 
-            free(source);
-            exit(-1); 
-        }
+    //     if(*dest == '\0') 
+    //     { 
+    //         Error(err); 
+    //         free(source);
+    //         exit(-1); 
+    //     }
 
-        if(!LoadProjectFromFile(source)) {
-            Error("Couldn't open '%s', running non-interactively.\n", source);
-            free(source);
-            exit(-1);
-        }
-        strcpy(CurrentCompileFile, dest);
-        GenerateIoList(-1);
-        CompileProgram(FALSE);
-        exit(0);
-    }
+    //     if(!LoadProjectFromFile(source)) {
+    //         Error("Couldn't open '%s', running non-interactively.\n", source);
+    //         free(source);
+    //         exit(-1);
+    //     }
+    //     strcpy(CurrentCompileFile, dest);
+    //     GenerateIoList(-1);
+    //     CompileProgram(FALSE);
+    //     exit(0);
+    // }
 
     GtkApplication *app;
     int status;

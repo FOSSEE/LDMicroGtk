@@ -48,6 +48,8 @@ typedef signed long SDWORD;
 // Constants for the GUI. We have drop-down menus, a listview for the I/Os,
 // etc.
 
+#define NUM_SUPPORTED_MCUS 16
+
 // Menu IDs
 extern HMENU MNU_NEW;
 extern HMENU MNU_OPEN;
@@ -106,7 +108,8 @@ extern HMENU MNU_MAKE_RESET_ONLY;
 extern HMENU MNU_INSERT_PWL;
 
 extern HMENU MNU_MCU_SETTINGS;
-extern HMENU MNU_PROCESSOR_0;
+extern HMENU MNU_PROCESSOR[NUM_SUPPORTED_MCUS+1];
+extern HMENU MNU_MICRO_CONTROLLER;
 
 extern HMENU MNU_SIMULATION_MODE;
 extern HMENU MNU_START_SIMULATION;
@@ -499,8 +502,6 @@ typedef struct McuIoInfoTag {
     DWORD            configurationWord;
 } McuIoInfo;
 
-#define NUM_SUPPORTED_MCUS 16
-
 //-----------------------------------------------
 // Function prototypes
 
@@ -525,7 +526,7 @@ extern McuIoInfo SupportedMcus[NUM_SUPPORTED_MCUS];
 // heap used for all the program storage is not yet corrupt, and oops() if
 // it is
 void CheckHeap(char *file, int line);
-#define ok() CheckHeap(__FILE__, __LINE__)*/
+#define ok() CheckHeap(__FILE__, __LINE__)
 
 // maincontrols.cpp
 void MakeMainWindowControls(void);
@@ -727,6 +728,7 @@ extern BOOL DialogCancel;
 
 // lang.cpp
 char *_(char *in);
+*/
 
 // simulate.cpp
 void SimulateOneCycle(BOOL forceRefresh);
@@ -742,6 +744,7 @@ SWORD GetAdcShadow(char *name);
 void DestroyUartSimulationWindow(void);
 void ShowUartSimulationWindow(void);
 extern BOOL InSimulationMode;
+/*
 extern BOOL SimulateRedrawAfterNextCycle;
 
 // compilecommon.cpp
@@ -770,6 +773,6 @@ void CompileAnsiC(char *outFile);
 // interpreted.c
 void CompileInterpreted(char *outFile);
 //Arduino.cpp
-void CompileArduino(char *outFile);
+void CompileArduino(char *outFile);*/
 
 #endif

@@ -31,9 +31,9 @@
 #include <limits.h>
 
 #include "ldmicro.h"
-#include "simulate.h"
+// #include "simulate.h"
 #include "intcode.h"
-#include "freeze.h"
+// #include "freeze.h"
 
 static struct {
     char name[MAX_NAME_LEN];
@@ -107,6 +107,7 @@ static char *MarkUsedVariable(char *name, DWORD flag);
 // Looks in the SingleBitItems list; if an item is not present then it is
 // FALSE by default.
 //-----------------------------------------------------------------------------
+/*
 static BOOL SingleBitOn(char *name)
 {
     int i;
@@ -130,10 +131,10 @@ static void SetSingleBit(char *name, BOOL state)
             if((name[0] == 'Y') && (SingleBitItems[i].powered != state))
             {
                 TranslateState(name, state);
-                /*char Debug[256];
-                sprintf_s(Debug, "SetSingleBit: \tname: %s \t state: %d\n",
-        name, state);
-    OutputDebugString(Debug);*/
+    //             char Debug[256];
+    //             sprintf_s(Debug, "SetSingleBit: \tname: %s \t state: %d\n",
+    //     name, state);
+    // OutputDebugString(Debug);
             }
             SingleBitItems[i].powered = state;
             return;
@@ -999,3 +1000,4 @@ static void AppendToUartSimulationTextControl(BYTE b)
     SendMessage(UartSimulationTextControl, WM_SETTEXT, 0, (LPARAM)buf);
     SendMessage(UartSimulationTextControl, EM_LINESCROLL, 0, (LPARAM)INT_MAX);
 }
+*/

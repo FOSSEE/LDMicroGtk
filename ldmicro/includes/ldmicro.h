@@ -514,7 +514,7 @@ void SetMenusEnabled(BOOL canNegate, BOOL canNormal, BOOL canResetOnly,
 void SetUndoEnabled(BOOL undoEnabled, BOOL redoEnabled);
 void RefreshScrollbars(void);
 extern HINSTANCE Instance;
-extern HWND MainWindow;
+extern HWID MainWindow;
 extern HDC Hdc;
 extern PlcProgram Prog;
 extern char CurrentSaveFile[MAX_PATH];

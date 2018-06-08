@@ -34,7 +34,7 @@
 
 
 HINSTANCE   Instance;
-HWND        MainWindow;
+HWID        MainWindow;
 HDC         Hdc;
 
 // parameters used to capture the mouse when implementing our totally non-
@@ -1097,8 +1097,8 @@ int main(int argc, char** argv)
     gtk_init(&argc, &argv);
 
     MainWindow=gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title(GTK_WINDOW(gtk_window_new), "LDMicro");
-    gtk_widget_show(gtk_window_new);
+    gtk_window_set_title(GTK_WINDOW(MainWindow), "LDMicro");
+    gtk_widget_show(MainWindow);
 
     /// BODY
 

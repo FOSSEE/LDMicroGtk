@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
 #include <stdio.h>
 #include <ctype.h>
-#include "linuxUI.h"
+#include <unistd.h>
 
 #define INTCODE_H_CONSTANTS_ONLY
 #include "intcode.h"
@@ -373,7 +373,7 @@ int main(int argc, char **argv)
 
         // XXX, nonportable; replace with whatever timing functions are
         // available on your target.
-        Sleep(10);
+        usleep(10000);
     }
 
     return 0;

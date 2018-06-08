@@ -29,9 +29,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "ldmicro.h"
-#include <iostream>
-
-using namespace std;
 
 // Menu IDs
 HMENU MNU_NEW;

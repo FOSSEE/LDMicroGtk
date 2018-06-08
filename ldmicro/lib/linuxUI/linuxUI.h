@@ -6,8 +6,9 @@
 #include <linux/limits.h>
 #include <stdio.h>
 #include <inttypes.h>
+#include <string.h>
+#include <stdlib.h>
 #include "linuxLD.h"
-//#include "windows.h"
 
 /// version control
 #define LDMicro_VERSION_MAJOR 1
@@ -43,7 +44,7 @@ extern const UINT MF_UNCHECKED;
 
 /// ListStore
 extern GtkWidget* view;
-extern GtkTreeViewColumn* column;
+extern GtkTreeViewColumn *column;
 
 /// data types
 typedef struct OpenFileInfoData {

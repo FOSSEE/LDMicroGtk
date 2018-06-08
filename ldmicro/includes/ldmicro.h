@@ -48,6 +48,8 @@ typedef signed long SDWORD;
 // Constants for the GUI. We have drop-down menus, a listview for the I/Os,
 // etc.
 
+#define NUM_SUPPORTED_MCUS 16
+
 // Menu IDs
 extern HMENU MNU_NEW;
 extern HMENU MNU_OPEN;
@@ -106,7 +108,8 @@ extern HMENU MNU_MAKE_RESET_ONLY;
 extern HMENU MNU_INSERT_PWL;
 
 extern HMENU MNU_MCU_SETTINGS;
-extern HMENU MNU_PROCESSOR_0;
+extern HMENU MNU_PROCESSOR[NUM_SUPPORTED_MCUS+1];
+extern HMENU MNU_MICRO_CONTROLLER;
 
 extern HMENU MNU_SIMULATION_MODE;
 extern HMENU MNU_START_SIMULATION;
@@ -499,8 +502,6 @@ typedef struct McuIoInfoTag {
     DWORD            configurationWord;
 } McuIoInfo;
 
-#define NUM_SUPPORTED_MCUS 16
-
 //-----------------------------------------------
 // Function prototypes
 
@@ -542,9 +543,10 @@ void UpdateMainWindowTitleBar(void);
 extern int ScrollWidth;
 extern int ScrollHeight;
 extern BOOL NeedHoriz;
-extern HWND IoList;
+extern HLIST IoList;
 extern int IoListTop;
 extern int IoListHeight;
+
 
 // draw.cpp
 int ProgCountWidestRow(void);
@@ -727,6 +729,7 @@ extern BOOL DialogCancel;
 // lang.cpp
 char *_(char *in);
 
+
 // simulate.cpp
 void SimulateOneCycle(BOOL forceRefresh);
 void CALLBACK PlcCycleTimer(HWND hwnd, UINT msg, UINT_PTR id, DWORD time);
@@ -741,6 +744,7 @@ SWORD GetAdcShadow(char *name);
 void DestroyUartSimulationWindow(void);
 void ShowUartSimulationWindow(void);
 extern BOOL InSimulationMode;
+
 extern BOOL SimulateRedrawAfterNextCycle;
 
 // compilecommon.cpp

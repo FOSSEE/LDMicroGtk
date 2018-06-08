@@ -195,7 +195,7 @@ static void CompileProgram(BOOL compileAs)
 
         default: oops();
     }
-//    IntDumpListing("t.pl");
+   IntDumpListing("t.pl");
 }
 
 //-----------------------------------------------------------------------------
@@ -1026,7 +1026,13 @@ static void CompileProgram(BOOL compileAs)
 
 //     return RegisterClassEx(&wc);
 // }
+void LDMicro_close(HWND window)
+{
+    FreezeWindowPos(MainWindow);
+    FreezeDWORD(IoListHeight);
 
+    gtk_main_quit();
+}
 //-----------------------------------------------------------------------------
 // Entry point into the program.
 //-----------------------------------------------------------------------------
@@ -1093,7 +1099,41 @@ int main(int argc, char** argv)
         CompileProgram(FALSE);
         exit(0);
     }
+    
+    gtk_init(&argc, &argv);
 
+    MainWindow=gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title(GTK_WINDOW(MainWindow), "LDMicro");
+    g_signal_connect (MainWindow, "delete_event", G_CALLBACK (LDMicro_close), NULL);
+    gtk_window_set_default_size (GTK_WINDOW (MainWindow), 600, 400);
+    gtk_window_resize (GTK_WINDOW (MainWindow), 600, 400);
+    
+    ThawWindowPos(MainWindow);
+    ThawDWORD(IoListHeight);
+    
+    gtk_widget_show(MainWindow);
+    
+    // Title bar
+    UpdateMainWindowTitleBar();
+
+    // Splitting the window
+    MakeMainWindowControls();
+
+    // Calling the Simulation functions
+    
+    StartSimulation();
+    SetMenusEnabled(true, true, false,
+    true, false, false, false,
+    true, true, true);
+    // ToggleSimulationMode();
+    // GenerateIoListDontLoseSelection();
+    StopSimulation();
+
+    // Displaying the window
+    gtk_widget_show_all(MainWindow);
+
+    gtk_main();
+    
     // /// ~~~
     // Instance = hInstance; /// parent window
 
@@ -1173,8 +1213,7 @@ int main(int argc, char** argv)
     //     TranslateMessage(&msg);
     //     DispatchMessage(&msg);
     // }
-    // FreezeWindowPos(MainWindow);
-    // FreezeDWORD(IoListHeight);
 
-    return 0;
+  
+    return EXIT_SUCCESS;
 }

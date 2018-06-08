@@ -58,10 +58,11 @@ typedef PVOID HANDLE;
 typedef HANDLE HINSTANCE;
 typedef HANDLE HDC;
 
-typedef GtkWidget *HWID;
-typedef GtkWidget *HMENU;
-typedef GtkWindow *HWND;
-typedef GtkApplication *HAPP;
+typedef GtkWidget* HWID;
+typedef GtkWidget* HMENU;
+typedef GtkWindow* HWND;
+typedef GtkListStore* HLIST;
+typedef GtkApplication* HAPP;
 
 /// Check if system is x64 or x86
 #if defined(__UNIX64)

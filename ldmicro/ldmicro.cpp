@@ -1027,8 +1027,79 @@ PlcProgram Prog;
 //     return RegisterClassEx(&wc);
 // }
 
-void Activate_App (GtkApplication* app,  gpointer user_data){
-    MainWindow = gtk_application_window_new (app);
+//-----------------------------------------------------------------------------
+// Entry point into the program.
+//-----------------------------------------------------------------------------
+int main(int argc, char** argv)
+{
+    /// Check if we're running in non-interactive mode; in that case we should
+    /// load the file, compile, and exit.
+
+    if(argc >= 2) {
+        RunningInBatchMode = TRUE;
+
+        char *err =
+            "Bad command line arguments: run 'ldmicro /c src.ld dest.hex'";
+
+        if (argc < 4)
+        { 
+            printf("throwing error...\n");
+            Error(err); 
+            exit(-1);
+        }
+
+        char *source = (char*)malloc(strlen(argv[2]) + strlen(argv[3]) + 2);
+        sprintf(source, "%s %s", argv[2], argv[3]);
+
+        while(isspace(*source)) {
+            source++;
+        }
+        if(*source == '\0') 
+        { 
+            Error(err); 
+            free(source);
+            exit(-1); 
+        }
+
+        char *dest = source;
+        while(!isspace(*dest) && *dest) {
+            dest++;
+        }
+        if(*dest == '\0') 
+        { 
+            Error(err); 
+            free(source);
+            exit(-1); 
+        }
+        *dest = '\0'; dest++;
+        while(isspace(*dest)) {
+            dest++;
+        }
+
+        if(*dest == '\0') 
+        { 
+            Error(err); 
+            free(source);
+            exit(-1); 
+        }
+
+        if(!LoadProjectFromFile(source)) {
+            Error("Couldn't open '%s', running non-interactively.\n", source);
+            free(source);
+            exit(-1);
+        }
+        strcpy(CurrentCompileFile, dest);
+        GenerateIoList(-1);
+        CompileProgram(FALSE);
+        exit(0);
+    }
+    
+    gtk_init(&argc, &argv);
+
+    MainWindow=gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title(GTK_WINDOW(MainWindow), "LDMicro");
+    gtk_widget_show(MainWindow);
+
     gtk_window_set_default_size (GTK_WINDOW (MainWindow), 600, 400);
 
     // Title bar
@@ -1050,82 +1121,8 @@ void Activate_App (GtkApplication* app,  gpointer user_data){
     // Displaying the window
     gtk_widget_show_all(MainWindow);
 
-}
-
-//-----------------------------------------------------------------------------
-// Entry point into the program.
-//-----------------------------------------------------------------------------
-int main(int argc, char** argv)
-{
-    /// Check if we're running in non-interactive mode; in that case we should
-    /// load the file, compile, and exit.
-
-    // if(argc >= 2) {
-    //     RunningInBatchMode = TRUE;
-
-    //     char *err =
-    //         "Bad command line arguments: run 'ldmicro /c src.ld dest.hex'";
-
-    //     if (argc < 4)
-    //     { 
-    //         printf("throwing error...\n");
-    //         Error(err); 
-    //         exit(-1);
-    //     }
-
-    //     char *source = (char*)malloc(strlen(argv[2]) + strlen(argv[3]) + 2);
-    //     sprintf(source, "%s %s", argv[2], argv[3]);
-
-    //     while(isspace(*source)) {
-    //         source++;
-    //     }
-    //     if(*source == '\0') 
-    //     { 
-    //         Error(err); 
-    //         free(source);
-    //         exit(-1); 
-    //     }
-
-    //     char *dest = source;
-    //     while(!isspace(*dest) && *dest) {
-    //         dest++;
-    //     }
-    //     if(*dest == '\0') 
-    //     { 
-    //         Error(err); 
-    //         free(source);
-    //         exit(-1); 
-    //     }
-    //     *dest = '\0'; dest++;
-    //     while(isspace(*dest)) {
-    //         dest++;
-    //     }
-
-    //     if(*dest == '\0') 
-    //     { 
-    //         Error(err); 
-    //         free(source);
-    //         exit(-1); 
-    //     }
-
-    //     if(!LoadProjectFromFile(source)) {
-    //         Error("Couldn't open '%s', running non-interactively.\n", source);
-    //         free(source);
-    //         exit(-1);
-    //     }
-    //     strcpy(CurrentCompileFile, dest);
-    //     GenerateIoList(-1);
-    //     CompileProgram(FALSE);
-    //     exit(0);
-    // }
-
-    GtkApplication *app;
-    int status;
-  
-    app = gtk_application_new ("org.gtk.new", G_APPLICATION_FLAGS_NONE);
-    g_signal_connect (app, "activate", G_CALLBACK (Activate_App), NULL);
-    status = g_application_run (G_APPLICATION (app), argc, argv);
-
+    gtk_main();
+    
     // /// ~~~
     // Instance = hInstance; /// parent window
 

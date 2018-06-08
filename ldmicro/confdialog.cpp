@@ -64,8 +64,8 @@ static LONG_PTR PrevBaudProc;
 //     return CallWindowProc((WNDPROC)t, hwnd, msg, wParam, lParam);
 // }
 
-// static void MakeControls(void)
-// {
+static void MakeControls(void)
+{
 //     HWND textLabel = CreateWindowEx(0, WC_STATIC, _("Cycle Time (ms):"),
 //         WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE | SS_RIGHT,
 //         5, 13, 145, 21, ConfDialog, NULL, Instance, NULL);
@@ -178,10 +178,10 @@ static LONG_PTR PrevBaudProc;
 
 //     PrevBaudProc = SetWindowLongPtr(BaudTextbox, GWLP_WNDPROC, 
 //         (LONG_PTR)MyNumberProc);
-// }
+}
 
-// void ShowConfDialog(void)
-// {
+void ShowConfDialog(void)
+{
 //     // The window's height will be resized later, to fit the explanation text.
 //     ConfDialog = CreateWindowClient(0, "LDmicroDialog", _("PLC Configuration"),
 //         WS_OVERLAPPED | WS_SYSMENU,
@@ -246,4 +246,4 @@ static LONG_PTR PrevBaudProc;
 //     EnableWindow(MainWindow, TRUE);
 //     DestroyWindow(ConfDialog);
 //     return;
-// }
+}

@@ -25,7 +25,7 @@ LPVOID HeapAlloc(HANDLE hHeap, DWORD  dwFlags, SIZE_T dwBytes)
 {
     if (hHeap == NULL)
     {
-        printf("Alloc**********NULL HEAP***************\n");
+        // printf("Alloc**********NULL HEAP***************\n");
         LPVOID p = malloc(dwBytes);
         return p;
     }
@@ -73,7 +73,7 @@ BOOL HeapFree(HANDLE hHeap, DWORD  dwFlags, LPVOID lpMem)
     /// if NULL free()
     if (hHeap == NULL)
     {
-        printf("free*********NULL HEAP***************\n");
+        // printf("free*********NULL HEAP***************\n");
         free(lpMem);
         return TRUE;
     }

@@ -4,4 +4,5 @@
 /ldmicro/obj/*
 !/ldmicro/obj/dummy
 /ldmicro/testMain.cpp
+/ldmicro/reg/results/*
 /ldmicro/includes/testMain.h

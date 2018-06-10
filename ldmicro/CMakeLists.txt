@@ -2,6 +2,18 @@ cmake_minimum_required(VERSION 2.6)
 
 project(LDMicro)
 
+macro(use_cxx11)
+
+if (CMAKE_VERSION VERSION_LESS "3.1")
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
+    endif ()
+else ()
+    set (CMAKE_CXX_STANDARD 11)
+endif ()
+
+endmacro(use_cxx11)
+
 IF(WIN32)
     MESSAGE( FATAL_ERROR "Cannot build for windows, exiting" )
     add_definitions(-D__WIN32__)
@@ -16,6 +28,8 @@ IF(UNIX)
     MESSAGE( STATUS "Initializing.." )
     add_definitions(-D__UNIX__)
     add_definitions(-DLDLANG_EN)
+    use_cxx11()
+    
     # set_property(DIRECTORY PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${CMAKE_CURRENT_SOURCE_DIR}/build/")
 
     MESSAGE( STATUS "Performing system check.." )
@@ -42,7 +56,7 @@ IF(UNIX)
     add_custom_command( 
         OUTPUT ${OBJDIR}/lang-tables.h
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        COMMAND perl ${CMAKE_CURRENT_SOURCE_DIR}/lang-tables.pl > ${OBJDIR}/lang-tables.h
+        COMMAND perl lang-tables.pl > ${OBJDIR}/lang-tables.h
         DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/lang-*.txt")
     
     add_custom_command( 

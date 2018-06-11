@@ -25,5 +25,6 @@ cmake ..
 make
 ```
 ### To run program in linux use the following command
+_Note_: Be sure to run as `sudo` for the first run, LDMicro creates and stores its config files in the `/usr/share/ldmicro` folder
 
 `./LDmicro /c <.ld file to compile> <.hex destination file>`

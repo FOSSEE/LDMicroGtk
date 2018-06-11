@@ -547,7 +547,6 @@ extern HLIST IoList;
 extern int IoListTop;
 extern int IoListHeight;
 
-
 // draw.cpp
 int ProgCountWidestRow(void);
 int CountHeightOfElement(int which, void *elem);

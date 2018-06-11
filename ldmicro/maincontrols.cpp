@@ -122,6 +122,7 @@ static HMENU        TopMenu;                                            // Menu 
 static HMENU        settings;
 static HMENU        compile;
 static HMENU        help;
+static HMENU        ScrollWindow;
 
 // listview used to maintain the list of I/O pins with symbolic names, plus
 // the internal relay too
@@ -468,7 +469,7 @@ void MakeMainWindowControls(void)
     gtk_grid_attach (GTK_GRID (grid), MakeMainWindowMenus(), 0, 0, 1, 1);
 
     // Creating Scrolled Window
-    GtkWidget* ScrollWindow = gtk_scrolled_window_new (NULL, NULL);
+    ScrollWindow = gtk_scrolled_window_new (NULL, NULL);
     gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (ScrollWindow),
 				                          GTK_POLICY_AUTOMATIC, 
 				                          GTK_POLICY_ALWAYS);
@@ -480,7 +481,7 @@ void MakeMainWindowControls(void)
     gtk_widget_set_hexpand (ScrollWindow, TRUE);
 
     // Appending tree view to pane and pane to grid
-    gtk_paned_add2 (GTK_PANED(pane), view);
+    gtk_paned_pack2 (GTK_PANED(pane), view, FALSE, FALSE);
     gtk_paned_set_position (GTK_PANED (pane), 250);
     gtk_grid_attach (GTK_GRID (grid), pane, 0, 0, 1, 1); 
 
@@ -743,7 +744,17 @@ void GenerateIoListDontLoseSelection(void)
     RefreshControlsToSettings();
 }
 
-
+//-----------------------------------------------------------------------------
+// Called when the main window has been resized. Adjust the size of the
+// status bar and the listview to reflect the new window size.
+//-----------------------------------------------------------------------------
+void MainWindowResized(void)
+{
+    // Make sure that the I/O list can't disappear entirely.
+    if(IoListHeight < 30) {
+        IoListHeight = 30;
+    }
+}
 
 //-----------------------------------------------------------------------------
 // Start real-time simulation. Have to update the controls grayed status

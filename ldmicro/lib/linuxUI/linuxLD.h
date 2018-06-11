@@ -17,6 +17,10 @@
 
 #define HEAP_ZERO_MEMORY 0x00000008
 
+/// Image loading flags
+#define IMAGE_ICON 1
+#define LDMICRO_ICON "ldmicro.ico"
+
 /// Typedefs
 //typedef int64_t __int64;
 typedef bool BOOL;
@@ -31,6 +35,7 @@ typedef char CHAR;
 
 typedef CONST WCHAR *LPCWSTR;
 typedef CONST CHAR *LPCSTR; /// should be __nullterminated
+typedef WORD ATOM;
 
 #ifdef UNICODE
  typedef LPCWSTR LPCTSTR; 
@@ -52,18 +57,18 @@ typedef void *LPVOID;
 typedef PVOID HFONT;
 typedef PVOID HMODULE;
 typedef PVOID HHOOK;
-typedef PVOID HBRUSH;
+
 typedef PVOID HFONT;
 typedef PVOID HANDLE;
 typedef HANDLE HINSTANCE;
 typedef HANDLE HDC;
-
 typedef GtkWidget *HWID;
 typedef GtkWidget *HMENU;
 typedef GtkWindow *HWND;
 typedef GtkListStore *HLIST;
 typedef GtkApplication *HAPP;
-
+typedef GtkTreeViewColumn *HTVC;
+typedef GdkPixbuf *HICON;
 /// Check if system is x64 or x86
 #if defined(__UNIX64)
 typedef uint64_t UINT_PTR;
@@ -82,26 +87,32 @@ typedef UINT_PTR WPARAM;
 typedef LONG_PTR LPARAM;
 typedef LONG_PTR LRESULT;
 
-/// Custom classes
-class COLORREF : public GdkRGBA{
+/// Classes
+typedef class tagColorReferance: public GdkRGBA{
     public:
-    COLORREF()
+    tagColorReferance()
     {
         this->red = 0.0;
         this->green = 0.0;
         this->blue = 0.0;
         this->alpha = 1.0;
     }
-    COLORREF(int r, int g, int b)
+
+    tagColorReferance(int r, int g, int b)
     {
         this->red = r/255.0;
         this->green = g/255.0;
         this->blue = b/255.0;
         this->alpha = 1.0;
     }
-};
 
-/// Custom structures
+    GdkRGBA* getThis()
+    {
+        return this;
+    }
+} COLORREF, *HBRUSH;
+
+/// Structures
 typedef struct HeapRecordChunckTag{
     PVOID Chunck;
     SIZE_T dwSize;
@@ -132,8 +143,25 @@ typedef struct tagNMHDR {
   UINT     code;
 } NMHDR;
 
+typedef struct tagWNDCLASSEX {
+  UINT      cbSize;
+  UINT      style;
+//   WNDPROC   lpfnWndProc;
+  int       cbClsExtra;
+  int       cbWndExtra;
+  HINSTANCE hInstance;
+  HICON     hIcon;
+//   HCURSOR   hCursor;
+  HBRUSH    hbrBackground;
+  LPCTSTR   lpszMenuName;
+  LPCTSTR   lpszClassName;
+  HICON     hIconSm;
+} WNDCLASSEX, *PWNDCLASSEX;
+
+
 /// Variables
 extern std::vector<HEAPRECORD> HeapRecord;
+extern std::vector<WNDCLASSEX> WindClassRecord;
 
 /// Functions
 HANDLE HeapCreate(
@@ -150,6 +178,17 @@ BOOL HeapFree(
     HANDLE hHeap,
     DWORD  dwFlags,
     LPVOID lpMem);
+
+BOOL RegisterClassEx(const WNDCLASSEX *lpwcx);
+
+HANDLE LoadImage(
+    HINSTANCE hinst,
+    LPCTSTR   lpszName,
+    UINT      uType,
+    int       cxDesired,
+    int       cyDesired,
+    UINT      fuLoad
+);
 
 /// functions to be ported
 void OutputDebugString(char*);

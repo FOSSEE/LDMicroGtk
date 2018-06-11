@@ -411,9 +411,9 @@ HMENU MakeMainWindowMenus(void)
 //-----------------------------------------------------------------------------
 void MakeMainWindowControls(void)
 {
-    GtkWidget* PackBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    GtkWidget* grid = gtk_grid_new();
-    GtkWidget* pane = gtk_paned_new (GTK_ORIENTATION_VERTICAL);
+    HWID PackBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    HWID grid = gtk_grid_new();
+    HWID pane = gtk_paned_new (GTK_ORIENTATION_VERTICAL);
 
     IoList = gtk_list_store_new (5, 
                                 G_TYPE_STRING,   

@@ -585,447 +585,448 @@ static void CompileProgram(BOOL compileAs)
 //-----------------------------------------------------------------------------
 // WndProc for MainWindow.
 //-----------------------------------------------------------------------------
-// LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
-// {
-//     switch (msg) {
-//         case WM_ERASEBKGND:
-//             break;
+LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+    // switch (msg) {
+    //     case WM_ERASEBKGND:
+    //         break;
 
-//         case WM_SETFOCUS:
-//             InvalidateRect(MainWindow, NULL, FALSE);
-//             break;
+    //     case WM_SETFOCUS:
+    //         InvalidateRect(MainWindow, NULL, FALSE);
+    //         break;
 
-//         case WM_PAINT: {
-//             PAINTSTRUCT ps;
-//             Hdc = BeginPaint(hwnd, &ps);
+    //     case WM_PAINT: {
+    //         PAINTSTRUCT ps;
+    //         Hdc = BeginPaint(hwnd, &ps);
 
-//             // This draws the schematic.
-//             PaintWindow();
+    //         // This draws the schematic.
+    //         PaintWindow();
 
-//             RECT r;
-//             // Fill around the scroll bars
-//             if(NeedHoriz) {
-//                 r.top = IoListTop - ScrollHeight - 2;
-//                 r.bottom = IoListTop - 2;
-//                 FillRect(Hdc, &r, (HBRUSH)GetStockObject(LTGRAY_BRUSH));
-//             }
-//             GetClientRect(MainWindow, &r);
-//             r.left = r.right - ScrollWidth - 2;
-//             FillRect(Hdc, &r, (HBRUSH)GetStockObject(LTGRAY_BRUSH));
+    //         RECT r;
+    //         // Fill around the scroll bars
+    //         if(NeedHoriz) {
+    //             r.top = IoListTop - ScrollHeight - 2;
+    //             r.bottom = IoListTop - 2;
+    //             FillRect(Hdc, &r, (HBRUSH)GetStockObject(LTGRAY_BRUSH));
+    //         }
+    //         GetClientRect(MainWindow, &r);
+    //         r.left = r.right - ScrollWidth - 2;
+    //         FillRect(Hdc, &r, (HBRUSH)GetStockObject(LTGRAY_BRUSH));
 
-//             // Draw the splitter thing to grab to resize the I/O listview.
-//             GetClientRect(MainWindow, &r);
-//             r.top = IoListTop - 2;
-//             r.bottom = IoListTop;
-//             FillRect(Hdc, &r, (HBRUSH)GetStockObject(LTGRAY_BRUSH));
-//             r.top = IoListTop - 2;
-//             r.bottom = IoListTop - 1;
-//             FillRect(Hdc, &r, (HBRUSH)GetStockObject(WHITE_BRUSH));
-//             r.top = IoListTop;
-//             r.bottom = IoListTop + 1;
-//             FillRect(Hdc, &r, (HBRUSH)GetStockObject(DKGRAY_BRUSH));
+    //         // Draw the splitter thing to grab to resize the I/O listview.
+    //         GetClientRect(MainWindow, &r);
+    //         r.top = IoListTop - 2;
+    //         r.bottom = IoListTop;
+    //         FillRect(Hdc, &r, (HBRUSH)GetStockObject(LTGRAY_BRUSH));
+    //         r.top = IoListTop - 2;
+    //         r.bottom = IoListTop - 1;
+    //         FillRect(Hdc, &r, (HBRUSH)GetStockObject(WHITE_BRUSH));
+    //         r.top = IoListTop;
+    //         r.bottom = IoListTop + 1;
+    //         FillRect(Hdc, &r, (HBRUSH)GetStockObject(DKGRAY_BRUSH));
 
-//             EndPaint(hwnd, &ps);
-//             return 1;
-//         }
+    //         EndPaint(hwnd, &ps);
+    //         return 1;
+    //     }
 
-//         case WM_KEYDOWN: {
-//             if(wParam == 'M') {
-//                 if(GetAsyncKeyState(VK_CONTROL) & 0x8000) {
-//                     ToggleSimulationMode();
-//                     break;
-//                 }
-//             } else if(wParam == VK_TAB) {
-//                 SetFocus(IoList);
-//                 BlinkCursor(0, 0, 0, 0);
-//                 break;
-//             } else if(wParam == VK_F1) {
-//                 ShowHelpDialog(FALSE);
-//                 break;
-//             }
+    //     case WM_KEYDOWN: {
+    //         if(wParam == 'M') {
+    //             if(GetAsyncKeyState(VK_CONTROL) & 0x8000) {
+    //                 ToggleSimulationMode();
+    //                 break;
+    //             }
+    //         } else if(wParam == VK_TAB) {
+    //             SetFocus(IoList);
+    //             BlinkCursor(0, 0, 0, 0);
+    //             break;
+    //         } else if(wParam == VK_F1) {
+    //             ShowHelpDialog(FALSE);
+    //             break;
+    //         }
 
-//             if(InSimulationMode) {
-//                 switch(wParam) {
-//                     case ' ':
-//                         SimulateOneCycle(TRUE);
-//                         break;
+    //         if(InSimulationMode) {
+    //             switch(wParam) {
+    //                 case ' ':
+    //                     SimulateOneCycle(TRUE);
+    //                     break;
 
-//                     case 'R':
-//                         if(GetAsyncKeyState(VK_CONTROL) & 0x8000)
-//                             StartSimulation();
-//                         break;
+    //                 case 'R':
+    //                     if(GetAsyncKeyState(VK_CONTROL) & 0x8000)
+    //                         StartSimulation();
+    //                     break;
 
-//                     case 'H':
-//                         if(GetAsyncKeyState(VK_CONTROL) & 0x8000)
-//                             StopSimulation();
-//                         break;
+    //                 case 'H':
+    //                     if(GetAsyncKeyState(VK_CONTROL) & 0x8000)
+    //                         StopSimulation();
+    //                     break;
 
-//                     case VK_DOWN:
-//                         if(ScrollYOffset < ScrollYOffsetMax)
-//                             ScrollYOffset++;
-//                         RefreshScrollbars();
-//                         InvalidateRect(MainWindow, NULL, FALSE);
-//                         break;
+    //                 case VK_DOWN:
+    //                     if(ScrollYOffset < ScrollYOffsetMax)
+    //                         ScrollYOffset++;
+    //                     RefreshScrollbars();
+    //                     InvalidateRect(MainWindow, NULL, FALSE);
+    //                     break;
 
-//                     case VK_UP:
-//                         if(ScrollYOffset > 0)
-//                             ScrollYOffset--;
-//                         RefreshScrollbars();
-//                         InvalidateRect(MainWindow, NULL, FALSE);
-//                         break;
+    //                 case VK_UP:
+    //                     if(ScrollYOffset > 0)
+    //                         ScrollYOffset--;
+    //                     RefreshScrollbars();
+    //                     InvalidateRect(MainWindow, NULL, FALSE);
+    //                     break;
 
-//                     case VK_LEFT:
-//                         ScrollXOffset -= FONT_WIDTH;
-//                         if(ScrollXOffset < 0) ScrollXOffset = 0;
-//                         RefreshScrollbars();
-//                         InvalidateRect(MainWindow, NULL, FALSE);
-//                         break;
+    //                 case VK_LEFT:
+    //                     ScrollXOffset -= FONT_WIDTH;
+    //                     if(ScrollXOffset < 0) ScrollXOffset = 0;
+    //                     RefreshScrollbars();
+    //                     InvalidateRect(MainWindow, NULL, FALSE);
+    //                     break;
 
-//                     case VK_RIGHT:
-//                         ScrollXOffset += FONT_WIDTH;
-//                         if(ScrollXOffset >= ScrollXOffsetMax)
-//                             ScrollXOffset = ScrollXOffsetMax;
-//                         RefreshScrollbars();
-//                         InvalidateRect(MainWindow, NULL, FALSE);
-//                         break;
+    //                 case VK_RIGHT:
+    //                     ScrollXOffset += FONT_WIDTH;
+    //                     if(ScrollXOffset >= ScrollXOffsetMax)
+    //                         ScrollXOffset = ScrollXOffsetMax;
+    //                     RefreshScrollbars();
+    //                     InvalidateRect(MainWindow, NULL, FALSE);
+    //                     break;
 
-//                     case VK_RETURN:
-//                     case VK_ESCAPE:
-//                         ToggleSimulationMode();
-//                         break;
-//                 }
-//                 break;
-//             }
+    //                 case VK_RETURN:
+    //                 case VK_ESCAPE:
+    //                     ToggleSimulationMode();
+    //                     break;
+    //             }
+    //             break;
+    //         }
 
 
-//             switch(wParam) {
-//                 case VK_F5:
-//                     CompileProgram(FALSE);
-//                     break;
+    //         switch(wParam) {
+    //             case VK_F5:
+    //                 CompileProgram(FALSE);
+    //                 break;
 
-//                 case VK_UP:
-//                     if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
-//                         CHANGING_PROGRAM(PushRungUp());
-//                     } else {
-//                         MoveCursorKeyboard(wParam);
-//                     }
-//                     break;
+    //             case VK_UP:
+    //                 if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
+    //                     CHANGING_PROGRAM(PushRungUp());
+    //                 } else {
+    //                     MoveCursorKeyboard(wParam);
+    //                 }
+    //                 break;
 
-//                 case VK_DOWN:
-//                     if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
-//                         CHANGING_PROGRAM(PushRungDown());
-//                     } else {
-//                         MoveCursorKeyboard(wParam);
-//                     }
-//                     break;
+    //             case VK_DOWN:
+    //                 if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
+    //                     CHANGING_PROGRAM(PushRungDown());
+    //                 } else {
+    //                     MoveCursorKeyboard(wParam);
+    //                 }
+    //                 break;
 
-//                 case VK_RIGHT:
-//                 case VK_LEFT:
-//                     MoveCursorKeyboard(wParam);
-//                     break;
+    //             case VK_RIGHT:
+    //             case VK_LEFT:
+    //                 MoveCursorKeyboard(wParam);
+    //                 break;
 
-//                 case VK_RETURN:
-//                     CHANGING_PROGRAM(EditSelectedElement());
-//                     break;
+    //             case VK_RETURN:
+    //                 CHANGING_PROGRAM(EditSelectedElement());
+    //                 break;
 
-//                 case VK_DELETE:
-//                     if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
-//                         CHANGING_PROGRAM(DeleteSelectedRung());
-//                     } else {
-//                         CHANGING_PROGRAM(DeleteSelectedFromProgram());
-//                     }
-//                     break;
+    //             case VK_DELETE:
+    //                 if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
+    //                     CHANGING_PROGRAM(DeleteSelectedRung());
+    //                 } else {
+    //                     CHANGING_PROGRAM(DeleteSelectedFromProgram());
+    //                 }
+    //                 break;
 
-//                 case VK_OEM_1:
-//                     CHANGING_PROGRAM(AddComment(_("--add comment here--")));
-//                     break;
+    //             case VK_OEM_1:
+    //                 CHANGING_PROGRAM(AddComment(_("--add comment here--")));
+    //                 break;
 
-//                 case 'C':
-//                     CHANGING_PROGRAM(AddContact());
-//                     break;
+    //             case 'C':
+    //                 CHANGING_PROGRAM(AddContact());
+    //                 break;
 
-//                 // TODO: rather country-specific here
-//                 case VK_OEM_2:
-//                     CHANGING_PROGRAM(AddEmpty(ELEM_ONE_SHOT_RISING));
-//                     break;
+    //             // TODO: rather country-specific here
+    //             case VK_OEM_2:
+    //                 CHANGING_PROGRAM(AddEmpty(ELEM_ONE_SHOT_RISING));
+    //                 break;
 
-//                 case VK_OEM_5:
-//                     CHANGING_PROGRAM(AddEmpty(ELEM_ONE_SHOT_FALLING));
-//                     break;
+    //             case VK_OEM_5:
+    //                 CHANGING_PROGRAM(AddEmpty(ELEM_ONE_SHOT_FALLING));
+    //                 break;
 
-//                 case 'L':
-//                     CHANGING_PROGRAM(AddCoil());
-//                     break;
+    //             case 'L':
+    //                 CHANGING_PROGRAM(AddCoil());
+    //                 break;
 
-//                 case 'R':
-//                     CHANGING_PROGRAM(MakeResetOnlySelected());
-//                     break;
+    //             case 'R':
+    //                 CHANGING_PROGRAM(MakeResetOnlySelected());
+    //                 break;
 
-//                 case 'E':
-//                     if(GetAsyncKeyState(VK_CONTROL) & 0x8000) {
-//                         ExportDialog();
-//                     } else {
-//                         CHANGING_PROGRAM(AddReset());
-//                     }
-//                     break;
+    //             case 'E':
+    //                 if(GetAsyncKeyState(VK_CONTROL) & 0x8000) {
+    //                     ExportDialog();
+    //                 } else {
+    //                     CHANGING_PROGRAM(AddReset());
+    //                 }
+    //                 break;
 
-//                 case 'S':
-//                     if(GetAsyncKeyState(VK_CONTROL) & 0x8000) {
-//                         SaveProgram();
-//                         UpdateMainWindowTitleBar();
-//                     } else {
-//                         CHANGING_PROGRAM(MakeSetOnlySelected());
-//                     }
-//                     break;
+    //             case 'S':
+    //                 if(GetAsyncKeyState(VK_CONTROL) & 0x8000) {
+    //                     SaveProgram();
+    //                     UpdateMainWindowTitleBar();
+    //                 } else {
+    //                     CHANGING_PROGRAM(MakeSetOnlySelected());
+    //                 }
+    //                 break;
 
-//                 case 'N':
-//                     if(GetAsyncKeyState(VK_CONTROL) & 0x8000) {
-//                         if(CheckSaveUserCancels()) break;
-//                         if(!ProgramChangedNotSaved) {
-//                             int r = MessageBox(MainWindow, 
-//                                 _("Start new program?"),
-//                                 "LDmicro", MB_YESNO | MB_DEFBUTTON2 |
-//                                 MB_ICONQUESTION);
-//                             if(r == IDNO) break;
-//                         }
-//                         NewProgram();
-//                         strcpy(CurrentSaveFile, "");
-//                         strcpy(CurrentCompileFile, "");
-//                         GenerateIoListDontLoseSelection();
-//                         RefreshScrollbars();
-//                         UpdateMainWindowTitleBar();
-//                     } else {
-//                         CHANGING_PROGRAM(NegateSelected());
-//                     }
-//                     break;
+    //             case 'N':
+    //                 if(GetAsyncKeyState(VK_CONTROL) & 0x8000) {
+    //                     if(CheckSaveUserCancels()) break;
+    //                     if(!ProgramChangedNotSaved) {
+    //                         int r = MessageBox(MainWindow, 
+    //                             _("Start new program?"),
+    //                             "LDmicro", MB_YESNO | MB_DEFBUTTON2 |
+    //                             MB_ICONQUESTION);
+    //                         if(r == IDNO) break;
+    //                     }
+    //                     NewProgram();
+    //                     strcpy(CurrentSaveFile, "");
+    //                     strcpy(CurrentCompileFile, "");
+    //                     GenerateIoListDontLoseSelection();
+    //                     RefreshScrollbars();
+    //                     UpdateMainWindowTitleBar();
+    //                 } else {
+    //                     CHANGING_PROGRAM(NegateSelected());
+    //                 }
+    //                 break;
 
-//                 case 'A':
-//                     CHANGING_PROGRAM(MakeNormalSelected());
-//                     break;
+    //             case 'A':
+    //                 CHANGING_PROGRAM(MakeNormalSelected());
+    //                 break;
 
-//                 case 'T':
-//                     CHANGING_PROGRAM(AddTimer(ELEM_RTO));
-//                     break;
+    //             case 'T':
+    //                 CHANGING_PROGRAM(AddTimer(ELEM_RTO));
+    //                 break;
 
-//                 case 'O':
-//                     if(GetAsyncKeyState(VK_CONTROL) & 0x8000) {
-//                         if(CheckSaveUserCancels()) break;
-//                         OpenDialog();
-//                     } else {
-//                         CHANGING_PROGRAM(AddTimer(ELEM_TON));
-//                     }
-//                     break;
+    //             case 'O':
+    //                 if(GetAsyncKeyState(VK_CONTROL) & 0x8000) {
+    //                     if(CheckSaveUserCancels()) break;
+    //                     OpenDialog();
+    //                 } else {
+    //                     CHANGING_PROGRAM(AddTimer(ELEM_TON));
+    //                 }
+    //                 break;
 
-//                 case 'F':
-//                     CHANGING_PROGRAM(AddTimer(ELEM_TOF));
-//                     break;
+    //             case 'F':
+    //                 CHANGING_PROGRAM(AddTimer(ELEM_TOF));
+    //                 break;
 
-//                 case 'U':
-//                     CHANGING_PROGRAM(AddCounter(ELEM_CTU));
-//                     break;
+    //             case 'U':
+    //                 CHANGING_PROGRAM(AddCounter(ELEM_CTU));
+    //                 break;
 
-//                 case 'I':
-//                     CHANGING_PROGRAM(AddCounter(ELEM_CTD));
-//                     break;
+    //             case 'I':
+    //                 CHANGING_PROGRAM(AddCounter(ELEM_CTD));
+    //                 break;
 
-//                 case 'J':
-//                     CHANGING_PROGRAM(AddCounter(ELEM_CTC));
-//                     break;
+    //             case 'J':
+    //                 CHANGING_PROGRAM(AddCounter(ELEM_CTC));
+    //                 break;
 
-//                 case 'M':
-//                     CHANGING_PROGRAM(AddMove());
-//                     break;
+    //             case 'M':
+    //                 CHANGING_PROGRAM(AddMove());
+    //                 break;
 
-//                 case 'P':
-//                     CHANGING_PROGRAM(AddReadAdc());
-//                     break;
+    //             case 'P':
+    //                 CHANGING_PROGRAM(AddReadAdc());
+    //                 break;
 
-//                 case VK_OEM_PLUS:
-//                     if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
-//                         CHANGING_PROGRAM(AddMath(ELEM_ADD));
-//                     } else {
-//                         CHANGING_PROGRAM(AddCmp(ELEM_EQU));
-//                     }
-//                     break;
+    //             case VK_OEM_PLUS:
+    //                 if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
+    //                     CHANGING_PROGRAM(AddMath(ELEM_ADD));
+    //                 } else {
+    //                     CHANGING_PROGRAM(AddCmp(ELEM_EQU));
+    //                 }
+    //                 break;
 
-//                 case VK_OEM_MINUS:
-//                     if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
-//                     } else {
-//                         CHANGING_PROGRAM(AddMath(ELEM_SUB));
-//                     }
-//                     break;
+    //             case VK_OEM_MINUS:
+    //                 if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
+    //                 } else {
+    //                     CHANGING_PROGRAM(AddMath(ELEM_SUB));
+    //                 }
+    //                 break;
 
-//                 case '8':
-//                     if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
-//                         CHANGING_PROGRAM(AddMath(ELEM_MUL));
-//                     }
-//                     break;
+    //             case '8':
+    //                 if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
+    //                     CHANGING_PROGRAM(AddMath(ELEM_MUL));
+    //                 }
+    //                 break;
 
-//                 case 'D':
-//                     CHANGING_PROGRAM(AddMath(ELEM_DIV));
-//                     break;
+    //             case 'D':
+    //                 CHANGING_PROGRAM(AddMath(ELEM_DIV));
+    //                 break;
 
-//                 case VK_OEM_PERIOD:
-//                     if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
-//                         CHANGING_PROGRAM(AddCmp(ELEM_GRT));
-//                     } else {
-//                         CHANGING_PROGRAM(AddCmp(ELEM_GEQ));
-//                     }
-//                     break;
+    //             case VK_OEM_PERIOD:
+    //                 if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
+    //                     CHANGING_PROGRAM(AddCmp(ELEM_GRT));
+    //                 } else {
+    //                     CHANGING_PROGRAM(AddCmp(ELEM_GEQ));
+    //                 }
+    //                 break;
 
-//                 case VK_OEM_COMMA:
-//                     if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
-//                         CHANGING_PROGRAM(AddCmp(ELEM_LES));
-//                     } else {
-//                         CHANGING_PROGRAM(AddCmp(ELEM_LEQ));
-//                     }
-//                     break;
+    //             case VK_OEM_COMMA:
+    //                 if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
+    //                     CHANGING_PROGRAM(AddCmp(ELEM_LES));
+    //                 } else {
+    //                     CHANGING_PROGRAM(AddCmp(ELEM_LEQ));
+    //                 }
+    //                 break;
 
-//                 case 'V':
-//                     if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
-//                         CHANGING_PROGRAM(InsertRung(TRUE));
-//                     }
-//                     break;
+    //             case 'V':
+    //                 if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
+    //                     CHANGING_PROGRAM(InsertRung(TRUE));
+    //                 }
+    //                 break;
 
-//                 case '6':
-//                     if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
-//                         CHANGING_PROGRAM(InsertRung(FALSE));
-//                     }
-//                     break;
+    //             case '6':
+    //                 if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
+    //                     CHANGING_PROGRAM(InsertRung(FALSE));
+    //                 }
+    //                 break;
 
-//                 case 'Z':
-//                     if(GetAsyncKeyState(VK_CONTROL) & 0x8000) {
-//                         UndoUndo();
-//                     }
-//                     break;
+    //             case 'Z':
+    //                 if(GetAsyncKeyState(VK_CONTROL) & 0x8000) {
+    //                     UndoUndo();
+    //                 }
+    //                 break;
 
-//                 case 'Y':
-//                     if(GetAsyncKeyState(VK_CONTROL) & 0x8000) {
-//                         UndoRedo();
-//                     }
-//                     break;
+    //             case 'Y':
+    //                 if(GetAsyncKeyState(VK_CONTROL) & 0x8000) {
+    //                     UndoRedo();
+    //                 }
+    //                 break;
 
-//                 default:
-//                     break;
-//             }
-//             if(wParam != VK_SHIFT && wParam != VK_CONTROL) {
-//                 InvalidateRect(MainWindow, NULL, FALSE);
-//             }
-//             break;
-//         }
+    //             default:
+    //                 break;
+    //         }
+    //         if(wParam != VK_SHIFT && wParam != VK_CONTROL) {
+    //             InvalidateRect(MainWindow, NULL, FALSE);
+    //         }
+    //         break;
+    //     }
 
-//         case WM_LBUTTONDBLCLK: {
-//             int x = LOWORD(lParam);
-//             int y = HIWORD(lParam);
-//             if(InSimulationMode) {
-//                 EditElementMouseDoubleclick(x, y);
-//             } else {
-//                 CHANGING_PROGRAM(EditElementMouseDoubleclick(x, y));
-//             }
-//             InvalidateRect(MainWindow, NULL, FALSE);
-//             break;
-//         }
+    //     case WM_LBUTTONDBLCLK: {
+    //         int x = LOWORD(lParam);
+    //         int y = HIWORD(lParam);
+    //         if(InSimulationMode) {
+    //             EditElementMouseDoubleclick(x, y);
+    //         } else {
+    //             CHANGING_PROGRAM(EditElementMouseDoubleclick(x, y));
+    //         }
+    //         InvalidateRect(MainWindow, NULL, FALSE);
+    //         break;
+    //     }
 
-//         case WM_LBUTTONDOWN: {
-//             int x = LOWORD(lParam);
-//             int y = HIWORD(lParam);
-//             if((y > (IoListTop - 9)) && (y < (IoListTop + 3))) {
-//                 POINT pt;
-//                 pt.x = x; pt.y = y;
-//                 ClientToScreen(MainWindow, &pt);
-//                 MouseY = pt.y;
-//                 MouseHookHandle = SetWindowsHookEx(WH_MOUSE_LL,
-//                         (HOOKPROC)MouseHook, Instance, 0);
-//             }
-//             if(!InSimulationMode) MoveCursorMouseClick(x, y);
+    //     case WM_LBUTTONDOWN: {
+    //         int x = LOWORD(lParam);
+    //         int y = HIWORD(lParam);
+    //         if((y > (IoListTop - 9)) && (y < (IoListTop + 3))) {
+    //             POINT pt;
+    //             pt.x = x; pt.y = y;
+    //             ClientToScreen(MainWindow, &pt);
+    //             MouseY = pt.y;
+    //             MouseHookHandle = SetWindowsHookEx(WH_MOUSE_LL,
+    //                     (HOOKPROC)MouseHook, Instance, 0);
+    //         }
+    //         if(!InSimulationMode) MoveCursorMouseClick(x, y);
 
-//             SetFocus(MainWindow);
-//             InvalidateRect(MainWindow, NULL, FALSE);
-//             break;
-//         }
-//         case WM_MOUSEMOVE: {
-//             int x = LOWORD(lParam);
-//             int y = HIWORD(lParam);
+    //         SetFocus(MainWindow);
+    //         InvalidateRect(MainWindow, NULL, FALSE);
+    //         break;
+    //     }
+    //     case WM_MOUSEMOVE: {
+    //         int x = LOWORD(lParam);
+    //         int y = HIWORD(lParam);
 
-//             if((y > (IoListTop - 9)) && (y < (IoListTop + 3))) {
-//                 SetCursor(LoadCursor(NULL, IDC_SIZENS));
-//             } else {
-//                 SetCursor(LoadCursor(NULL, IDC_ARROW));
-//             }
+    //         if((y > (IoListTop - 9)) && (y < (IoListTop + 3))) {
+    //             SetCursor(LoadCursor(NULL, IDC_SIZENS));
+    //         } else {
+    //             SetCursor(LoadCursor(NULL, IDC_ARROW));
+    //         }
             
-//             break;
-//         }
-//         case WM_MOUSEWHEEL: {
-//             if((GET_WHEEL_DELTA_WPARAM(wParam)) > 0) {
-//                 VscrollProc(SB_LINEUP);
-//             } else {
-//                 VscrollProc(SB_LINEDOWN);
-//             }
-//             break;
-//         }
+    //         break;
+    //     }
+    //     case WM_MOUSEWHEEL: {
+    //         if((GET_WHEEL_DELTA_WPARAM(wParam)) > 0) {
+    //             VscrollProc(SB_LINEUP);
+    //         } else {
+    //             VscrollProc(SB_LINEDOWN);
+    //         }
+    //         break;
+    //     }
 
-//         case WM_SIZE:
-//             MainWindowResized();
-//             break;
+    //     case WM_SIZE:
+    //         MainWindowResized();
+    //         break;
 
-//         case WM_NOTIFY: {
-//             NMHDR *h = (NMHDR *)lParam;
-//             if(h->hwndFrom == IoList) {
-//                 IoListProc(h);
-//             }
-//             return 0;
-//         }
-//         case WM_VSCROLL:
-//             VscrollProc(wParam);
-//             break;
+    //     case WM_NOTIFY: {
+    //         NMHDR *h = (NMHDR *)lParam;
+    //         if(h->hwndFrom == IoList) {
+    //             IoListProc(h);
+    //         }
+    //         return 0;
+    //     }
+    //     case WM_VSCROLL:
+    //         VscrollProc(wParam);
+    //         break;
 
-//         case WM_HSCROLL:
-//             HscrollProc(wParam);
-//             break;
+    //     case WM_HSCROLL:
+    //         HscrollProc(wParam);
+    //         break;
 
-//         case WM_COMMAND:
-//             ProcessMenu(LOWORD(wParam));
-//             InvalidateRect(MainWindow, NULL, FALSE);
-//             break;
+    //     case WM_COMMAND:
+    //         ProcessMenu(LOWORD(wParam));
+    //         InvalidateRect(MainWindow, NULL, FALSE);
+    //         break;
 
-//         case WM_CLOSE:
-//         case WM_DESTROY:
-//             if(CheckSaveUserCancels()) break;
+    //     case WM_CLOSE:
+    //     case WM_DESTROY:
+    //         if(CheckSaveUserCancels()) break;
 
-//             PostQuitMessage(0);
-//             return 1;
+    //         PostQuitMessage(0);
+    //         return 1;
 
-//         default:
-//             return DefWindowProc(hwnd, msg, wParam, lParam);
-//     }
+    //     default:
+    //         return DefWindowProc(hwnd, msg, wParam, lParam);
+    // }
 
-//     return 1;
-// }
+    return 1;
+}
 
 //-----------------------------------------------------------------------------
 // Create our window class; nothing exciting.
 //-----------------------------------------------------------------------------
-// static BOOL MakeWindowClass()
-// {
-//     WNDCLASSEX wc;
-//     memset(&wc, 0, sizeof(wc));
-//     wc.cbSize = sizeof(wc);
+static BOOL MakeWindowClass()
+{
+    WNDCLASSEX wc;
+    memset(&wc, 0, sizeof(wc));
+    wc.cbSize = sizeof(wc);
 
-//     wc.style            = CS_BYTEALIGNCLIENT | CS_BYTEALIGNWINDOW | CS_OWNDC |
-//                             CS_DBLCLKS;
-//     wc.lpfnWndProc      = (WNDPROC)MainWndProc;
-//     wc.hInstance        = Instance;
-//     wc.hbrBackground    = (HBRUSH)GetStockObject(BLACK_BRUSH);
-//     wc.lpszClassName    = "LDmicro";
-//     wc.lpszMenuName     = NULL;
-//     wc.hCursor          = LoadCursor(NULL, IDC_ARROW);
-//     wc.hIcon            = (HICON)LoadImage(Instance, MAKEINTRESOURCE(4000),
-//                             IMAGE_ICON, 32, 32, 0);
-//     wc.hIconSm          = (HICON)LoadImage(Instance, MAKEINTRESOURCE(4000),
-//                             IMAGE_ICON, 16, 16, 0);
+    // wc.style            = CS_BYTEALIGNCLIENT | CS_BYTEALIGNWINDOW | CS_OWNDC |
+                            // CS_DBLCLKS;
+    // wc.lpfnWndProc      = (WNDPROC)MainWndProc;
+    wc.hInstance        = NULL;
+    wc.hbrBackground    = (HBRUSH)GetStockObject(BLACK_BRUSH);
+    wc.lpszClassName    = "LDmicro";
+    // wc.lpszMenuName     = Instance;
+    // wc.hCursor          = LoadCursor(NULL, IDC_ARROW);
+    wc.hIcon            = (HICON)LoadImage(Instance, LDMICRO_ICON,
+                            IMAGE_ICON, 32, 32, 0);
+    wc.hIconSm          = (HICON)LoadImage(Instance, LDMICRO_ICON,
+                            IMAGE_ICON, 16, 16, 0);//MAKEINTRESOURCE(4000)
 
-//     return RegisterClassEx(&wc);
-// }
+    return RegisterClassEx(&wc);
+}
+
 void LDMicro_close(HWND window)
 {
     FreezeWindowPos(MainWindow);
@@ -1101,7 +1102,8 @@ int main(int argc, char** argv)
     }
     
     gtk_init(&argc, &argv);
-
+    Instance = NULL;
+    /* TEST
     MainWindow=gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW(MainWindow), "LDMicro");
     g_signal_connect (MainWindow, "delete_event", G_CALLBACK (LDMicro_close), NULL);
@@ -1111,7 +1113,6 @@ int main(int argc, char** argv)
     ThawWindowPos(MainWindow);
     ThawDWORD(IoListHeight);
     
-    gtk_widget_show(MainWindow);
     
     // Title bar
     UpdateMainWindowTitleBar();
@@ -1121,50 +1122,46 @@ int main(int argc, char** argv)
 
     // Calling the Simulation functions
     
-    StartSimulation();
-    SetMenusEnabled(true, true, false,
-    true, false, false, false,
-    true, true, true);
-    // ToggleSimulationMode();
+    // StartSimulation(); // test
+    // SetMenusEnabled(true, true, false,
+    // true, false, false, false,
+    // true, true, true);  // test
+    // ToggleSimulationMode(); //test
     // GenerateIoListDontLoseSelection();
-    StopSimulation();
-
-    // Displaying the window
-    gtk_widget_show_all(MainWindow);
-
-    gtk_main();
+    StopSimulation(); //Test
+    */
     
-    // /// ~~~
-    // Instance = hInstance; /// parent window
+    MainHeap = HeapCreate(0, 1024*64, 0);
 
-    // MainHeap = HeapCreate(0, 1024*64, 0);
+    MakeWindowClass();
+    // MakeDialogBoxClass();
+    // MakeComponentListClass();
+    // MakeSmplDialogClass();
+    // MakeNamingListClass();
+    HMENU top = MakeMainWindowMenus();
 
-    // // MakeWindowClass();
-    // // MakeDialogBoxClass();
-    // // MakeComponentListClass();
-    // // MakeSmplDialogClass();
-    // // MakeNamingListClass();
-    // HMENU top = MakeMainWindowMenus();
+    /// Make main window
+    // WS_OVERLAPPED | WS_THICKFRAME | WS_CLIPCHILDREN | WS_MAXIMIZEBOX |
+        // WS_MINIMIZEBOX | WS_SYSMENU | WS_SIZEBOX
+    MainWindow = CreateWindowEx(0, "LDmicro", "",
+        0,
+        10, 10, 800, 600, NULL, top, NULL, NULL);
+    g_signal_connect (MainWindow, "delete_event", G_CALLBACK (LDMicro_close), NULL);
+    
+    ThawWindowPos(MainWindow);
+    IoListHeight = 100;
+    ThawDWORD(IoListHeight);
 
-    // /// Make main window
-    // // MainWindow = CreateWindowEx(0, "LDmicro", "",
-    // //     WS_OVERLAPPED | WS_THICKFRAME | WS_CLIPCHILDREN | WS_MAXIMIZEBOX |
-    // //     WS_MINIMIZEBOX | WS_SYSMENU | WS_SIZEBOX,
-    // //     10, 10, 800, 600, NULL, top, Instance, NULL);
-    // ThawWindowPos(MainWindow);
-    // IoListHeight = 100;
-    // ThawDWORD(IoListHeight);
+    // InitCommonControls(); /// NOT USED, Only for windows
+    InitForDrawing();
 
-    // InitCommonControls();
-    // InitForDrawing();
-
-    // MakeMainWindowControls();
-    // MainWindowResized();
+    MakeMainWindowControls();
+    MainWindowResized();
     // NewProgram();
     // strcpy(CurrentSaveFile, "");
 
-    // // We are running interactively, or we would already have exited. We
-    // // can therefore show the window now, and otherwise set up the GUI.
+    // We are running interactively, or we would already have exited. We
+    // can therefore show the window now, and otherwise set up the GUI.
 
     // ShowWindow(MainWindow, SW_SHOW);
     // SetTimer(MainWindow, TIMER_BLINK_CURSOR, 800, BlinkCursor);
@@ -1188,9 +1185,9 @@ int main(int argc, char** argv)
     //     UndoFlush();
     // }
 
-    // GenerateIoListDontLoseSelection();
+    // GenerateIoListDontLoseSelection(); ~
     // RefreshScrollbars();
-    // UpdateMainWindowTitleBar();
+    // UpdateMainWindowTitleBar(); ~
 
     // MSG msg;
     // DWORD ret;
@@ -1213,6 +1210,10 @@ int main(int argc, char** argv)
     //     TranslateMessage(&msg);
     //     DispatchMessage(&msg);
     // }
+
+    // Displaying the window
+    gtk_widget_show_all(MainWindow);
     
+    gtk_main();
     return EXIT_SUCCESS;
 }

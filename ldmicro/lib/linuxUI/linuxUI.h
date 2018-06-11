@@ -43,8 +43,8 @@ extern const UINT MF_CHECKED;
 extern const UINT MF_UNCHECKED;
 
 /// ListStore
-extern GtkWidget* view;
-extern GtkTreeViewColumn* column;
+extern GtkWidget *view;
+extern GtkTreeViewColumn *column;
 
 /// data types
 typedef struct OpenFileInfoData {

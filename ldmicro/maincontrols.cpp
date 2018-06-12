@@ -204,7 +204,6 @@ HMENU MakeMainWindowMenus(void)
                                 GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (MNU_SAVE, "activate", AccelGroup, GDK_KEY_S,
                                 GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
-    // gtk_accel_group_connect (AccelGroup, GDK_KEY_s, GDK_CONTROL_MASK, 0, closure);
     gtk_widget_add_accelerator (MNU_EXPORT, "activate", AccelGroup, GDK_KEY_E,
                                 GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
   
@@ -237,7 +236,6 @@ HMENU MakeMainWindowMenus(void)
                                 GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (MNU_INSERT_RUNG_BEFORE, "activate", AccelGroup, GDK_KEY_F6,
                                 GDK_SHIFT_MASK, GTK_ACCEL_VISIBLE);
-    // gtk_accel_group_connect (AccelGroup, GDK_KEY_F6, GDK_SHIFT_MASK, 0, closure);
     gtk_widget_add_accelerator (MNU_INSERT_RUNG_AFTER, "activate", AccelGroup, GDK_KEY_V,
                                 GDK_SHIFT_MASK, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (MNU_PUSH_RUNG_UP, "activate", AccelGroup, GDK_KEY_uparrow,

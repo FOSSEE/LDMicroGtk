@@ -42,6 +42,11 @@ extern const UINT MF_GRAYED;
 extern const UINT MF_CHECKED;
 extern const UINT MF_UNCHECKED;
 
+/// Accelerators (keyboard shortcuts)
+extern GtkAccelGroup* AccelGroup;
+extern GClosure* closure;
+
+
 /// ListStore
 extern GtkWidget* view;
 extern GtkTreeViewColumn *column;

@@ -122,7 +122,7 @@ static HMENU        TopMenu;                                            // Menu 
 static HMENU        settings;
 static HMENU        compile;
 static HMENU        help;
-static HMENU        ScrollWindow;
+HMENU        ScrollWindow;
 
 // listview used to maintain the list of I/O pins with symbolic names, plus
 // the internal relay too
@@ -176,22 +176,37 @@ HMENU MakeMainWindowMenus(void)
     compile = gtk_menu_new();
     help = gtk_menu_new();
 
+    // Declaring the accelerator group for keyboard shortcuts
+    AccelGroup = gtk_accel_group_new ();
+    gtk_window_add_accel_group (GTK_WINDOW (MainWindow), AccelGroup);
+
     // Creating labels for each menu
-    FileLabel = gtk_menu_item_new_with_label("File");
-    EditLabel = gtk_menu_item_new_with_label("Edit");
-    SettingsLabel = gtk_menu_item_new_with_label("Settings");  
-    InstructionLabel = gtk_menu_item_new_with_label("Instructions");
-    SimulateLabel = gtk_menu_item_new_with_label("Simulate");
-    CompileLabel = gtk_menu_item_new_with_label("Compile");
-    HelpLabel = gtk_menu_item_new_with_label("Help");
+    FileLabel = gtk_menu_item_new_with_mnemonic("_File");
+    EditLabel = gtk_menu_item_new_with_mnemonic("_Edit");
+    SettingsLabel = gtk_menu_item_new_with_mnemonic("_Settings");  
+    InstructionLabel = gtk_menu_item_new_with_mnemonic("_Instructions");
+    SimulateLabel = gtk_menu_item_new_with_mnemonic("_Simulate");
+    CompileLabel = gtk_menu_item_new_with_mnemonic("_Compile");
+    HelpLabel = gtk_menu_item_new_with_mnemonic("_Help");
 
     // Creating labels for File Menu
-    MNU_NEW = gtk_menu_item_new_with_label("New");
-    MNU_OPEN = gtk_menu_item_new_with_label("Open");
-    MNU_SAVE = gtk_menu_item_new_with_label("Save");
-    MNU_SAVE_AS = gtk_menu_item_new_with_label("Save As");
-    MNU_EXPORT = gtk_menu_item_new_with_label("Export As Text");
-    MNU_EXIT = gtk_menu_item_new_with_label("Exit");
+    MNU_NEW = gtk_menu_item_new_with_mnemonic("_New");
+    MNU_OPEN = gtk_menu_item_new_with_mnemonic("_Open");
+    MNU_SAVE = gtk_menu_item_new_with_mnemonic("_Save");
+    MNU_SAVE_AS = gtk_menu_item_new_with_mnemonic("_Save As");
+    MNU_EXPORT = gtk_menu_item_new_with_mnemonic("_Export As Text");
+    MNU_EXIT = gtk_menu_item_new_with_mnemonic("_Exit");
+
+    // Creating keyboard shortcuts for File menu
+    gtk_widget_add_accelerator (MNU_NEW, "activate", AccelGroup, GDK_KEY_N,
+                                GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+    gtk_widget_add_accelerator (MNU_OPEN, "activate", AccelGroup, GDK_KEY_O,
+                                GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+    gtk_widget_add_accelerator (MNU_SAVE, "activate", AccelGroup, GDK_KEY_S,
+                                GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+    // gtk_accel_group_connect (AccelGroup, GDK_KEY_s, GDK_CONTROL_MASK, 0, closure);
+    gtk_widget_add_accelerator (MNU_EXPORT, "activate", AccelGroup, GDK_KEY_E,
+                                GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
   
     // Appending menu items (labels) to File menu and adding separators
     gtk_menu_shell_append(GTK_MENU_SHELL (FileMenu), MNU_NEW);       // Appending menu items
@@ -206,14 +221,33 @@ HMENU MakeMainWindowMenus(void)
     gtk_menu_shell_append(GTK_MENU_SHELL (FileMenu), MNU_EXIT);
 
     // Creating labels for Edit Menu
-    MNU_UNDO = gtk_menu_item_new_with_label("Undo");
-    MNU_REDO = gtk_menu_item_new_with_label("Redo");
-    MNU_INSERT_RUNG_BEFORE = gtk_menu_item_new_with_label("Insert rung Before");
-    MNU_INSERT_RUNG_AFTER = gtk_menu_item_new_with_label("Insert Rung After");
-    MNU_PUSH_RUNG_UP = gtk_menu_item_new_with_label("Move Selected Rung Up");
-    MNU_PUSH_RUNG_DOWN = gtk_menu_item_new_with_label("Move Selected Rung Down");
-    MNU_DELETE_ELEMENT = gtk_menu_item_new_with_label("Delete Selected Element");
-    MNU_DELETE_RUNG = gtk_menu_item_new_with_label("Delete Rung");
+    MNU_UNDO = gtk_menu_item_new_with_mnemonic("_Undo");
+    MNU_REDO = gtk_menu_item_new_with_mnemonic("_Redo");
+    MNU_INSERT_RUNG_BEFORE = gtk_menu_item_new_with_mnemonic("_Insert rung Before");
+    MNU_INSERT_RUNG_AFTER = gtk_menu_item_new_with_mnemonic("_Insert Rung After");
+    MNU_PUSH_RUNG_UP = gtk_menu_item_new_with_mnemonic("_Move Selected Rung Up");
+    MNU_PUSH_RUNG_DOWN = gtk_menu_item_new_with_mnemonic("_Move Selected Rung Down");
+    MNU_DELETE_ELEMENT = gtk_menu_item_new_with_mnemonic("_Delete Selected Element");
+    MNU_DELETE_RUNG = gtk_menu_item_new_with_mnemonic("_Delete Rung");
+
+    // Creating keyboard shortcuts for Edit menu
+    gtk_widget_add_accelerator (MNU_UNDO, "activate", AccelGroup, GDK_KEY_Z,
+                                GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+    gtk_widget_add_accelerator (MNU_REDO, "activate", AccelGroup, GDK_KEY_Y,
+                                GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+    gtk_widget_add_accelerator (MNU_INSERT_RUNG_BEFORE, "activate", AccelGroup, GDK_KEY_F6,
+                                GDK_SHIFT_MASK, GTK_ACCEL_VISIBLE);
+    // gtk_accel_group_connect (AccelGroup, GDK_KEY_F6, GDK_SHIFT_MASK, 0, closure);
+    gtk_widget_add_accelerator (MNU_INSERT_RUNG_AFTER, "activate", AccelGroup, GDK_KEY_V,
+                                GDK_SHIFT_MASK, GTK_ACCEL_VISIBLE);
+    gtk_widget_add_accelerator (MNU_PUSH_RUNG_UP, "activate", AccelGroup, GDK_KEY_uparrow,
+                                GDK_SHIFT_MASK, GTK_ACCEL_VISIBLE);
+    gtk_widget_add_accelerator (MNU_PUSH_RUNG_DOWN, "activate", AccelGroup, GDK_KEY_downarrow,
+                                GDK_SHIFT_MASK, GTK_ACCEL_VISIBLE);
+    gtk_widget_add_accelerator (MNU_DELETE_ELEMENT, "activate", AccelGroup, GDK_KEY_Delete,
+                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+    gtk_widget_add_accelerator (MNU_DELETE_RUNG, "activate", AccelGroup, GDK_KEY_Delete,
+                                GDK_SHIFT_MASK, GTK_ACCEL_VISIBLE);
 
     // Appending menu items to Edit menu and adding separators
     gtk_menu_shell_append(GTK_MENU_SHELL (EditMenu), MNU_UNDO);    
@@ -230,8 +264,8 @@ HMENU MakeMainWindowMenus(void)
     gtk_menu_shell_append(GTK_MENU_SHELL (EditMenu), MNU_DELETE_RUNG);
 
     // Creating labels for Settings Menu
-    MNU_MCU_SETTINGS = gtk_menu_item_new_with_label ("MCU Parameters...");
-    MNU_MICRO_CONTROLLER = gtk_menu_item_new_with_label ("Microcontroller");
+    MNU_MCU_SETTINGS = gtk_menu_item_new_with_mnemonic ("_MCU Parameters...");
+    MNU_MICRO_CONTROLLER = gtk_menu_item_new_with_mnemonic ("_Microcontroller");
 
     // Appending menu items to Settings menu
     gtk_menu_shell_append (GTK_MENU_SHELL (settings), MNU_MCU_SETTINGS);
@@ -248,45 +282,101 @@ HMENU MakeMainWindowMenus(void)
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(MNU_MICRO_CONTROLLER), ProcessorMenu);
 
     // Creating labels for Instruction Menu and adding separators
-    MNU_INSERT_COMMENT = gtk_menu_item_new_with_label("Insert Comment");
-    MNU_INSERT_CONTACTS = gtk_menu_item_new_with_label("Insert Contacts");
-    MNU_INSERT_OSR = gtk_menu_item_new_with_label("Insert OSR (One Shot Rising)");
-    MNU_INSERT_OSF = gtk_menu_item_new_with_label("Insert OSF (One Shot Falling)");
-    MNU_INSERT_TON = gtk_menu_item_new_with_label("Insert TON (Delayed Turn On)");
-    MNU_INSERT_TOF = gtk_menu_item_new_with_label("Insert TOF (Delayed Turn Off)");
-    MNU_INSERT_RTO = gtk_menu_item_new_with_label("Insert RTO (Retentive Delayed Turn On)");
-    MNU_INSERT_CTU = gtk_menu_item_new_with_label("Insert CTU (Count Up)");
-    MNU_INSERT_CTD = gtk_menu_item_new_with_label("Insert CTD (Count Down)");
-    MNU_INSERT_CTC = gtk_menu_item_new_with_label("Insert CTC (Count Circular)");
-    MNU_INSERT_EQU = gtk_menu_item_new_with_label("Insert EQU (Compare for Equals)");
-    MNU_INSERT_NEQ = gtk_menu_item_new_with_label("Insert NEQ (Compare for Not Equals)");
-    MNU_INSERT_GRT = gtk_menu_item_new_with_label("Insert GRT (Compare for Greater Than)");
-    MNU_INSERT_GEQ = gtk_menu_item_new_with_label("Insert GEQ (Compare for Greater Than or Equal)");
-    MNU_INSERT_LES = gtk_menu_item_new_with_label("Insert LES (Compare for Less Than)");
-    MNU_INSERT_LEQ = gtk_menu_item_new_with_label("Insert LEQ (Compare for Less Than or Equal)");
-    MNU_INSERT_OPEN = gtk_menu_item_new_with_label("Insert Open Circuit");
-    MNU_INSERT_SHORT = gtk_menu_item_new_with_label("Insert Short Circuit");
-    MNU_INSERT_MASTER_RLY = gtk_menu_item_new_with_label("Insert Master Control Relay");
-    MNU_INSERT_COIL = gtk_menu_item_new_with_label("Insert Coil");
-    MNU_INSERT_RES = gtk_menu_item_new_with_label("Insert RES (Counter/RTO Reset)");
-    MNU_INSERT_MOV = gtk_menu_item_new_with_label("Insert MOV (Move)");
-    MNU_INSERT_ADD = gtk_menu_item_new_with_label("Insert ADD (16-bit Integer Ad)");
-    MNU_INSERT_SUB = gtk_menu_item_new_with_label("Insert SUB (16-bit Integer Subtract)");
-    MNU_INSERT_MUL = gtk_menu_item_new_with_label("Insert MUL (16-bit Integer Multiply)");
-    MNU_INSERT_DIV = gtk_menu_item_new_with_label("Insert DIV (16-bit Integer Division)");
-    MNU_INSERT_SHIFT_REG = gtk_menu_item_new_with_label("Insert Shift Register");
-    MNU_INSERT_LUT = gtk_menu_item_new_with_label("Insert Look-Up Table");
-    MNU_INSERT_PWL = gtk_menu_item_new_with_label("Insert Piecewise Linear");
-    MNU_INSERT_FMTD_STR = gtk_menu_item_new_with_label("Insert Formatted String Over UART");
-    MNU_INSERT_UART_SEND = gtk_menu_item_new_with_label("Insert UART Send");
-    MNU_INSERT_UART_RECV = gtk_menu_item_new_with_label("Insert UART Receive");
-    MNU_INSERT_SET_PWM = gtk_menu_item_new_with_label("Insert Set PWM Output");
-    MNU_INSERT_READ_ADC = gtk_menu_item_new_with_label("Insert A/D Converter Read");
-    MNU_INSERT_PERSIST = gtk_menu_item_new_with_label("Insert Make Persistent");
-    MNU_MAKE_NORMAL = gtk_menu_item_new_with_label("Make Normal");
-    MNU_NEGATE = gtk_menu_item_new_with_label("Make Negated");
-    MNU_MAKE_SET_ONLY = gtk_menu_item_new_with_label("Make Set-Only");
-    MNU_MAKE_RESET_ONLY = gtk_menu_item_new_with_label("Make Reset-Only");
+    MNU_INSERT_COMMENT = gtk_menu_item_new_with_mnemonic("_Insert Comment");
+    MNU_INSERT_CONTACTS = gtk_menu_item_new_with_mnemonic("_Insert Contacts");
+    MNU_INSERT_OSR = gtk_menu_item_new_with_mnemonic("_Insert OSR (One Shot Rising)");
+    MNU_INSERT_OSF = gtk_menu_item_new_with_mnemonic("_Insert OSF (One Shot Falling)");
+    MNU_INSERT_TON = gtk_menu_item_new_with_mnemonic("_Insert TON (Delayed Turn On)");
+    MNU_INSERT_TOF = gtk_menu_item_new_with_mnemonic("_Insert TOF (Delayed Turn Off)");
+    MNU_INSERT_RTO = gtk_menu_item_new_with_mnemonic("_Insert RTO (Retentive Delayed Turn On)");
+    MNU_INSERT_CTU = gtk_menu_item_new_with_mnemonic("_Insert CTU (Count Up)");
+    MNU_INSERT_CTD = gtk_menu_item_new_with_mnemonic("_Insert CTD (Count Down)");
+    MNU_INSERT_CTC = gtk_menu_item_new_with_mnemonic("_Insert CTC (Count Circular)");
+    MNU_INSERT_EQU = gtk_menu_item_new_with_mnemonic("_Insert EQU (Compare for Equals)");
+    MNU_INSERT_NEQ = gtk_menu_item_new_with_mnemonic("_Insert NEQ (Compare for Not Equals)");
+    MNU_INSERT_GRT = gtk_menu_item_new_with_mnemonic("_Insert GRT (Compare for Greater Than)");
+    MNU_INSERT_GEQ = gtk_menu_item_new_with_mnemonic("_Insert GEQ (Compare for Greater Than or Equal)");
+    MNU_INSERT_LES = gtk_menu_item_new_with_mnemonic("_Insert LES (Compare for Less Than)");
+    MNU_INSERT_LEQ = gtk_menu_item_new_with_mnemonic("_Insert LEQ (Compare for Less Than or Equal)");
+    MNU_INSERT_OPEN = gtk_menu_item_new_with_mnemonic("_Insert Open Circuit");
+    MNU_INSERT_SHORT = gtk_menu_item_new_with_mnemonic("_Insert Short Circuit");
+    MNU_INSERT_MASTER_RLY = gtk_menu_item_new_with_mnemonic("_Insert Master Control Relay");
+    MNU_INSERT_COIL = gtk_menu_item_new_with_mnemonic("_Insert Coil");
+    MNU_INSERT_RES = gtk_menu_item_new_with_mnemonic("_Insert RES (Counter/RTO Reset)");
+    MNU_INSERT_MOV = gtk_menu_item_new_with_mnemonic("_Insert MOV (Move)");
+    MNU_INSERT_ADD = gtk_menu_item_new_with_mnemonic("_Insert ADD (16-bit Integer Ad)");
+    MNU_INSERT_SUB = gtk_menu_item_new_with_mnemonic("_Insert SUB (16-bit Integer Subtract)");
+    MNU_INSERT_MUL = gtk_menu_item_new_with_mnemonic("_Insert MUL (16-bit Integer Multiply)");
+    MNU_INSERT_DIV = gtk_menu_item_new_with_mnemonic("_Insert DIV (16-bit Integer Division)");
+    MNU_INSERT_SHIFT_REG = gtk_menu_item_new_with_mnemonic("_Insert Shift Register");
+    MNU_INSERT_LUT = gtk_menu_item_new_with_mnemonic("_Insert Look-Up Table");
+    MNU_INSERT_PWL = gtk_menu_item_new_with_mnemonic("_Insert Piecewise Linear");
+    MNU_INSERT_FMTD_STR = gtk_menu_item_new_with_mnemonic("_Insert Formatted String Over UART");
+    MNU_INSERT_UART_SEND = gtk_menu_item_new_with_mnemonic("_Insert UART Send");
+    MNU_INSERT_UART_RECV = gtk_menu_item_new_with_mnemonic("_Insert UART Receive");
+    MNU_INSERT_SET_PWM = gtk_menu_item_new_with_mnemonic("_Insert Set PWM Output");
+    MNU_INSERT_READ_ADC = gtk_menu_item_new_with_mnemonic("_Insert A/D Converter Read");
+    MNU_INSERT_PERSIST = gtk_menu_item_new_with_mnemonic("_Insert Make Persistent");
+    MNU_MAKE_NORMAL = gtk_menu_item_new_with_mnemonic("_Make Normal");
+    MNU_NEGATE = gtk_menu_item_new_with_mnemonic("_Make Negated");
+    MNU_MAKE_SET_ONLY = gtk_menu_item_new_with_mnemonic("_Make Set-Only");
+    MNU_MAKE_RESET_ONLY = gtk_menu_item_new_with_mnemonic("_Make Reset-Only");
+
+    // Creating keyboard shortcuts for Instructions menu
+    gtk_widget_add_accelerator (MNU_INSERT_COMMENT, "activate", AccelGroup, GDK_KEY_semicolon,
+                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+    gtk_widget_add_accelerator (MNU_INSERT_CONTACTS, "activate", AccelGroup, GDK_KEY_C,
+                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+    gtk_widget_add_accelerator (MNU_INSERT_OSR, "activate", AccelGroup, GDK_KEY_backslash,
+                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+    gtk_widget_add_accelerator (MNU_INSERT_OSF, "activate", AccelGroup, GDK_KEY_slash,
+                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+    gtk_widget_add_accelerator (MNU_INSERT_TON, "activate", AccelGroup, GDK_KEY_O,
+                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+    gtk_widget_add_accelerator (MNU_INSERT_TOF, "activate", AccelGroup, GDK_KEY_F,
+                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+    gtk_widget_add_accelerator (MNU_INSERT_RTO, "activate", AccelGroup, GDK_KEY_T,
+                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+    gtk_widget_add_accelerator (MNU_INSERT_CTU, "activate", AccelGroup, GDK_KEY_U,
+                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+    gtk_widget_add_accelerator (MNU_INSERT_CTD, "activate", AccelGroup, GDK_KEY_I,
+                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+    gtk_widget_add_accelerator (MNU_INSERT_CTC, "activate", AccelGroup, GDK_KEY_J,
+                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+    gtk_widget_add_accelerator (MNU_INSERT_EQU, "activate", AccelGroup, GDK_KEY_equal,
+                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+    gtk_widget_add_accelerator (MNU_INSERT_GRT, "activate", AccelGroup, GDK_KEY_greater,
+                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+    gtk_widget_add_accelerator (MNU_INSERT_GEQ, "activate", AccelGroup, GDK_KEY_Stop,
+                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+    gtk_widget_add_accelerator (MNU_INSERT_LES, "activate", AccelGroup, GDK_KEY_less,
+                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+    gtk_widget_add_accelerator (MNU_INSERT_LEQ, "activate", AccelGroup, GDK_KEY_comma,
+                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+    gtk_widget_add_accelerator (MNU_INSERT_COIL, "activate", AccelGroup, GDK_KEY_L,
+                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+    gtk_widget_add_accelerator (MNU_INSERT_RES, "activate", AccelGroup, GDK_KEY_E,
+                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+    gtk_widget_add_accelerator (MNU_INSERT_MOV, "activate", AccelGroup, GDK_KEY_M,
+                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+    gtk_widget_add_accelerator (MNU_INSERT_ADD, "activate", AccelGroup, GDK_KEY_plus,
+                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+    gtk_widget_add_accelerator (MNU_INSERT_SUB, "activate", AccelGroup, GDK_KEY_minus,
+                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+    gtk_widget_add_accelerator (MNU_INSERT_MUL, "activate", AccelGroup, GDK_KEY_multiply,
+                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+    gtk_widget_add_accelerator (MNU_INSERT_DIV, "activate", AccelGroup, GDK_KEY_D,
+                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+    gtk_widget_add_accelerator (MNU_INSERT_READ_ADC, "activate", AccelGroup, GDK_KEY_P,
+                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+    gtk_widget_add_accelerator (MNU_MAKE_NORMAL, "activate", AccelGroup, GDK_KEY_A,
+                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+    gtk_widget_add_accelerator (MNU_NEGATE, "activate", AccelGroup, GDK_KEY_N,
+                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+    gtk_widget_add_accelerator (MNU_MAKE_SET_ONLY, "activate", AccelGroup, GDK_KEY_S,
+                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+    gtk_widget_add_accelerator (MNU_MAKE_RESET_ONLY, "activate", AccelGroup, GDK_KEY_R,
+                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
 
     // Appending menu items to Instruction menu and adding separators
     gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_INSERT_COMMENT);
@@ -351,27 +441,45 @@ HMENU MakeMainWindowMenus(void)
     gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_MAKE_SET_ONLY);
     gtk_menu_shell_append (GTK_MENU_SHELL (InstructionMenu), MNU_MAKE_RESET_ONLY);
 
-    // Creating labels for Simulation Menu
-    MNU_COMPILE = gtk_menu_item_new_with_label("Compile");
-    MNU_COMPILE_AS = gtk_menu_item_new_with_label("Compile As...");
+    // Creating labels for Compile Menu
+    MNU_COMPILE = gtk_menu_item_new_with_mnemonic("_Compile");
+    MNU_COMPILE_AS = gtk_menu_item_new_with_mnemonic("_Compile As...");
+
+    // Creating keyboard shortcuts for Compile menu
+    gtk_widget_add_accelerator (MNU_COMPILE, "activate", AccelGroup, GDK_KEY_F5,
+                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
 
     // Appending menu items to Compile menu
     gtk_menu_shell_append(GTK_MENU_SHELL (compile), MNU_COMPILE);
     gtk_menu_shell_append(GTK_MENU_SHELL (compile), MNU_COMPILE_AS);
 
-    // Creating labels for Simulation Menu
-    MNU_MANUAL = gtk_menu_item_new_with_label("Manual...");
-    MNU_ABOUT = gtk_menu_item_new_with_label("About...");
+    // Creating labels for Help Menu
+    MNU_MANUAL = gtk_menu_item_new_with_mnemonic("_Manual...");
+    MNU_ABOUT = gtk_menu_item_new_with_mnemonic("_About...");
+
+    // Creating keyboard shortcuts for Help menu
+    gtk_widget_add_accelerator (MNU_MANUAL, "activate", AccelGroup, GDK_KEY_F1,
+                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
 
     // Appending menu items to Help menu
     gtk_menu_shell_append(GTK_MENU_SHELL (help), MNU_MANUAL);
     gtk_menu_shell_append(GTK_MENU_SHELL (help), MNU_ABOUT);
 
     // Creating labels for Simulation Menu
-    MNU_SIMULATION_MODE = gtk_check_menu_item_new_with_label("Simulation Mode");
-    MNU_START_SIMULATION = gtk_menu_item_new_with_label("Start Real-Time Simulation");
-    MNU_STOP_SIMULATION = gtk_menu_item_new_with_label("Halt Simulation");
-    MNU_SINGLE_CYCLE = gtk_menu_item_new_with_label("Single Cycle");
+    MNU_SIMULATION_MODE = gtk_check_menu_item_new_with_mnemonic("_Simulation Mode");
+    MNU_START_SIMULATION = gtk_menu_item_new_with_mnemonic("_Start Real-Time Simulation");
+    MNU_STOP_SIMULATION = gtk_menu_item_new_with_mnemonic("_Halt Simulation");
+    MNU_SINGLE_CYCLE = gtk_menu_item_new_with_mnemonic("_Single Cycle");
+
+    // Creating keyboard shortcuts for Edit menu
+    gtk_widget_add_accelerator (MNU_SIMULATION_MODE, "activate", AccelGroup, GDK_KEY_M,
+                                GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+    gtk_widget_add_accelerator (MNU_START_SIMULATION, "activate", AccelGroup, GDK_KEY_R,
+                                GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+    gtk_widget_add_accelerator (MNU_STOP_SIMULATION, "activate", AccelGroup, GDK_KEY_H,
+                                GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+    gtk_widget_add_accelerator (MNU_SINGLE_CYCLE, "activate", AccelGroup, GDK_KEY_space,
+                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
 
     // Appending menu items to Simulate menu and adding separators
     gtk_menu_shell_append(GTK_MENU_SHELL (SimulateMenu), MNU_SIMULATION_MODE);

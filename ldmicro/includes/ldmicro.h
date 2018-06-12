@@ -546,6 +546,7 @@ extern BOOL NeedHoriz;
 extern HLIST IoList;
 extern int IoListTop;
 extern int IoListHeight;
+extern HMENU ScrollWindow;
 
 // draw.cpp
 int ProgCountWidestRow(void);

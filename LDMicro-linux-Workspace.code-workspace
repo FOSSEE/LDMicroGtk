@@ -9,7 +9,14 @@
 	],
 	"settings": {
 		"files.associations": {
-			"hash_map": "cpp"
+			"hash_map": "cpp",
+			"typeinfo": "cpp",
+			"array": "cpp",
+			"istream": "cpp",
+			"ostream": "cpp",
+			"type_traits": "cpp",
+			"tuple": "cpp",
+			"utility": "cpp"
 		}
 	}
 }

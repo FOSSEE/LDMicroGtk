@@ -32,6 +32,7 @@
 #include "ldmicro.h"
 
 void (*DrawChars)(int, int, char *);
+GtkSettings *SettingsInstance;
 
 // After an undo all the memory addresses change but make an effort to put
 // the cursor roughly where it should be.
@@ -87,22 +88,9 @@ void CALLBACK BlinkCursor(HWND hwnd, UINT msg, UINT_PTR id, DWORD time)
     // if(Cursor.left == 0) return;
 
     // PlcCursor c;
-    // memcpy(&c, &Cursor, sizeof(c));
+    // SettingsInstance = gtk_settings_get_default();
+    // gtk_settings_install_property_parser (gtk-cursor-blink ,black);
 
-    // c.top -= ScrollYOffset*POS_HEIGHT*FONT_HEIGHT;
-    // c.left -= ScrollXOffset;
-
-    // if(c.top >= IoListTop) return;
-
-    // if(c.top + c.height >= IoListTop) {
-    //     c.height = IoListTop - c.top - 3;
-    // }
-
-    // Hdc = GetDC(MainWindow);
-    // SelectObject(Hdc, GetStockObject(WHITE_BRUSH));
-    // PatBlt(Hdc, c.left, c.top, c.width, c.height, PATINVERT);
-    // CursorDrawn = !CursorDrawn;
-    // ReleaseDC(MainWindow, Hdc);
 }
 
 //-----------------------------------------------------------------------------

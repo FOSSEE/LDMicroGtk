@@ -72,19 +72,19 @@ void EnableMenuItem(HMENU, HMENU, UINT);
 void CheckMenuItem(HMENU, HMENU, UINT);
 HBRUSH GetStockObject(int fnObject);
 
-HWID CreateWindowEx(
-    DWORD     dwExStyle,
-    LPCTSTR   lpClassName,
-    LPCTSTR   lpWindowName,
-    DWORD     dwStyle,
-    int       x,
-    int       y,
-    int       nWidth,
-    int       nHeight,
-    HWND      hWndParent,
-    HMENU     hMenu,
-    HINSTANCE hInstance,
-    LPVOID    lpParam
-);
+// HWID CreateWindowEx(
+//     DWORD     dwExStyle,
+//     LPCTSTR   lpClassName,
+//     LPCTSTR   lpWindowName,
+//     DWORD     dwStyle,
+//     int       x,
+//     int       y,
+//     int       nWidth,
+//     int       nHeight,
+//     HWND      hWndParent,
+//     HMENU     hMenu,
+//     HINSTANCE hInstance,
+//     LPVOID    lpParam
+// );
 
 #endif

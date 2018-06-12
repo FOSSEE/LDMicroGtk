@@ -1002,31 +1002,6 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     return 1;
 }
 
-//-----------------------------------------------------------------------------
-// Create our window class; nothing exciting.
-//-----------------------------------------------------------------------------
-static BOOL MakeWindowClass()
-{
-    WNDCLASSEX wc;
-    memset(&wc, 0, sizeof(wc));
-    wc.cbSize = sizeof(wc);
-
-    // wc.style            = CS_BYTEALIGNCLIENT | CS_BYTEALIGNWINDOW | CS_OWNDC |
-                            // CS_DBLCLKS;
-    // wc.lpfnWndProc      = (WNDPROC)MainWndProc;
-    wc.hInstance        = NULL;
-    wc.hbrBackground    = (HBRUSH)GetStockObject(BLACK_BRUSH);
-    wc.lpszClassName    = "LDmicro";
-    // wc.lpszMenuName     = Instance;
-    // wc.hCursor          = LoadCursor(NULL, IDC_ARROW);
-    wc.hIcon            = (HICON)LoadImage(Instance, LDMICRO_ICON,
-                            IMAGE_ICON, 32, 32, 0);
-    wc.hIconSm          = (HICON)LoadImage(Instance, LDMICRO_ICON,
-                            IMAGE_ICON, 16, 16, 0);//MAKEINTRESOURCE(4000)
-
-    return RegisterClassEx(&wc);
-}
-
 void LDMicro_close(HWND window)
 {
     FreezeWindowPos(MainWindow);
@@ -1133,7 +1108,6 @@ int main(int argc, char** argv)
     
     MainHeap = HeapCreate(0, 1024*64, 0);
 
-    MakeWindowClass();
     // MakeDialogBoxClass();
     // MakeComponentListClass();
     // MakeSmplDialogClass();
@@ -1141,21 +1115,27 @@ int main(int argc, char** argv)
     HMENU top = MakeMainWindowMenus();
 
     /// Make main window
-    // WS_OVERLAPPED | WS_THICKFRAME | WS_CLIPCHILDREN | WS_MAXIMIZEBOX |
-        // WS_MINIMIZEBOX | WS_SYSMENU | WS_SIZEBOX
-    MainWindow = CreateWindowEx(0, "LDmicro", "",
-        0,
-        10, 10, 800, 600, NULL, top, NULL, NULL);
+    MainWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title(GTK_WINDOW(MainWindow),  "LDmicro");
+    gtk_window_set_default_size (GTK_WINDOW(MainWindow), 800, 600);
+    gtk_window_resize (GTK_WINDOW(MainWindow), 800, 600);
+    gtk_window_move(GTK_WINDOW(MainWindow), 10, 10);
+    gtk_widget_override_background_color(GTK_WIDGET(MainWindow), 
+                            GTK_STATE_FLAG_NORMAL, GetStockObject(BLACK_BRUSH)->getThis());
+    gtk_window_set_default_icon(LoadImage(Instance, LDMICRO_ICON,
+                            IMAGE_ICON, 32, 32, 0));
+    gtk_window_set_icon(GTK_WINDOW(MainWindow), LoadImage(Instance, LDMICRO_ICON,
+                            IMAGE_ICON, 32, 32, 0));
+    
     g_signal_connect (MainWindow, "delete_event", G_CALLBACK (LDMicro_close), NULL);
     
     ThawWindowPos(MainWindow);
     IoListHeight = 100;
     ThawDWORD(IoListHeight);
 
-    // InitCommonControls(); /// NOT USED, Only for windows
     InitForDrawing();
 
-    MakeMainWindowControls();
+    MakeMainWindowControls(); /// takes care of MakeMainWindowMenus()
     MainWindowResized();
     // NewProgram();
     // strcpy(CurrentSaveFile, "");

@@ -19,7 +19,7 @@
 
 /// Image loading flags
 #define IMAGE_ICON 1
-#define LDMICRO_ICON "ldmicro.ico"
+#define LDMICRO_ICON "../ldmicro.ico"
 
 /// Typedefs
 //typedef int64_t __int64;
@@ -143,25 +143,8 @@ typedef struct tagNMHDR {
   UINT     code;
 } NMHDR;
 
-typedef struct tagWNDCLASSEX {
-  UINT      cbSize;
-  UINT      style;
-//   WNDPROC   lpfnWndProc;
-  int       cbClsExtra;
-  int       cbWndExtra;
-  HINSTANCE hInstance;
-  HICON     hIcon;
-//   HCURSOR   hCursor;
-  HBRUSH    hbrBackground;
-  LPCTSTR   lpszMenuName;
-  LPCTSTR   lpszClassName;
-  HICON     hIconSm;
-} WNDCLASSEX, *PWNDCLASSEX;
-
-
 /// Variables
 extern std::vector<HEAPRECORD> HeapRecord;
-extern std::vector<WNDCLASSEX> WindClassRecord;
 
 /// Functions
 HANDLE HeapCreate(
@@ -181,7 +164,7 @@ BOOL HeapFree(
 
 BOOL RegisterClassEx(const WNDCLASSEX *lpwcx);
 
-HANDLE LoadImage(
+HICON LoadImage(
     HINSTANCE hinst,
     LPCTSTR   lpszName,
     UINT      uType,

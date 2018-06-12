@@ -1,7 +1,6 @@
 #include "linuxUI.h"
 
 std::vector<HEAPRECORD> HeapRecords;
-std::vector<WNDCLASSEX> WindClassRecord;
 
 HANDLE HeapCreate(DWORD  flOptions, SIZE_T dwInitialSize, SIZE_T dwMaximumSize)
 {
@@ -106,7 +105,7 @@ BOOL RegisterClassEx(const WNDCLASSEX *lpwcx)
     return TRUE;
 }
 
-HANDLE LoadImage(HINSTANCE hinst, LPCTSTR lpszName, UINT uType, int cxDesired,
+HICON LoadImage(HINSTANCE hinst, LPCTSTR lpszName, UINT uType, int cxDesired,
     int cyDesired, UINT fuLoad)
 {
     HICON pixbuf;
@@ -118,7 +117,7 @@ HANDLE LoadImage(HINSTANCE hinst, LPCTSTR lpszName, UINT uType, int cxDesired,
         g_error_free(error);
     }
 
-    return (HANDLE) pixbuf;
+    return pixbuf;
 }
 
 void OutputDebugString(char* str)

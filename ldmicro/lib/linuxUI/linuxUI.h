@@ -10,6 +10,8 @@
 #include <stdlib.h>
 #include "linuxLD.h"
 
+// 4000 ICON "ldmicro.ico"
+
 /// version control
 #define LDMicro_VERSION_MAJOR 1
 #define LDMicro_VERSION_MINOR 0
@@ -36,6 +38,9 @@
 #define OFN_HIDEREADONLY 0x00000200L
 #define OFN_OVERWRITEPROMPT 0x00000400L
 
+/// window brushes
+#define BLACK_BRUSH 0x00000401L
+
 /// EnableMenuItem variables
 extern const UINT MF_ENABLED;
 extern const UINT MF_GRAYED;
@@ -48,7 +53,7 @@ extern GClosure* closure;
 
 
 /// ListStore
-extern GtkWidget* view;
+extern GtkWidget *view;
 extern GtkTreeViewColumn *column;
 
 /// data types
@@ -70,5 +75,21 @@ int MessageBox(HWID, char*, char*, UINT);
 BOOL GetSaveFileName(OPENFILENAME* );
 void EnableMenuItem(HMENU, HMENU, UINT);
 void CheckMenuItem(HMENU, HMENU, UINT);
+HBRUSH GetStockObject(int fnObject);
+
+HWID CreateWindowEx(
+    DWORD     dwExStyle,
+    LPCTSTR   lpClassName,
+    LPCTSTR   lpWindowName,
+    DWORD     dwStyle,
+    int       x,
+    int       y,
+    int       nWidth,
+    int       nHeight,
+    HWND      hWndParent,
+    HMENU     hMenu,
+    HINSTANCE hInstance,
+    LPVOID    lpParam
+);
 
 #endif

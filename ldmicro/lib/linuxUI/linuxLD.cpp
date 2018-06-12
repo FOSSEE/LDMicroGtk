@@ -1,6 +1,7 @@
 #include "linuxUI.h"
 
 std::vector<HEAPRECORD> HeapRecords;
+std::vector<WNDCLASSEX> WindClassRecord;
 
 HANDLE HeapCreate(DWORD  flOptions, SIZE_T dwInitialSize, SIZE_T dwMaximumSize)
 {
@@ -25,7 +26,7 @@ LPVOID HeapAlloc(HANDLE hHeap, DWORD  dwFlags, SIZE_T dwBytes)
 {
     if (hHeap == NULL)
     {
-        printf("Alloc**********NULL HEAP***************\n");
+        // printf("Alloc**********NULL HEAP***************\n");
         LPVOID p = malloc(dwBytes);
         return p;
     }
@@ -73,7 +74,7 @@ BOOL HeapFree(HANDLE hHeap, DWORD  dwFlags, LPVOID lpMem)
     /// if NULL free()
     if (hHeap == NULL)
     {
-        printf("free*********NULL HEAP***************\n");
+        // printf("free*********NULL HEAP***************\n");
         free(lpMem);
         return TRUE;
     }
@@ -97,6 +98,27 @@ BOOL HeapFree(HANDLE hHeap, DWORD  dwFlags, LPVOID lpMem)
     else 
         return FALSE;
 
+}
+
+BOOL RegisterClassEx(const WNDCLASSEX *lpwcx)
+{
+    WindClassRecord.push_back(*lpwcx);
+    return TRUE;
+}
+
+HANDLE LoadImage(HINSTANCE hinst, LPCTSTR lpszName, UINT uType, int cxDesired,
+    int cyDesired, UINT fuLoad)
+{
+    HICON pixbuf;
+    GError *error = NULL;
+    pixbuf = gdk_pixbuf_new_from_file(lpszName, &error);
+
+    if(!pixbuf) {
+        fprintf(stderr, "%s\n", error->message);
+        g_error_free(error);
+    }
+
+    return (HANDLE) pixbuf;
 }
 
 void OutputDebugString(char* str)

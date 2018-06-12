@@ -11,8 +11,8 @@ GtkAccelGroup* AccelGroup;
 GClosure* closure;
 
 /// ListStore
-GtkWidget* view;
-GtkTreeViewColumn* column;
+HWID view;
+HTVC column;
  
 /// Wraper function for gtk_window_has_toplevel_focus
 BOOL isFocus(HWID window)
@@ -22,13 +22,26 @@ BOOL isFocus(HWID window)
 
 COLORREF RGB(int red, int green, int blue)
 {
-    COLORREF col;
-    col.red = red/255.0;
-    col.green = green/255.0;
-    col.blue = blue/255.0;
-    col.alpha = 1.0;
+    COLORREF col(red, green, blue);
+    // col.red = red/255.0;
+    // col.green = green/255.0;
+    // col.blue = blue/255.0;
+    // col.alpha = 1.0;
 
     return col;
+}
+
+HBRUSH GetStockObject(int fnObject)
+{
+    switch(fnObject)
+    {
+        case BLACK_BRUSH:
+            return new COLORREF(0, 0, 0);
+            break;
+
+        default:
+            return new COLORREF(255, 255, 255);
+    }
 }
 
 int MessageBox(HWID pWindow, char* message, char* title, UINT mFlags)
@@ -156,7 +169,8 @@ BOOL GetSaveFileName(OPENFILENAME *ofn)
     return exitStatus;
 }
 
-void EnableMenuItem(HMENU MenuName, HMENU MenuItem, UINT CheckEnabledItem) {
+void EnableMenuItem(HMENU MenuName, HMENU MenuItem, UINT CheckEnabledItem) 
+{
     switch (CheckEnabledItem){
         case MF_ENABLED :
            gtk_widget_set_sensitive (MenuItem, true);
@@ -167,7 +181,8 @@ void EnableMenuItem(HMENU MenuName, HMENU MenuItem, UINT CheckEnabledItem) {
     }
 }
 
-void CheckMenuItem(HMENU MenuName, HMENU MenuItem, UINT Check){
+void CheckMenuItem(HMENU MenuName, HMENU MenuItem, UINT Check)
+{
     switch (Check){
         case MF_CHECKED :
             gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM(MenuItem), true);
@@ -176,4 +191,26 @@ void CheckMenuItem(HMENU MenuName, HMENU MenuItem, UINT Check){
             gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM(MenuItem), false);
         break;
     }
+}
+
+HWID CreateWindowEx(DWORD dwExStyle, LPCTSTR lpClassName, LPCTSTR lpWindowName,
+    DWORD dwStyle, int x, int y, int nWidth, int nHeight, HWND hWndParent,
+    HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam)
+{
+    
+    auto WinClR_it = std::find_if(WindClassRecord.begin(), WindClassRecord.end(),  [&lpClassName](WNDCLASSEX &Record) { return Record.lpszClassName == lpClassName; });
+
+    if (WinClR_it == WindClassRecord.end())
+        return NULL;
+    
+    HWID window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title(GTK_WINDOW(window), lpWindowName);
+    gtk_window_set_default_size (GTK_WINDOW(window), nWidth, nHeight);
+    gtk_window_resize (GTK_WINDOW(window), nWidth, nHeight);
+    gtk_window_move(GTK_WINDOW(window), x, y);
+    gtk_widget_override_background_color(GTK_WIDGET(window), GTK_STATE_FLAG_NORMAL, WinClR_it->hbrBackground->getThis());
+    gtk_window_set_default_icon(WinClR_it->hIcon);
+    gtk_window_set_icon(GTK_WINDOW(window), WinClR_it->hIcon);
+
+    return window;
 }

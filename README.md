@@ -20,10 +20,16 @@ _Note_: Be sure to run `sudo apt-get update` and `sudo apt-get upgrade` before r
 ## LDMicro for Linux can be compiled and run using the following commands
 ### To cmpile using cmake use the following commands
 ```
-cd /LDmicro/build
+cd /LDmicro/
+mkdir build
+cd build/
 cmake ..
 make
 ```
 ### To run program in linux use the following command
 
+# To run program in shell mode use the below command
 `./LDmicro /c <.ld file to compile> <.hex destination file>`
+
+# To run program in GUI mode use the below command
+`sudo ./LDMicro`

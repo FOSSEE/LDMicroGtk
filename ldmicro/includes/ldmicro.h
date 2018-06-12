@@ -558,14 +558,14 @@ extern BOOL SelectionActive;
 extern BOOL ThisHighlighted;
 
 // draw_outputdev.cpp
-// extern void (*DrawChars)(int, int, char *);
-// void CALLBACK BlinkCursor(HWND hwnd, UINT msg, UINT_PTR id, DWORD time);
-// void PaintWindow(void);
-// void ExportDrawingAsText(char *file);
-// void InitForDrawing(void);
-// void SetUpScrollbars(BOOL *horizShown, SCROLLINFO *horiz, SCROLLINFO *vert);
-// int ScreenRowsAvailable(void);
-// int ScreenColsAvailable(void);
+extern void (*DrawChars)(int, int, char *);
+void CALLBACK BlinkCursor(HWND hwnd, UINT msg, UINT_PTR id, DWORD time);
+void PaintWindow(void);
+void ExportDrawingAsText(char *file);
+void InitForDrawing(void);
+void SetUpScrollbars(BOOL *horizShown, SCROLLINFO *horiz, SCROLLINFO *vert);
+int ScreenRowsAvailable(void);
+int ScreenColsAvailable(void);
 extern HFONT FixedWidthFont;
 extern HFONT FixedWidthFontBold;
 extern int SelectedGxAfterNextPaint;

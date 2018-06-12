@@ -130,6 +130,10 @@ IF(UNIX)
                             maincontrols.cpp
                             ldmicro.cpp)
     
+    ## Build *.int interpreter
+    add_executable (ldinterpret ldinterpret.c)
+    target_link_libraries (ldinterpret LinuxUI)
+    
     ## Build main LDMicro executable
     add_executable (LDMicro ${COMPILE_CPP_SOURCES})
     add_dependencies(LDMicro LDMicro_SCRIPT_GENERATED_FILES)
@@ -137,13 +141,12 @@ IF(UNIX)
     target_link_libraries (LDMicro LinuxUI)
     target_link_libraries (LDMicro FreezeLD)
 
-    ## Build *.int interpreter
-    add_executable (ldinterpret ldinterpret.c)
-    target_link_libraries (ldinterpret LinuxUI)
-
-    #add_executable (testMain testMain.cpp)
-    #install (TARGETS testMain DESTINATION bin)
-    #target_link_libraries (testMain LinuxUI)
-    #target_link_libraries (testMain FreezeLD)
+    ## Add tests
+    MESSAGE( STATUS "Adding tests.." )
+    add_custom_command(
+        TARGET LDMicro
+        POST_BUILD
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/reg
+        COMMAND perl run-tests.pl)
     
 ENDIF(UNIX)

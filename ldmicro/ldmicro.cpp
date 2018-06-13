@@ -35,6 +35,7 @@
 
 HINSTANCE   Instance;
 HWID        MainWindow;
+HWID        DrawWindow;
 HDC         Hdc;
 
 // parameters used to capture the mouse when implementing our totally non-
@@ -637,16 +638,24 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     return 1;
 }
 
-void LD_GTK_delete_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)//(HWND window)
+void LD_WM_Close_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)//(HWND window)
 {
+    /* Handles:
+    * WM_CLOSE
+    */
+
     FreezeWindowPos(MainWindow);
     FreezeDWORD(IoListHeight);
 
     gtk_main_quit();
 }
 
-gboolean LD_GTK_keybord_hook(GtkWidget *widget, GdkEvent *event, gpointer user_data)
-{
+gboolean LD_WM_KeyDown_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+{   
+    /* Handles:
+    * WM_KEYDOWN
+    */
+
     switch(event->key.state)
     {
         case GDK_SHIFT_MASK:
@@ -941,16 +950,20 @@ gboolean LD_GTK_keybord_hook(GtkWidget *widget, GdkEvent *event, gpointer user_d
     //         InvalidateRect(MainWindow, NULL, FALSE);
     //     }
     //     break;
-
+    return FALSE;
 }
 
 gboolean LD_GTK_mouse_click_hook(GtkWidget *widget, GdkEvent *event, gpointer user_data)
 {
+    /* Handles:
+    * WM_LBUTTONDBLCLK, WM_LBUTTONDOWN
+    */
+
     g_print("x = %f\n", event->button.x_root);
     g_print("y = %f\n", event->button.y_root);
     switch(event->button.type)
     {
-        case GDK_BUTTON_PRESS:
+        case GDK_BUTTON_PRESS:// To Do: run only for left click
             // int x = LOWORD(lParam);
             // int y = HIWORD(lParam);
             // if((y > (IoListTop - 9)) && (y < (IoListTop + 3))) {
@@ -978,10 +991,15 @@ gboolean LD_GTK_mouse_click_hook(GtkWidget *widget, GdkEvent *event, gpointer us
             break;
 
     }
+    return FALSE;
 }
 
 gboolean LD_GTK_mouse_scroll_hook(GtkWidget *widget, GdkEvent *event, gpointer user_data)
 {
+    /* Handles:
+    * WM_VSCROLL, WM_HSCROLL, WM_MOUSEWHEEL
+    */
+
     switch(event->scroll.direction)
     {
         case GDK_SCROLL_UP:
@@ -1002,10 +1020,15 @@ gboolean LD_GTK_mouse_scroll_hook(GtkWidget *widget, GdkEvent *event, gpointer u
             break;
 
     }
+    return FALSE;
 }
 
-gboolean LD_GTK_mouse_move_hook(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+gboolean LD_WM_MouseMove_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)
 {
+    /* Handles:
+    * WM_MOUSEMOVE
+    */
+
     g_print("x = %f\n", event->button.x_root);
     g_print("y = %f\n", event->button.y_root);
     // int x = LOWORD(lParam);
@@ -1018,11 +1041,56 @@ gboolean LD_GTK_mouse_move_hook(GtkWidget *widget, GdkEvent *event, gpointer use
     // }
     
     // break;
+    return FALSE;
 }
 
-gboolean LD_GTK_paint_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+gboolean LD_WM_Paint_call(GtkWidget *widget, cairo_t *cr, gpointer data)
 {
+    /* Handles:
+    * WM_PAINT
+    */
+
     g_print("draw called\n");
+    
+    guint width, height;
+    GdkRGBA color;
+    GtkStyleContext *context;
+
+    context = gtk_widget_get_style_context (widget);
+
+    width = gtk_widget_get_allocated_width (widget);
+    height = gtk_widget_get_allocated_height (widget);
+
+    gtk_render_background (context, cr, 0, 0, width, height);
+
+    cairo_arc (cr,
+                width / 2.0, height / 2.0,
+                MIN (width, height) / 3.0,
+                0, 2 * G_PI);
+
+    gtk_style_context_get_color (context,
+                                gtk_style_context_get_state (context),
+                                &color);
+    gdk_cairo_set_source_rgba (cr, &color);
+
+    cairo_fill (cr);
+    static double Cairo_R = 0.0, Cairo_G = 0.0, Cairo_B = 0.0;
+    cairo_set_source_rgb(cr, Cairo_R, Cairo_G, Cairo_G); 
+    Cairo_R = (Cairo_R+0.2 > 0.4) ? 0 : Cairo_R+0.2;
+    Cairo_G = (Cairo_G+0.4 > 1.0) ? 0.4 : Cairo_G+0.4;
+    Cairo_B = (Cairo_B+0.1 > 0.5) ? 0 : Cairo_B+0.1;
+    
+    cairo_select_font_face(cr, "Purisa",
+        CAIRO_FONT_SLANT_NORMAL,
+        CAIRO_FONT_WEIGHT_BOLD);
+
+    cairo_set_font_size(cr, 20);
+
+    cairo_move_to(cr, 20, height / 2.0);
+    cairo_show_text(cr, "-----------THIS IS A TEST DRAW----------");  
+
+    cairo_fill (cr);
+
     // PAINTSTRUCT ps;
     // Hdc = BeginPaint(hwnd, &ps);
 
@@ -1053,27 +1121,46 @@ gboolean LD_GTK_paint_call(GtkWidget *widget, GdkEvent *event, gpointer user_dat
     // FillRect(Hdc, &r, (HBRUSH)GetStockObject(DKGRAY_BRUSH));
 
     // EndPaint(hwnd, &ps);
-    // return 1;
+
+    return FALSE;
 }
 
-gboolean LD_GTK_destroy_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+gboolean LD_WM_Destroy_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)
 {
+    /* Handles:
+    * WM_DESTROY
+    */
+
     // if(CheckSaveUserCancels()) break;
 
     // PostQuitMessage(0);
     // return 1;
+
+    return FALSE;
 }
 
-gboolean LD_GTK_size_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+gboolean LD_WM_Size_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)
 {
+    /* Handles:
+    * WM_SIZE
+    */
+
     // MainWindowResized();
     // break;
+
+    return FALSE;
 }
 
-gboolean LD_GTK_set_focus_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+gboolean LD_WM_SetFocus_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)
 {
+    /* Handles:
+    * WM_SETFOCUS
+    */
+
     // InvalidateRect(MainWindow, NULL, FALSE);
     // break;
+
+    return FALSE;
 }
 
 //-----------------------------------------------------------------------------
@@ -1188,34 +1275,34 @@ int main(int argc, char** argv)
     gtk_window_resize (GTK_WINDOW(MainWindow), 800, 600);
     gtk_window_move(GTK_WINDOW(MainWindow), 10, 10);
     gtk_widget_override_background_color(GTK_WIDGET(MainWindow), 
-                            GTK_STATE_FLAG_NORMAL, GetStockObject(BLACK_BRUSH)->getThis());
+                            GTK_STATE_FLAG_NORMAL, ((HBRUSH)GetStockObject(GREY_BRUSH))->getThis());
     gtk_window_set_default_icon(LoadImage(Instance, LDMICRO_ICON,
                             IMAGE_ICON, 32, 32, 0));
     gtk_window_set_icon(GTK_WINDOW(MainWindow), LoadImage(Instance, LDMICRO_ICON,
                             IMAGE_ICON, 32, 32, 0));
+    /// Make main window - end
 
-    /// Keyboard and mouse hooks equivalent to MainWndProc
-    g_signal_connect (MainWindow, "delete_event", G_CALLBACK (LD_GTK_delete_call), NULL);
-    g_signal_connect (MainWindow, "key_press_event", G_CALLBACK (LD_GTK_keybord_hook), NULL);
-    g_signal_connect (MainWindow, "button_press_event", G_CALLBACK (LD_GTK_mouse_click_hook), NULL);
-    g_signal_connect (MainWindow, "scroll_event", G_CALLBACK (LD_GTK_mouse_scroll_hook), NULL);
-    g_signal_connect (MainWindow, "motion_notify_event", G_CALLBACK (LD_GTK_mouse_move_hook), NULL);
-    // g_signal_connect (DrawWindow, "draw", G_CALLBACK (LD_GTK_paint_call), NULL);
-    g_signal_connect (MainWindow, "destroy_event", G_CALLBACK (LD_GTK_destroy_call), NULL);
-    g_signal_connect (MainWindow, "configure_event", G_CALLBACK (LD_GTK_size_call), NULL);
-    g_signal_connect (MainWindow, "focus_in_event", G_CALLBACK (LD_GTK_set_focus_call), NULL);
-    
-    
+    InitForDrawing();
+
     ThawWindowPos(MainWindow);
     IoListHeight = 100;
     ThawDWORD(IoListHeight);
 
-    InitForDrawing();
-
-
-
     MakeMainWindowControls(); /// takes care of MakeMainWindowMenus()
     MainWindowResized();
+
+    /// Keyboard and mouse hooks equivalent to MainWndProc
+    g_signal_connect (MainWindow, "delete_event", G_CALLBACK (LD_WM_Close_call), NULL);
+    g_signal_connect (MainWindow, "key_press_event", G_CALLBACK (LD_WM_KeyDown_call), NULL);
+    g_signal_connect (MainWindow, "button_press_event", G_CALLBACK (LD_GTK_mouse_click_hook), NULL);
+    g_signal_connect (MainWindow, "scroll_event", G_CALLBACK (LD_GTK_mouse_scroll_hook), NULL);
+    g_signal_connect (MainWindow, "motion_notify_event", G_CALLBACK (LD_WM_MouseMove_call), NULL);
+    g_signal_connect (DrawWindow, "draw", G_CALLBACK (LD_WM_Paint_call), NULL);
+    g_signal_connect (MainWindow, "destroy_event", G_CALLBACK (LD_WM_Destroy_call), NULL);
+    g_signal_connect (MainWindow, "configure_event", G_CALLBACK (LD_WM_Size_call), NULL);
+    g_signal_connect (MainWindow, "focus_in_event", G_CALLBACK (LD_WM_SetFocus_call), NULL);
+    /// Keyboard and mouse hooks equivalent to MainWndProc - end
+
     // NewProgram();
     // strcpy(CurrentSaveFile, "");
 

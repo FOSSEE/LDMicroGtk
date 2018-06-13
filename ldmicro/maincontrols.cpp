@@ -413,6 +413,7 @@ void MakeMainWindowControls(void)
 {
     HWID PackBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     HWID grid = gtk_grid_new();
+    /// Pane to separate Scrolled Window and other widgets
     HWID pane = gtk_paned_new (GTK_ORIENTATION_VERTICAL);
 
     IoList = gtk_list_store_new (5, 
@@ -426,7 +427,7 @@ void MakeMainWindowControls(void)
     int pinWidth = 100;
     int portWidth = 90;
 
-    // Creating a list
+    /// Creating a list
     view = gtk_tree_view_new_with_model (GTK_TREE_MODEL(IoList));
     gtk_tree_view_set_model (GTK_TREE_VIEW (view), GTK_TREE_MODEL (IoList));
 
@@ -465,33 +466,37 @@ void MakeMainWindowControls(void)
     gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
     gtk_tree_view_column_set_min_width (column, portWidth);
 
-    // Appending Menus to grid
+    /// Appending Menus to grid
     gtk_grid_attach (GTK_GRID (grid), MakeMainWindowMenus(), 0, 0, 1, 1);
 
-    // Creating Scrolled Window
+    /// Creating Scrolled Window
     ScrollWindow = gtk_scrolled_window_new (NULL, NULL);
+    HWID viewport = gtk_viewport_new (NULL,NULL);
     gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (ScrollWindow),
 				                          GTK_POLICY_AUTOMATIC, 
 				                          GTK_POLICY_ALWAYS);
+    gtk_widget_set_hexpand(GTK_WIDGET(ScrollWindow), TRUE);  
+    gtk_widget_set_vexpand(GTK_WIDGET(ScrollWindow), TRUE);
 
-    // Creating a pane to separate Scrolled Window and other widgets
+    /// Adding DrawWindow to pane
+    gtk_container_add (GTK_CONTAINER(viewport), DrawWindow);
+    gtk_container_add (GTK_CONTAINER(ScrollWindow), viewport);
     gtk_paned_add1 (GTK_PANED (pane), ScrollWindow);
     gtk_paned_set_position (GTK_PANED (pane), 0);
-    gtk_widget_set_vexpand (ScrollWindow, TRUE);
-    gtk_widget_set_hexpand (ScrollWindow, TRUE);
+    
 
-    // Appending tree view to pane and pane to grid
+    /// Appending tree view to pane and pane to grid
     gtk_paned_pack2 (GTK_PANED(pane), view, FALSE, FALSE);
     gtk_paned_set_position (GTK_PANED (pane), 250);
     gtk_grid_attach (GTK_GRID (grid), pane, 0, 0, 1, 1); 
 
-    // Creating Status Bar and attaching to grid
+    /// Creating Status Bar and attaching to grid
     StatusBar = gtk_statusbar_new();
     gtk_statusbar_push (GTK_STATUSBAR (StatusBar),
                         gtk_statusbar_get_context_id (GTK_STATUSBAR (StatusBar), "Introduction"), 
                         "LDMicro Started");
 
-    // Appneding Status Bar to box which is then added to Main Window
+    /// Appneding Status Bar to box which is then added to Main Window
     gtk_box_pack_start(GTK_BOX(PackBox), grid, TRUE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(PackBox), StatusBar, FALSE, FALSE, 0);
     gtk_container_add(GTK_CONTAINER(MainWindow), PackBox);

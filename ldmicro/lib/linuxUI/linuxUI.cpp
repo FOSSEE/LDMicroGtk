@@ -27,14 +27,19 @@ COLORREF RGB(int red, int green, int blue)
     return col;
 }
 
-HBRUSH GetStockObject(int fnObject)
+HANDLE GetStockObject(int fnObject)
 {
     switch(fnObject)
     {
         case BLACK_BRUSH:
             return new COLORREF(0, 0, 0);
             break;
-
+        case WHITE_BRUSH:
+            return new COLORREF(255, 255, 255);
+            break;
+        case GREY_BRUSH:
+            return new COLORREF(128, 128, 128);
+            break;
         default:
             return new COLORREF(255, 255, 255);
     }

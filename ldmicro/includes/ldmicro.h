@@ -516,6 +516,7 @@ void SetUndoEnabled(BOOL undoEnabled, BOOL redoEnabled);
 void RefreshScrollbars(void);
 extern HINSTANCE Instance;
 extern HWID MainWindow;
+extern HWID DrawWindow;
 extern HDC Hdc;
 extern PlcProgram Prog;
 extern char CurrentSaveFile[MAX_PATH];

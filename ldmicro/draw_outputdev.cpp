@@ -390,6 +390,7 @@ static void SetSyntaxHighlightingColours(void)
 //-----------------------------------------------------------------------------
 void InitForDrawing(void)
 {
+    DrawWindow = gtk_drawing_area_new ();
     // SetSyntaxHighlightingColours();
 
     // FixedWidthFont = CreateFont(

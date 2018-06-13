@@ -39,7 +39,9 @@
 #define OFN_OVERWRITEPROMPT 0x00000400L
 
 /// window brushes
-#define BLACK_BRUSH 0x00000401L
+#define BLACK_BRUSH 0x00000002L
+#define WHITE_BRUSH 0x00000004L
+#define GREY_BRUSH 0x00000008L
 
 /// EnableMenuItem variables
 extern const UINT MF_ENABLED;
@@ -70,6 +72,6 @@ int MessageBox(HWID, char*, char*, UINT);
 BOOL GetSaveFileName(OPENFILENAME* );
 void EnableMenuItem(HMENU, HMENU, UINT);
 void CheckMenuItem(HMENU, HMENU, UINT);
-HBRUSH GetStockObject(int fnObject);
+HANDLE GetStockObject(int fnObject);
 
 #endif

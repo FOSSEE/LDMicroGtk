@@ -498,6 +498,136 @@ void MakeMainWindowControls(void)
 }
 
 //-----------------------------------------------------------------------------
+// Adjust the size and visibility of the scrollbars as necessary, either due
+// to a change in the size of the program or a change in the size of the
+// window.
+//-----------------------------------------------------------------------------
+void RefreshScrollbars(void)
+{
+    // SCROLLINFO vert, horiz;
+    // SetUpScrollbars(&NeedHoriz, &horiz, &vert);
+    // SetScrollInfo(HorizScrollBar, SB_CTL, &horiz, TRUE);
+    // SetScrollInfo(VertScrollBar, SB_CTL, &vert, TRUE);
+
+    // RECT main;
+    // GetClientRect(MainWindow, &main);
+
+    // if(NeedHoriz) {
+    //     MoveWindow(HorizScrollBar, 0, IoListTop - ScrollHeight - 2,
+    //         main.right - ScrollWidth - 2, ScrollHeight, TRUE);
+    //     ShowWindow(HorizScrollBar, SW_SHOW);
+    //     EnableWindow(HorizScrollBar, TRUE);
+    // } else {
+    //     ShowWindow(HorizScrollBar, SW_HIDE);
+    // }
+    // MoveWindow(VertScrollBar, main.right - ScrollWidth - 2, 1, ScrollWidth,
+    //     NeedHoriz ? (IoListTop - ScrollHeight - 4) : (IoListTop - 3), TRUE);
+
+    // MoveWindow(VertScrollBar, main.right - ScrollWidth - 2, 1, ScrollWidth,
+    //     NeedHoriz ? (IoListTop - ScrollHeight - 4) : (IoListTop - 3), TRUE);
+
+    // InvalidateRect(MainWindow, NULL, FALSE);
+}
+
+//-----------------------------------------------------------------------------
+// Respond to a WM_VSCROLL sent to the main window, presumably by the one and
+// only vertical scrollbar that it has as a child.
+//-----------------------------------------------------------------------------
+void VscrollProc(WPARAM wParam)
+{
+    // int prevY = ScrollYOffset;
+    // switch(LOWORD(wParam)) {
+    //     case SB_LINEUP:
+    //     case SB_PAGEUP:
+    //         if(ScrollYOffset > 0) {
+    //             ScrollYOffset--;
+    //         }
+    //         break;
+
+    //     case SB_LINEDOWN:
+    //     case SB_PAGEDOWN:
+    //         if(ScrollYOffset < ScrollYOffsetMax) {
+    //             ScrollYOffset++;
+    //         }
+    //         break;
+
+    //     case SB_TOP:
+    //         ScrollYOffset = 0;
+    //         break;
+
+    //     case SB_BOTTOM:
+    //         ScrollYOffset = ScrollYOffsetMax;
+    //         break;
+
+    //     case SB_THUMBTRACK:
+    //     case SB_THUMBPOSITION:
+    //         ScrollYOffset = HIWORD(wParam);
+    //         break;
+    // }
+    // if(prevY != ScrollYOffset) {
+    //     SCROLLINFO si;
+    //     si.cbSize = sizeof(si);
+    //     si.fMask = SIF_POS;
+    //     si.nPos = ScrollYOffset;
+    //     SetScrollInfo(VertScrollBar, SB_CTL, &si, TRUE);
+
+    //     InvalidateRect(MainWindow, NULL, FALSE);
+    // }
+}
+
+//-----------------------------------------------------------------------------
+// Respond to a WM_HSCROLL sent to the main window, presumably by the one and
+// only horizontal scrollbar that it has as a child.
+//-----------------------------------------------------------------------------
+void HscrollProc(WPARAM wParam)
+{
+    // int prevX = ScrollXOffset;
+    // switch(LOWORD(wParam)) {
+    //     case SB_LINEUP:
+    //         ScrollXOffset -= FONT_WIDTH;
+    //         break;
+
+    //     case SB_PAGEUP:
+    //         ScrollXOffset -= POS_WIDTH*FONT_WIDTH;
+    //         break;
+
+    //     case SB_LINEDOWN:
+    //         ScrollXOffset += FONT_WIDTH;
+    //         break;
+
+    //     case SB_PAGEDOWN:
+    //         ScrollXOffset += POS_WIDTH*FONT_WIDTH;
+    //         break;
+
+    //     case SB_TOP:
+    //         ScrollXOffset = 0;
+    //         break;
+
+    //     case SB_BOTTOM:
+    //         ScrollXOffset = ScrollXOffsetMax;
+    //         break;
+
+    //     case SB_THUMBTRACK:
+    //     case SB_THUMBPOSITION:
+    //         ScrollXOffset = HIWORD(wParam);
+    //         break;
+    // }
+
+    // if(ScrollXOffset > ScrollXOffsetMax) ScrollXOffset = ScrollXOffsetMax;
+    // if(ScrollXOffset < 0) ScrollXOffset = 0;
+
+    // if(prevX != ScrollXOffset) {
+    //     SCROLLINFO si;
+    //     si.cbSize = sizeof(si);
+    //     si.fMask = SIF_POS;
+    //     si.nPos = ScrollXOffset;
+    //     SetScrollInfo(HorizScrollBar, SB_CTL, &si, TRUE);
+
+    //     InvalidateRect(MainWindow, NULL, FALSE);
+    // }
+}
+
+//-----------------------------------------------------------------------------
 // Set up the title bar text for the main window; indicate whether we are in
 // simulation or editing mode, and indicate the filename.
 //-----------------------------------------------------------------------------

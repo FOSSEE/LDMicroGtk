@@ -259,8 +259,9 @@ static LRESULT CALLBACK DialogProc(HWND hwnd, UINT msg, WPARAM wParam,
 //-----------------------------------------------------------------------------
 // Set the font of a control to a pretty proportional font (typ. Tahoma).
 //-----------------------------------------------------------------------------
-void NiceFont(HWND h)
+void NiceFont(HWID h)
 {
+    // gtk_widget_override_font(GTK_WIDGET(h), pango_font_description_from_string("Times New Roman"));
 //    SendMessage(h, WM_SETFONT, (WPARAM)MyNiceFont, TRUE);
 }
 

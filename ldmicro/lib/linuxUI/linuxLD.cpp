@@ -99,12 +99,6 @@ BOOL HeapFree(HANDLE hHeap, DWORD  dwFlags, LPVOID lpMem)
 
 }
 
-BOOL RegisterClassEx(const WNDCLASSEX *lpwcx)
-{
-    WindClassRecord.push_back(*lpwcx);
-    return TRUE;
-}
-
 HICON LoadImage(HINSTANCE hinst, LPCTSTR lpszName, UINT uType, int cxDesired,
     int cyDesired, UINT fuLoad)
 {

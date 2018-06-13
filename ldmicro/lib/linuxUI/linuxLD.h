@@ -162,8 +162,6 @@ BOOL HeapFree(
     DWORD  dwFlags,
     LPVOID lpMem);
 
-BOOL RegisterClassEx(const WNDCLASSEX *lpwcx);
-
 HICON LoadImage(
     HINSTANCE hinst,
     LPCTSTR   lpszName,

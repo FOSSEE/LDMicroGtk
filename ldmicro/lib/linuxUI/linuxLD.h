@@ -4,6 +4,7 @@
 #include "linuxUI.h"
 #include <ctype.h>
 #include <vector>
+#include <math.h>
 #include <algorithm>
 #include <sys/mman.h>
 
@@ -20,6 +21,9 @@
 /// Image loading flags
 #define IMAGE_ICON 1
 #define LDMICRO_ICON "../ldmicro.ico"
+
+/// Macro functions
+#define max(_A, _B) std::max(_A, _B)
 
 /// Typedefs
 //typedef int64_t __int64;
@@ -54,14 +58,14 @@ typedef CHAR *LPSTR;
 
 typedef void *PVOID;
 typedef void *LPVOID;
-typedef PVOID HFONT;
 typedef PVOID HMODULE;
 typedef PVOID HHOOK;
 
-typedef PVOID HFONT;
 typedef PVOID HANDLE;
 typedef HANDLE HINSTANCE;
-typedef HANDLE HDC;
+typedef HANDLE HGDIOBJ;
+
+typedef cairo_t *HCRDC;
 typedef GtkWidget *HWID;
 typedef GtkWidget *HMENU;
 typedef GtkWindow *HWND;
@@ -106,6 +110,14 @@ typedef class tagColorReferance: public GdkRGBA{
         this->alpha = 1.0;
     }
 
+    // tagColorReferance(tagColorReferance &refCpy)
+    // {
+    //     this->red = refCpy.red;
+    //     this->green = refCpy.green;
+    //     this->blue = refCpy.blue;
+    //     this->alpha = refCpy.alpha;
+    // }
+
     GdkRGBA* getThis()
     {
         return this;
@@ -142,6 +154,21 @@ typedef struct tagNMHDR {
   UINT_PTR idFrom;
   UINT     code;
 } NMHDR;
+
+typedef struct FontTag {
+    int     nHeight;
+    int     nWidth;
+    int     nOrientation;
+    int     fnWeight;
+    DWORD   fdwItalic;
+    LPCTSTR lpszFace;
+} *HFONT, FONT;
+
+typedef struct tagLOGBRUSH {
+  UINT      lbStyle;
+  COLORREF  lbColor;
+//   ULONG_PTR lbHatch;
+} LOGBRUSH, *PLOGBRUSH;
 
 /// Variables
 extern std::vector<HEAPRECORD> HeapRecord;

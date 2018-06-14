@@ -75,111 +75,111 @@ BOOL ThisHighlighted;
 // of the widths of its members, and the width of a parallel circuit is
 // the maximum of the widths of its members.
 //-----------------------------------------------------------------------------
-// static int CountWidthOfElement(int which, void *elem, int soFar)
-// {
-//     switch(which) {
-//         case ELEM_PLACEHOLDER:
-//         case ELEM_OPEN:
-//         case ELEM_SHORT:
-//         case ELEM_CONTACTS:
-//         case ELEM_TON:
-//         case ELEM_TOF:
-//         case ELEM_RTO:
-//         case ELEM_CTU:
-//         case ELEM_CTD:
-//         case ELEM_ONE_SHOT_RISING:
-//         case ELEM_ONE_SHOT_FALLING:
-//         case ELEM_EQU:
-//         case ELEM_NEQ:
-//         case ELEM_GRT:
-//         case ELEM_GEQ:
-//         case ELEM_LES:
-//         case ELEM_LEQ:
-//         case ELEM_UART_RECV:
-//         case ELEM_UART_SEND:
-//             return 1;
+static int CountWidthOfElement(int which, void *elem, int soFar)
+{
+    switch(which) {
+        case ELEM_PLACEHOLDER:
+        case ELEM_OPEN:
+        case ELEM_SHORT:
+        case ELEM_CONTACTS:
+        case ELEM_TON:
+        case ELEM_TOF:
+        case ELEM_RTO:
+        case ELEM_CTU:
+        case ELEM_CTD:
+        case ELEM_ONE_SHOT_RISING:
+        case ELEM_ONE_SHOT_FALLING:
+        case ELEM_EQU:
+        case ELEM_NEQ:
+        case ELEM_GRT:
+        case ELEM_GEQ:
+        case ELEM_LES:
+        case ELEM_LEQ:
+        case ELEM_UART_RECV:
+        case ELEM_UART_SEND:
+            return 1;
 
-//         case ELEM_FORMATTED_STRING:
-//             return 2;
+        case ELEM_FORMATTED_STRING:
+            return 2;
 
-//         case ELEM_COMMENT: {
-//             if(soFar != 0) oops();
+        case ELEM_COMMENT: {
+            if(soFar != 0) oops();
 
-//             ElemLeaf *l = (ElemLeaf *)elem;
-//             char tbuf[MAX_COMMENT_LEN];
+            ElemLeaf *l = (ElemLeaf *)elem;
+            char tbuf[MAX_COMMENT_LEN];
 
-//             strcpy(tbuf, l->d.comment.str);
-//             char *b = strchr(tbuf, '\n');
+            strcpy(tbuf, l->d.comment.str);
+            char *b = strchr(tbuf, '\n');
 
-//             int len;
-//             if(b) {
-//                 *b = '\0';
-//                 len = max(strlen(tbuf)-1, strlen(b+1));
-//             } else {
-//                 len = strlen(tbuf);
-//             }
-//             // round up, and allow space for lead-in
-//             len = (len + 7 + (POS_WIDTH-1)) / POS_WIDTH;
-//             return max(ColsAvailable, len);
-//         }
-//         case ELEM_CTC:
-//         case ELEM_RES:
-//         case ELEM_COIL:
-//         case ELEM_MOVE:
-//         case ELEM_SHIFT_REGISTER:
-//         case ELEM_LOOK_UP_TABLE:
-//         case ELEM_PIECEWISE_LINEAR:
-//         case ELEM_MASTER_RELAY:
-//         case ELEM_READ_ADC:
-//         case ELEM_SET_PWM:
-//         case ELEM_PERSIST:
-//             if(ColsAvailable - soFar > 1) {
-//                 return ColsAvailable - soFar;
-//             } else {
-//                 return 1;
-//             }
+            int len;
+            if(b) {
+                *b = '\0';
+                len = max(strlen(tbuf)-1, strlen(b+1));
+            } else {
+                len = strlen(tbuf);
+            }
+            // round up, and allow space for lead-in
+            len = (len + 7 + (POS_WIDTH-1)) / POS_WIDTH;
+            return max(ColsAvailable, len);
+        }
+        case ELEM_CTC:
+        case ELEM_RES:
+        case ELEM_COIL:
+        case ELEM_MOVE:
+        case ELEM_SHIFT_REGISTER:
+        case ELEM_LOOK_UP_TABLE:
+        case ELEM_PIECEWISE_LINEAR:
+        case ELEM_MASTER_RELAY:
+        case ELEM_READ_ADC:
+        case ELEM_SET_PWM:
+        case ELEM_PERSIST:
+            if(ColsAvailable - soFar > 1) {
+                return ColsAvailable - soFar;
+            } else {
+                return 1;
+            }
 
-//         case ELEM_ADD:
-//         case ELEM_SUB:
-//         case ELEM_MUL:
-//         case ELEM_DIV:
-//             if(ColsAvailable - soFar > 2) {
-//                 return ColsAvailable - soFar;
-//             } else {
-//                 return 2;
-//             }
+        case ELEM_ADD:
+        case ELEM_SUB:
+        case ELEM_MUL:
+        case ELEM_DIV:
+            if(ColsAvailable - soFar > 2) {
+                return ColsAvailable - soFar;
+            } else {
+                return 2;
+            }
 
-//         case ELEM_SERIES_SUBCKT: {
-//             // total of the width of the members
-//             int total = 0;
-//             int i;
-//             ElemSubcktSeries *s = (ElemSubcktSeries *)elem;
-//             for(i = 0; i < s->count; i++) {
-//                 total += CountWidthOfElement(s->contents[i].which,
-//                     s->contents[i].d.any, total+soFar);
-//             }
-//             return total;
-//         }
+        case ELEM_SERIES_SUBCKT: {
+            // total of the width of the members
+            int total = 0;
+            int i;
+            ElemSubcktSeries *s = (ElemSubcktSeries *)elem;
+            for(i = 0; i < s->count; i++) {
+                total += CountWidthOfElement(s->contents[i].which,
+                    s->contents[i].d.any, total+soFar);
+            }
+            return total;
+        }
 
-//         case ELEM_PARALLEL_SUBCKT: {
-//             // greatest of the width of the members
-//             int max = 0;
-//             int i;
-//             ElemSubcktParallel *p = (ElemSubcktParallel *)elem;
-//             for(i = 0; i < p->count; i++) {
-//                 int w = CountWidthOfElement(p->contents[i].which,
-//                     p->contents[i].d.any, soFar);
-//                 if(w > max) {
-//                     max = w;
-//                 }
-//             }
-//             return max;
-//         }
+        case ELEM_PARALLEL_SUBCKT: {
+            // greatest of the width of the members
+            int max = 0;
+            int i;
+            ElemSubcktParallel *p = (ElemSubcktParallel *)elem;
+            for(i = 0; i < p->count; i++) {
+                int w = CountWidthOfElement(p->contents[i].which,
+                    p->contents[i].d.any, soFar);
+                if(w > max) {
+                    max = w;
+                }
+            }
+            return max;
+        }
 
-//         default:
-//             oops();
-//     }
-// }
+        default:
+            oops();
+    }
+}
 
 //-----------------------------------------------------------------------------
 // Determine the height, in leaf element units, of a particular subcircuit.
@@ -188,63 +188,63 @@ BOOL ThisHighlighted;
 // maximum of the heights of its members. (This is the dual of the width
 // case.)
 //-----------------------------------------------------------------------------
-// int CountHeightOfElement(int which, void *elem)
-// {
-//     switch(which) {
-//         CASE_LEAF
-//             return 1;
+int CountHeightOfElement(int which, void *elem)
+{
+    switch(which) {
+        CASE_LEAF
+            return 1;
 
-//         case ELEM_PARALLEL_SUBCKT: {
-//             // total of the height of the members
-//             int total = 0;
-//             int i;
-//             ElemSubcktParallel *s = (ElemSubcktParallel *)elem;
-//             for(i = 0; i < s->count; i++) {
-//                 total += CountHeightOfElement(s->contents[i].which,
-//                     s->contents[i].d.any);
-//             }
-//             return total;
-//         }
+        case ELEM_PARALLEL_SUBCKT: {
+            // total of the height of the members
+            int total = 0;
+            int i;
+            ElemSubcktParallel *s = (ElemSubcktParallel *)elem;
+            for(i = 0; i < s->count; i++) {
+                total += CountHeightOfElement(s->contents[i].which,
+                    s->contents[i].d.any);
+            }
+            return total;
+        }
 
-//         case ELEM_SERIES_SUBCKT: {
-//             // greatest of the height of the members
-//             int max = 0;
-//             int i;
-//             ElemSubcktSeries *s = (ElemSubcktSeries *)elem;
-//             for(i = 0; i < s->count; i++) {
-//                 int w = CountHeightOfElement(s->contents[i].which,
-//                     s->contents[i].d.any);
-//                 if(w > max) {
-//                     max = w;
-//                 }
-//             }
-//             return max;
-//         }
+        case ELEM_SERIES_SUBCKT: {
+            // greatest of the height of the members
+            int max = 0;
+            int i;
+            ElemSubcktSeries *s = (ElemSubcktSeries *)elem;
+            for(i = 0; i < s->count; i++) {
+                int w = CountHeightOfElement(s->contents[i].which,
+                    s->contents[i].d.any);
+                if(w > max) {
+                    max = w;
+                }
+            }
+            return max;
+        }
 
-//         default:
-//             oops();
-//     }
-// }
+        default:
+            oops();
+    }
+}
 
 //-----------------------------------------------------------------------------
 // Determine the width, in leaf element units, of the widest row of the PLC
 // program (i.e. loop over all the rungs and find the widest).
 //-----------------------------------------------------------------------------
-// int ProgCountWidestRow(void)
-// {
-//     int i;
-//     int max = 0;
-//     int colsTemp = ColsAvailable;
-//     ColsAvailable = 0;
-//     for(i = 0; i < Prog.numRungs; i++) {
-//         int w = CountWidthOfElement(ELEM_SERIES_SUBCKT, Prog.rungs[i], 0);
-//         if(w > max) {
-//             max = w;
-//         }
-//     }
-//     ColsAvailable = colsTemp;
-//     return max;
-// }
+int ProgCountWidestRow(void)
+{
+    int i;
+    int max = 0;
+    int colsTemp = ColsAvailable;
+    ColsAvailable = 0;
+    for(i = 0; i < Prog.numRungs; i++) {
+        int w = CountWidthOfElement(ELEM_SERIES_SUBCKT, Prog.rungs[i], 0);
+        if(w > max) {
+            max = w;
+        }
+    }
+    ColsAvailable = colsTemp;
+    return max;
+}
 
 //-----------------------------------------------------------------------------
 // Draw a vertical wire one leaf element unit high up from (cx, cy), where cx
@@ -926,8 +926,8 @@ BOOL ThisHighlighted;
 // element, else FALSE. This is needed to colour all the wires correctly,
 // since the colouring indicates whether a wire is energized.
 //-----------------------------------------------------------------------------
-// BOOL DrawElement(int which, void *elem, int *cx, int *cy, BOOL poweredBefore)
-// {
+BOOL DrawElement(int which, void *elem, int *cx, int *cy, BOOL poweredBefore)
+{
 //     BOOL poweredAfter;
 
 //     int cx0 = *cx, cy0 = *cy;
@@ -1047,14 +1047,14 @@ BOOL ThisHighlighted;
 
 //     NormText();
 //     return poweredAfter;
-// }
+}
 
 //-----------------------------------------------------------------------------
 // Draw the rung that signals the end of the program. Kind of useless but
 // do it anyways, for convention.
 //-----------------------------------------------------------------------------
-// void DrawEndRung(int cx, int cy)
-// {
+void DrawEndRung(int cx, int cy)
+{
 //     int i;
 //     char *str = "[END]";
 //     int lead = (POS_WIDTH - strlen(str))/2;
@@ -1067,4 +1067,4 @@ BOOL ThisHighlighted;
 //     for(; i < ColsAvailable*POS_WIDTH; i++) {
 //         DrawChars(cx + i, cy + (POS_HEIGHT/2), "-");
 //     }
-// }
+}

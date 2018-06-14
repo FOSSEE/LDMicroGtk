@@ -36,7 +36,7 @@
 HINSTANCE   Instance;
 HWID        MainWindow;
 HWID        DrawWindow;
-HDC         Hdc;
+HCRDC         Hdc;
 
 // parameters used to capture the mouse when implementing our totally non-
 // general splitter control
@@ -1044,58 +1044,59 @@ gboolean LD_WM_MouseMove_call(GtkWidget *widget, GdkEvent *event, gpointer user_
     return FALSE;
 }
 
-gboolean LD_WM_Paint_call(GtkWidget *widget, cairo_t *cr, gpointer data)
+gboolean LD_WM_Paint_call(HWID widget, HCRDC cr, gpointer data)
 {
     /* Handles:
     * WM_PAINT
     */
 
     g_print("draw called\n");
+
+    // guint width, height;
+    // GdkRGBA color;
+    // GtkStyleContext *context;
+
+    // context = gtk_widget_get_style_context (widget);
+
+    // width = gtk_widget_get_allocated_width (widget);
+    // height = gtk_widget_get_allocated_height (widget);
+
+    // gtk_render_background (context, cr, 0, 0, width, height);
+
+    // cairo_arc (cr,
+    //             width / 2.0, height / 2.0,
+    //             MIN (width, height) / 3.0,
+    //             0, 2 * G_PI);
+
+    // gtk_style_context_get_color (context,
+    //                             gtk_style_context_get_state (context),
+    //                             &color);
+    // gdk_cairo_set_source_rgba (cr, &color);
+
+    // cairo_fill (cr);
+    // static double Cairo_R = 0.0, Cairo_G = 0.0, Cairo_B = 0.0;
+    // cairo_set_source_rgb(cr, Cairo_R, Cairo_G, Cairo_G); 
+    // Cairo_R = (Cairo_R+0.2 > 0.4) ? 0 : Cairo_R+0.2;
+    // Cairo_G = (Cairo_G+0.4 > 1.0) ? 0.4 : Cairo_G+0.4;
+    // Cairo_B = (Cairo_B+0.1 > 0.5) ? 0 : Cairo_B+0.1;
     
-    guint width, height;
-    GdkRGBA color;
-    GtkStyleContext *context;
+    // cairo_select_font_face(cr, "Purisa",
+    //     CAIRO_FONT_SLANT_NORMAL,
+    //     CAIRO_FONT_WEIGHT_BOLD);
 
-    context = gtk_widget_get_style_context (widget);
+    // cairo_set_font_size(cr, 20);
 
-    width = gtk_widget_get_allocated_width (widget);
-    height = gtk_widget_get_allocated_height (widget);
+    // cairo_move_to(cr, 20, height / 2.0);
+    // cairo_show_text(cr, "-----------THIS IS A TEST DRAW----------");  
 
-    gtk_render_background (context, cr, 0, 0, width, height);
+    // cairo_fill (cr);
 
-    cairo_arc (cr,
-                width / 2.0, height / 2.0,
-                MIN (width, height) / 3.0,
-                0, 2 * G_PI);
-
-    gtk_style_context_get_color (context,
-                                gtk_style_context_get_state (context),
-                                &color);
-    gdk_cairo_set_source_rgba (cr, &color);
-
-    cairo_fill (cr);
-    static double Cairo_R = 0.0, Cairo_G = 0.0, Cairo_B = 0.0;
-    cairo_set_source_rgb(cr, Cairo_R, Cairo_G, Cairo_G); 
-    Cairo_R = (Cairo_R+0.2 > 0.4) ? 0 : Cairo_R+0.2;
-    Cairo_G = (Cairo_G+0.4 > 1.0) ? 0.4 : Cairo_G+0.4;
-    Cairo_B = (Cairo_B+0.1 > 0.5) ? 0 : Cairo_B+0.1;
     
-    cairo_select_font_face(cr, "Purisa",
-        CAIRO_FONT_SLANT_NORMAL,
-        CAIRO_FONT_WEIGHT_BOLD);
-
-    cairo_set_font_size(cr, 20);
-
-    cairo_move_to(cr, 20, height / 2.0);
-    cairo_show_text(cr, "-----------THIS IS A TEST DRAW----------");  
-
-    cairo_fill (cr);
-
     // PAINTSTRUCT ps;
     // Hdc = BeginPaint(hwnd, &ps);
 
-    // // This draws the schematic.
-    // PaintWindow();
+    /// This draws the schematic.
+    PaintWindow(cr);
 
     // RECT r;
     // // Fill around the scroll bars

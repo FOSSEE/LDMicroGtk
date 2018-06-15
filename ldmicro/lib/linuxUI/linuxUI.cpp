@@ -203,18 +203,18 @@ void SelectObject(HCRDC hcr, HFONT hfont)
 
     cairo_rotate(hcr, hfont->nOrientation);
 
-    cairo_text_extents_t extents;
-    cairo_text_extents (hcr, "H", &extents);
+    // cairo_text_extents_t extents;
+    // cairo_text_extents (hcr, "H", &extents);
  
-    cairo_matrix_t matrix;
-    cairo_matrix_init_scale (&matrix,
-                    (double)hfont->nWidth / extents.width,
-                    (double)hfont->nHeight / extents.width);
+    // cairo_matrix_t matrix;
+    // cairo_matrix_init_scale (&matrix,
+    //                 (double)hfont->nWidth / extents.width,
+    //                 (double)hfont->nHeight / extents.width);
  
-    cairo_set_font_matrix (hcr, &matrix);
-    g_print("wR = %f\nhR = %f\n", (double)hfont->nWidth / extents.width, (double)hfont->nHeight / extents.height);
-    g_print("tW = %f\ntH = %f\n", extents.width, extents.width);
-    // cairo_set_font_size(hcr, 20);
+    // cairo_set_font_matrix (hcr, &matrix);
+    // g_print("wR = %f\nhR = %f\n", (double)hfont->nWidth / extents.width, (double)hfont->nHeight / extents.height);
+    // g_print("tW = %f\ntH = %f\n", extents.width, extents.width);
+    cairo_set_font_size(hcr, 15);
 }
 
 HBRUSH CreateBrushIndirect(PLOGBRUSH plb)

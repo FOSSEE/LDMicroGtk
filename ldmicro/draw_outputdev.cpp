@@ -243,7 +243,7 @@ void PaintWindow(HCRDC hcr)
     
     SelectObject(hcr, FixedWidthFont);
     
-    TextOut(hcr, 50, 100, "-----HELLO----", 14);
+    TextOut(hcr, 5, 100, "-------] [-------------------------------------------------------------------------------------------------------------------------------------------------{RES}-------", 14);
     // static HBITMAP BackBitmap;
     // static HDC BackDc;
     // static int BitmapWidth;

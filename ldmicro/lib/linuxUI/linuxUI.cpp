@@ -1,5 +1,7 @@
 #include "linuxUI.h"
 
+void AddMenuAccelerators (void);
+
 /// EnableMenuItem Variables
 const UINT MF_ENABLED = 0;
 const UINT MF_GRAYED = 1;
@@ -214,3 +216,17 @@ HWID CreateWindowEx(DWORD dwExStyle, LPCTSTR lpClassName, LPCTSTR lpWindowName,
 
     return window;
 }
+
+// bool KeyPressEnter(HWID widget, GdkEventKey* event, gpointer* data) {
+//     if (event->keyval == GDK_KEY_Return){
+//         return TRUE;
+//     }
+//     return FALSE;
+// }
+
+// bool KeyPressEsc(HWID widget, GdkEventKey* event, gpointer* data) {
+//     if (event->keyval == GDK_KEY_Escape){
+//         return TRUE;
+//     }
+//     return FALSE;
+// }

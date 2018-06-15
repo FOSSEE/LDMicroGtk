@@ -51,10 +51,9 @@ extern const UINT MF_UNCHECKED;
 extern GtkAccelGroup* AccelGroup;
 extern GClosure* closure;
 
-
 /// ListStore
-extern GtkWidget *view;
-extern GtkTreeViewColumn *column;
+extern HWID view;
+extern HTVC column;
 
 /// data types
 typedef struct OpenFileInfoData {
@@ -76,6 +75,8 @@ BOOL GetSaveFileName(OPENFILENAME* );
 void EnableMenuItem(HMENU, HMENU, UINT);
 void CheckMenuItem(HMENU, HMENU, UINT);
 HBRUSH GetStockObject(int fnObject);
+// bool KeyPressEnter (HWID, GdkEventKey, gpointer);
+// bool KeyPressEsc (HWID, GdkEventKey, gpointer);
 
 HWID CreateWindowEx(
     DWORD     dwExStyle,

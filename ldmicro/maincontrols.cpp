@@ -592,22 +592,22 @@ void MakeMainWindowControls(void)
     /// Adding DrawWindow to pane
     gtk_container_add (GTK_CONTAINER(viewport), DrawWindow);
     gtk_container_add (GTK_CONTAINER(ScrollWindow), viewport);
-    gtk_paned_add1 (GTK_PANED (pane), ScrollWindow);
+    gtk_paned_pack1 (GTK_PANED (pane), ScrollWindow, TRUE, TRUE);
     gtk_paned_set_position (GTK_PANED (pane), 0);    
 
     /// Appending tree view to pane and pane to grid
     gtk_paned_pack2 (GTK_PANED(pane), view, FALSE, FALSE);
-    gtk_paned_set_position (GTK_PANED (pane), 250);
+    gtk_paned_set_position (GTK_PANED (pane), 400);
     gtk_grid_attach (GTK_GRID (grid), pane, 0, 0, 1, 1); 
 
     /// Creating Status Bar and attaching to grid
     StatusBar = gtk_statusbar_new();
     gtk_statusbar_push (GTK_STATUSBAR (StatusBar),
-                        gtk_statusbar_get_context_id (GTK_STATUSBAR (StatusBar), "Introduction"), 
-                        "LDMicro Started");
+                        gtk_statusbar_get_context_id (GTK_STATUSBAR (StatusBar),
+                        "Introduction"), "LDMicro Started");
 
     /// Appneding Status Bar to box which is then added to Main Window
-    gtk_box_pack_start(GTK_BOX(PackBox), grid, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(PackBox), grid, FALSE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(PackBox), StatusBar, FALSE, FALSE, 0);
     gtk_container_add(GTK_CONTAINER(MainWindow), PackBox);
 }

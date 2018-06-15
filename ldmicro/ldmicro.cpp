@@ -39,7 +39,8 @@ using namespace std;
 
 HINSTANCE   Instance;
 HWID        MainWindow;
-HDC         Hdc;
+HWID        DrawWindow;
+HCRDC         Hdc;
 
 // parameters used to capture the mouse when implementing our totally non-
 // general splitter control
@@ -603,381 +604,24 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     //         break;
 
     //     case WM_SETFOCUS:
-    //         InvalidateRect(MainWindow, NULL, FALSE);
-    //         break;
 
     //     case WM_PAINT: {
-    //         PAINTSTRUCT ps;
-    //         Hdc = BeginPaint(hwnd, &ps);
-
-    //         // This draws the schematic.
-    //         PaintWindow();
-
-    //         RECT r;
-    //         // Fill around the scroll bars
-    //         if(NeedHoriz) {
-    //             r.top = IoListTop - ScrollHeight - 2;
-    //             r.bottom = IoListTop - 2;
-    //             FillRect(Hdc, &r, (HBRUSH)GetStockObject(LTGRAY_BRUSH));
-    //         }
-    //         GetClientRect(MainWindow, &r);
-    //         r.left = r.right - ScrollWidth - 2;
-    //         FillRect(Hdc, &r, (HBRUSH)GetStockObject(LTGRAY_BRUSH));
-
-    //         // Draw the splitter thing to grab to resize the I/O listview.
-    //         GetClientRect(MainWindow, &r);
-    //         r.top = IoListTop - 2;
-    //         r.bottom = IoListTop;
-    //         FillRect(Hdc, &r, (HBRUSH)GetStockObject(LTGRAY_BRUSH));
-    //         r.top = IoListTop - 2;
-    //         r.bottom = IoListTop - 1;
-    //         FillRect(Hdc, &r, (HBRUSH)GetStockObject(WHITE_BRUSH));
-    //         r.top = IoListTop;
-    //         r.bottom = IoListTop + 1;
-    //         FillRect(Hdc, &r, (HBRUSH)GetStockObject(DKGRAY_BRUSH));
-
-    //         EndPaint(hwnd, &ps);
-    //         return 1;
     //     }
 
     //     case WM_KEYDOWN: {
-    //         if(wParam == 'M') {
-    //             if(GetAsyncKeyState(VK_CONTROL) & 0x8000) {
-    //                 ToggleSimulationMode();
-    //                 break;
-    //             }
-    //         } else if(wParam == VK_TAB) {
-    //             SetFocus(IoList);
-    //             BlinkCursor(0, 0, 0, 0);
-    //             break;
-    //         } else if(wParam == VK_F1) {
-    //             ShowHelpDialog(FALSE);
-    //             break;
-    //         }
-
-    //         if(InSimulationMode) {
-    //             switch(wParam) {
-    //                 case ' ':
-    //                     SimulateOneCycle(TRUE);
-    //                     break;
-
-    //                 case 'R':
-    //                     if(GetAsyncKeyState(VK_CONTROL) & 0x8000)
-    //                         StartSimulation();
-    //                     break;
-
-    //                 case 'H':
-    //                     if(GetAsyncKeyState(VK_CONTROL) & 0x8000)
-    //                         StopSimulation();
-    //                     break;
-
-    //                 case VK_DOWN:
-    //                     if(ScrollYOffset < ScrollYOffsetMax)
-    //                         ScrollYOffset++;
-    //                     RefreshScrollbars();
-    //                     InvalidateRect(MainWindow, NULL, FALSE);
-    //                     break;
-
-    //                 case VK_UP:
-    //                     if(ScrollYOffset > 0)
-    //                         ScrollYOffset--;
-    //                     RefreshScrollbars();
-    //                     InvalidateRect(MainWindow, NULL, FALSE);
-    //                     break;
-
-    //                 case VK_LEFT:
-    //                     ScrollXOffset -= FONT_WIDTH;
-    //                     if(ScrollXOffset < 0) ScrollXOffset = 0;
-    //                     RefreshScrollbars();
-    //                     InvalidateRect(MainWindow, NULL, FALSE);
-    //                     break;
-
-    //                 case VK_RIGHT:
-    //                     ScrollXOffset += FONT_WIDTH;
-    //                     if(ScrollXOffset >= ScrollXOffsetMax)
-    //                         ScrollXOffset = ScrollXOffsetMax;
-    //                     RefreshScrollbars();
-    //                     InvalidateRect(MainWindow, NULL, FALSE);
-    //                     break;
-
-    //                 case VK_RETURN:
-    //                 case VK_ESCAPE:
-    //                     ToggleSimulationMode();
-    //                     break;
-    //             }
-    //             break;
-    //         }
-
-
-    //         switch(wParam) {
-    //             case VK_F5:
-    //                 CompileProgram(FALSE);
-    //                 break;
-
-    //             case VK_UP:
-    //                 if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
-    //                     CHANGING_PROGRAM(PushRungUp());
-    //                 } else {
-    //                     MoveCursorKeyboard(wParam);
-    //                 }
-    //                 break;
-
-    //             case VK_DOWN:
-    //                 if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
-    //                     CHANGING_PROGRAM(PushRungDown());
-    //                 } else {
-    //                     MoveCursorKeyboard(wParam);
-    //                 }
-    //                 break;
-
-    //             case VK_RIGHT:
-    //             case VK_LEFT:
-    //                 MoveCursorKeyboard(wParam);
-    //                 break;
-
-    //             case VK_RETURN:
-    //                 CHANGING_PROGRAM(EditSelectedElement());
-    //                 break;
-
-    //             case VK_DELETE:
-    //                 if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
-    //                     CHANGING_PROGRAM(DeleteSelectedRung());
-    //                 } else {
-    //                     CHANGING_PROGRAM(DeleteSelectedFromProgram());
-    //                 }
-    //                 break;
-
-    //             case VK_OEM_1:
-    //                 CHANGING_PROGRAM(AddComment(_("--add comment here--")));
-    //                 break;
-
-    //             case 'C':
-    //                 CHANGING_PROGRAM(AddContact());
-    //                 break;
-
-    //             // TODO: rather country-specific here
-    //             case VK_OEM_2:
-    //                 CHANGING_PROGRAM(AddEmpty(ELEM_ONE_SHOT_RISING));
-    //                 break;
-
-    //             case VK_OEM_5:
-    //                 CHANGING_PROGRAM(AddEmpty(ELEM_ONE_SHOT_FALLING));
-    //                 break;
-
-    //             case 'L':
-    //                 CHANGING_PROGRAM(AddCoil());
-    //                 break;
-
-    //             case 'R':
-    //                 CHANGING_PROGRAM(MakeResetOnlySelected());
-    //                 break;
-
-    //             case 'E':
-    //                 if(GetAsyncKeyState(VK_CONTROL) & 0x8000) {
-    //                     ExportDialog();
-    //                 } else {
-    //                     CHANGING_PROGRAM(AddReset());
-    //                 }
-    //                 break;
-
-    //             case 'S':
-    //                 if(GetAsyncKeyState(VK_CONTROL) & 0x8000) {
-    //                     SaveProgram();
-    //                     UpdateMainWindowTitleBar();
-    //                 } else {
-    //                     CHANGING_PROGRAM(MakeSetOnlySelected());
-    //                 }
-    //                 break;
-
-    //             case 'N':
-    //                 if(GetAsyncKeyState(VK_CONTROL) & 0x8000) {
-    //                     if(CheckSaveUserCancels()) break;
-    //                     if(!ProgramChangedNotSaved) {
-    //                         int r = MessageBox(MainWindow, 
-    //                             _("Start new program?"),
-    //                             "LDmicro", MB_YESNO | MB_DEFBUTTON2 |
-    //                             MB_ICONQUESTION);
-    //                         if(r == IDNO) break;
-    //                     }
-    //                     NewProgram();
-    //                     strcpy(CurrentSaveFile, "");
-    //                     strcpy(CurrentCompileFile, "");
-    //                     GenerateIoListDontLoseSelection();
-    //                     RefreshScrollbars();
-    //                     UpdateMainWindowTitleBar();
-    //                 } else {
-    //                     CHANGING_PROGRAM(NegateSelected());
-    //                 }
-    //                 break;
-
-    //             case 'A':
-    //                 CHANGING_PROGRAM(MakeNormalSelected());
-    //                 break;
-
-    //             case 'T':
-    //                 CHANGING_PROGRAM(AddTimer(ELEM_RTO));
-    //                 break;
-
-    //             case 'O':
-    //                 if(GetAsyncKeyState(VK_CONTROL) & 0x8000) {
-    //                     if(CheckSaveUserCancels()) break;
-    //                     OpenDialog();
-    //                 } else {
-    //                     CHANGING_PROGRAM(AddTimer(ELEM_TON));
-    //                 }
-    //                 break;
-
-    //             case 'F':
-    //                 CHANGING_PROGRAM(AddTimer(ELEM_TOF));
-    //                 break;
-
-    //             case 'U':
-    //                 CHANGING_PROGRAM(AddCounter(ELEM_CTU));
-    //                 break;
-
-    //             case 'I':
-    //                 CHANGING_PROGRAM(AddCounter(ELEM_CTD));
-    //                 break;
-
-    //             case 'J':
-    //                 CHANGING_PROGRAM(AddCounter(ELEM_CTC));
-    //                 break;
-
-    //             case 'M':
-    //                 CHANGING_PROGRAM(AddMove());
-    //                 break;
-
-    //             case 'P':
-    //                 CHANGING_PROGRAM(AddReadAdc());
-    //                 break;
-
-    //             case VK_OEM_PLUS:
-    //                 if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
-    //                     CHANGING_PROGRAM(AddMath(ELEM_ADD));
-    //                 } else {
-    //                     CHANGING_PROGRAM(AddCmp(ELEM_EQU));
-    //                 }
-    //                 break;
-
-    //             case VK_OEM_MINUS:
-    //                 if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
-    //                 } else {
-    //                     CHANGING_PROGRAM(AddMath(ELEM_SUB));
-    //                 }
-    //                 break;
-
-    //             case '8':
-    //                 if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
-    //                     CHANGING_PROGRAM(AddMath(ELEM_MUL));
-    //                 }
-    //                 break;
-
-    //             case 'D':
-    //                 CHANGING_PROGRAM(AddMath(ELEM_DIV));
-    //                 break;
-
-    //             case VK_OEM_PERIOD:
-    //                 if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
-    //                     CHANGING_PROGRAM(AddCmp(ELEM_GRT));
-    //                 } else {
-    //                     CHANGING_PROGRAM(AddCmp(ELEM_GEQ));
-    //                 }
-    //                 break;
-
-    //             case VK_OEM_COMMA:
-    //                 if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
-    //                     CHANGING_PROGRAM(AddCmp(ELEM_LES));
-    //                 } else {
-    //                     CHANGING_PROGRAM(AddCmp(ELEM_LEQ));
-    //                 }
-    //                 break;
-
-    //             case 'V':
-    //                 if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
-    //                     CHANGING_PROGRAM(InsertRung(TRUE));
-    //                 }
-    //                 break;
-
-    //             case '6':
-    //                 if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
-    //                     CHANGING_PROGRAM(InsertRung(FALSE));
-    //                 }
-    //                 break;
-
-    //             case 'Z':
-    //                 if(GetAsyncKeyState(VK_CONTROL) & 0x8000) {
-    //                     UndoUndo();
-    //                 }
-    //                 break;
-
-    //             case 'Y':
-    //                 if(GetAsyncKeyState(VK_CONTROL) & 0x8000) {
-    //                     UndoRedo();
-    //                 }
-    //                 break;
-
-    //             default:
-    //                 break;
-    //         }
-    //         if(wParam != VK_SHIFT && wParam != VK_CONTROL) {
-    //             InvalidateRect(MainWindow, NULL, FALSE);
-    //         }
-    //         break;
     //     }
 
     //     case WM_LBUTTONDBLCLK: {
-    //         int x = LOWORD(lParam);
-    //         int y = HIWORD(lParam);
-    //         if(InSimulationMode) {
-    //             EditElementMouseDoubleclick(x, y);
-    //         } else {
-    //             CHANGING_PROGRAM(EditElementMouseDoubleclick(x, y));
-    //         }
-    //         InvalidateRect(MainWindow, NULL, FALSE);
-    //         break;
     //     }
 
     //     case WM_LBUTTONDOWN: {
-    //         int x = LOWORD(lParam);
-    //         int y = HIWORD(lParam);
-    //         if((y > (IoListTop - 9)) && (y < (IoListTop + 3))) {
-    //             POINT pt;
-    //             pt.x = x; pt.y = y;
-    //             ClientToScreen(MainWindow, &pt);
-    //             MouseY = pt.y;
-    //             MouseHookHandle = SetWindowsHookEx(WH_MOUSE_LL,
-    //                     (HOOKPROC)MouseHook, Instance, 0);
-    //         }
-    //         if(!InSimulationMode) MoveCursorMouseClick(x, y);
-
-    //         SetFocus(MainWindow);
-    //         InvalidateRect(MainWindow, NULL, FALSE);
-    //         break;
     //     }
     //     case WM_MOUSEMOVE: {
-    //         int x = LOWORD(lParam);
-    //         int y = HIWORD(lParam);
-
-    //         if((y > (IoListTop - 9)) && (y < (IoListTop + 3))) {
-    //             SetCursor(LoadCursor(NULL, IDC_SIZENS));
-    //         } else {
-    //             SetCursor(LoadCursor(NULL, IDC_ARROW));
-    //         }
-            
-    //         break;
     //     }
     //     case WM_MOUSEWHEEL: {
-    //         if((GET_WHEEL_DELTA_WPARAM(wParam)) > 0) {
-    //             VscrollProc(SB_LINEUP);
-    //         } else {
-    //             VscrollProc(SB_LINEDOWN);
-    //         }
-    //         break;
     //     }
 
     //     case WM_SIZE:
-    //         MainWindowResized();
-    //         break;
 
     //     case WM_NOTIFY: {
     //         NMHDR *h = (NMHDR *)lParam;
@@ -987,12 +631,8 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     //         return 0;
     //     }
     //     case WM_VSCROLL:
-    //         VscrollProc(wParam);
-    //         break;
 
     //     case WM_HSCROLL:
-    //         HscrollProc(wParam);
-    //         break;
 
     //     case WM_COMMAND:
     //         ProcessMenu(LOWORD(wParam));
@@ -1001,10 +641,6 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
     //     case WM_CLOSE:
     //     case WM_DESTROY:
-    //         if(CheckSaveUserCancels()) break;
-
-    //         PostQuitMessage(0);
-    //         return 1;
 
     //     default:
     //         return DefWindowProc(hwnd, msg, wParam, lParam);
@@ -1013,38 +649,532 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     return 1;
 }
 
-//-----------------------------------------------------------------------------
-// Create our window class; nothing exciting.
-//-----------------------------------------------------------------------------
-static BOOL MakeWindowClass()
+void LD_WM_Close_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)//(HWND window)
 {
-    WNDCLASSEX wc;
-    memset(&wc, 0, sizeof(wc));
-    wc.cbSize = sizeof(wc);
+    /* Handles:
+    * WM_CLOSE
+    */
 
-    // wc.style            = CS_BYTEALIGNCLIENT | CS_BYTEALIGNWINDOW | CS_OWNDC |
-                            // CS_DBLCLKS;
-    // wc.lpfnWndProc      = (WNDPROC)MainWndProc;
-    wc.hInstance        = NULL;
-    wc.hbrBackground    = (HBRUSH)GetStockObject(BLACK_BRUSH);
-    wc.lpszClassName    = "LDmicro";
-    // wc.lpszMenuName     = Instance;
-    // wc.hCursor          = LoadCursor(NULL, IDC_ARROW);
-    wc.hIcon            = (HICON)LoadImage(Instance, LDMICRO_ICON,
-                            IMAGE_ICON, 32, 32, 0);
-    wc.hIconSm          = (HICON)LoadImage(Instance, LDMICRO_ICON,
-                            IMAGE_ICON, 16, 16, 0);//MAKEINTRESOURCE(4000)
-
-    return RegisterClassEx(&wc);
-}
-
-void LDMicro_close(HWND window)
-{
     FreezeWindowPos(MainWindow);
     FreezeDWORD(IoListHeight);
 
     gtk_main_quit();
 }
+
+gboolean LD_WM_KeyDown_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+{   
+    /* Handles:
+    * WM_KEYDOWN
+    */
+
+    switch(event->key.state)
+    {
+        case GDK_SHIFT_MASK:
+            g_print("SHIFT+");
+            break;
+        case GDK_CONTROL_MASK:
+            g_print("CONTROL+");
+            break;
+    }
+  
+    g_print("%c\n", (char)gdk_keyval_to_unicode(event->key.keyval));
+
+    // if(wParam == 'M') {
+    //         if(GetAsyncKeyState(VK_CONTROL) & 0x8000) {
+    //             ToggleSimulationMode();
+    //             break;
+    //         }
+    //     } else if(wParam == VK_TAB) {
+    //         SetFocus(IoList);
+    //         BlinkCursor(0, 0, 0, 0);
+    //         break;
+    //     } else if(wParam == VK_F1) {
+    //         ShowHelpDialog(FALSE);
+    //         break;
+    //     }
+
+    //     if(InSimulationMode) {
+    //         switch(wParam) {
+    //             case ' ':
+    //                 SimulateOneCycle(TRUE);
+    //                 break;
+
+    //             case 'R':
+    //                 if(GetAsyncKeyState(VK_CONTROL) & 0x8000)
+    //                     StartSimulation();
+    //                 break;
+
+    //             case 'H':
+    //                 if(GetAsyncKeyState(VK_CONTROL) & 0x8000)
+    //                     StopSimulation();
+    //                 break;
+
+    //             case VK_DOWN:
+    //                 if(ScrollYOffset < ScrollYOffsetMax)
+    //                     ScrollYOffset++;
+    //                 RefreshScrollbars();
+    //                 InvalidateRect(MainWindow, NULL, FALSE);
+    //                 break;
+
+    //             case VK_UP:
+    //                 if(ScrollYOffset > 0)
+    //                     ScrollYOffset--;
+    //                 RefreshScrollbars();
+    //                 InvalidateRect(MainWindow, NULL, FALSE);
+    //                 break;
+
+    //             case VK_LEFT:
+    //                 ScrollXOffset -= FONT_WIDTH;
+    //                 if(ScrollXOffset < 0) ScrollXOffset = 0;
+    //                 RefreshScrollbars();
+    //                 InvalidateRect(MainWindow, NULL, FALSE);
+    //                 break;
+
+    //             case VK_RIGHT:
+    //                 ScrollXOffset += FONT_WIDTH;
+    //                 if(ScrollXOffset >= ScrollXOffsetMax)
+    //                     ScrollXOffset = ScrollXOffsetMax;
+    //                 RefreshScrollbars();
+    //                 InvalidateRect(MainWindow, NULL, FALSE);
+    //                 break;
+
+    //             case VK_RETURN:
+    //             case VK_ESCAPE:
+    //                 ToggleSimulationMode();
+    //                 break;
+    //         }
+    //         break;
+    //     }
+
+
+    //     switch(wParam) {
+    //         case VK_F5:
+    //             CompileProgram(FALSE);
+    //             break;
+
+    //         case VK_UP:
+    //             if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
+    //                 CHANGING_PROGRAM(PushRungUp());
+    //             } else {
+    //                 MoveCursorKeyboard(wParam);
+    //             }
+    //             break;
+
+    //         case VK_DOWN:
+    //             if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
+    //                 CHANGING_PROGRAM(PushRungDown());
+    //             } else {
+    //                 MoveCursorKeyboard(wParam);
+    //             }
+    //             break;
+
+    //         case VK_RIGHT:
+    //         case VK_LEFT:
+    //             MoveCursorKeyboard(wParam);
+    //             break;
+
+    //         case VK_RETURN:
+    //             CHANGING_PROGRAM(EditSelectedElement());
+    //             break;
+
+    //         case VK_DELETE:
+    //             if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
+    //                 CHANGING_PROGRAM(DeleteSelectedRung());
+    //             } else {
+    //                 CHANGING_PROGRAM(DeleteSelectedFromProgram());
+    //             }
+    //             break;
+
+    //         case VK_OEM_1:
+    //             CHANGING_PROGRAM(AddComment(_("--add comment here--")));
+    //             break;
+
+    //         case 'C':
+    //             CHANGING_PROGRAM(AddContact());
+    //             break;
+
+    //         // TODO: rather country-specific here
+    //         case VK_OEM_2:
+    //             CHANGING_PROGRAM(AddEmpty(ELEM_ONE_SHOT_RISING));
+    //             break;
+
+    //         case VK_OEM_5:
+    //             CHANGING_PROGRAM(AddEmpty(ELEM_ONE_SHOT_FALLING));
+    //             break;
+
+    //         case 'L':
+    //             CHANGING_PROGRAM(AddCoil());
+    //             break;
+
+    //         case 'R':
+    //             CHANGING_PROGRAM(MakeResetOnlySelected());
+    //             break;
+
+    //         case 'E':
+    //             if(GetAsyncKeyState(VK_CONTROL) & 0x8000) {
+    //                 ExportDialog();
+    //             } else {
+    //                 CHANGING_PROGRAM(AddReset());
+    //             }
+    //             break;
+
+    //         case 'S':
+    //             if(GetAsyncKeyState(VK_CONTROL) & 0x8000) {
+    //                 SaveProgram();
+    //                 UpdateMainWindowTitleBar();
+    //             } else {
+    //                 CHANGING_PROGRAM(MakeSetOnlySelected());
+    //             }
+    //             break;
+
+    //         case 'N':
+    //             if(GetAsyncKeyState(VK_CONTROL) & 0x8000) {
+    //                 if(CheckSaveUserCancels()) break;
+    //                 if(!ProgramChangedNotSaved) {
+    //                     int r = MessageBox(MainWindow, 
+    //                         _("Start new program?"),
+    //                         "LDmicro", MB_YESNO | MB_DEFBUTTON2 |
+    //                         MB_ICONQUESTION);
+    //                     if(r == IDNO) break;
+    //                 }
+    //                 NewProgram();
+    //                 strcpy(CurrentSaveFile, "");
+    //                 strcpy(CurrentCompileFile, "");
+    //                 GenerateIoListDontLoseSelection();
+    //                 RefreshScrollbars();
+    //                 UpdateMainWindowTitleBar();
+    //             } else {
+    //                 CHANGING_PROGRAM(NegateSelected());
+    //             }
+    //             break;
+
+    //         case 'A':
+    //             CHANGING_PROGRAM(MakeNormalSelected());
+    //             break;
+
+    //         case 'T':
+    //             CHANGING_PROGRAM(AddTimer(ELEM_RTO));
+    //             break;
+
+    //         case 'O':
+    //             if(GetAsyncKeyState(VK_CONTROL) & 0x8000) {
+    //                 if(CheckSaveUserCancels()) break;
+    //                 OpenDialog();
+    //             } else {
+    //                 CHANGING_PROGRAM(AddTimer(ELEM_TON));
+    //             }
+    //             break;
+
+    //         case 'F':
+    //             CHANGING_PROGRAM(AddTimer(ELEM_TOF));
+    //             break;
+
+    //         case 'U':
+    //             CHANGING_PROGRAM(AddCounter(ELEM_CTU));
+    //             break;
+
+    //         case 'I':
+    //             CHANGING_PROGRAM(AddCounter(ELEM_CTD));
+    //             break;
+
+    //         case 'J':
+    //             CHANGING_PROGRAM(AddCounter(ELEM_CTC));
+    //             break;
+
+    //         case 'M':
+    //             CHANGING_PROGRAM(AddMove());
+    //             break;
+
+    //         case 'P':
+    //             CHANGING_PROGRAM(AddReadAdc());
+    //             break;
+
+    //         case VK_OEM_PLUS:
+    //             if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
+    //                 CHANGING_PROGRAM(AddMath(ELEM_ADD));
+    //             } else {
+    //                 CHANGING_PROGRAM(AddCmp(ELEM_EQU));
+    //             }
+    //             break;
+
+    //         case VK_OEM_MINUS:
+    //             if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
+    //             } else {
+    //                 CHANGING_PROGRAM(AddMath(ELEM_SUB));
+    //             }
+    //             break;
+
+    //         case '8':
+    //             if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
+    //                 CHANGING_PROGRAM(AddMath(ELEM_MUL));
+    //             }
+    //             break;
+
+    //         case 'D':
+    //             CHANGING_PROGRAM(AddMath(ELEM_DIV));
+    //             break;
+
+    //         case VK_OEM_PERIOD:
+    //             if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
+    //                 CHANGING_PROGRAM(AddCmp(ELEM_GRT));
+    //             } else {
+    //                 CHANGING_PROGRAM(AddCmp(ELEM_GEQ));
+    //             }
+    //             break;
+
+    //         case VK_OEM_COMMA:
+    //             if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
+    //                 CHANGING_PROGRAM(AddCmp(ELEM_LES));
+    //             } else {
+    //                 CHANGING_PROGRAM(AddCmp(ELEM_LEQ));
+    //             }
+    //             break;
+
+    //         case 'V':
+    //             if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
+    //                 CHANGING_PROGRAM(InsertRung(TRUE));
+    //             }
+    //             break;
+
+    //         case '6':
+    //             if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
+    //                 CHANGING_PROGRAM(InsertRung(FALSE));
+    //             }
+    //             break;
+
+    //         case 'Z':
+    //             if(GetAsyncKeyState(VK_CONTROL) & 0x8000) {
+    //                 UndoUndo();
+    //             }
+    //             break;
+
+    //         case 'Y':
+    //             if(GetAsyncKeyState(VK_CONTROL) & 0x8000) {
+    //                 UndoRedo();
+    //             }
+    //             break;
+
+    //         default:
+    //             break;
+    //     }
+    //     if(wParam != VK_SHIFT && wParam != VK_CONTROL) {
+    //         InvalidateRect(MainWindow, NULL, FALSE);
+    //     }
+    //     break;
+    return FALSE;
+}
+
+gboolean LD_GTK_mouse_click_hook(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+{
+    /* Handles:
+    * WM_LBUTTONDBLCLK, WM_LBUTTONDOWN
+    */
+
+    g_print("x = %f\n", event->button.x_root);
+    g_print("y = %f\n", event->button.y_root);
+    switch(event->button.type)
+    {
+        case GDK_BUTTON_PRESS:// To Do: run only for left click
+            // int x = LOWORD(lParam);
+            // int y = HIWORD(lParam);
+            // if((y > (IoListTop - 9)) && (y < (IoListTop + 3))) {
+            //     POINT pt;
+            //     pt.x = x; pt.y = y;
+            //     ClientToScreen(MainWindow, &pt);
+            //     MouseY = pt.y;
+            //     MouseHookHandle = SetWindowsHookEx(WH_MOUSE_LL,
+            //             (HOOKPROC)MouseHook, Instance, 0);
+            // }
+            // if(!InSimulationMode) MoveCursorMouseClick(x, y);
+
+            // SetFocus(MainWindow);
+            // InvalidateRect(MainWindow, NULL, FALSE);
+            break;
+        case GDK_2BUTTON_PRESS:
+            // int x = LOWORD(lParam);
+            // int y = HIWORD(lParam);
+            // if(InSimulationMode) {
+            //     EditElementMouseDoubleclick(x, y);
+            // } else {
+            //     CHANGING_PROGRAM(EditElementMouseDoubleclick(x, y));
+            // }
+            // InvalidateRect(MainWindow, NULL, FALSE);
+            break;
+
+    }
+    return FALSE;
+}
+
+gboolean LD_GTK_mouse_scroll_hook(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+{
+    /* Handles:
+    * WM_VSCROLL, WM_HSCROLL, WM_MOUSEWHEEL
+    */
+
+    switch(event->scroll.direction)
+    {
+        case GDK_SCROLL_UP:
+        case GDK_SCROLL_DOWN:
+            // VscrollProc(wParam);
+            break;
+        case GDK_SCROLL_LEFT:
+        case GDK_SCROLL_RIGHT:
+            // HscrollProc(wParam);
+            break;
+        case GDK_SCROLL_SMOOTH:
+            // if((GET_WHEEL_DELTA_WPARAM(wParam)) > 0) {
+            //     VscrollProc(SB_LINEUP);
+            // } else {
+            //     VscrollProc(SB_LINEDOWN);
+            // }
+            // gdk_event_get_scroll_deltas (const GdkEvent *event, gdouble *delta_x, gdouble *delta_y);
+            break;
+
+    }
+    return FALSE;
+}
+
+gboolean LD_WM_MouseMove_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+{
+    /* Handles:
+    * WM_MOUSEMOVE
+    */
+
+    g_print("x = %f\n", event->button.x_root);
+    g_print("y = %f\n", event->button.y_root);
+    // int x = LOWORD(lParam);
+    // int y = HIWORD(lParam);
+
+    // if((y > (IoListTop - 9)) && (y < (IoListTop + 3))) {
+    //     SetCursor(LoadCursor(NULL, IDC_SIZENS));
+    // } else {
+    //     SetCursor(LoadCursor(NULL, IDC_ARROW));
+    // }
+    
+    // break;
+    return FALSE;
+}
+
+gboolean LD_WM_Paint_call(HWID widget, HCRDC cr, gpointer data)
+{
+    /* Handles:
+    * WM_PAINT
+    */
+
+    g_print("draw called\n");
+
+    // guint width, height;
+    // GdkRGBA color;
+    // GtkStyleContext *context;
+
+    // context = gtk_widget_get_style_context (widget);
+
+    // width = gtk_widget_get_allocated_width (widget);
+    // height = gtk_widget_get_allocated_height (widget);
+
+    // gtk_render_background (context, cr, 0, 0, width, height);
+
+    // cairo_arc (cr,
+    //             width / 2.0, height / 2.0,
+    //             MIN (width, height) / 3.0,
+    //             0, 2 * G_PI);
+
+    // gtk_style_context_get_color (context,
+    //                             gtk_style_context_get_state (context),
+    //                             &color);
+    // gdk_cairo_set_source_rgba (cr, &color);
+
+    // cairo_fill (cr);
+    // static double Cairo_R = 0.0, Cairo_G = 0.0, Cairo_B = 0.0;
+    // cairo_set_source_rgb(cr, Cairo_R, Cairo_G, Cairo_G); 
+    // Cairo_R = (Cairo_R+0.2 > 0.4) ? 0 : Cairo_R+0.2;
+    // Cairo_G = (Cairo_G+0.4 > 1.0) ? 0.4 : Cairo_G+0.4;
+    // Cairo_B = (Cairo_B+0.1 > 0.5) ? 0 : Cairo_B+0.1;
+    
+    // cairo_select_font_face(cr, "Purisa",
+    //     CAIRO_FONT_SLANT_NORMAL,
+    //     CAIRO_FONT_WEIGHT_BOLD);
+
+    // cairo_set_font_size(cr, 20);
+
+    // cairo_move_to(cr, 20, height / 2.0);
+    // cairo_show_text(cr, "-----------THIS IS A TEST DRAW----------");  
+
+    // cairo_fill (cr);
+
+    
+    // PAINTSTRUCT ps;
+    // Hdc = BeginPaint(hwnd, &ps);
+
+    /// This draws the schematic.
+    PaintWindow(cr);
+
+    // RECT r;
+    // // Fill around the scroll bars
+    // if(NeedHoriz) {
+    //     r.top = IoListTop - ScrollHeight - 2;
+    //     r.bottom = IoListTop - 2;
+    //     FillRect(Hdc, &r, (HBRUSH)GetStockObject(LTGRAY_BRUSH));
+    // }
+    // GetClientRect(MainWindow, &r);
+    // r.left = r.right - ScrollWidth - 2;
+    // FillRect(Hdc, &r, (HBRUSH)GetStockObject(LTGRAY_BRUSH));
+
+    // // Draw the splitter thing to grab to resize the I/O listview.
+    // GetClientRect(MainWindow, &r);
+    // r.top = IoListTop - 2;
+    // r.bottom = IoListTop;
+    // FillRect(Hdc, &r, (HBRUSH)GetStockObject(LTGRAY_BRUSH));
+    // r.top = IoListTop - 2;
+    // r.bottom = IoListTop - 1;
+    // FillRect(Hdc, &r, (HBRUSH)GetStockObject(WHITE_BRUSH));
+    // r.top = IoListTop;
+    // r.bottom = IoListTop + 1;
+    // FillRect(Hdc, &r, (HBRUSH)GetStockObject(DKGRAY_BRUSH));
+
+    // EndPaint(hwnd, &ps);
+
+    return FALSE;
+}
+
+gboolean LD_WM_Destroy_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+{
+    /* Handles:
+    * WM_DESTROY
+    */
+
+    // if(CheckSaveUserCancels()) break;
+
+    // PostQuitMessage(0);
+    // return 1;
+
+    return FALSE;
+}
+
+gboolean LD_WM_Size_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+{
+    /* Handles:
+    * WM_SIZE
+    */
+
+    // MainWindowResized();
+    // break;
+
+    return FALSE;
+}
+
+gboolean LD_WM_SetFocus_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+{
+    /* Handles:
+    * WM_SETFOCUS
+    */
+
+    // InvalidateRect(MainWindow, NULL, FALSE);
+    // break;
+
+    return FALSE;
+}
+
 //-----------------------------------------------------------------------------
 // Entry point into the program.
 //-----------------------------------------------------------------------------
@@ -1144,7 +1274,6 @@ int main(int argc, char** argv)
     
     MainHeap = HeapCreate(0, 1024*64, 0);
 
-    MakeWindowClass();
     // MakeDialogBoxClass();
     // MakeComponentListClass();
     // MakeSmplDialogClass();
@@ -1152,23 +1281,42 @@ int main(int argc, char** argv)
     HMENU top = MakeMainWindowMenus();
 
     /// Make main window
-    // WS_OVERLAPPED | WS_THICKFRAME | WS_CLIPCHILDREN | WS_MAXIMIZEBOX |
-        // WS_MINIMIZEBOX | WS_SYSMENU | WS_SIZEBOX
-    MainWindow = CreateWindowEx(0, "LDmicro", "",
-        0, 10, 10, 800, 600, NULL, top, NULL, NULL);
-    g_signal_connect (MainWindow, "delete_event", G_CALLBACK (LDMicro_close), NULL);
-    
+    MainWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title(GTK_WINDOW(MainWindow),  "LDmicro");
+    gtk_window_set_default_size (GTK_WINDOW(MainWindow), 800, 600);
+    gtk_window_resize (GTK_WINDOW(MainWindow), 800, 600);
+    gtk_window_move(GTK_WINDOW(MainWindow), 10, 10);
+    gtk_widget_override_background_color(GTK_WIDGET(MainWindow), 
+                            GTK_STATE_FLAG_NORMAL, ((HBRUSH)GetStockObject(GREY_BRUSH))->getThis());
+    gtk_window_set_default_icon(LoadImage(Instance, LDMICRO_ICON,
+                            IMAGE_ICON, 32, 32, 0));
+    gtk_window_set_icon(GTK_WINDOW(MainWindow), LoadImage(Instance, LDMICRO_ICON,
+                            IMAGE_ICON, 32, 32, 0));
+    /// Make main window - end
+
+    InitForDrawing();
+
     ThawWindowPos(MainWindow);
     IoListHeight = 100;
     ThawDWORD(IoListHeight);
 
-    // InitCommonControls(); /// NOT USED, Only for windows
-    InitForDrawing();
-
-    MakeMainWindowControls();
+    MakeMainWindowControls(); /// takes care of MakeMainWindowMenus()
     MainWindowResized();
     // CHANGING_PROGRAM(ShowConfDialog());
     MenuHandler();
+
+    /// Keyboard and mouse hooks equivalent to MainWndProc
+    g_signal_connect (MainWindow, "delete_event", G_CALLBACK (LD_WM_Close_call), NULL);
+    g_signal_connect (MainWindow, "key_press_event", G_CALLBACK (LD_WM_KeyDown_call), NULL);
+    g_signal_connect (MainWindow, "button_press_event", G_CALLBACK (LD_GTK_mouse_click_hook), NULL);
+    g_signal_connect (MainWindow, "scroll_event", G_CALLBACK (LD_GTK_mouse_scroll_hook), NULL);
+    g_signal_connect (MainWindow, "motion_notify_event", G_CALLBACK (LD_WM_MouseMove_call), NULL);
+    g_signal_connect (DrawWindow, "draw", G_CALLBACK (LD_WM_Paint_call), NULL);
+    g_signal_connect (MainWindow, "destroy_event", G_CALLBACK (LD_WM_Destroy_call), NULL);
+    g_signal_connect (MainWindow, "configure_event", G_CALLBACK (LD_WM_Size_call), NULL);
+    g_signal_connect (MainWindow, "focus_in_event", G_CALLBACK (LD_WM_SetFocus_call), NULL);
+    /// Keyboard and mouse hooks equivalent to MainWndProc - end
+
     // NewProgram();
     // strcpy(CurrentSaveFile, "");
 

@@ -39,7 +39,15 @@
 #define OFN_OVERWRITEPROMPT 0x00000400L
 
 /// window brushes
-#define BLACK_BRUSH 0x00000401L
+#define BS_SOLID 0x00000001L
+#define BS_HOLLOW 0x00000002L
+#define BLACK_BRUSH 0x00000004L
+#define WHITE_BRUSH 0x00000008L 
+#define GREY_BRUSH 0x00000010L
+
+/// Font flags
+#define FW_REGULAR 0x00000001L
+#define FW_BOLD 0x00000002L
 
 /// EnableMenuItem variables
 extern const UINT MF_ENABLED;
@@ -68,29 +76,52 @@ typedef struct OpenFileInfoData {
 } OPENFILENAME;
 
 /// functions
-BOOL isFocus(HWID);
-COLORREF RGB(int, int, int);
-int MessageBox(HWID, char*, char*, UINT);
-BOOL GetSaveFileName(OPENFILENAME* );
-void EnableMenuItem(HMENU, HMENU, UINT);
-void CheckMenuItem(HMENU, HMENU, UINT);
-HBRUSH GetStockObject(int fnObject);
-// bool KeyPressEnter (HWID, GdkEventKey, gpointer);
-// bool KeyPressEsc (HWID, GdkEventKey, gpointer);
+BOOL isFocus(HWID window);
 
-HWID CreateWindowEx(
-    DWORD     dwExStyle,
-    LPCTSTR   lpClassName,
-    LPCTSTR   lpWindowName,
-    DWORD     dwStyle,
-    int       x,
-    int       y,
-    int       nWidth,
-    int       nHeight,
-    HWND      hWndParent,
-    HMENU     hMenu,
-    HINSTANCE hInstance,
-    LPVOID    lpParam
-);
+COLORREF RGB(int red, 
+        int green, 
+        int blue);
+
+int MessageBox(HWID pWindow, 
+    char* message, 
+    char* title, 
+    UINT  mFlags);
+
+BOOL GetSaveFileName(OPENFILENAME *ofn);
+
+void EnableMenuItem(HMENU MenuName, 
+    HMENU MenuItem, 
+    UINT  CheckEnabledItem);
+
+void CheckMenuItem(HMENU MenuName, 
+    HMENU MenuItem, 
+    UINT  Check);
+
+HANDLE GetStockObject(int fnObject);
+
+void SelectObject(HCRDC hcr, 
+    HFONT hfont);
+
+HBRUSH CreateBrushIndirect(PLOGBRUSH plb);
+
+HFONT CreateFont(int nHeight,
+    int     nWidth,
+    int     nOrientation,
+    int     fnWeight,
+    DWORD   fdwItalic,
+    LPCTSTR lpszFace);
+
+void SetBkColor(HWID widget, 
+    HCRDC    hcr,
+    COLORREF bkCol);
+
+void SetTextColor(HCRDC hcr, 
+    COLORREF color);
+
+void TextOut(HCRDC hcr,
+   int     nXStart,
+   int     nYStart,
+   LPCTSTR lpString,
+   int     cchString);
 
 #endif

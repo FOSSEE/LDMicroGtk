@@ -33,19 +33,6 @@ COLORREF RGB(int red, int green, int blue)
     return col;
 }
 
-HBRUSH GetStockObject(int fnObject)
-{
-    switch(fnObject)
-    {
-        case BLACK_BRUSH:
-            return new COLORREF(0, 0, 0);
-            break;
-
-        default:
-            return new COLORREF(255, 255, 255);
-    }
-}
-
 int MessageBox(HWID pWindow, char* message, char* title, UINT mFlags)
  {
     GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
@@ -96,6 +83,7 @@ int MessageBox(HWID pWindow, char* message, char* title, UINT mFlags)
 
     return result;
  }
+
 
 BOOL GetSaveFileName(OPENFILENAME *ofn)
 {
@@ -195,38 +183,98 @@ void CheckMenuItem(HMENU MenuName, HMENU MenuItem, UINT Check)
     }
 }
 
-HWID CreateWindowEx(DWORD dwExStyle, LPCTSTR lpClassName, LPCTSTR lpWindowName,
-    DWORD dwStyle, int x, int y, int nWidth, int nHeight, HWND hWndParent,
-    HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam)
+HANDLE GetStockObject(int fnObject)
 {
-    
-    auto WinClR_it = std::find_if(WindClassRecord.begin(), WindClassRecord.end(),  [&lpClassName](WNDCLASSEX &Record) { return Record.lpszClassName == lpClassName; });
-
-    if (WinClR_it == WindClassRecord.end())
-        return NULL;
-    
-    HWID window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title(GTK_WINDOW(window), lpWindowName);
-    gtk_window_set_default_size (GTK_WINDOW(window), nWidth, nHeight);
-    gtk_window_resize (GTK_WINDOW(window), nWidth, nHeight);
-    gtk_window_move(GTK_WINDOW(window), x, y);
-    gtk_widget_override_background_color(GTK_WIDGET(window), GTK_STATE_FLAG_NORMAL, WinClR_it->hbrBackground->getThis());
-    gtk_window_set_default_icon(WinClR_it->hIcon);
-    gtk_window_set_icon(GTK_WINDOW(window), WinClR_it->hIcon);
-
-    return window;
+    switch(fnObject)
+    {
+        case BLACK_BRUSH:
+            return new COLORREF(0, 0, 0);
+            break;
+        case WHITE_BRUSH:
+            return new COLORREF(255, 255, 255);
+            break;
+        case GREY_BRUSH:
+            return new COLORREF(128, 128, 128);
+            break;
+        default:
+            return new COLORREF(255, 255, 255);
+    }
 }
 
-// bool KeyPressEnter(HWID widget, GdkEventKey* event, gpointer* data) {
-//     if (event->keyval == GDK_KEY_Return){
-//         return TRUE;
-//     }
-//     return FALSE;
-// }
+void SelectObject(HCRDC hcr, HFONT hfont)
+{
+    cairo_select_font_face(hcr, hfont->lpszFace,
+        hfont->fdwItalic ? CAIRO_FONT_SLANT_ITALIC : CAIRO_FONT_SLANT_NORMAL,
+        hfont->fnWeight == FW_BOLD ? CAIRO_FONT_WEIGHT_BOLD : CAIRO_FONT_WEIGHT_NORMAL);
 
-// bool KeyPressEsc(HWID widget, GdkEventKey* event, gpointer* data) {
-//     if (event->keyval == GDK_KEY_Escape){
-//         return TRUE;
-//     }
-//     return FALSE;
-// }
+    cairo_rotate(hcr, hfont->nOrientation);
+
+    // cairo_text_extents_t extents;
+    // cairo_text_extents (hcr, "H", &extents);
+ 
+    // cairo_matrix_t matrix;
+    // cairo_matrix_init_scale (&matrix,
+    //                 (double)hfont->nWidth / extents.width,
+    //                 (double)hfont->nHeight / extents.width);
+ 
+    // cairo_set_font_matrix (hcr, &matrix);
+    // g_print("wR = %f\nhR = %f\n", (double)hfont->nWidth / extents.width, (double)hfont->nHeight / extents.height);
+    // g_print("tW = %f\ntH = %f\n", extents.width, extents.width);
+    cairo_set_font_size(hcr, 15);
+}
+
+HBRUSH CreateBrushIndirect(PLOGBRUSH plb)
+{
+    COLORREF brush(plb->lbColor);
+    brush.alpha = (plb->lbStyle == BS_SOLID) ? 1 : 0.2;
+
+    return &brush;
+}
+
+HFONT CreateFont(int nHeight, int nWidth, int nOrientation, int fnWeight,
+    DWORD fdwItalic, LPCTSTR lpszFace)
+{
+    HFONT font = new FONT;
+    font->nHeight = nHeight;
+    font->nWidth = nWidth;
+    font->nOrientation = nOrientation;
+    font->fnWeight = fnWeight;
+    font->fdwItalic = fdwItalic;
+    font->lpszFace = lpszFace;
+
+    return font;
+}
+
+void SetBkColor(HWID widget, HCRDC hcr, COLORREF bkCol)
+{
+    gtk_widget_override_background_color(GTK_WIDGET(widget), 
+                        GTK_STATE_FLAG_NORMAL, &bkCol);
+
+    GtkStyleContext *context;
+    COLORREF col;
+
+    context = gtk_widget_get_style_context (widget);
+    gint width = gtk_widget_get_allocated_width (widget);
+    gint height = gtk_widget_get_allocated_height (widget);
+
+    gtk_style_context_get_color (context,
+                            gtk_style_context_get_state (context),
+                            &col);
+    
+    gdk_cairo_set_source_rgba (hcr, &col);
+
+    gtk_render_background (context, hcr, 0, 0, width, height);
+}
+
+void SetTextColor(HCRDC hcr, COLORREF color)
+{
+    gdk_cairo_set_source_rgba (hcr, &color);
+}
+
+void TextOut(HCRDC hcr, int nXStart, int nYStart, LPCTSTR lpString, int cchString)
+{
+    cairo_move_to(hcr, nXStart, nYStart);
+    cairo_show_text(hcr, lpString);  
+
+    cairo_fill (hcr);
+}

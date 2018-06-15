@@ -524,6 +524,7 @@ void MakeMainWindowControls(void)
 {
     HWID PackBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     HWID grid = gtk_grid_new();
+    /// Pane to separate Scrolled Window and other widgets
     HWID pane = gtk_paned_new (GTK_ORIENTATION_VERTICAL);
 
     IoList = gtk_list_store_new (5, 
@@ -537,7 +538,7 @@ void MakeMainWindowControls(void)
     int pinWidth = 100;
     int portWidth = 90;
 
-    // Creating a list
+    /// Creating a list
     view = gtk_tree_view_new_with_model (GTK_TREE_MODEL(IoList));
     gtk_tree_view_set_model (GTK_TREE_VIEW (view), GTK_TREE_MODEL (IoList));
 
@@ -576,36 +577,169 @@ void MakeMainWindowControls(void)
     gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
     gtk_tree_view_column_set_min_width (column, portWidth);
 
-    // Appending Menus to grid
+    /// Appending Menus to grid
     gtk_grid_attach (GTK_GRID (grid), MakeMainWindowMenus(), 0, 0, 1, 1);
 
-    // Creating Scrolled Window
+    /// Creating Scrolled Window
     ScrollWindow = gtk_scrolled_window_new (NULL, NULL);
+    HWID viewport = gtk_viewport_new (NULL,NULL);
     gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (ScrollWindow),
 				                          GTK_POLICY_AUTOMATIC, 
 				                          GTK_POLICY_ALWAYS);
+    gtk_widget_set_hexpand(GTK_WIDGET(ScrollWindow), TRUE);  
+    gtk_widget_set_vexpand(GTK_WIDGET(ScrollWindow), TRUE);
 
-    // Creating a pane to separate Scrolled Window and other widgets
-    gtk_paned_pack1 (GTK_PANED (pane), ScrollWindow, TRUE, TRUE);
-    gtk_paned_set_position (GTK_PANED (pane), 0);
-    gtk_widget_set_vexpand (ScrollWindow, TRUE);
-    gtk_widget_set_hexpand (ScrollWindow, TRUE);
+    /// Adding DrawWindow to pane
+    gtk_container_add (GTK_CONTAINER(viewport), DrawWindow);
+    gtk_container_add (GTK_CONTAINER(ScrollWindow), viewport);
+    gtk_paned_add1 (GTK_PANED (pane), ScrollWindow);
+    gtk_paned_set_position (GTK_PANED (pane), 0);    
 
-    // Appending tree view to pane and pane to grid
-    gtk_paned_pack2 (GTK_PANED(pane), view, FALSE, TRUE);
-    gtk_paned_set_position (GTK_PANED (pane), 400);
+    /// Appending tree view to pane and pane to grid
+    gtk_paned_pack2 (GTK_PANED(pane), view, FALSE, FALSE);
+    gtk_paned_set_position (GTK_PANED (pane), 250);
     gtk_grid_attach (GTK_GRID (grid), pane, 0, 0, 1, 1); 
 
-    // Creating Status Bar and attaching to grid
+    /// Creating Status Bar and attaching to grid
     StatusBar = gtk_statusbar_new();
     gtk_statusbar_push (GTK_STATUSBAR (StatusBar),
                         gtk_statusbar_get_context_id (GTK_STATUSBAR (StatusBar), "Introduction"), 
                         "LDMicro Started");
 
-    // Appneding Status Bar to box which is then added to Main Window
+    /// Appneding Status Bar to box which is then added to Main Window
     gtk_box_pack_start(GTK_BOX(PackBox), grid, TRUE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(PackBox), StatusBar, FALSE, FALSE, 0);
     gtk_container_add(GTK_CONTAINER(MainWindow), PackBox);
+}
+
+//-----------------------------------------------------------------------------
+// Adjust the size and visibility of the scrollbars as necessary, either due
+// to a change in the size of the program or a change in the size of the
+// window.
+//-----------------------------------------------------------------------------
+void RefreshScrollbars(void)
+{
+    // SCROLLINFO vert, horiz;
+    // SetUpScrollbars(&NeedHoriz, &horiz, &vert);
+    // SetScrollInfo(HorizScrollBar, SB_CTL, &horiz, TRUE);
+    // SetScrollInfo(VertScrollBar, SB_CTL, &vert, TRUE);
+
+    // RECT main;
+    // GetClientRect(MainWindow, &main);
+
+    // if(NeedHoriz) {
+    //     MoveWindow(HorizScrollBar, 0, IoListTop - ScrollHeight - 2,
+    //         main.right - ScrollWidth - 2, ScrollHeight, TRUE);
+    //     ShowWindow(HorizScrollBar, SW_SHOW);
+    //     EnableWindow(HorizScrollBar, TRUE);
+    // } else {
+    //     ShowWindow(HorizScrollBar, SW_HIDE);
+    // }
+    // MoveWindow(VertScrollBar, main.right - ScrollWidth - 2, 1, ScrollWidth,
+    //     NeedHoriz ? (IoListTop - ScrollHeight - 4) : (IoListTop - 3), TRUE);
+
+    // MoveWindow(VertScrollBar, main.right - ScrollWidth - 2, 1, ScrollWidth,
+    //     NeedHoriz ? (IoListTop - ScrollHeight - 4) : (IoListTop - 3), TRUE);
+
+    // InvalidateRect(MainWindow, NULL, FALSE);
+}
+
+//-----------------------------------------------------------------------------
+// Respond to a WM_VSCROLL sent to the main window, presumably by the one and
+// only vertical scrollbar that it has as a child.
+//-----------------------------------------------------------------------------
+void VscrollProc(WPARAM wParam)
+{
+    // int prevY = ScrollYOffset;
+    // switch(LOWORD(wParam)) {
+    //     case SB_LINEUP:
+    //     case SB_PAGEUP:
+    //         if(ScrollYOffset > 0) {
+    //             ScrollYOffset--;
+    //         }
+    //         break;
+
+    //     case SB_LINEDOWN:
+    //     case SB_PAGEDOWN:
+    //         if(ScrollYOffset < ScrollYOffsetMax) {
+    //             ScrollYOffset++;
+    //         }
+    //         break;
+
+    //     case SB_TOP:
+    //         ScrollYOffset = 0;
+    //         break;
+
+    //     case SB_BOTTOM:
+    //         ScrollYOffset = ScrollYOffsetMax;
+    //         break;
+
+    //     case SB_THUMBTRACK:
+    //     case SB_THUMBPOSITION:
+    //         ScrollYOffset = HIWORD(wParam);
+    //         break;
+    // }
+    // if(prevY != ScrollYOffset) {
+    //     SCROLLINFO si;
+    //     si.cbSize = sizeof(si);
+    //     si.fMask = SIF_POS;
+    //     si.nPos = ScrollYOffset;
+    //     SetScrollInfo(VertScrollBar, SB_CTL, &si, TRUE);
+
+    //     InvalidateRect(MainWindow, NULL, FALSE);
+    // }
+}
+
+//-----------------------------------------------------------------------------
+// Respond to a WM_HSCROLL sent to the main window, presumably by the one and
+// only horizontal scrollbar that it has as a child.
+//-----------------------------------------------------------------------------
+void HscrollProc(WPARAM wParam)
+{
+    // int prevX = ScrollXOffset;
+    // switch(LOWORD(wParam)) {
+    //     case SB_LINEUP:
+    //         ScrollXOffset -= FONT_WIDTH;
+    //         break;
+
+    //     case SB_PAGEUP:
+    //         ScrollXOffset -= POS_WIDTH*FONT_WIDTH;
+    //         break;
+
+    //     case SB_LINEDOWN:
+    //         ScrollXOffset += FONT_WIDTH;
+    //         break;
+
+    //     case SB_PAGEDOWN:
+    //         ScrollXOffset += POS_WIDTH*FONT_WIDTH;
+    //         break;
+
+    //     case SB_TOP:
+    //         ScrollXOffset = 0;
+    //         break;
+
+    //     case SB_BOTTOM:
+    //         ScrollXOffset = ScrollXOffsetMax;
+    //         break;
+
+    //     case SB_THUMBTRACK:
+    //     case SB_THUMBPOSITION:
+    //         ScrollXOffset = HIWORD(wParam);
+    //         break;
+    // }
+
+    // if(ScrollXOffset > ScrollXOffsetMax) ScrollXOffset = ScrollXOffsetMax;
+    // if(ScrollXOffset < 0) ScrollXOffset = 0;
+
+    // if(prevX != ScrollXOffset) {
+    //     SCROLLINFO si;
+    //     si.cbSize = sizeof(si);
+    //     si.fMask = SIF_POS;
+    //     si.nPos = ScrollXOffset;
+    //     SetScrollInfo(HorizScrollBar, SB_CTL, &si, TRUE);
+
+    //     InvalidateRect(MainWindow, NULL, FALSE);
+    // }
 }
 
 //-----------------------------------------------------------------------------

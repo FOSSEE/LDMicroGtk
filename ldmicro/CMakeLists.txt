@@ -26,6 +26,7 @@ ENDIF (MSVC)
 
 IF(UNIX)
     MESSAGE( STATUS "Initializing.." )
+    add_definitions ("-w")
     add_definitions(-D__UNIX__)
     add_definitions(-DLDLANG_EN)
     use_cxx11()

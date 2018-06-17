@@ -59,7 +59,7 @@ extern const UINT MF_UNCHECKED;
 extern GtkWidget *view;
 extern GtkTreeViewColumn *column;
 
-/// data types
+/// Structures
 typedef struct OpenFileInfoData {
     DWORD         lStructSize;
     HWID          parentWindow;
@@ -70,6 +70,9 @@ typedef struct OpenFileInfoData {
     DWORD         Flags;
     LPCTSTR       lpstrDefExt;
 } OPENFILENAME;
+
+/// Variables
+extern COLORREF HdcCurrentTextColor;
 
 /// functions
 BOOL isFocus(HWID window);
@@ -119,5 +122,12 @@ void TextOut(HCRDC hcr,
    int     nYStart,
    LPCTSTR lpString,
    int     cchString);
+
+COLORREF GetTextColor(HCRDC Hdc);
+
+BOOL InvalidateRect(
+    HWID hWId,
+    const RECT *lpRect,
+    BOOL bErase);
 
 #endif

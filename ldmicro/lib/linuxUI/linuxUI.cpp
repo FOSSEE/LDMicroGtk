@@ -1,5 +1,8 @@
 #include "linuxUI.h"
 
+/// Variable to current text color
+COLORREF HdcCurrentTextColor;
+
 /// EnableMenuItem Variables
 const UINT MF_ENABLED = 0;
 const UINT MF_GRAYED = 1;
@@ -203,18 +206,18 @@ void SelectObject(HCRDC hcr, HFONT hfont)
 
     cairo_rotate(hcr, hfont->nOrientation);
 
-    // cairo_text_extents_t extents;
-    // cairo_text_extents (hcr, "H", &extents);
+    cairo_text_extents_t extents;
+    cairo_text_extents (hcr, "H", &extents);
  
-    // cairo_matrix_t matrix;
-    // cairo_matrix_init_scale (&matrix,
-    //                 (double)hfont->nWidth / extents.width,
-    //                 (double)hfont->nHeight / extents.width);
+    cairo_matrix_t matrix;
+    cairo_matrix_init_scale (&matrix,
+                    (double)hfont->nWidth * 1.6,
+                    (double)hfont->nHeight * 1.4);
  
-    // cairo_set_font_matrix (hcr, &matrix);
+    cairo_set_font_matrix (hcr, &matrix);
     // g_print("wR = %f\nhR = %f\n", (double)hfont->nWidth / extents.width, (double)hfont->nHeight / extents.height);
     // g_print("tW = %f\ntH = %f\n", extents.width, extents.width);
-    cairo_set_font_size(hcr, 15);
+    // cairo_set_font_size(hcr, 15);
 }
 
 HBRUSH CreateBrushIndirect(PLOGBRUSH plb)
@@ -262,6 +265,7 @@ void SetBkColor(HWID widget, HCRDC hcr, COLORREF bkCol)
 
 void SetTextColor(HCRDC hcr, COLORREF color)
 {
+    HdcCurrentTextColor = color;
     gdk_cairo_set_source_rgba (hcr, &color);
 }
 
@@ -272,4 +276,20 @@ void TextOut(HCRDC hcr, int nXStart, int nYStart, LPCTSTR lpString, int cchStrin
 
     cairo_fill (hcr);
 }
-   
+
+COLORREF GetTextColor(HCRDC Hdc)
+{
+    // COLORREF col;
+    // gtk_style_context_get_color (Hdc,
+    //                             gtk_style_context_get_state (Hdc),
+    //                             &col);
+    
+    return HdcCurrentTextColor;
+}
+
+BOOL InvalidateRect(HWID hWid, const RECT *lpRect, BOOL bErase)
+{
+    // gtk_widget_queue_draw(hWid);
+    gdk_window_invalidate_rect (gtk_widget_get_window (hWid), lpRect, bErase);
+}
+

@@ -1093,10 +1093,10 @@ gboolean LD_WM_Paint_call(HWID widget, HCRDC cr, gpointer data)
 
     
     // PAINTSTRUCT ps;
-    // Hdc = BeginPaint(hwnd, &ps);
+    Hdc = cr;//BeginPaint(hwnd, &ps);
 
     /// This draws the schematic.
-    PaintWindow(cr);
+    PaintWindow();
 
     // RECT r;
     // // Fill around the scroll bars
@@ -1172,18 +1172,17 @@ int main(int argc, char** argv)
     /// Check if we're running in non-interactive mode; in that case we should
     /// load the file, compile, and exit.
 
-    if(argc >= 2) {
+    if(argc >= 2 && !(argc < 4) ) {
         RunningInBatchMode = TRUE;
 
         char *err =
             "Bad command line arguments: run 'ldmicro /c src.ld dest.hex'";
 
-        if (argc < 4)
-        { 
-            printf("throwing error...\n");
-            Error(err); 
-            exit(-1);
-        }
+        // if (argc < 4)
+        // {
+        //     Error(err); 
+        //     exit(-1);
+        // }
 
         char *source = (char*)malloc(strlen(argv[2]) + strlen(argv[3]) + 2);
         sprintf(source, "%s %s", argv[2], argv[3]);
@@ -1304,37 +1303,39 @@ int main(int argc, char** argv)
     g_signal_connect (MainWindow, "focus_in_event", G_CALLBACK (LD_WM_SetFocus_call), NULL);
     /// Keyboard and mouse hooks equivalent to MainWndProc - end
 
-    // NewProgram();
-    // strcpy(CurrentSaveFile, "");
+    NewProgram();
+    strcpy(CurrentSaveFile, "");
 
     // We are running interactively, or we would already have exited. We
     // can therefore show the window now, and otherwise set up the GUI.
 
-    // ShowWindow(MainWindow, SW_SHOW);
+    // Displaying the window
+    gtk_widget_show_all(MainWindow);
     // SetTimer(MainWindow, TIMER_BLINK_CURSOR, 800, BlinkCursor);
     
-    // if(strlen(lpCmdLine) > 0) {
-    //     char line[MAX_PATH];
-    //     if(*lpCmdLine == '"') { 
-    //         strcpy(line, lpCmdLine+1);
-    //     } else {
-    //         strcpy(line, lpCmdLine);
-    //     }
-    //     if(strchr(line, '"')) *strchr(line, '"') = '\0';
+    if(argc >= 2) {
+        // g_print("load prog: %s\n", argv[1]);
+        char line[MAX_PATH];
+        if(*argv[1] == '"') { 
+            strcpy(line, argv[1]+1);
+        } else {
+            strcpy(line, argv[1]);
+        }
+        if(strchr(line, '"')) *strchr(line, '"') = '\0';
+        
+        realpath(line, CurrentSaveFile);
+        // g_print("resolved path: %s\n", CurrentSaveFile);
+        if(!LoadProjectFromFile(CurrentSaveFile)) {
+            NewProgram();
+            Error(_("Couldn't open '%s'."), CurrentSaveFile);
+            CurrentSaveFile[0] = '\0';
+        }
+        UndoFlush();
+    }
 
-    //     char *s;
-    //     GetFullPathName(line, sizeof(CurrentSaveFile), CurrentSaveFile, &s);
-    //     if(!LoadProjectFromFile(CurrentSaveFile)) {
-    //         NewProgram();
-    //         Error(_("Couldn't open '%s'."), CurrentSaveFile);
-    //         CurrentSaveFile[0] = '\0';
-    //     }
-    //     UndoFlush();
-    // }
-
-    // GenerateIoListDontLoseSelection(); ~
+    GenerateIoListDontLoseSelection(); //~
     // RefreshScrollbars();
-    // UpdateMainWindowTitleBar(); ~
+    UpdateMainWindowTitleBar(); //~
 
     // MSG msg;
     // DWORD ret;
@@ -1357,9 +1358,6 @@ int main(int argc, char** argv)
     //     TranslateMessage(&msg);
     //     DispatchMessage(&msg);
     // }
-
-    // Displaying the window
-    gtk_widget_show_all(MainWindow);
     
     gtk_main();
     return EXIT_SUCCESS;

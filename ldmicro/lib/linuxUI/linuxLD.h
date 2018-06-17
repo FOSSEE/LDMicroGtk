@@ -24,6 +24,7 @@
 
 /// Macro functions
 #define max(_A, _B) std::max(_A, _B)
+// #define min(_A, _B) std::min(_A, _B)
 
 /// Typedefs
 //typedef int64_t __int64;
@@ -73,6 +74,9 @@ typedef GtkListStore *HLIST;
 typedef GtkApplication *HAPP;
 typedef GtkTreeViewColumn *HTVC;
 typedef GdkPixbuf *HICON;
+typedef GdkRectangle RECT;
+typedef GdkRectangle *PRECT;
+
 /// Check if system is x64 or x86
 #if defined(__UNIX64)
 typedef uint64_t UINT_PTR;

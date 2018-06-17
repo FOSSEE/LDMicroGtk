@@ -18,36 +18,44 @@
 
 /// Flags
 /// message box
-#define MB_OK 0x00000001L
-#define MB_OKCANCEL 0x00000002L
-#define MB_YESNO 0x00000004L
-#define MB_YESNOCANCEL 0x00000008L
+#define MB_OK              0x00000001L
+#define MB_OKCANCEL        0x00000002L
+#define MB_YESNO           0x00000004L
+#define MB_YESNOCANCEL     0x00000008L
 
-#define IDOK 1
-#define IDCANCEL 2
-#define IDYES 3
-#define IDNO 4
+#define IDOK      1
+#define IDCANCEL  2
+#define IDYES     3
+#define IDNO      4
 
-#define MB_ICONERROR 0x00000010L
-#define MB_ICONQUESTION 0x00000020L
-#define MB_ICONWARNING 0x00000040L
-#define MB_ICONINFORMATION 0x00000080L
+#define MB_ICONERROR        0x00000010L
+#define MB_ICONQUESTION     0x00000020L
+#define MB_ICONWARNING      0x00000040L
+#define MB_ICONINFORMATION  0x00000080L
 
 /// open/save file
-#define OFN_PATHMUSTEXIST 0x00000100L
-#define OFN_HIDEREADONLY 0x00000200L
-#define OFN_OVERWRITEPROMPT 0x00000400L
+#define OFN_PATHMUSTEXIST     0x00000100L
+#define OFN_HIDEREADONLY      0x00000200L
+#define OFN_OVERWRITEPROMPT   0x00000400L
 
 /// window brushes
-#define BS_SOLID 0x00000001L
-#define BS_HOLLOW 0x00000002L
-#define BLACK_BRUSH 0x00000004L
-#define WHITE_BRUSH 0x00000008L 
-#define GREY_BRUSH 0x00000010L
+#define BS_SOLID       0x00000001L
+#define BS_HOLLOW      0x00000002L
+#define BLACK_BRUSH    0x00000004L
+#define WHITE_BRUSH    0x00000008L 
+#define GRAY_BRUSH     0x00000010L
+#define LTGRAY_BRUSH   0x00000020L
+#define DKGRAY_BRUSH   0x00000040L
+
+extern const COLORREF BLACK_BR;
+extern const COLORREF WHITE_BR;
+extern const COLORREF GRAY_BR;
+extern const COLORREF LTGRAY_BR;
+extern const COLORREF DKGRAY_BR;
 
 /// Font flags
-#define FW_REGULAR 0x00000001L
-#define FW_BOLD 0x00000002L
+#define FW_REGULAR   0x00000001L
+#define FW_BOLD      0x00000002L
 
 /// EnableMenuItem variables
 extern const UINT MF_ENABLED;
@@ -129,5 +137,14 @@ BOOL InvalidateRect(
     HWID hWId,
     const RECT *lpRect,
     BOOL bErase);
+
+int FillRect(
+    HCRDC        hDC,
+    const RECT   *lprc,
+    HBRUSH       hbr);
+
+BOOL GetClientRect(
+    HWID   hWid,
+    PRECT lpRect);
 
 #endif

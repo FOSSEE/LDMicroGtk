@@ -105,9 +105,9 @@ HMENU MNU_ABOUT;
 // scrollbars for the ladder logic area
 // static HWND         HorizScrollBar;
 // static HWND         VertScrollBar;
-// int                 ScrollWidth;
-// int                 ScrollHeight;
-// BOOL                NeedHoriz;
+int                 ScrollWidth;
+int                 ScrollHeight;
+BOOL                NeedHoriz;
 
 // status bar at the bottom of the screen, to display settings
 static HMENU        StatusBar;

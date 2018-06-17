@@ -1,5 +1,12 @@
 #include "linuxUI.h"
 
+/// Brushes
+const COLORREF BLACK_BR(0, 0, 0);
+const COLORREF WHITE_BR(255, 255, 255);
+const COLORREF GRAY_BR(128, 128, 128);
+const COLORREF LTGRAY_BR(211, 211, 211);
+const COLORREF DKGRAY_BR(169, 169, 169);
+
 /// Variable to current text color
 COLORREF HdcCurrentTextColor;
 
@@ -185,16 +192,22 @@ HANDLE GetStockObject(int fnObject)
     switch(fnObject)
     {
         case BLACK_BRUSH:
-            return new COLORREF(0, 0, 0);
+            return (HANDLE)&BLACK_BR;
             break;
         case WHITE_BRUSH:
-            return new COLORREF(255, 255, 255);
+            return (HANDLE)&WHITE_BR;
             break;
-        case GREY_BRUSH:
-            return new COLORREF(128, 128, 128);
+        case GRAY_BRUSH:
+            return (HANDLE)&GRAY_BR;
+            break;
+        case LTGRAY_BRUSH:
+            return (HANDLE)&LTGRAY_BR;
+            break;
+        case DKGRAY_BRUSH:
+            return (HANDLE)&DKGRAY_BR;
             break;
         default:
-            return new COLORREF(255, 255, 255);
+            return (HANDLE)&WHITE_BR;
     }
 }
 
@@ -222,10 +235,13 @@ void SelectObject(HCRDC hcr, HFONT hfont)
 
 HBRUSH CreateBrushIndirect(PLOGBRUSH plb)
 {
-    COLORREF brush(plb->lbColor);
-    brush.alpha = (plb->lbStyle == BS_SOLID) ? 1 : 0.2;
+    COLORREF* brush = new COLORREF;
+    brush->red = plb->lbColor.red;
+    brush->green = plb->lbColor.green;
+    brush->blue = plb->lbColor.blue;
+    brush->alpha = (plb->lbStyle == BS_SOLID) ? 1 : 0.2;
 
-    return &brush;
+    return brush;
 }
 
 HFONT CreateFont(int nHeight, int nWidth, int nOrientation, int fnWeight,
@@ -289,7 +305,31 @@ COLORREF GetTextColor(HCRDC Hdc)
 
 BOOL InvalidateRect(HWID hWid, const RECT *lpRect, BOOL bErase)
 {
+    GDRECT Gdrect;
+    RECT_to_GDRECT(lpRect, &Gdrect);
     // gtk_widget_queue_draw(hWid);
-    gdk_window_invalidate_rect (gtk_widget_get_window (hWid), lpRect, bErase);
+    gdk_window_invalidate_rect (gtk_widget_get_window (hWid), &Gdrect, bErase);
 }
 
+int FillRect(HCRDC hDC, const RECT *lprc, HBRUSH hbr)
+{
+    GDRECT gdrc;
+    RECT_to_GDRECT(lprc, &gdrc);
+
+    cairo_set_source_rgb(hDC, hbr->red, hbr->green, hbr->blue);
+    cairo_rectangle(hDC, gdrc.x, gdrc.y, gdrc.width, gdrc.height);
+    cairo_stroke_preserve(hDC);
+    cairo_fill(hDC);
+    
+    return 0;
+}
+
+BOOL GetClientRect(HWID hWid, PRECT pRect)
+{
+    pRect->top = 0;
+    pRect->left = 0;
+    pRect->right = gtk_widget_get_allocated_width (hWid);
+    pRect->bottom = gtk_widget_get_allocated_height (hWid);
+
+    return TRUE;
+}

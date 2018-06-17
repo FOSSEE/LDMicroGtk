@@ -1029,8 +1029,9 @@ gboolean LD_WM_MouseMove_call(GtkWidget *widget, GdkEvent *event, gpointer user_
     * WM_MOUSEMOVE
     */
 
-    g_print("x = %f\n", event->button.x_root);
-    g_print("y = %f\n", event->button.y_root);
+    // g_print("x = %f\n", event->button.x_root);
+    // g_print("y = %f\n", event->button.y_root);
+
     // int x = LOWORD(lParam);
     // int y = HIWORD(lParam);
 
@@ -1098,29 +1099,38 @@ gboolean LD_WM_Paint_call(HWID widget, HCRDC cr, gpointer data)
     /// This draws the schematic.
     PaintWindow();
 
-    // RECT r;
-    // // Fill around the scroll bars
+    // cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+    // cairo_set_line_width(cr, 1);
+
+    // cairo_rectangle(cr, 20, 20, 120, 80);
+    // cairo_rectangle(cr, 180, 20, 80, 80);
+    // cairo_stroke_preserve(cr);
+    // cairo_fill(cr);
+
+    RECT r;
+    // Fill around the scroll bars
     // if(NeedHoriz) {
-    //     r.top = IoListTop - ScrollHeight - 2;
-    //     r.bottom = IoListTop - 2;
-    //     FillRect(Hdc, &r, (HBRUSH)GetStockObject(LTGRAY_BRUSH));
+        ScrollHeight = 10;
+        r.top = IoListTop - ScrollHeight - 2;
+        r.bottom = IoListTop - 2;
+        r.right = 5;
+        FillRect(Hdc, &r, (HBRUSH)GetStockObject(LTGRAY_BRUSH));
     // }
-    // GetClientRect(MainWindow, &r);
-    // r.left = r.right - ScrollWidth - 2;
-    // FillRect(Hdc, &r, (HBRUSH)GetStockObject(LTGRAY_BRUSH));
-
-    // // Draw the splitter thing to grab to resize the I/O listview.
-    // GetClientRect(MainWindow, &r);
-    // r.top = IoListTop - 2;
-    // r.bottom = IoListTop;
-    // FillRect(Hdc, &r, (HBRUSH)GetStockObject(LTGRAY_BRUSH));
-    // r.top = IoListTop - 2;
-    // r.bottom = IoListTop - 1;
-    // FillRect(Hdc, &r, (HBRUSH)GetStockObject(WHITE_BRUSH));
-    // r.top = IoListTop;
-    // r.bottom = IoListTop + 1;
-    // FillRect(Hdc, &r, (HBRUSH)GetStockObject(DKGRAY_BRUSH));
-
+    GetClientRect(DrawWindow, &r);
+    ScrollWidth = 10;
+    r.left = r.right - ScrollWidth - 2;
+    FillRect(Hdc, &r, (HBRUSH)GetStockObject(LTGRAY_BRUSH));
+    // Draw the splitter thing to grab to resize the I/O listview.
+    GetClientRect(DrawWindow, &r);
+    r.top = IoListTop - 2;
+    r.bottom = IoListTop;
+    FillRect(Hdc, &r, (HBRUSH)GetStockObject(LTGRAY_BRUSH));
+    r.top = IoListTop - 2;
+    r.bottom = IoListTop - 1;
+    FillRect(Hdc, &r, (HBRUSH)GetStockObject(WHITE_BRUSH));
+    r.top = IoListTop;
+    r.bottom = IoListTop + 1;
+    FillRect(Hdc, &r, (HBRUSH)GetStockObject(DKGRAY_BRUSH));
     // EndPaint(hwnd, &ps);
 
     return FALSE;
@@ -1275,7 +1285,7 @@ int main(int argc, char** argv)
     gtk_window_resize (GTK_WINDOW(MainWindow), 800, 600);
     gtk_window_move(GTK_WINDOW(MainWindow), 10, 10);
     gtk_widget_override_background_color(GTK_WIDGET(MainWindow), 
-                            GTK_STATE_FLAG_NORMAL, ((HBRUSH)GetStockObject(GREY_BRUSH))->getThis());
+                            GTK_STATE_FLAG_NORMAL, ((HBRUSH)GetStockObject(GRAY_BRUSH))->getThis());
     gtk_window_set_default_icon(LoadImage(Instance, LDMICRO_ICON,
                             IMAGE_ICON, 32, 32, 0));
     gtk_window_set_icon(GTK_WINDOW(MainWindow), LoadImage(Instance, LDMICRO_ICON,

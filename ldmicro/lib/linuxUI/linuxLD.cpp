@@ -114,6 +114,14 @@ HICON LoadImage(HINSTANCE hinst, LPCTSTR lpszName, UINT uType, int cxDesired,
     return pixbuf;
 }
 
+void RECT_to_GDRECT(const RECT *rc, GDRECT *gdrc)
+{
+    gdrc->x = rc->top;
+    gdrc->y = rc->left;
+    gdrc->width = rc->right - rc->left;
+    gdrc->height = rc->bottom - rc->top;
+}
+
 void OutputDebugString(char* str)
 {
 

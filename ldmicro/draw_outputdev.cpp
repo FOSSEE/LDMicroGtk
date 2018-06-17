@@ -329,7 +329,6 @@ void PaintWindow()
     }
     cy -= 2;
     DrawEndRung(0, cy);
-
     if(SelectedGxAfterNextPaint >= 0) {
         MoveCursorNear(SelectedGxAfterNextPaint, SelectedGyAfterNextPaint);
         InvalidateRect(DrawWindow, NULL, FALSE);
@@ -350,15 +349,15 @@ void PaintWindow()
     }
 
     /// draw the `buses' at either side of the screen
-    // r.left = X_PADDING - FONT_WIDTH;
-    // r.top = 0;
-    // r.right = r.left + 4;
-    // r.bottom = IoListTop;
-    // FillRect(Hdc, &r, InSimulationMode ? BusLeftBrush : BusBrush);
-
-    // r.left += POS_WIDTH*FONT_WIDTH*ColsAvailable + 2;
-    // r.right += POS_WIDTH*FONT_WIDTH*ColsAvailable + 2;
-    // FillRect(Hdc, &r, InSimulationMode ? BusRightBus : BusBrush);
+    RECT r;
+    r.left = X_PADDING - FONT_WIDTH;
+    r.top = 0;
+    r.right = r.left + 4;
+    r.bottom = IoListTop;
+    FillRect(Hdc, &r, InSimulationMode ? BusLeftBrush : BusBrush);
+    r.left += POS_WIDTH*FONT_WIDTH*ColsAvailable + 2;
+    r.right += POS_WIDTH*FONT_WIDTH*ColsAvailable + 2;
+    FillRect(Hdc, &r, InSimulationMode ? BusRightBus : BusBrush);
  
     CursorDrawn = FALSE;
 
@@ -428,7 +427,7 @@ void InitForDrawing(void)
     FixedWidthFontBold = CreateFont(
         FONT_HEIGHT, FONT_WIDTH,
         0,
-        FW_REGULAR, // the bold text renders funny under Vista
+        FW_BOLD, // the bold text renders funny under Vista
         FALSE,
         "Lucida Console");
 
@@ -439,7 +438,7 @@ void InitForDrawing(void)
 
     lb.lbColor = HighlightColours.simBusLeft;
     BusLeftBrush = CreateBrushIndirect(&lb);
-
+    
     lb.lbColor = HighlightColours.bus;
     BusBrush = CreateBrushIndirect(&lb);
 

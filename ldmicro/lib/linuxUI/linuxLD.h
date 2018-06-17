@@ -74,8 +74,8 @@ typedef GtkListStore *HLIST;
 typedef GtkApplication *HAPP;
 typedef GtkTreeViewColumn *HTVC;
 typedef GdkPixbuf *HICON;
-typedef GdkRectangle RECT;
-typedef GdkRectangle *PRECT;
+typedef GdkRectangle GDRECT;
+typedef GdkRectangle *PGDRECT;
 
 /// Check if system is x64 or x86
 #if defined(__UNIX64)
@@ -113,14 +113,6 @@ typedef class tagColorReferance: public GdkRGBA{
         this->blue = b/255.0;
         this->alpha = 1.0;
     }
-
-    // tagColorReferance(tagColorReferance &refCpy)
-    // {
-    //     this->red = refCpy.red;
-    //     this->green = refCpy.green;
-    //     this->blue = refCpy.blue;
-    //     this->alpha = refCpy.alpha;
-    // }
 
     GdkRGBA* getThis()
     {
@@ -174,6 +166,13 @@ typedef struct tagLOGBRUSH {
 //   ULONG_PTR lbHatch;
 } LOGBRUSH, *PLOGBRUSH;
 
+typedef struct _RECT {
+  LONG left;
+  LONG top;
+  LONG right;
+  LONG bottom;
+} RECT, *PRECT;
+
 /// Variables
 extern std::vector<HEAPRECORD> HeapRecord;
 
@@ -201,6 +200,10 @@ HICON LoadImage(
     int       cyDesired,
     UINT      fuLoad
 );
+
+void RECT_to_GDRECT(
+    const RECT *rc,
+    GDRECT     *gdrc);
 
 /// functions to be ported
 void OutputDebugString(char*);

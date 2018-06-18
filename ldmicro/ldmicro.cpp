@@ -327,9 +327,8 @@ void ProgramChanged(void)
 //-----------------------------------------------------------------------------
 // Handle a selection from the menu bar of the main window.
 //-----------------------------------------------------------------------------
-static void ProcessMenu(GtkMenuItem* men, gpointer gpcode)
+static void ProcessMenu(int code)
 {
-    int code = GPOINTER_TO_INT(gpcode);
     if(code >= MNU_PROCESSOR_0 && code < MNU_PROCESSOR_0+NUM_SUPPORTED_MCUS) {
         strcpy(CurrentCompileFile, "");
         Prog.mcu = &SupportedMcus[code - MNU_PROCESSOR_0];
@@ -588,11 +587,15 @@ static void ProcessMenu(GtkMenuItem* men, gpointer gpcode)
     }
 }
 
-void MenuHandler (){
-    g_signal_connect(G_OBJECT(McuSettingsMenu), "activate",
-        G_CALLBACK(ProcessMenu), GINT_TO_POINTER(MNU_MCU_SETTINGS));
+void WM_COMMAND (GtkMenuItem* men, gpointer gpcode){
+    int tempcode = GPOINTER_TO_INT(gpcode);
+    ProcessMenu (tempcode);
 }
 
+void MenuHandler (){
+    g_signal_connect(G_OBJECT(McuSettingsMenu), "activate",
+        G_CALLBACK(WM_COMMAND), GINT_TO_POINTER(MNU_MCU_SETTINGS));
+}
 
 //-----------------------------------------------------------------------------
 // WndProc for MainWindow.

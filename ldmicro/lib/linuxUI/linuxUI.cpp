@@ -309,9 +309,12 @@ void TextOut(HWID hWid, HCRDC hcr, int nXStart, int nYStart, LPCTSTR lpString, i
 
     if (resize_flag)
         gtk_widget_set_size_request(hWid, width, height);
+    char* text = (char*)malloc(cchString);
+    strncpy(text, lpString, cchString);
+    text[cchString] = '\0';
 
     cairo_move_to(hcr, nXStart, nYStart);
-    cairo_show_text(hcr, lpString);  
+    cairo_show_text(hcr, text);
 
     cairo_fill (hcr);
 }

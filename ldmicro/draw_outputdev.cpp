@@ -278,7 +278,7 @@ void PaintWindow()
     }
     cy -= 2;
     DrawEndRung(0, cy);
-    g_print("cy = %i\n", cy);
+    
     if(SelectedGxAfterNextPaint >= 0) {
         MoveCursorNear(SelectedGxAfterNextPaint, SelectedGyAfterNextPaint);
         InvalidateRect(DrawWindow, NULL, FALSE);

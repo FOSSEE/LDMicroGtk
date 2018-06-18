@@ -85,51 +85,61 @@ extern COLORREF HdcCurrentTextColor;
 /// functions
 BOOL isFocus(HWID window);
 
-COLORREF RGB(int red, 
-        int green, 
-        int blue);
+COLORREF RGB(
+    int red, 
+    int green, 
+    int blue);
 
-int MessageBox(HWID pWindow, 
+int MessageBox(
+    HWID  pWindow, 
     char* message, 
     char* title, 
     UINT  mFlags);
 
 BOOL GetSaveFileName(OPENFILENAME *ofn);
 
-void EnableMenuItem(HMENU MenuName, 
+void EnableMenuItem(
+    HMENU MenuName, 
     HMENU MenuItem, 
     UINT  CheckEnabledItem);
 
-void CheckMenuItem(HMENU MenuName, 
+void CheckMenuItem(
+    HMENU MenuName, 
     HMENU MenuItem, 
     UINT  Check);
 
 HANDLE GetStockObject(int fnObject);
 
-void SelectObject(HCRDC hcr, 
+void SelectObject(
+    HCRDC hcr, 
     HFONT hfont);
 
 HBRUSH CreateBrushIndirect(PLOGBRUSH plb);
 
-HFONT CreateFont(int nHeight,
+HFONT CreateFont(
+    int     nHeight,
     int     nWidth,
     int     nOrientation,
     int     fnWeight,
     DWORD   fdwItalic,
     LPCTSTR lpszFace);
 
-void SetBkColor(HWID widget, 
+void SetBkColor(
+    HWID     widget, 
     HCRDC    hcr,
     COLORREF bkCol);
 
-void SetTextColor(HCRDC hcr, 
+void SetTextColor(
+    HCRDC    hcr, 
     COLORREF color);
 
-void TextOut(HCRDC hcr,
-   int     nXStart,
-   int     nYStart,
-   LPCTSTR lpString,
-   int     cchString);
+void TextOut(
+    HWID    hWid,
+    HCRDC   hcr,
+    int     nXStart,
+    int     nYStart,
+    LPCTSTR lpString,
+    int     cchString);
 
 COLORREF GetTextColor(HCRDC Hdc);
 
@@ -146,5 +156,17 @@ int FillRect(
 BOOL GetClientRect(
     HWID   hWid,
     PRECT lpRect);
+
+BOOL MoveWindow(
+    HWID hWid,
+    int  X,
+    int  Y,
+    int  nWidth,
+    int  nHeight,
+    BOOL bRepaint);
+
+BOOL GetWindowRect(
+    HWID   hWid,
+    PRECT  pRect);
 
 #endif

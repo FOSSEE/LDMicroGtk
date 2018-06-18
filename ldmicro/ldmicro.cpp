@@ -1058,10 +1058,14 @@ gboolean LD_WM_Paint_call(HWID widget, HCRDC cr, gpointer data)
     // GtkStyleContext *context;
 
     // context = gtk_widget_get_style_context (widget);
-
+    
     // width = gtk_widget_get_allocated_width (widget);
     // height = gtk_widget_get_allocated_height (widget);
+    // g_print("w = %i\n", width);
+    // g_print("h = %i\n", height);
 
+    // SetBkColor(widget, cr, HighlightColours.bg);
+    
     // gtk_render_background (context, cr, 0, 0, width, height);
 
     // cairo_arc (cr,
@@ -1069,32 +1073,25 @@ gboolean LD_WM_Paint_call(HWID widget, HCRDC cr, gpointer data)
     //             MIN (width, height) / 3.0,
     //             0, 2 * G_PI);
 
+    // cairo_rectangle(cr, 0, 0, width, height);
+    // cairo_stroke_preserve(cr);
+
     // gtk_style_context_get_color (context,
     //                             gtk_style_context_get_state (context),
     //                             &color);
     // gdk_cairo_set_source_rgba (cr, &color);
 
     // cairo_fill (cr);
-    // static double Cairo_R = 0.0, Cairo_G = 0.0, Cairo_B = 0.0;
-    // cairo_set_source_rgb(cr, Cairo_R, Cairo_G, Cairo_G); 
-    // Cairo_R = (Cairo_R+0.2 > 0.4) ? 0 : Cairo_R+0.2;
-    // Cairo_G = (Cairo_G+0.4 > 1.0) ? 0.4 : Cairo_G+0.4;
-    // Cairo_B = (Cairo_B+0.1 > 0.5) ? 0 : Cairo_B+0.1;
     
-    // cairo_select_font_face(cr, "Purisa",
-    //     CAIRO_FONT_SLANT_NORMAL,
-    //     CAIRO_FONT_WEIGHT_BOLD);
+    // SetTextColor(cr, HighlightColours.rungNum);
+    // SelectObject(cr, FixedWidthFont);
 
-    // cairo_set_font_size(cr, 20);
-
-    // cairo_move_to(cr, 20, height / 2.0);
-    // cairo_show_text(cr, "-----------THIS IS A TEST DRAW----------");  
-
-    // cairo_fill (cr);
-
+    // for(int i = 10; i<500; i+=20)
+    // {
+    //     TextOut(DrawWindow, cr, 20, i, "-------] [-------------------------------------------------------------------------------------------------------------------------------------------------{RES}-------", 14);
+    // }
     
-    // PAINTSTRUCT ps;
-    Hdc = cr;//BeginPaint(hwnd, &ps);
+    Hdc = cr;
 
     /// This draws the schematic.
     PaintWindow();
@@ -1106,32 +1103,6 @@ gboolean LD_WM_Paint_call(HWID widget, HCRDC cr, gpointer data)
     // cairo_rectangle(cr, 180, 20, 80, 80);
     // cairo_stroke_preserve(cr);
     // cairo_fill(cr);
-
-    RECT r;
-    // Fill around the scroll bars
-    // if(NeedHoriz) {
-        ScrollHeight = 10;
-        r.top = IoListTop - ScrollHeight - 2;
-        r.bottom = IoListTop - 2;
-        r.right = 5;
-        FillRect(Hdc, &r, (HBRUSH)GetStockObject(LTGRAY_BRUSH));
-    // }
-    GetClientRect(DrawWindow, &r);
-    ScrollWidth = 10;
-    r.left = r.right - ScrollWidth - 2;
-    FillRect(Hdc, &r, (HBRUSH)GetStockObject(LTGRAY_BRUSH));
-    // Draw the splitter thing to grab to resize the I/O listview.
-    GetClientRect(DrawWindow, &r);
-    r.top = IoListTop - 2;
-    r.bottom = IoListTop;
-    FillRect(Hdc, &r, (HBRUSH)GetStockObject(LTGRAY_BRUSH));
-    r.top = IoListTop - 2;
-    r.bottom = IoListTop - 1;
-    FillRect(Hdc, &r, (HBRUSH)GetStockObject(WHITE_BRUSH));
-    r.top = IoListTop;
-    r.bottom = IoListTop + 1;
-    FillRect(Hdc, &r, (HBRUSH)GetStockObject(DKGRAY_BRUSH));
-    // EndPaint(hwnd, &ps);
 
     return FALSE;
 }
@@ -1156,8 +1127,7 @@ gboolean LD_WM_Size_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)
     * WM_SIZE
     */
 
-    // MainWindowResized();
-    // break;
+    MainWindowResized();
 
     return FALSE;
 }
@@ -1168,8 +1138,7 @@ gboolean LD_WM_SetFocus_call(GtkWidget *widget, GdkEvent *event, gpointer user_d
     * WM_SETFOCUS
     */
 
-    // InvalidateRect(MainWindow, NULL, FALSE);
-    // break;
+    InvalidateRect(DrawWindow, NULL, FALSE);
 
     return FALSE;
 }

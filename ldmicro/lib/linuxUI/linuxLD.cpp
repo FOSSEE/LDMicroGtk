@@ -116,8 +116,8 @@ HICON LoadImage(HINSTANCE hinst, LPCTSTR lpszName, UINT uType, int cxDesired,
 
 void RECT_to_GDRECT(const RECT *rc, GDRECT *gdrc)
 {
-    gdrc->x = rc->top;
-    gdrc->y = rc->left;
+    gdrc->x = rc->left;
+    gdrc->y = rc->top;
     gdrc->width = rc->right - rc->left;
     gdrc->height = rc->bottom - rc->top;
 }

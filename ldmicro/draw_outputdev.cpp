@@ -131,10 +131,10 @@ static void DrawCharsToScreen(int cx, int cy, const char *str)
             if(inBrace == 1) {
                 prev = GetTextColor(Hdc);
                 SetTextColor(Hdc, HighlightColours.punct);
-                TextOut(Hdc, x, y, str, 1);
+                TextOut(DrawWindow, Hdc, x, y, str, 1);
                 SetTextColor(Hdc, prev);
             } else {
-                TextOut(Hdc, x, y, str, 1);
+                TextOut(DrawWindow, Hdc, x, y, str, 1);
             }
             if(*str == ']' || *str == '}') inBrace--;
         } else if((
@@ -144,7 +144,7 @@ static void DrawCharsToScreen(int cx, int cy, const char *str)
         {
             prev = GetTextColor(Hdc);
             SetTextColor(Hdc, HighlightColours.lit);
-            TextOut(Hdc, x, y, str, 1);
+            TextOut(DrawWindow, Hdc, x, y, str, 1);
             SetTextColor(Hdc, prev);
             inNumber = TRUE;
         } else if(*str == '\x01') {
@@ -170,14 +170,14 @@ static void DrawCharsToScreen(int cx, int cy, const char *str)
             if(isdigit(*str) || *str == '.') {
                 prev = GetTextColor(Hdc);
                 SetTextColor(Hdc, HighlightColours.lit);
-                TextOut(Hdc, x, y, str, 1);
+                TextOut(DrawWindow, Hdc, x, y, str, 1);
                 SetTextColor(Hdc, prev);
             } else {
-                TextOut(Hdc, x, y, str, 1);
+                TextOut(DrawWindow, Hdc, x, y, str, 1);
                 inNumber = FALSE;
             }
         } else {
-            TextOut(Hdc, x, y, str, 1);
+            TextOut(DrawWindow, Hdc, x, y, str, 1);
         }
 
         firstTime = FALSE;
@@ -220,21 +220,6 @@ int ScreenRowsAvailable(void)
 //-----------------------------------------------------------------------------
 void PaintWindow()
 {
-    /*
-    cairo_set_source_rgb(cr, Cairo_R, Cairo_G, Cairo_G); 
-    
-    cairo_select_font_face(cr, "Purisa",
-        CAIRO_FONT_SLANT_NORMAL,
-        CAIRO_FONT_WEIGHT_BOLD);
-
-    cairo_set_font_size(cr, 20);
-
-    cairo_move_to(cr, 20, height / 2.0);
-    cairo_show_text(cr, "-----------THIS IS A TEST DRAW----------");  
-
-    cairo_fill (cr);
-    */
-    
     // SetBkColor(DrawWindow, hcr, InSimulationMode ? HighlightColours.simBg :
     //     HighlightColours.bg);
     
@@ -243,7 +228,7 @@ void PaintWindow()
     
     // SelectObject(hcr, FixedWidthFont);
     
-    // TextOut(hcr, 5, 100, "-------] [-------------------------------------------------------------------------------------------------------------------------------------------------{RES}-------", 14);
+    // TextOut(DrawWindow, hcr, 5, 100, "-------] [-------------------------------------------------------------------------------------------------------------------------------------------------{RES}-------", 14);
 
     // static HBITMAP BackBitmap;
     // static HDC BackDc;
@@ -313,10 +298,10 @@ void PaintWindow()
 
             if(rung < 10) {
                 char r[1] = { rung + '0' };
-                TextOut(Hdc, 8 + FONT_WIDTH, yp, r, 1);
+                TextOut(DrawWindow, Hdc, 8 + FONT_WIDTH, yp, r, 1);
             } else {
                 char r[2] = { (rung / 10) + '0', (rung % 10) + '0' };
-                TextOut(Hdc, 8, yp, r, 2);
+                TextOut(DrawWindow, Hdc, 8, yp, r, 2);
             }
 
             int cx = 0;
@@ -354,9 +339,13 @@ void PaintWindow()
     r.top = 0;
     r.right = r.left + 4;
     r.bottom = IoListTop;
+    g_print("IoList = %i\n", IoListTop);
     FillRect(Hdc, &r, InSimulationMode ? BusLeftBrush : BusBrush);
+    g_print("ColsAvailable = %i\n", ColsAvailable);
     r.left += POS_WIDTH*FONT_WIDTH*ColsAvailable + 2;
     r.right += POS_WIDTH*FONT_WIDTH*ColsAvailable + 2;
+    g_print("right = %i\n", r.right);
+    g_print("left = %i\n", r.left);
     FillRect(Hdc, &r, InSimulationMode ? BusRightBus : BusBrush);
  
     CursorDrawn = FALSE;

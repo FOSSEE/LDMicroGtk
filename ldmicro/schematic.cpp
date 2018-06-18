@@ -83,43 +83,43 @@ BOOL FindSelected(int *gx, int *gy)
 //-----------------------------------------------------------------------------
 void SelectElement(int gx, int gy, int state)
 {
-//     if(gx < 0 || gy < 0) {
-//         if(!FindSelected(&gx, &gy)) {
-//             return;
-//         }
-//     }
+    if(gx < 0 || gy < 0) {
+        if(!FindSelected(&gx, &gy)) {
+            return;
+        }
+    }
 
-//     if(Selected) Selected->selectedState = SELECTED_NONE;
+    if(Selected) Selected->selectedState = SELECTED_NONE;
 
-//     Selected = DisplayMatrix[gx][gy];
-//     SelectedWhich = DisplayMatrixWhich[gx][gy];
+    Selected = DisplayMatrix[gx][gy];
+    SelectedWhich = DisplayMatrixWhich[gx][gy];
 
-//     if(SelectedWhich == ELEM_PLACEHOLDER) {
-//         state = SELECTED_LEFT;
-//     }
+    if(SelectedWhich == ELEM_PLACEHOLDER) {
+        state = SELECTED_LEFT;
+    }
 
-//     if((gy - ScrollYOffset) >= ScreenRowsAvailable()) {
-//         ScrollYOffset = gy - ScreenRowsAvailable() + 1;
-//         RefreshScrollbars();
-//     }
-//     if((gy - ScrollYOffset) < 0) {
-//         ScrollYOffset = gy;
-//         RefreshScrollbars();
-//     }
-//     if((gx - ScrollXOffset*POS_WIDTH*FONT_WIDTH) >= ScreenColsAvailable()) {
-//         ScrollXOffset = gx*POS_WIDTH*FONT_WIDTH - ScreenColsAvailable();
-//         RefreshScrollbars();
-//     }
-//     if((gx - ScrollXOffset*POS_WIDTH*FONT_WIDTH) < 0) {
-//         ScrollXOffset = gx*POS_WIDTH*FONT_WIDTH;
-//         RefreshScrollbars();
-//     }
+    if((gy - ScrollYOffset) >= ScreenRowsAvailable()) {
+        ScrollYOffset = gy - ScreenRowsAvailable() + 1;
+        RefreshScrollbars();
+    }
+    if((gy - ScrollYOffset) < 0) {
+        ScrollYOffset = gy;
+        RefreshScrollbars();
+    }
+    if((gx - ScrollXOffset*POS_WIDTH*FONT_WIDTH) >= ScreenColsAvailable()) {
+        ScrollXOffset = gx*POS_WIDTH*FONT_WIDTH - ScreenColsAvailable();
+        RefreshScrollbars();
+    }
+    if((gx - ScrollXOffset*POS_WIDTH*FONT_WIDTH) < 0) {
+        ScrollXOffset = gx*POS_WIDTH*FONT_WIDTH;
+        RefreshScrollbars();
+    }
 
-//     ok();
-//     Selected->selectedState = state;
-//     ok();
+    ok();
+    Selected->selectedState = state;
+    ok();
 
-//     WhatCanWeDoFromCursorAndTopology();
+    WhatCanWeDoFromCursorAndTopology();
 }
 
 //-----------------------------------------------------------------------------
@@ -129,86 +129,86 @@ void SelectElement(int gx, int gy, int state)
 //-----------------------------------------------------------------------------
 void WhatCanWeDoFromCursorAndTopology(void)
 {
-//     BOOL canNegate = FALSE, canNormal = FALSE;
-//     BOOL canResetOnly = FALSE, canSetOnly = FALSE;
-//     BOOL canPushUp = TRUE, canPushDown = TRUE;
+    BOOL canNegate = FALSE, canNormal = FALSE;
+    BOOL canResetOnly = FALSE, canSetOnly = FALSE;
+    BOOL canPushUp = TRUE, canPushDown = TRUE;
 
-//     BOOL canDelete = TRUE;
+    BOOL canDelete = TRUE;
 
-//     int i = RungContainingSelected();
-//     if(i >= 0) {
-//         if(i == 0) canPushUp = FALSE;
-//         if(i == (Prog.numRungs-1)) canPushDown = FALSE;
+    int i = RungContainingSelected();
+    if(i >= 0) {
+        if(i == 0) canPushUp = FALSE;
+        if(i == (Prog.numRungs-1)) canPushDown = FALSE;
 
-//         if(Prog.rungs[i]->count == 1 &&
-//             Prog.rungs[i]->contents[0].which == ELEM_PLACEHOLDER)
-//         {
-//             canDelete = FALSE;
-//         }
-//     }
+        if(Prog.rungs[i]->count == 1 &&
+            Prog.rungs[i]->contents[0].which == ELEM_PLACEHOLDER)
+        {
+            canDelete = FALSE;
+        }
+    }
 
-//     CanInsertEnd = FALSE;
-//     CanInsertOther = TRUE;
+    CanInsertEnd = FALSE;
+    CanInsertOther = TRUE;
 
-//     if(Selected && 
-//         (SelectedWhich == ELEM_COIL ||
-//          SelectedWhich == ELEM_RES ||
-//          SelectedWhich == ELEM_ADD ||
-//          SelectedWhich == ELEM_SUB ||
-//          SelectedWhich == ELEM_MUL ||
-//          SelectedWhich == ELEM_DIV ||
-//          SelectedWhich == ELEM_CTC ||
-//          SelectedWhich == ELEM_READ_ADC ||
-//          SelectedWhich == ELEM_SET_PWM ||
-//          SelectedWhich == ELEM_MASTER_RELAY ||
-//          SelectedWhich == ELEM_SHIFT_REGISTER ||
-//          SelectedWhich == ELEM_LOOK_UP_TABLE ||
-//          SelectedWhich == ELEM_PIECEWISE_LINEAR ||
-//          SelectedWhich == ELEM_PERSIST ||
-//          SelectedWhich == ELEM_MOVE))
-//     {
-//         if(SelectedWhich == ELEM_COIL) {
-//             canNegate = TRUE;
-//             canNormal = TRUE;
-//             canResetOnly = TRUE;
-//             canSetOnly = TRUE;
-//         }
+    if(Selected && 
+        (SelectedWhich == ELEM_COIL ||
+         SelectedWhich == ELEM_RES ||
+         SelectedWhich == ELEM_ADD ||
+         SelectedWhich == ELEM_SUB ||
+         SelectedWhich == ELEM_MUL ||
+         SelectedWhich == ELEM_DIV ||
+         SelectedWhich == ELEM_CTC ||
+         SelectedWhich == ELEM_READ_ADC ||
+         SelectedWhich == ELEM_SET_PWM ||
+         SelectedWhich == ELEM_MASTER_RELAY ||
+         SelectedWhich == ELEM_SHIFT_REGISTER ||
+         SelectedWhich == ELEM_LOOK_UP_TABLE ||
+         SelectedWhich == ELEM_PIECEWISE_LINEAR ||
+         SelectedWhich == ELEM_PERSIST ||
+         SelectedWhich == ELEM_MOVE))
+    {
+        if(SelectedWhich == ELEM_COIL) {
+            canNegate = TRUE;
+            canNormal = TRUE;
+            canResetOnly = TRUE;
+            canSetOnly = TRUE;
+        }
 
-//         if(Selected->selectedState == SELECTED_ABOVE ||
-//            Selected->selectedState == SELECTED_BELOW)
-//         {
-//             CanInsertEnd = TRUE;
-//             CanInsertOther = FALSE;
-//         } else if(Selected->selectedState == SELECTED_RIGHT) {
-//             CanInsertEnd = FALSE;
-//             CanInsertOther = FALSE;
-//         }
-//     } else if(Selected) {
-//         if(Selected->selectedState == SELECTED_RIGHT || 
-//             SelectedWhich == ELEM_PLACEHOLDER)
-//         {
-//             CanInsertEnd = ItemIsLastInCircuit(Selected);
-//         }
-//     }
-//     if(SelectedWhich == ELEM_CONTACTS) {
-//         canNegate = TRUE;
-//         canNormal = TRUE;
-//     }
-//     if(SelectedWhich == ELEM_PLACEHOLDER) {
-//         // a comment must be the only element in its rung, and it will fill
-//         // the rung entirely
-//         CanInsertComment = TRUE;
-//     } else {
-//         CanInsertComment = FALSE;
-//     }
-//     if(SelectedWhich == ELEM_COMMENT) {
-//         // if there's a comment there already then don't let anything else
-//         // into the rung
-//         CanInsertEnd = FALSE;
-//         CanInsertOther = FALSE;
-//     }
-//     SetMenusEnabled(canNegate, canNormal, canResetOnly, canSetOnly, canDelete,
-//         CanInsertEnd, CanInsertOther, canPushDown, canPushUp, CanInsertComment);
+        if(Selected->selectedState == SELECTED_ABOVE ||
+           Selected->selectedState == SELECTED_BELOW)
+        {
+            CanInsertEnd = TRUE;
+            CanInsertOther = FALSE;
+        } else if(Selected->selectedState == SELECTED_RIGHT) {
+            CanInsertEnd = FALSE;
+            CanInsertOther = FALSE;
+        }
+    } else if(Selected) {
+        if(Selected->selectedState == SELECTED_RIGHT || 
+            SelectedWhich == ELEM_PLACEHOLDER)
+        {
+            CanInsertEnd = ItemIsLastInCircuit(Selected);
+        }
+    }
+    if(SelectedWhich == ELEM_CONTACTS) {
+        canNegate = TRUE;
+        canNormal = TRUE;
+    }
+    if(SelectedWhich == ELEM_PLACEHOLDER) {
+        // a comment must be the only element in its rung, and it will fill
+        // the rung entirely
+        CanInsertComment = TRUE;
+    } else {
+        CanInsertComment = FALSE;
+    }
+    if(SelectedWhich == ELEM_COMMENT) {
+        // if there's a comment there already then don't let anything else
+        // into the rung
+        CanInsertEnd = FALSE;
+        CanInsertOther = FALSE;
+    }
+    SetMenusEnabled(canNegate, canNormal, canResetOnly, canSetOnly, canDelete,
+        CanInsertEnd, CanInsertOther, canPushDown, canPushUp, CanInsertComment);
 }
 
 //-----------------------------------------------------------------------------

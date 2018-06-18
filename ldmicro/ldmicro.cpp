@@ -1053,36 +1053,36 @@ gboolean LD_WM_Paint_call(HWID widget, HCRDC cr, gpointer data)
 
     g_print("draw called\n");
 
-    // guint width, height;
-    // GdkRGBA color;
-    // GtkStyleContext *context;
+    guint width, height;
+    GdkRGBA color;
+    GtkStyleContext *context;
 
-    // context = gtk_widget_get_style_context (widget);
+    context = gtk_widget_get_style_context (widget);
     
-    // width = gtk_widget_get_allocated_width (widget);
-    // height = gtk_widget_get_allocated_height (widget);
+    width = gtk_widget_get_allocated_width (widget);
+    height = gtk_widget_get_allocated_height (widget);
     // g_print("w = %i\n", width);
     // g_print("h = %i\n", height);
 
     // SetBkColor(widget, cr, HighlightColours.bg);
     
-    // gtk_render_background (context, cr, 0, 0, width, height);
+    gtk_render_background (context, cr, 0, 0, width, height);
 
     // cairo_arc (cr,
     //             width / 2.0, height / 2.0,
     //             MIN (width, height) / 3.0,
     //             0, 2 * G_PI);
 
-    // cairo_rectangle(cr, 0, 0, width, height);
-    // cairo_stroke_preserve(cr);
+    cairo_rectangle(cr, 0, 0, width, height);
+    cairo_stroke_preserve(cr);
 
-    // gtk_style_context_get_color (context,
-    //                             gtk_style_context_get_state (context),
-    //                             &color);
-    // gdk_cairo_set_source_rgba (cr, &color);
+    gtk_style_context_get_color (context,
+                                gtk_style_context_get_state (context),
+                                &color);
+    gdk_cairo_set_source_rgba (cr, &color);
 
-    // cairo_fill (cr);
-    
+    cairo_fill (cr);
+
     // SetTextColor(cr, HighlightColours.rungNum);
     // SelectObject(cr, FixedWidthFont);
 

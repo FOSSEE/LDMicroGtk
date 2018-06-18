@@ -286,12 +286,15 @@ void SetTextColor(HCRDC hcr, COLORREF color)
 
 void TextOut(HWID hWid, HCRDC hcr, int nXStart, int nYStart, LPCTSTR lpString, int cchString)
 {
+    nYStart += 20;
+    
     cairo_text_extents_t extents;
     cairo_text_extents (hcr, lpString, &extents);
     int width = gtk_widget_get_allocated_width (hWid);
     int height= gtk_widget_get_allocated_height (hWid);
     BOOL resize_flag = FALSE;
     // g_print("w = %f h = %f")
+
     if(nYStart+(extents.height/2.0) >= height)
     {
         height += extents.height;

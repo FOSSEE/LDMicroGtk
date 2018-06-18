@@ -220,46 +220,10 @@ int ScreenRowsAvailable(void)
 //-----------------------------------------------------------------------------
 void PaintWindow()
 {
-    // SetBkColor(DrawWindow, hcr, InSimulationMode ? HighlightColours.simBg :
-    //     HighlightColours.bg);
-    
-    // SetTextColor(hcr, InSimulationMode ? HighlightColours.simRungNum :
-    //     HighlightColours.rungNum);
-    
-    // SelectObject(hcr, FixedWidthFont);
-    
-    // TextOut(DrawWindow, hcr, 5, 100, "-------] [-------------------------------------------------------------------------------------------------------------------------------------------------{RES}-------", 14);
-
-    // static HBITMAP BackBitmap;
-    // static HDC BackDc;
-    // static int BitmapWidth;
-
     ok();
-
-    // RECT r;
-    // GetClientRect(MainWindow, &r);
-    
+   
     int bw =  gtk_widget_get_allocated_width (DrawWindow);// = r.right;
     int bh = IoListTop;
-
-    // HDC paintDc;
-    // if(!BackDc) {
-    //     HWND desktop = GetDesktopWindow();
-    //     RECT dk;
-    //     GetClientRect(desktop, &dk);
-
-    //     BitmapWidth = max(2000, dk.right + 300);
-    //     BackBitmap = CreateCompatibleBitmap(Hdc, BitmapWidth, dk.bottom + 300);
-    //     BackDc = CreateCompatibleDC(Hdc);
-    //     SelectObject(BackDc, BackBitmap);
-    // }
-    // paintDc = Hdc;
-    // Hdc = BackDc;
-
-    // RECT fi;
-    // fi.left = 0; fi.top = 0;
-    // fi.right = BitmapWidth; fi.bottom = bh;
-    // FillRect(Hdc, &fi, InSimulationMode ? SimBgBrush : BgBrush);
     
     /// now figure out how we should draw the ladder logic
     ColsAvailable = ProgCountWidestRow();
@@ -295,7 +259,7 @@ void PaintWindow()
             int y = Y_PADDING + FONT_HEIGHT*cy;
             int yp = y + FONT_HEIGHT*(POS_HEIGHT/2) - 
                 POS_HEIGHT*FONT_HEIGHT*ScrollYOffset;
-
+            
             if(rung < 10) {
                 char r[1] = { rung + '0' };
                 TextOut(DrawWindow, Hdc, 8 + FONT_WIDTH, yp, r, 1);
@@ -314,6 +278,7 @@ void PaintWindow()
     }
     cy -= 2;
     DrawEndRung(0, cy);
+    g_print("cy = %i\n", cy);
     if(SelectedGxAfterNextPaint >= 0) {
         MoveCursorNear(SelectedGxAfterNextPaint, SelectedGyAfterNextPaint);
         InvalidateRect(DrawWindow, NULL, FALSE);
@@ -339,13 +304,9 @@ void PaintWindow()
     r.top = 0;
     r.right = r.left + 4;
     r.bottom = IoListTop;
-    g_print("IoList = %i\n", IoListTop);
     FillRect(Hdc, &r, InSimulationMode ? BusLeftBrush : BusBrush);
-    g_print("ColsAvailable = %i\n", ColsAvailable);
     r.left += POS_WIDTH*FONT_WIDTH*ColsAvailable + 2;
     r.right += POS_WIDTH*FONT_WIDTH*ColsAvailable + 2;
-    g_print("right = %i\n", r.right);
-    g_print("left = %i\n", r.left);
     FillRect(Hdc, &r, InSimulationMode ? BusRightBus : BusBrush);
  
     CursorDrawn = FALSE;

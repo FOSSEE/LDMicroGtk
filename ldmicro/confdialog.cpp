@@ -36,6 +36,8 @@ static HWID ConfDialog;
 static HWID CrystalTextbox;
 static HWID CycleTextbox;
 static HWID BaudTextbox;
+static HWID ButtonOk;
+static HWID ButtonCancel;
 
 static LONG_PTR PrevCrystalProc;
 static LONG_PTR PrevCycleProc;
@@ -93,8 +95,8 @@ static void MakeControls(void)
         gtk_widget_set_sensitive (textLabel2, FALSE);
     }
 
-    HWID OkButton = gtk_button_new_with_label ("OK");
-    HWID CancelButton = gtk_button_new_with_label ("Cancel");
+    ButtonOk = gtk_button_new_with_label ("OK");
+    ButtonCancel = gtk_button_new_with_label ("Cancel");
 
     char explanation[1024] = "";
 
@@ -110,7 +112,7 @@ static void MakeControls(void)
         }
     }
     else {
-        strcpy(explanation, _("No serial instructions (UART Send/UART Receive) \n"
+        strcpy(explanation, _("\n No serial instructions (UART Send/UART Receive) \n"
             "are in use; add one to program before \n"
             "setting baud rate.\r\n\r\n") );
     }
@@ -125,7 +127,7 @@ static void MakeControls(void)
         "micro to convert between timing \n" "in clock cycles and timing in"
         "seconds. A 4 MHz to \n" "20 MHz crystal is typical; check the speed "
         "grade of \n" "the part you are using to determine the maximum \n" "allowable"
-        "clock speed before choosing a crystal."));
+        "clock speed before choosing a crystal.\n"));
 
     HWID textLabel4 = gtk_label_new (explanation);
 
@@ -135,10 +137,10 @@ static void MakeControls(void)
 
     gtk_grid_attach (GTK_GRID (Grid), textLabel, 1, 2, 1, 1);
     gtk_grid_attach (GTK_GRID (Grid), CycleTextbox, 3, 2, 1, 1);
-    gtk_grid_attach (GTK_GRID (Grid), OkButton, 6, 2, 2, 1);
+    gtk_grid_attach (GTK_GRID (Grid), ButtonOk, 6, 2, 2, 1);
     gtk_grid_attach (GTK_GRID (Grid), textLabel2, 1, 4, 1, 1);
     gtk_grid_attach (GTK_GRID (Grid), CrystalTextbox, 3, 4, 1, 1);
-    gtk_grid_attach (GTK_GRID (Grid), CancelButton, 6, 4, 2, 1);
+    gtk_grid_attach (GTK_GRID (Grid), ButtonCancel, 6, 4, 2, 1);
     gtk_grid_attach (GTK_GRID (Grid), textLabel3, 1, 6, 1, 1);
     gtk_grid_attach (GTK_GRID (Grid), BaudTextbox, 3, 6, 1, 1);
     gtk_grid_set_column_spacing (GTK_GRID (Grid), 2);
@@ -173,77 +175,64 @@ static void MakeControls(void)
 //         (LONG_PTR)MyNumberProc);
 }
 
+void DestroyWindow (GtkWidget* widget, gpointer data){
+    gtk_widget_destroy (ConfDialog);
+    gtk_widget_set_sensitive (MainWindow, TRUE);
+}
+
+void SaveData (GtkWidget* widget, gpointer data){
+    char* buf;
+        
+    buf = const_cast <char*> (gtk_entry_get_text (GTK_ENTRY (CycleTextbox)));
+    Prog.cycleTime = (int)(1000*atof(buf) + 0.5);
+    if(Prog.cycleTime == 0) {
+        Error(_("Zero cycle time not valid; resetting to 10 ms."));
+        Prog.cycleTime = 10000;
+    }
+
+    buf = const_cast <char*> (gtk_entry_get_text (GTK_ENTRY(CrystalTextbox)));
+    Prog.mcuClock = (int)(1e6*atof(buf) + 0.5);
+    cout << Prog.mcuClock << "\n";
+
+    buf = const_cast <char*> (gtk_entry_get_text (GTK_ENTRY(BaudTextbox)));
+    Prog.baudRate = atoi(buf);        
+    DestroyWindow (ConfDialog, NULL);
+}
+
+void KeyPress (GtkWidget* widget, GdkEventKey* event, gpointer data){
+    if (event -> keyval == GDK_KEY_Return){
+        SaveData(NULL, NULL);
+        DestroyWindow (ConfDialog, NULL);
+    }
+    else if (event -> keyval == GDK_KEY_Escape){
+        DestroyWindow (ConfDialog, NULL);
+    }
+}
+
+void SignalCall () {
+    g_signal_connect (G_OBJECT (ConfDialog), "key-press-event",
+                    G_CALLBACK(KeyPress), NULL);
+    g_signal_connect (G_OBJECT (ConfDialog), "key_press_event",
+                    G_CALLBACK(KeyPress), NULL);
+    g_signal_connect (G_OBJECT (ButtonOk), "clicked",
+                    G_CALLBACK(SaveData), NULL);
+    g_signal_connect (G_OBJECT (ButtonCancel), "clicked",
+                    G_CALLBACK(DestroyWindow), NULL);
+}
+
 void ShowConfDialog(void)
 {
     // The window's height will be resized later, to fit the explanation text.
     MakeControls();
+    GdkEventKey* event;
 
     ConfDialog = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW(ConfDialog), "PLC Configuration");
     gtk_window_set_default_size(GTK_WINDOW(ConfDialog), 200, 250);
     gtk_window_set_resizable (GTK_WINDOW (ConfDialog), FALSE);
     gtk_container_add(GTK_CONTAINER(ConfDialog), PackingBox);
-    gtk_widget_add_events(ConfDialog, GDK_KEY_PRESS_MASK);
-    cout << "Created Window" << "\n";
-
-    gtk_widget_set_sensitive (MainWindow, FALSE);
-    gtk_widget_grab_focus (CycleTextbox);
-    gtk_widget_show_all (ConfDialog);
-    
-
-//     MSG msg;
-//     DWORD ret;
-    DialogDone = FALSE;
-    DialogCancel = FALSE;
-    // g_signal_connect (G_OBJECT (ConfDialog), "keyboard_press",
-    //                     G_CALLBACK (KeyPressEnter), NULL);
-    // g_signal_connect (G_OBJECT (ConfDialog), "keyboard_press",
-    //                     G_CALLBACK (KeyPressEsc), NULL);
-    
-    // while (!DialogDone) {
-    //     if (KeyPressEnter(ConfDialog, GDK_KEY_PRESS, NULL)){
-    //         DialogDone = TRUE;
-    //         break;
-    //     }
-    //     else if (KeyPressEsc(ConfDialog, GDK_KEY_PRESS, NULL)){
-    //         DialogDone = TRUE;
-    //         DialogCancel = TRUE;
-    //         break;
-    //     }
-    // }
-    // while((ret = GetMessage(&msg, NULL, 0, 0)) && !DialogDone) {
-    //     if(msg.message == WM_KEYDOWN) {
-    //         if(msg.wParam == VK_RETURN) {
-    //             DialogDone = TRUE;
-    //             break;
-    //         } else if(msg.wParam == VK_ESCAPE) {
-    //             DialogDone = TRUE;
-    //             DialogCancel = TRUE;
-    //             break;
-    //         }
-    //     }
-
-//         if(IsDialogMessage(ConfDialog, &msg)) continue;
-//         TranslateMessage(&msg);
-//         DispatchMessage(&msg);
-//     }
-
-    if(!DialogCancel) {
-        char* buf;
-        
-        buf = const_cast <char*> (gtk_entry_get_text (GTK_ENTRY (CycleTextbox)));
-        Prog.cycleTime = (int)(1000*atof(buf) + 0.5);
-        if(Prog.cycleTime == 0) {
-            Error(_("Zero cycle time not valid; resetting to 10 ms."));
-            Prog.cycleTime = 10000;
-        }
-
-        buf = const_cast <char*> (gtk_entry_get_text (GTK_ENTRY(CrystalTextbox)));
-        Prog.mcuClock = (int)(1e6*atof(buf) + 0.5);
-        
-        buf = const_cast <char*> (gtk_entry_get_text (GTK_ENTRY(BaudTextbox)));
-        Prog.baudRate = atoi(buf);
-    }
+    gtk_widget_add_events (ConfDialog, GDK_KEY_PRESS_MASK);
+    gtk_widget_add_events (ConfDialog, GDK_BUTTON_PRESS_MASK);
 
     char buf[16];
     sprintf(buf, "%.1f", (Prog.cycleTime / 1000.0));
@@ -255,8 +244,15 @@ void ShowConfDialog(void)
     sprintf(buf, "%d", Prog.baudRate);
     gtk_entry_set_text (GTK_ENTRY (BaudTextbox), buf);
 
-    gtk_widget_set_sensitive (MainWindow, TRUE);
-    // gtk_widget_destroy (ConfDialog);
+    gtk_widget_set_sensitive (MainWindow, FALSE);
+    gtk_widget_grab_focus (CycleTextbox);
+    gtk_widget_grab_focus (ButtonOk);
+    gtk_widget_show_all (ConfDialog);
+    
+    DialogDone = FALSE;
+    DialogCancel = FALSE;
+
+    SignalCall();
 
     return;
 }

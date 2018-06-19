@@ -151,7 +151,7 @@ void MyNumberProc (GtkEditable *editable, gchar *NewText, gint length,
     gint *position, gpointer data){
     for (int i = 0; i < length; i++){
         if (!(isdigit (NewText[i]) || NewText[i] == '.' || NewText[i] == '\b')){
-            g_signal_stop_emission_by_name (G_OBJECT (editable), "insert_text");
+            g_signal_stop_emission_by_name (G_OBJECT (editable), "insert-text");
             return;
         }
     }

@@ -46,31 +46,6 @@ static LONG_PTR PrevBaudProc;
 HWID Grid;
 HWID PackingBox;
 
-//-----------------------------------------------------------------------------
-// Don't allow any characters other than 0-9. in the text boxes.
-//-----------------------------------------------------------------------------
-// static LRESULT CALLBACK MyNumberProc(HWND hwnd, UINT msg, WPARAM wParam,
-//     LPARAM lParam)
-// {
-//     if(msg == WM_CHAR) {
-//         if(!(isdigit(wParam) || wParam == '.' || wParam == '\b')) {
-//             return 0;
-//         }
-//     }
-
-//     LONG_PTR t;
-//     if(hwnd == CrystalTextbox)
-//         t = PrevCrystalProc;
-//     else if(hwnd == CycleTextbox)
-//         t = PrevCycleProc;
-//     else if(hwnd == BaudTextbox)
-//         t = PrevBaudProc;
-//     else
-//         oops();
-
-//     return CallWindowProc((WNDPROC)t, hwnd, msg, wParam, lParam);
-// }
-
 static void MakeControls(void)
 {      
     // Creating text labels
@@ -80,8 +55,12 @@ static void MakeControls(void)
 
     // Creating text boxes 
     CycleTextbox = gtk_entry_new ();
-    CrystalTextbox = gtk_entry_new ();       
+    gtk_entry_set_max_length (GTK_ENTRY (CycleTextbox), 0);
+    // gtk_entry_set_input_purpose (GTK_ENTRY (CycleTextbox), GTK_INPUT_PURPOSE_DIGITS);
+    CrystalTextbox = gtk_entry_new ();
+    gtk_entry_set_max_length (GTK_ENTRY (CrystalTextbox), 0);
     BaudTextbox = gtk_entry_new ();
+    gtk_entry_set_max_length (GTK_ENTRY (BaudTextbox), 0);
 
     if(!UartFunctionUsed()) {   
         gtk_widget_set_sensitive (BaudTextbox, FALSE);
@@ -143,27 +122,11 @@ static void MakeControls(void)
     gtk_grid_attach (GTK_GRID (Grid), ButtonCancel, 6, 4, 2, 1);
     gtk_grid_attach (GTK_GRID (Grid), textLabel3, 1, 6, 1, 1);
     gtk_grid_attach (GTK_GRID (Grid), BaudTextbox, 3, 6, 1, 1);
+    
     gtk_grid_set_column_spacing (GTK_GRID (Grid), 2);
 
     gtk_box_pack_start(GTK_BOX(PackingBox), Grid, TRUE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(PackingBox), textLabel4, TRUE, TRUE, 0);
-
-//     // Measure the explanation string, so that we know how to size our window
-//     RECT tr, cr;
-//     HDC hdc = CreateCompatibleDC(NULL);
-//     SelectObject(hdc, MyNiceFont);
-//     SetRect(&tr, 0, 0, 310, 400);
-//     DrawText(hdc, explanation, -1, &tr, DT_CALCRECT |
-//                                         DT_LEFT | DT_TOP | DT_WORDBREAK);
-//     DeleteDC(hdc);
-//     int h = 104 + tr.bottom + 10;
-//     SetWindowPos(ConfDialog, NULL, 0, 0, 344, h, SWP_NOMOVE);
-//     // h is the desired client height, but SetWindowPos includes title bar;
-//     // so fix it up by hand
-//     GetClientRect(ConfDialog, &cr);
-//     int nh = h + (h - (cr.bottom - cr.top));
-//     SetWindowPos(ConfDialog, NULL, 0, 0, 344, nh, SWP_NOMOVE);
-
 
 //     PrevCycleProc = SetWindowLongPtr(CycleTextbox, GWLP_WNDPROC, 
 //         (LONG_PTR)MyNumberProc);
@@ -180,10 +143,26 @@ void DestroyWindow (GtkWidget* widget, gpointer data){
     gtk_widget_set_sensitive (MainWindow, TRUE);
 }
 
-void SaveData (GtkWidget* widget, gpointer data){
+//-----------------------------------------------------------------------------
+// Don't allow any characters other than 0-9. in the text boxes.
+//-----------------------------------------------------------------------------
+
+void MyNumberProc (GtkEditable *editable, gchar *NewText, gint length, 
+    gint *position, gpointer data){
+    for (int i = 0; i < length; i++){
+        if (!(isdigit (NewText[i]) || NewText[i] == '.' || NewText[i] == '\b')){
+            g_signal_stop_emission_by_name (G_OBJECT (editable), "insert_text");
+            return;
+        }
+    }
+}
+
+// Gets data from the text boxes
+void GetData (GtkWidget* widget, gpointer data){
     char* buf;
         
     buf = const_cast <char*> (gtk_entry_get_text (GTK_ENTRY (CycleTextbox)));
+    // cout << sizeof (buf)/sizeof (*buf) << "\n";
     Prog.cycleTime = (int)(1000*atof(buf) + 0.5);
     if(Prog.cycleTime == 0) {
         Error(_("Zero cycle time not valid; resetting to 10 ms."));
@@ -192,30 +171,35 @@ void SaveData (GtkWidget* widget, gpointer data){
 
     buf = const_cast <char*> (gtk_entry_get_text (GTK_ENTRY(CrystalTextbox)));
     Prog.mcuClock = (int)(1e6*atof(buf) + 0.5);
-    cout << Prog.mcuClock << "\n";
 
     buf = const_cast <char*> (gtk_entry_get_text (GTK_ENTRY(BaudTextbox)));
     Prog.baudRate = atoi(buf);        
     DestroyWindow (ConfDialog, NULL);
 }
 
-void KeyPress (GtkWidget* widget, GdkEventKey* event, gpointer data){
+// Checks for the required key press
+gboolean KeyPress (GtkWidget* widget, GdkEventKey* event, gpointer data){
     if (event -> keyval == GDK_KEY_Return){
-        SaveData(NULL, NULL);
-        DestroyWindow (ConfDialog, NULL);
+        GetData(NULL, NULL);
     }
     else if (event -> keyval == GDK_KEY_Escape){
         DestroyWindow (ConfDialog, NULL);
     }
+    return FALSE;
 }
 
+// Consists of all the signal calls
 void SignalCall () {
+    g_signal_connect (G_OBJECT(CycleTextbox), "insert-text",
+		     G_CALLBACK(MyNumberProc), NULL);
+    g_signal_connect (G_OBJECT(CrystalTextbox), "insert-text",
+		     G_CALLBACK(MyNumberProc), NULL);
+    g_signal_connect (G_OBJECT(BaudTextbox), "insert-text",
+		     G_CALLBACK(MyNumberProc), NULL);
     g_signal_connect (G_OBJECT (ConfDialog), "key-press-event",
                     G_CALLBACK(KeyPress), NULL);
-    g_signal_connect (G_OBJECT (ConfDialog), "key_press_event",
-                    G_CALLBACK(KeyPress), NULL);
     g_signal_connect (G_OBJECT (ButtonOk), "clicked",
-                    G_CALLBACK(SaveData), NULL);
+                    G_CALLBACK(GetData), NULL);
     g_signal_connect (G_OBJECT (ButtonCancel), "clicked",
                     G_CALLBACK(DestroyWindow), NULL);
 }
@@ -245,12 +229,10 @@ void ShowConfDialog(void)
     gtk_entry_set_text (GTK_ENTRY (BaudTextbox), buf);
 
     gtk_widget_set_sensitive (MainWindow, FALSE);
-    gtk_widget_grab_focus (CycleTextbox);
     gtk_widget_grab_focus (ButtonOk);
+    gtk_widget_set_state_flags (CycleTextbox, GTK_STATE_FLAG_FOCUSED, TRUE);
+    gtk_widget_grab_focus (CycleTextbox);
     gtk_widget_show_all (ConfDialog);
-    
-    DialogDone = FALSE;
-    DialogCancel = FALSE;
 
     SignalCall();
 

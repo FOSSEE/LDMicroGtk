@@ -254,9 +254,8 @@ void AddMenuAccelerators (void){
 //-----------------------------------------------------------------------------
 HMENU MakeMainWindowMenus(void)
 {   
-    HMENU MenuBox;                                                  // Box for alignment
-    HMENU PackedMenuBox;                                            // Stores the packed box
-    HMENU TopMenu;                                                  // Menu Bar
+    HMENU MenuBox;                                                  // Box for packing and alignment
+    // HMENU TopMenu;                                                  // Menu Bar
     HWID  FileLabel;                                                // File menu label
     HWID  EditLabel;                                                // Edit menu label
     HWID  InstructionLabel;                                         // Instruction menu label

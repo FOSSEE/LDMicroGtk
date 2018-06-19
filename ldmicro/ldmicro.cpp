@@ -973,8 +973,6 @@ gboolean LD_GTK_mouse_click_hook(GtkWidget *widget, GdkEvent *event, gpointer us
     * WM_LBUTTONDBLCLK, WM_LBUTTONDOWN
     */
 
-    g_print("x = %f\n", event->button.x_root);
-    g_print("y = %f\n", event->button.y_root);
     switch(event->button.type)
     {
         case GDK_BUTTON_PRESS:// To Do: run only for left click
@@ -1043,8 +1041,6 @@ gboolean LD_WM_MouseMove_call(GtkWidget *widget, GdkEvent *event, gpointer user_
     * WM_MOUSEMOVE
     */
 
-    g_print("x = %f\n", event->button.x_root);
-    g_print("y = %f\n", event->button.y_root);
     // int x = LOWORD(lParam);
     // int y = HIWORD(lParam);
 
@@ -1063,8 +1059,6 @@ gboolean LD_WM_Paint_call(HWID widget, HCRDC cr, gpointer data)
     /* Handles:
     * WM_PAINT
     */
-
-    g_print("draw called\n");
 
     // guint width, height;
     // GdkRGBA color;
@@ -1310,17 +1304,17 @@ int main(int argc, char** argv)
 
     /// Keyboard and mouse hooks equivalent to MainWndProc
     g_signal_connect (MainWindow, "delete_event", G_CALLBACK (LD_WM_Close_call), NULL);
-    g_signal_connect (MainWindow, "key_press_event", G_CALLBACK (LD_WM_KeyDown_call), NULL);
+    // g_signal_connect (MainWindow, "key_press_event", G_CALLBACK (LD_WM_KeyDown_call), NULL);
     g_signal_connect (MainWindow, "button_press_event", G_CALLBACK (LD_GTK_mouse_click_hook), NULL);
     g_signal_connect (MainWindow, "scroll_event", G_CALLBACK (LD_GTK_mouse_scroll_hook), NULL);
     g_signal_connect (MainWindow, "motion_notify_event", G_CALLBACK (LD_WM_MouseMove_call), NULL);
     g_signal_connect (DrawWindow, "draw", G_CALLBACK (LD_WM_Paint_call), NULL);
     g_signal_connect (MainWindow, "destroy_event", G_CALLBACK (LD_WM_Destroy_call), NULL);
     g_signal_connect (MainWindow, "configure_event", G_CALLBACK (LD_WM_Size_call), NULL);
-    g_signal_connect (MainWindow, "focus_in_event", G_CALLBACK (LD_WM_SetFocus_call), NULL);
+    // g_signal_connect (MainWindow, "focus_in_event", G_CALLBACK (LD_WM_SetFocus_call), NULL);
     /// Keyboard and mouse hooks equivalent to MainWndProc - end
 
-    // NewProgram();
+    NewProgram();
     // strcpy(CurrentSaveFile, "");
 
     // We are running interactively, or we would already have exited. We

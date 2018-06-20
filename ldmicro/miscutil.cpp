@@ -23,8 +23,10 @@
 #include "linuxUI.h"
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <iostream>
 #include "ldmicro.h"
+
+using namespace std;
 
 // We should display messages to the user differently if we are running
 // interactively vs. in batch (command-line) mode.

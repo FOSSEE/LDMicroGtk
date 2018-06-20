@@ -31,6 +31,10 @@
 #include "ldmicro.h"
 #include "freezeLD.h"
 #include "mcutable.h"
+#include <iomanip>
+#include <iostream>
+
+using namespace std;
 
 
 HINSTANCE   Instance;
@@ -274,17 +278,17 @@ static void CompileProgram(BOOL compileAs)
 // changed so that we ask if user wants to save before exiting, and update
 // the I/O list.
 //-----------------------------------------------------------------------------
-// void ProgramChanged(void)
-// {
-//     ProgramChangedNotSaved = TRUE;
-//     GenerateIoListDontLoseSelection();
-//     RefreshScrollbars();
-// }
-// #define CHANGING_PROGRAM(x) { \
-//         UndoRemember(); \
-//         x; \
-//         ProgramChanged(); \
-//     }
+void ProgramChanged(void)
+{
+    ProgramChangedNotSaved = TRUE;
+    GenerateIoListDontLoseSelection();
+    // RefreshScrollbars();
+}
+#define CHANGING_PROGRAM(x) { \
+        UndoRemember(); \
+        x; \
+        ProgramChanged();\
+    }
 
 //-----------------------------------------------------------------------------
 // Hook that we install when the user starts dragging the `splitter,' in case
@@ -323,155 +327,155 @@ static void CompileProgram(BOOL compileAs)
 //-----------------------------------------------------------------------------
 // Handle a selection from the menu bar of the main window.
 //-----------------------------------------------------------------------------
-// static void ProcessMenu(int code)
-// {
-//     if(code >= MNU_PROCESSOR_0 && code < MNU_PROCESSOR_0+NUM_SUPPORTED_MCUS) {
-//         strcpy(CurrentCompileFile, "");
-//         Prog.mcu = &SupportedMcus[code - MNU_PROCESSOR_0];
-//         RefreshControlsToSettings();
-//         return;
-//     }
-//     if(code == MNU_PROCESSOR_0+NUM_SUPPORTED_MCUS) {
-//         Prog.mcu = NULL;
-//         strcpy(CurrentCompileFile, "");
-//         RefreshControlsToSettings();
-//         return;
-//     }
+static void ProcessMenu(int code)
+{
+    if(code >= MNU_PROCESSOR_0 && code < MNU_PROCESSOR_0+NUM_SUPPORTED_MCUS) {
+        strcpy(CurrentCompileFile, "");
+        Prog.mcu = &SupportedMcus[code - MNU_PROCESSOR_0];
+        RefreshControlsToSettings();
+        return;
+    }
+    if(code == MNU_PROCESSOR_0+NUM_SUPPORTED_MCUS) {
+        Prog.mcu = NULL;
+        strcpy(CurrentCompileFile, "");
+        RefreshControlsToSettings();
+        return;
+    }
 
-//     switch(code) {
-//         case MNU_NEW:
-//             if(CheckSaveUserCancels()) break;
-//             NewProgram();
-//             strcpy(CurrentSaveFile, "");
-//             strcpy(CurrentCompileFile, "");
-//             GenerateIoListDontLoseSelection();
-//             RefreshScrollbars();
-//             UpdateMainWindowTitleBar();
-//             break;
+    switch(code) {
+        case MNU_NEW:
+            // if(CheckSaveUserCancels()) break;
+            // NewProgram();
+            // strcpy(CurrentSaveFile, "");
+            // strcpy(CurrentCompileFile, "");
+            // GenerateIoListDontLoseSelection();
+            // RefreshScrollbars();
+            // UpdateMainWindowTitleBar();
+            break;
 
-//         case MNU_OPEN:
-//             if(CheckSaveUserCancels()) break;
-//             OpenDialog();
-//             break;
+        case MNU_OPEN:
+            // if(CheckSaveUserCancels()) break;
+            // OpenDialog();
+            break;
 
-//         case MNU_SAVE:
-//             SaveProgram();
-//             UpdateMainWindowTitleBar();
-//             break;
+        case MNU_SAVE:
+            // SaveProgram();
+            // UpdateMainWindowTitleBar();
+            break;
 
-//         case MNU_SAVE_AS:
-//             SaveAsDialog();
-//             UpdateMainWindowTitleBar();
-//             break;
+        case MNU_SAVE_AS:
+            // SaveAsDialog();
+            // UpdateMainWindowTitleBar();
+            break;
 
-//         case MNU_EXPORT:
-//             ExportDialog();
-//             break;
+        case MNU_EXPORT:
+            // ExportDialog();
+            break;
 
-//         case MNU_EXIT:
-//             if(CheckSaveUserCancels()) break;
-//             PostQuitMessage(0);
-//             break;
+        case MNU_EXIT:
+            // if(CheckSaveUserCancels()) break;
+            // PostQuitMessage(0);
+            break;
 
-//         case MNU_INSERT_COMMENT:
-//             CHANGING_PROGRAM(AddComment(_("--add comment here--")));
-//             break;
+        case MNU_INSERT_COMMENT:
+            // CHANGING_PROGRAM(AddComment(_("--add comment here--")));
+            break;
 
-//         case MNU_INSERT_CONTACTS:
-//             CHANGING_PROGRAM(AddContact());
-//             break;
+        case MNU_INSERT_CONTACTS:
+            // CHANGING_PROGRAM(AddContact());
+            break;
 
-//         case MNU_INSERT_COIL:
-//             CHANGING_PROGRAM(AddCoil());
-//             break;
+        case MNU_INSERT_COIL:
+            // CHANGING_PROGRAM(AddCoil());
+            break;
 
-//         case MNU_INSERT_TON:
-//             CHANGING_PROGRAM(AddTimer(ELEM_TON));
-//             break;
+        case MNU_INSERT_TON:
+            // CHANGING_PROGRAM(AddTimer(ELEM_TON));
+            break;
 
-//         case MNU_INSERT_TOF:
-//             CHANGING_PROGRAM(AddTimer(ELEM_TOF));
-//             break;
+        case MNU_INSERT_TOF:
+            // CHANGING_PROGRAM(AddTimer(ELEM_TOF));
+            break;
 
-//         case MNU_INSERT_RTO:
-//             CHANGING_PROGRAM(AddTimer(ELEM_RTO));
-//             break;
+        case MNU_INSERT_RTO:
+            // CHANGING_PROGRAM(AddTimer(ELEM_RTO));
+            break;
 
-//         case MNU_INSERT_CTU:
-//             CHANGING_PROGRAM(AddCounter(ELEM_CTU));
-//             break;
+        case MNU_INSERT_CTU:
+            // CHANGING_PROGRAM(AddCounter(ELEM_CTU));
+            break;
 
-//         case MNU_INSERT_CTD:
-//             CHANGING_PROGRAM(AddCounter(ELEM_CTD));
-//             break;
+        case MNU_INSERT_CTD:
+            // CHANGING_PROGRAM(AddCounter(ELEM_CTD));
+            break;
 
-//         case MNU_INSERT_CTC:
-//             CHANGING_PROGRAM(AddCounter(ELEM_CTC));
-//             break;
+        case MNU_INSERT_CTC:
+            // CHANGING_PROGRAM(AddCounter(ELEM_CTC));
+            break;
 
-//         case MNU_INSERT_RES:
-//             CHANGING_PROGRAM(AddReset());
-//             break;
+        case MNU_INSERT_RES:
+            // CHANGING_PROGRAM(AddReset());
+            break;
 
-//         case MNU_INSERT_OPEN:
-//             CHANGING_PROGRAM(AddEmpty(ELEM_OPEN));
-//             break;
+        case MNU_INSERT_OPEN:
+            // CHANGING_PROGRAM(AddEmpty(ELEM_OPEN));
+            break;
 
-//         case MNU_INSERT_SHORT:
-//             CHANGING_PROGRAM(AddEmpty(ELEM_SHORT));
-//             break;
+        case MNU_INSERT_SHORT:
+            // CHANGING_PROGRAM(AddEmpty(ELEM_SHORT));
+            break;
 
-//         case MNU_INSERT_MASTER_RLY:
-//             CHANGING_PROGRAM(AddMasterRelay());
-//             break;
+        case MNU_INSERT_MASTER_RLY:
+            // CHANGING_PROGRAM(AddMasterRelay());
+            break;
 
-//         case MNU_INSERT_SHIFT_REG:
-//             CHANGING_PROGRAM(AddShiftRegister());
-//             break;
+        case MNU_INSERT_SHIFT_REG:
+            // CHANGING_PROGRAM(AddShiftRegister());
+            break;
 
-//         case MNU_INSERT_LUT:
-//             CHANGING_PROGRAM(AddLookUpTable());
-//             break;
+        case MNU_INSERT_LUT:
+            // CHANGING_PROGRAM(AddLookUpTable());
+            break;
         
-//         case MNU_INSERT_PWL:
-//             CHANGING_PROGRAM(AddPiecewiseLinear());
-//             break;
+        case MNU_INSERT_PWL:
+            // CHANGING_PROGRAM(AddPiecewiseLinear());
+            break;
         
-//         case MNU_INSERT_FMTD_STR:
-//             CHANGING_PROGRAM(AddFormattedString());
-//             break;
+        case MNU_INSERT_FMTD_STR:
+            // CHANGING_PROGRAM(AddFormattedString());
+            break;
 
-//         case MNU_INSERT_OSR:
-//             CHANGING_PROGRAM(AddEmpty(ELEM_ONE_SHOT_RISING));
-//             break;
+        case MNU_INSERT_OSR:
+            // CHANGING_PROGRAM(AddEmpty(ELEM_ONE_SHOT_RISING));
+            break;
 
-//         case MNU_INSERT_OSF:
-//             CHANGING_PROGRAM(AddEmpty(ELEM_ONE_SHOT_FALLING));
-//             break;
+        case MNU_INSERT_OSF:
+            // CHANGING_PROGRAM(AddEmpty(ELEM_ONE_SHOT_FALLING));
+            break;
 
-//         case MNU_INSERT_MOV:
-//             CHANGING_PROGRAM(AddMove());
-//             break;
+        case MNU_INSERT_MOV:
+            // CHANGING_PROGRAM(AddMove());
+            break;
 
-//         case MNU_INSERT_SET_PWM:
-//             CHANGING_PROGRAM(AddSetPwm());
-//             break;
+        case MNU_INSERT_SET_PWM:
+            // CHANGING_PROGRAM(AddSetPwm());
+            break;
 
-//         case MNU_INSERT_READ_ADC:
-//             CHANGING_PROGRAM(AddReadAdc());
-//             break;
+        case MNU_INSERT_READ_ADC:
+            // CHANGING_PROGRAM(AddReadAdc());
+            break;
 
-//         case MNU_INSERT_UART_SEND:
-//             CHANGING_PROGRAM(AddUart(ELEM_UART_SEND));
-//             break;
+        case MNU_INSERT_UART_SEND:
+            // CHANGING_PROGRAM(AddUart(ELEM_UART_SEND));
+            break;
 
-//         case MNU_INSERT_UART_RECV:
-//             CHANGING_PROGRAM(AddUart(ELEM_UART_RECV));
-//             break;
+        case MNU_INSERT_UART_RECV:
+            // CHANGING_PROGRAM(AddUart(ELEM_UART_RECV));
+            break;
 
-//         case MNU_INSERT_PERSIST:
-//             CHANGING_PROGRAM(AddPersist());
-//             break;
+        case MNU_INSERT_PERSIST:
+            // CHANGING_PROGRAM(AddPersist());
+            break;
 
 //         {
 //             int elem;
@@ -497,91 +501,101 @@ static void CompileProgram(BOOL compileAs)
 //                 break;
 //         } 
 
-//         case MNU_MAKE_NORMAL:
-//             CHANGING_PROGRAM(MakeNormalSelected());
-//             break;
+        case MNU_MAKE_NORMAL:
+            // CHANGING_PROGRAM(MakeNormalSelected());
+            break;
 
-//         case MNU_NEGATE:
-//             CHANGING_PROGRAM(NegateSelected());
-//             break;
+        case MNU_NEGATE:
+            // CHANGING_PROGRAM(NegateSelected());
+            break;
 
-//         case MNU_MAKE_SET_ONLY:
-//             CHANGING_PROGRAM(MakeSetOnlySelected());
-//             break;
+        case MNU_MAKE_SET_ONLY:
+            // CHANGING_PROGRAM(MakeSetOnlySelected());
+            break;
 
-//         case MNU_MAKE_RESET_ONLY:
-//             CHANGING_PROGRAM(MakeResetOnlySelected());
-//             break;
+        case MNU_MAKE_RESET_ONLY:
+            // CHANGING_PROGRAM(MakeResetOnlySelected());
+            break;
 
-//         case MNU_UNDO:
-//             UndoUndo();
-//             break;
+        case MNU_UNDO:
+            // UndoUndo();
+            break;
 
-//         case MNU_REDO:
-//             UndoRedo();
-//             break;
+        case MNU_REDO:
+            // UndoRedo();
+            break;
 
-//         case MNU_INSERT_RUNG_BEFORE:
-//             CHANGING_PROGRAM(InsertRung(FALSE));
-//             break;
+        case MNU_INSERT_RUNG_BEFORE:
+            // CHANGING_PROGRAM(InsertRung(FALSE));
+            break;
 
-//         case MNU_INSERT_RUNG_AFTER:
-//             CHANGING_PROGRAM(InsertRung(TRUE));
-//             break;
+        case MNU_INSERT_RUNG_AFTER:
+            // CHANGING_PROGRAM(InsertRung(TRUE));
+            break;
 
-//         case MNU_DELETE_RUNG:
-//             CHANGING_PROGRAM(DeleteSelectedRung());
-//             break;
+        case MNU_DELETE_RUNG:
+            // CHANGING_PROGRAM(DeleteSelectedRung());
+            break;
 
-//         case MNU_PUSH_RUNG_UP:
-//             CHANGING_PROGRAM(PushRungUp());
-//             break;
+        case MNU_PUSH_RUNG_UP:
+            // CHANGING_PROGRAM(PushRungUp());
+            break;
 
-//         case MNU_PUSH_RUNG_DOWN:
-//             CHANGING_PROGRAM(PushRungDown());
-//             break;
+        case MNU_PUSH_RUNG_DOWN:
+            // CHANGING_PROGRAM(PushRungDown());
+            break;
 
-//         case MNU_DELETE_ELEMENT:
-//             CHANGING_PROGRAM(DeleteSelectedFromProgram());
-//             break;
+        case MNU_DELETE_ELEMENT:
+            // CHANGING_PROGRAM(DeleteSelectedFromProgram());
+            break;
 
-//         case MNU_MCU_SETTINGS:
-//             CHANGING_PROGRAM(ShowConfDialog());
-//             break;
+        case MNU_MCU_SETTINGS:
+            CHANGING_PROGRAM(ShowConfDialog());
+            break;
 
-//         case MNU_SIMULATION_MODE:
-//             ToggleSimulationMode();
-//             break;
+        case MNU_SIMULATION_MODE:
+            // ToggleSimulationMode();
+            break;
 
-//         case MNU_START_SIMULATION:
-//             StartSimulation();
-//             break;
+        case MNU_START_SIMULATION:
+            // StartSimulation();
+            break;
 
-//         case MNU_STOP_SIMULATION:
-//             StopSimulation();
-//             break;
+        case MNU_STOP_SIMULATION:
+            // StopSimulation();
+            break;
 
-//         case MNU_SINGLE_CYCLE:
-//             SimulateOneCycle(TRUE);
-//             break;
+        case MNU_SINGLE_CYCLE:
+            // SimulateOneCycle(TRUE);
+            break;
 
-//         case MNU_COMPILE:
-//             CompileProgram(FALSE);
-//             break;
+        case MNU_COMPILE:
+            // CompileProgram(FALSE);
+            break;
 
-//         case MNU_COMPILE_AS:
-//             CompileProgram(TRUE);
-//             break;
+        case MNU_COMPILE_AS:
+            // CompileProgram(TRUE);
+            break;
 
-//         case MNU_MANUAL:
-//             ShowHelpDialog(FALSE);
-//             break;
+        case MNU_MANUAL:
+            // ShowHelpDialog(FALSE);
+            break;
 
-//         case MNU_ABOUT:
-//             ShowHelpDialog(TRUE);
-//             break;
-//     }
-// }
+        case MNU_ABOUT:
+            // ShowHelpDialog(TRUE);
+            break;
+    }
+}
+
+void WM_COMMAND (GtkMenuItem* men, gpointer gpcode){
+    int tempcode = GPOINTER_TO_INT(gpcode);
+    ProcessMenu (tempcode);
+}
+
+void MenuHandler (){
+    g_signal_connect(G_OBJECT(McuSettingsMenu), "activate",
+        G_CALLBACK(WM_COMMAND), GINT_TO_POINTER(MNU_MCU_SETTINGS));
+}
 
 //-----------------------------------------------------------------------------
 // WndProc for MainWindow.
@@ -959,8 +973,6 @@ gboolean LD_GTK_mouse_click_hook(GtkWidget *widget, GdkEvent *event, gpointer us
     * WM_LBUTTONDBLCLK, WM_LBUTTONDOWN
     */
 
-    g_print("x = %f\n", event->button.x_root);
-    g_print("y = %f\n", event->button.y_root);
     switch(event->button.type)
     {
         case GDK_BUTTON_PRESS:// To Do: run only for left click
@@ -1270,17 +1282,19 @@ int main(int argc, char** argv)
 
     MakeMainWindowControls(); /// takes care of MakeMainWindowMenus()
     MainWindowResized();
+    // CHANGING_PROGRAM(ShowConfDialog());
+    MenuHandler();
 
     /// Keyboard and mouse hooks equivalent to MainWndProc
     g_signal_connect (MainWindow, "delete_event", G_CALLBACK (LD_WM_Close_call), NULL);
-    g_signal_connect (MainWindow, "key_press_event", G_CALLBACK (LD_WM_KeyDown_call), NULL);
+    // g_signal_connect (MainWindow, "key_press_event", G_CALLBACK (LD_WM_KeyDown_call), NULL);
     g_signal_connect (MainWindow, "button_press_event", G_CALLBACK (LD_GTK_mouse_click_hook), NULL);
     g_signal_connect (MainWindow, "scroll_event", G_CALLBACK (LD_GTK_mouse_scroll_hook), NULL);
     g_signal_connect (MainWindow, "motion_notify_event", G_CALLBACK (LD_WM_MouseMove_call), NULL);
     g_signal_connect (DrawWindow, "draw", G_CALLBACK (LD_WM_Paint_call), NULL);
     g_signal_connect (MainWindow, "destroy_event", G_CALLBACK (LD_WM_Destroy_call), NULL);
     g_signal_connect (MainWindow, "configure_event", G_CALLBACK (LD_WM_Size_call), NULL);
-    g_signal_connect (MainWindow, "focus_in_event", G_CALLBACK (LD_WM_SetFocus_call), NULL);
+    // g_signal_connect (MainWindow, "focus_in_event", G_CALLBACK (LD_WM_SetFocus_call), NULL);
     /// Keyboard and mouse hooks equivalent to MainWndProc - end
 
     NewProgram();

@@ -16,6 +16,10 @@ const UINT MF_GRAYED = 1;
 const UINT MF_CHECKED = 2;
 const UINT MF_UNCHECKED = 3;
 
+/// Accelerators (keyboard shortcuts)
+GtkAccelGroup* AccelGroup;
+GClosure* closure;
+
 /// ListStore
 HWID view;
 HTVC column;

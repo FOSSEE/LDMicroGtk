@@ -24,9 +24,11 @@
 #include <linuxUI.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <iostream>
 
 #include "ldmicro.h"
 
+using namespace std;
 
 static ElemSubcktSeries *LoadSeriesFromFile(FILE *f);
 
@@ -638,7 +640,7 @@ void FreeCircuit(int which, void *any)
 //-----------------------------------------------------------------------------
 void FreeEntireProgram(void)
 {
-    ForgetEverything();
+    // ForgetEverything();
 
     int i;
     for(i = 0; i < Prog.numRungs; i++) {

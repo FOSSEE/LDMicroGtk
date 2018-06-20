@@ -1,4 +1,7 @@
 #include "linuxUI.h"
+#include <iostream>
+
+using namespace std;
 
 std::vector<HEAPRECORD> HeapRecords;
 

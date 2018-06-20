@@ -823,7 +823,7 @@ void NewProgram(void)
 {
     UndoFlush();
     FreeEntireProgram();
-
+    
     Prog.numRungs = 1;
     Prog.rungs[0] = AllocEmptyRung();
 }

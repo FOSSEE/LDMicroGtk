@@ -105,9 +105,9 @@ HMENU MNU_ABOUT;
 // scrollbars for the ladder logic area
 // static HWND         HorizScrollBar;
 // static HWND         VertScrollBar;
-// int                 ScrollWidth;
-// int                 ScrollHeight;
-// BOOL                NeedHoriz;
+int                 ScrollWidth;
+int                 ScrollHeight;
+BOOL                NeedHoriz;
 
 // status bar at the bottom of the screen, to display settings
 static HMENU        StatusBar;
@@ -885,10 +885,33 @@ void GenerateIoListDontLoseSelection(void)
 //-----------------------------------------------------------------------------
 void MainWindowResized(void)
 {
+    RECT main;
+    GetClientRect(DrawWindow, &main);
+
+    RECT status;
+    GetWindowRect(StatusBar, &status);
+    int statusHeight = status.bottom - status.top;
+
+    // MoveWindow(StatusBar, 0, main.bottom - statusHeight, main.right,
+        // statusHeight, TRUE);
+
     // Make sure that the I/O list can't disappear entirely.
     if(IoListHeight < 30) {
         IoListHeight = 30;
     }
+    IoListTop = main.bottom ;//- IoListHeight - statusHeight;
+
+    // Make sure that we can't drag the top of the I/O list above the
+    // bottom of the menu bar, because it then becomes inaccessible.
+    if(IoListTop < 5) {
+        IoListHeight = main.bottom - statusHeight - 5;
+        IoListTop = main.bottom - IoListHeight - statusHeight;
+    }
+    // MoveWindow(IoList, 0, IoListTop, main.right, IoListHeight, TRUE);
+
+    RefreshScrollbars();
+    
+    InvalidateRect(DrawWindow, NULL, FALSE);
 }
 
 //-----------------------------------------------------------------------------

@@ -1029,8 +1029,9 @@ gboolean LD_WM_MouseMove_call(GtkWidget *widget, GdkEvent *event, gpointer user_
     * WM_MOUSEMOVE
     */
 
-    g_print("x = %f\n", event->button.x_root);
-    g_print("y = %f\n", event->button.y_root);
+    // g_print("x = %f\n", event->button.x_root);
+    // g_print("y = %f\n", event->button.y_root);
+
     // int x = LOWORD(lParam);
     // int y = HIWORD(lParam);
 
@@ -1057,16 +1058,23 @@ gboolean LD_WM_Paint_call(HWID widget, HCRDC cr, gpointer data)
     // GtkStyleContext *context;
 
     // context = gtk_widget_get_style_context (widget);
-
+    
     // width = gtk_widget_get_allocated_width (widget);
     // height = gtk_widget_get_allocated_height (widget);
+    // // g_print("w = %i\n", width);
+    // // g_print("h = %i\n", height);
 
+    // // SetBkColor(widget, cr, HighlightColours.bg);
+    
     // gtk_render_background (context, cr, 0, 0, width, height);
 
-    // cairo_arc (cr,
-    //             width / 2.0, height / 2.0,
-    //             MIN (width, height) / 3.0,
-    //             0, 2 * G_PI);
+    // // cairo_arc (cr,
+    // //             width / 2.0, height / 2.0,
+    // //             MIN (width, height) / 3.0,
+    // //             0, 2 * G_PI);
+
+    // cairo_rectangle(cr, 0, 0, width, height);
+    // cairo_stroke_preserve(cr);
 
     // gtk_style_context_get_color (context,
     //                             gtk_style_context_get_state (context),
@@ -1074,54 +1082,11 @@ gboolean LD_WM_Paint_call(HWID widget, HCRDC cr, gpointer data)
     // gdk_cairo_set_source_rgba (cr, &color);
 
     // cairo_fill (cr);
-    // static double Cairo_R = 0.0, Cairo_G = 0.0, Cairo_B = 0.0;
-    // cairo_set_source_rgb(cr, Cairo_R, Cairo_G, Cairo_G); 
-    // Cairo_R = (Cairo_R+0.2 > 0.4) ? 0 : Cairo_R+0.2;
-    // Cairo_G = (Cairo_G+0.4 > 1.0) ? 0.4 : Cairo_G+0.4;
-    // Cairo_B = (Cairo_B+0.1 > 0.5) ? 0 : Cairo_B+0.1;
-    
-    // cairo_select_font_face(cr, "Purisa",
-    //     CAIRO_FONT_SLANT_NORMAL,
-    //     CAIRO_FONT_WEIGHT_BOLD);
 
-    // cairo_set_font_size(cr, 20);
-
-    // cairo_move_to(cr, 20, height / 2.0);
-    // cairo_show_text(cr, "-----------THIS IS A TEST DRAW----------");  
-
-    // cairo_fill (cr);
-
-    
-    // PAINTSTRUCT ps;
-    // Hdc = BeginPaint(hwnd, &ps);
+    Hdc = cr;
 
     /// This draws the schematic.
-    PaintWindow(cr);
-
-    // RECT r;
-    // // Fill around the scroll bars
-    // if(NeedHoriz) {
-    //     r.top = IoListTop - ScrollHeight - 2;
-    //     r.bottom = IoListTop - 2;
-    //     FillRect(Hdc, &r, (HBRUSH)GetStockObject(LTGRAY_BRUSH));
-    // }
-    // GetClientRect(MainWindow, &r);
-    // r.left = r.right - ScrollWidth - 2;
-    // FillRect(Hdc, &r, (HBRUSH)GetStockObject(LTGRAY_BRUSH));
-
-    // // Draw the splitter thing to grab to resize the I/O listview.
-    // GetClientRect(MainWindow, &r);
-    // r.top = IoListTop - 2;
-    // r.bottom = IoListTop;
-    // FillRect(Hdc, &r, (HBRUSH)GetStockObject(LTGRAY_BRUSH));
-    // r.top = IoListTop - 2;
-    // r.bottom = IoListTop - 1;
-    // FillRect(Hdc, &r, (HBRUSH)GetStockObject(WHITE_BRUSH));
-    // r.top = IoListTop;
-    // r.bottom = IoListTop + 1;
-    // FillRect(Hdc, &r, (HBRUSH)GetStockObject(DKGRAY_BRUSH));
-
-    // EndPaint(hwnd, &ps);
+    PaintWindow();
 
     return FALSE;
 }
@@ -1146,8 +1111,7 @@ gboolean LD_WM_Size_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)
     * WM_SIZE
     */
 
-    // MainWindowResized();
-    // break;
+    MainWindowResized();
 
     return FALSE;
 }
@@ -1158,8 +1122,7 @@ gboolean LD_WM_SetFocus_call(GtkWidget *widget, GdkEvent *event, gpointer user_d
     * WM_SETFOCUS
     */
 
-    // InvalidateRect(MainWindow, NULL, FALSE);
-    // break;
+    InvalidateRect(DrawWindow, NULL, FALSE);
 
     return FALSE;
 }
@@ -1172,18 +1135,17 @@ int main(int argc, char** argv)
     /// Check if we're running in non-interactive mode; in that case we should
     /// load the file, compile, and exit.
 
-    if(argc >= 2) {
+    if(argc >= 2 && !(argc < 4) ) {
         RunningInBatchMode = TRUE;
 
         char *err =
             "Bad command line arguments: run 'ldmicro /c src.ld dest.hex'";
 
-        if (argc < 4)
-        { 
-            printf("throwing error...\n");
-            Error(err); 
-            exit(-1);
-        }
+        // if (argc < 4)
+        // {
+        //     Error(err); 
+        //     exit(-1);
+        // }
 
         char *source = (char*)malloc(strlen(argv[2]) + strlen(argv[3]) + 2);
         sprintf(source, "%s %s", argv[2], argv[3]);
@@ -1276,7 +1238,7 @@ int main(int argc, char** argv)
     gtk_window_resize (GTK_WINDOW(MainWindow), 800, 600);
     gtk_window_move(GTK_WINDOW(MainWindow), 10, 10);
     gtk_widget_override_background_color(GTK_WIDGET(MainWindow), 
-                            GTK_STATE_FLAG_NORMAL, ((HBRUSH)GetStockObject(GREY_BRUSH))->getThis());
+                            GTK_STATE_FLAG_NORMAL, ((HBRUSH)GetStockObject(GRAY_BRUSH))->getThis());
     gtk_window_set_default_icon(LoadImage(Instance, LDMICRO_ICON,
                             IMAGE_ICON, 32, 32, 0));
     gtk_window_set_icon(GTK_WINDOW(MainWindow), LoadImage(Instance, LDMICRO_ICON,
@@ -1304,37 +1266,39 @@ int main(int argc, char** argv)
     g_signal_connect (MainWindow, "focus_in_event", G_CALLBACK (LD_WM_SetFocus_call), NULL);
     /// Keyboard and mouse hooks equivalent to MainWndProc - end
 
-    // NewProgram();
-    // strcpy(CurrentSaveFile, "");
+    NewProgram();
+    strcpy(CurrentSaveFile, "");
 
     // We are running interactively, or we would already have exited. We
     // can therefore show the window now, and otherwise set up the GUI.
 
-    // ShowWindow(MainWindow, SW_SHOW);
+    // Displaying the window
+    gtk_widget_show_all(MainWindow);
     // SetTimer(MainWindow, TIMER_BLINK_CURSOR, 800, BlinkCursor);
     
-    // if(strlen(lpCmdLine) > 0) {
-    //     char line[MAX_PATH];
-    //     if(*lpCmdLine == '"') { 
-    //         strcpy(line, lpCmdLine+1);
-    //     } else {
-    //         strcpy(line, lpCmdLine);
-    //     }
-    //     if(strchr(line, '"')) *strchr(line, '"') = '\0';
+    if(argc >= 2) {
+        // g_print("load prog: %s\n", argv[1]);
+        char line[MAX_PATH];
+        if(*argv[1] == '"') { 
+            strcpy(line, argv[1]+1);
+        } else {
+            strcpy(line, argv[1]);
+        }
+        if(strchr(line, '"')) *strchr(line, '"') = '\0';
+        
+        realpath(line, CurrentSaveFile);
+        // g_print("resolved path: %s\n", CurrentSaveFile);
+        if(!LoadProjectFromFile(CurrentSaveFile)) {
+            NewProgram();
+            Error(_("Couldn't open '%s'."), CurrentSaveFile);
+            CurrentSaveFile[0] = '\0';
+        }
+        UndoFlush();
+    }
 
-    //     char *s;
-    //     GetFullPathName(line, sizeof(CurrentSaveFile), CurrentSaveFile, &s);
-    //     if(!LoadProjectFromFile(CurrentSaveFile)) {
-    //         NewProgram();
-    //         Error(_("Couldn't open '%s'."), CurrentSaveFile);
-    //         CurrentSaveFile[0] = '\0';
-    //     }
-    //     UndoFlush();
-    // }
-
-    // GenerateIoListDontLoseSelection(); ~
+    GenerateIoListDontLoseSelection(); //~
     // RefreshScrollbars();
-    // UpdateMainWindowTitleBar(); ~
+    UpdateMainWindowTitleBar(); //~
 
     // MSG msg;
     // DWORD ret;
@@ -1357,9 +1321,6 @@ int main(int argc, char** argv)
     //     TranslateMessage(&msg);
     //     DispatchMessage(&msg);
     // }
-
-    // Displaying the window
-    gtk_widget_show_all(MainWindow);
     
     gtk_main();
     return EXIT_SUCCESS;

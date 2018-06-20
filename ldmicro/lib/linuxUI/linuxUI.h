@@ -18,36 +18,44 @@
 
 /// Flags
 /// message box
-#define MB_OK 0x00000001L
-#define MB_OKCANCEL 0x00000002L
-#define MB_YESNO 0x00000004L
-#define MB_YESNOCANCEL 0x00000008L
+#define MB_OK              0x00000001L
+#define MB_OKCANCEL        0x00000002L
+#define MB_YESNO           0x00000004L
+#define MB_YESNOCANCEL     0x00000008L
 
-#define IDOK 1
-#define IDCANCEL 2
-#define IDYES 3
-#define IDNO 4
+#define IDOK      1
+#define IDCANCEL  2
+#define IDYES     3
+#define IDNO      4
 
-#define MB_ICONERROR 0x00000010L
-#define MB_ICONQUESTION 0x00000020L
-#define MB_ICONWARNING 0x00000040L
-#define MB_ICONINFORMATION 0x00000080L
+#define MB_ICONERROR        0x00000010L
+#define MB_ICONQUESTION     0x00000020L
+#define MB_ICONWARNING      0x00000040L
+#define MB_ICONINFORMATION  0x00000080L
 
 /// open/save file
-#define OFN_PATHMUSTEXIST 0x00000100L
-#define OFN_HIDEREADONLY 0x00000200L
-#define OFN_OVERWRITEPROMPT 0x00000400L
+#define OFN_PATHMUSTEXIST     0x00000100L
+#define OFN_HIDEREADONLY      0x00000200L
+#define OFN_OVERWRITEPROMPT   0x00000400L
 
 /// window brushes
-#define BS_SOLID 0x00000001L
-#define BS_HOLLOW 0x00000002L
-#define BLACK_BRUSH 0x00000004L
-#define WHITE_BRUSH 0x00000008L 
-#define GREY_BRUSH 0x00000010L
+#define BS_SOLID       0x00000001L
+#define BS_HOLLOW      0x00000002L
+#define BLACK_BRUSH    0x00000004L
+#define WHITE_BRUSH    0x00000008L 
+#define GRAY_BRUSH     0x00000010L
+#define LTGRAY_BRUSH   0x00000020L
+#define DKGRAY_BRUSH   0x00000040L
+
+extern const COLORREF BLACK_BR;
+extern const COLORREF WHITE_BR;
+extern const COLORREF GRAY_BR;
+extern const COLORREF LTGRAY_BR;
+extern const COLORREF DKGRAY_BR;
 
 /// Font flags
-#define FW_REGULAR 0x00000001L
-#define FW_BOLD 0x00000002L
+#define FW_REGULAR   0x00000001L
+#define FW_BOLD      0x00000002L
 
 /// EnableMenuItem variables
 extern const UINT MF_ENABLED;
@@ -59,7 +67,7 @@ extern const UINT MF_UNCHECKED;
 extern GtkWidget *view;
 extern GtkTreeViewColumn *column;
 
-/// data types
+/// Structures
 typedef struct OpenFileInfoData {
     DWORD         lStructSize;
     HWID          parentWindow;
@@ -71,53 +79,94 @@ typedef struct OpenFileInfoData {
     LPCTSTR       lpstrDefExt;
 } OPENFILENAME;
 
+/// Variables
+extern COLORREF HdcCurrentTextColor;
+
 /// functions
 BOOL isFocus(HWID window);
 
-COLORREF RGB(int red, 
-        int green, 
-        int blue);
+COLORREF RGB(
+    int red, 
+    int green, 
+    int blue);
 
-int MessageBox(HWID pWindow, 
+int MessageBox(
+    HWID  pWindow, 
     char* message, 
     char* title, 
     UINT  mFlags);
 
 BOOL GetSaveFileName(OPENFILENAME *ofn);
 
-void EnableMenuItem(HMENU MenuName, 
+void EnableMenuItem(
+    HMENU MenuName, 
     HMENU MenuItem, 
     UINT  CheckEnabledItem);
 
-void CheckMenuItem(HMENU MenuName, 
+void CheckMenuItem(
+    HMENU MenuName, 
     HMENU MenuItem, 
     UINT  Check);
 
 HANDLE GetStockObject(int fnObject);
 
-void SelectObject(HCRDC hcr, 
+void SelectObject(
+    HCRDC hcr, 
     HFONT hfont);
 
 HBRUSH CreateBrushIndirect(PLOGBRUSH plb);
 
-HFONT CreateFont(int nHeight,
+HFONT CreateFont(
+    int     nHeight,
     int     nWidth,
     int     nOrientation,
     int     fnWeight,
     DWORD   fdwItalic,
     LPCTSTR lpszFace);
 
-void SetBkColor(HWID widget, 
+void SetBkColor(
+    HWID     widget, 
     HCRDC    hcr,
     COLORREF bkCol);
 
-void SetTextColor(HCRDC hcr, 
+void SetTextColor(
+    HCRDC    hcr, 
     COLORREF color);
 
-void TextOut(HCRDC hcr,
-   int     nXStart,
-   int     nYStart,
-   LPCTSTR lpString,
-   int     cchString);
+void TextOut(
+    HWID    hWid,
+    HCRDC   hcr,
+    int     nXStart,
+    int     nYStart,
+    LPCTSTR lpString,
+    int     cchString);
+
+COLORREF GetTextColor(HCRDC Hdc);
+
+BOOL InvalidateRect(
+    HWID hWId,
+    const RECT *lpRect,
+    BOOL bErase);
+
+int FillRect(
+    HCRDC        hDC,
+    const RECT   *lprc,
+    HBRUSH       hbr);
+
+BOOL GetClientRect(
+    HWID   hWid,
+    PRECT lpRect);
+
+BOOL MoveWindow(
+    HWID hWid,
+    int  X,
+    int  Y,
+    int  nWidth,
+    int  nHeight,
+    BOOL bRepaint);
+
+BOOL GetWindowRect(
+    HWID   hWid,
+    PRECT  pRect);
 
 #endif

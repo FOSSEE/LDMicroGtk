@@ -1,5 +1,15 @@
 #include "linuxUI.h"
 
+/// Brushes
+const COLORREF BLACK_BR(0, 0, 0);
+const COLORREF WHITE_BR(255, 255, 255);
+const COLORREF GRAY_BR(128, 128, 128);
+const COLORREF LTGRAY_BR(211, 211, 211);
+const COLORREF DKGRAY_BR(169, 169, 169);
+
+/// Variable to current text color
+COLORREF HdcCurrentTextColor;
+
 /// EnableMenuItem Variables
 const UINT MF_ENABLED = 0;
 const UINT MF_GRAYED = 1;
@@ -182,16 +192,22 @@ HANDLE GetStockObject(int fnObject)
     switch(fnObject)
     {
         case BLACK_BRUSH:
-            return new COLORREF(0, 0, 0);
+            return (HANDLE)&BLACK_BR;
             break;
         case WHITE_BRUSH:
-            return new COLORREF(255, 255, 255);
+            return (HANDLE)&WHITE_BR;
             break;
-        case GREY_BRUSH:
-            return new COLORREF(128, 128, 128);
+        case GRAY_BRUSH:
+            return (HANDLE)&GRAY_BR;
+            break;
+        case LTGRAY_BRUSH:
+            return (HANDLE)&LTGRAY_BR;
+            break;
+        case DKGRAY_BRUSH:
+            return (HANDLE)&DKGRAY_BR;
             break;
         default:
-            return new COLORREF(255, 255, 255);
+            return (HANDLE)&WHITE_BR;
     }
 }
 
@@ -202,27 +218,29 @@ void SelectObject(HCRDC hcr, HFONT hfont)
         hfont->fnWeight == FW_BOLD ? CAIRO_FONT_WEIGHT_BOLD : CAIRO_FONT_WEIGHT_NORMAL);
 
     cairo_rotate(hcr, hfont->nOrientation);
-
     // cairo_text_extents_t extents;
-    // cairo_text_extents (hcr, "H", &extents);
- 
+    // cairo_text_extents (hcr, "Z", &extents);
     // cairo_matrix_t matrix;
     // cairo_matrix_init_scale (&matrix,
-    //                 (double)hfont->nWidth / extents.width,
-    //                 (double)hfont->nHeight / extents.width);
+    //                 (double)hfont->nWidth,
+    //                 (double)hfont->nHeight);
  
     // cairo_set_font_matrix (hcr, &matrix);
+
     // g_print("wR = %f\nhR = %f\n", (double)hfont->nWidth / extents.width, (double)hfont->nHeight / extents.height);
-    // g_print("tW = %f\ntH = %f\n", extents.width, extents.width);
-    cairo_set_font_size(hcr, 15);
+    // g_print("tW = %f tH = %f\n", extents.width, extents.width);
+    cairo_set_font_size(hcr, 10);
 }
 
 HBRUSH CreateBrushIndirect(PLOGBRUSH plb)
 {
-    COLORREF brush(plb->lbColor);
-    brush.alpha = (plb->lbStyle == BS_SOLID) ? 1 : 0.2;
+    COLORREF* brush = new COLORREF;
+    brush->red = plb->lbColor.red;
+    brush->green = plb->lbColor.green;
+    brush->blue = plb->lbColor.blue;
+    brush->alpha = (plb->lbStyle == BS_SOLID) ? 1 : 0.2;
 
-    return &brush;
+    return brush;
 }
 
 HFONT CreateFont(int nHeight, int nWidth, int nOrientation, int fnWeight,
@@ -262,14 +280,121 @@ void SetBkColor(HWID widget, HCRDC hcr, COLORREF bkCol)
 
 void SetTextColor(HCRDC hcr, COLORREF color)
 {
+    HdcCurrentTextColor = color;
     gdk_cairo_set_source_rgba (hcr, &color);
 }
 
-void TextOut(HCRDC hcr, int nXStart, int nYStart, LPCTSTR lpString, int cchString)
+void TextOut(HWID hWid, HCRDC hcr, int nXStart, int nYStart, LPCTSTR lpString, int cchString)
 {
+    nYStart += 20;
+    
+    cairo_text_extents_t extents;
+    cairo_text_extents (hcr, lpString, &extents);
+    int width = gtk_widget_get_allocated_width (hWid);
+    int height= gtk_widget_get_allocated_height (hWid);
+    BOOL resize_flag = FALSE;
+    // g_print("w = %f h = %f")
+
+    if(nYStart+(extents.height/2.0) >= height)
+    {
+        height += extents.height;
+        resize_flag = TRUE;
+    }
+    
+    if (nXStart+(extents.width/2.0) >= width)
+    {
+        width += extents.width;
+        resize_flag = TRUE;
+    }
+
+    if (resize_flag)
+        gtk_widget_set_size_request(hWid, width, height);
+    char* text = (char*)malloc(cchString);
+    strncpy(text, lpString, cchString);
+    text[cchString] = '\0';
+
     cairo_move_to(hcr, nXStart, nYStart);
-    cairo_show_text(hcr, lpString);  
+    cairo_show_text(hcr, text);
 
     cairo_fill (hcr);
 }
-   
+
+COLORREF GetTextColor(HCRDC Hdc)
+{
+    // COLORREF col;
+    // gtk_style_context_get_color (Hdc,
+    //                             gtk_style_context_get_state (Hdc),
+    //                             &col);
+    
+    return HdcCurrentTextColor;
+}
+
+BOOL InvalidateRect(HWID hWid, const RECT *lpRect, BOOL bErase)
+{
+    if(!GDK_IS_WINDOW(hWid))
+        return FALSE;
+
+    if (lpRect == NULL)
+    {
+        gdk_window_invalidate_rect (gtk_widget_get_window (hWid), NULL, FALSE);
+        return TRUE;
+    }
+
+    GDRECT Gdrect;
+    RECT_to_GDRECT(lpRect, &Gdrect);
+    // gtk_widget_queue_draw(hWid);
+    gdk_window_invalidate_rect (gtk_widget_get_window (hWid), &Gdrect, FALSE);
+    
+    return TRUE;
+}
+
+int FillRect(HCRDC hDC, const RECT *lprc, HBRUSH hbr)
+{
+    GDRECT gdrc;
+    RECT_to_GDRECT(lprc, &gdrc);
+
+    cairo_set_source_rgb(hDC, hbr->red, hbr->green, hbr->blue);
+    cairo_rectangle(hDC, gdrc.x, gdrc.y, gdrc.width, gdrc.height);
+    cairo_stroke_preserve(hDC);
+    cairo_fill(hDC);
+    
+    return 0;
+}
+
+BOOL GetClientRect(HWID hWid, PRECT pRect)
+{   
+    GtkAllocation allocation;
+    gtk_widget_get_allocation (hWid, &allocation);
+
+    pRect->top = allocation.x;
+    pRect->left = allocation.y;
+    pRect->right = allocation.width;
+    pRect->bottom = allocation.height;
+
+    return TRUE;
+}
+
+BOOL MoveWindow(HWID hWid, int X, int Y, int nWidth, int nHeight, BOOL bRepaint)
+{
+    gtk_window_move(GTK_WINDOW(hWid), X, Y);
+    gtk_window_resize(GTK_WINDOW(hWid), nWidth, nHeight);
+
+    if (bRepaint)
+        gdk_window_invalidate_rect (gtk_widget_get_window (hWid), NULL, FALSE);
+    
+    return TRUE;
+}
+
+
+BOOL GetWindowRect(HWID hWid, PRECT pRect)
+{
+    GtkAllocation allocation;
+    gtk_widget_get_allocation (hWid, &allocation);
+
+    pRect->top = allocation.x;
+    pRect->left = allocation.y;
+    pRect->right = allocation.width;
+    pRect->bottom = allocation.height;
+
+    return TRUE;
+}

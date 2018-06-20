@@ -10,7 +10,7 @@
 #ifndef __FREEZE_H
 #define __FREEZE_H
 
-#define FREEZE_REGISTER "/usr/share/ldmicro"
+#define FREEZE_REGISTER ".ldmicro"
 
 #define FREEZE_SUBKEY "LDMicro"
 

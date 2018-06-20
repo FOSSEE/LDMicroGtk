@@ -631,9 +631,9 @@ extern BOOL SelectionActive;
 extern BOOL ThisHighlighted;
 
 // draw_outputdev.cpp
-extern void (*DrawChars)(int, int, char *);
+extern void (*DrawChars)(int, int, const char *);
 void CALLBACK BlinkCursor(HWND hwnd, UINT msg, UINT_PTR id, DWORD time);
-void PaintWindow(cairo_t *cr);
+void PaintWindow();
 void ExportDrawingAsText(char *file);
 void InitForDrawing(void);
 void SetUpScrollbars(BOOL *horizShown, SCROLLINFO *horiz, SCROLLINFO *vert);

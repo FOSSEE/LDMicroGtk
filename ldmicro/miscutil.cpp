@@ -23,8 +23,10 @@
 #include "linuxUI.h"
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <iostream>
 #include "ldmicro.h"
+
+using namespace std;
 
 // We should display messages to the user differently if we are running
 // interactively vs. in batch (command-line) mode.
@@ -158,8 +160,10 @@ void CheckHeap(char *file, int line)
 //-----------------------------------------------------------------------------
 void *CheckMalloc(size_t n)
 {
+    cout << "Inside CheckMalloc" << "\n";
     ok();
     void *p = HeapAlloc(MainHeap, HEAP_ZERO_MEMORY, n);
+    cout << "Exiting CheckMalloc" << "\n";
     return p;
 }
 void CheckFree(void *p)

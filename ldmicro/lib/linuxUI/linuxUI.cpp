@@ -25,7 +25,7 @@ HWID view;
 HTVC column;
  
 /// Wraper function for gtk_window_has_toplevel_focus
-BOOL isFocus(HWID window)
+BOOL GetFocus(HWID window)
 {
     return (BOOL) gtk_window_has_toplevel_focus(GTK_WINDOW(window));
 }
@@ -371,6 +371,17 @@ int FillRect(HCRDC hDC, const RECT *lprc, HBRUSH hbr)
     cairo_fill(hDC);
     
     return 0;
+}
+
+BOOL PatBlt(HCRDC hdc, int nXLeft, int nYLeft, int nWidth, int nHeight, DWORD dwRop, HBRUSH hbr)
+{
+    cairo_set_source_rgb(hdc, hbr->red, hbr->green, hbr->blue);
+    cairo_rectangle(hdc, nXLeft, nYLeft + 20, nWidth, nHeight);
+    cairo_stroke_preserve(hdc);
+
+    cairo_fill(hdc);
+
+    return TRUE;
 }
 
 BOOL GetClientRect(HWID hWid, PRECT pRect)

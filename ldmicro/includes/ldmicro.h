@@ -632,7 +632,7 @@ extern BOOL ThisHighlighted;
 
 // draw_outputdev.cpp
 extern void (*DrawChars)(int, int, const char *);
-void CALLBACK BlinkCursor(HWND hwnd, UINT msg, UINT_PTR id, DWORD time);
+gboolean BlinkCursor(GtkWidget * window);
 void PaintWindow();
 void ExportDrawingAsText(char *file);
 void InitForDrawing(void);

@@ -48,6 +48,9 @@
 #define OFN_HIDEREADONLY      0x00000200L
 #define OFN_OVERWRITEPROMPT   0x00000400L
 
+/// PatBlt paint flags
+#define PATINVERT 0x00000100L
+
 /// window brushes
 #define BS_SOLID       0x00000001L
 #define BS_HOLLOW      0x00000002L
@@ -97,7 +100,7 @@ typedef struct OpenFileInfoData {
 extern COLORREF HdcCurrentTextColor;
 
 /// functions
-BOOL isFocus(HWID window);
+BOOL GetFocus(HWID window);
 
 COLORREF RGB(
     int red, 
@@ -166,6 +169,15 @@ int FillRect(
     HCRDC        hDC,
     const RECT   *lprc,
     HBRUSH       hbr);
+
+BOOL PatBlt(
+    HCRDC  hdc,
+    int    nXLeft,
+    int    nYLeft,
+    int    nWidth,
+    int    nHeight,
+    DWORD  dwRop,
+    HBRUSH hbr);
 
 BOOL GetClientRect(
     HWID   hWid,

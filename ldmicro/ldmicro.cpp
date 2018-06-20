@@ -972,34 +972,42 @@ gboolean LD_GTK_mouse_click_hook(GtkWidget *widget, GdkEvent *event, gpointer us
     /* Handles:
     * WM_LBUTTONDBLCLK, WM_LBUTTONDOWN
     */
-
+    
     switch(event->button.type)
     {
-        case GDK_BUTTON_PRESS:// To Do: run only for left click
-            // int x = LOWORD(lParam);
-            // int y = HIWORD(lParam);
-            // if((y > (IoListTop - 9)) && (y < (IoListTop + 3))) {
-            //     POINT pt;
-            //     pt.x = x; pt.y = y;
-            //     ClientToScreen(MainWindow, &pt);
-            //     MouseY = pt.y;
-            //     MouseHookHandle = SetWindowsHookEx(WH_MOUSE_LL,
-            //             (HOOKPROC)MouseHook, Instance, 0);
-            // }
-            // if(!InSimulationMode) MoveCursorMouseClick(x, y);
+        case GDK_BUTTON_PRESS:
+            if (event->button.button == 1) /// left click
+            {
+                int x = event->button.x;
+                int y = event->button.y - 30;
 
-            // SetFocus(MainWindow);
-            // InvalidateRect(MainWindow, NULL, FALSE);
+                // if((y > (IoListTop - 9)) && (y < (IoListTop + 3))) {
+                //     // POINT pt;
+                //     // pt.x = x; pt.y = y;
+                //     // ClientToScreen(MainWindow, &pt);
+                //     MouseY = y; //pt.y;
+                //     // MouseHookHandle = SetWindowsHookEx(WH_MOUSE_LL,
+                //     //         (HOOKPROC)MouseHook, Instance, 0);
+                // }
+                if(!InSimulationMode) MoveCursorMouseClick(x, y);
+
+                // SetFocus(MainWindow);
+                InvalidateRect(DrawWindow, NULL, FALSE);
+            }
             break;
         case GDK_2BUTTON_PRESS:
-            // int x = LOWORD(lParam);
-            // int y = HIWORD(lParam);
-            // if(InSimulationMode) {
-            //     EditElementMouseDoubleclick(x, y);
-            // } else {
-            //     CHANGING_PROGRAM(EditElementMouseDoubleclick(x, y));
-            // }
-            // InvalidateRect(MainWindow, NULL, FALSE);
+            if (event->button.button == 1) /// left click
+            {
+                int x = event->button.x;
+                int y = event->button.y - 30;
+
+                if(InSimulationMode) {
+                    EditElementMouseDoubleclick(x, y);
+                } else {
+                    CHANGING_PROGRAM(EditElementMouseDoubleclick(x, y));
+                }
+                InvalidateRect(DrawWindow, NULL, FALSE);
+            }
             break;
 
     }
@@ -1011,17 +1019,28 @@ gboolean LD_GTK_mouse_scroll_hook(GtkWidget *widget, GdkEvent *event, gpointer u
     /* Handles:
     * WM_VSCROLL, WM_HSCROLL, WM_MOUSEWHEEL
     */
-
-    MainWindowResized();
-    PaintWindow();
-
+    
+    GtkAdjustment *adjustment = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(ScrollWindow));
+    // g_print("adj = %f\n", gtk_adjustment_get_value(adjustment));
+    // g_print("upper = %f\n", gtk_adjustment_get_upper(adjustment) - gtk_widget_get_allocated_height (ScrollWindow));
+    // g_print("lower = %f\n", gtk_adjustment_get_lower(adjustment));
+    // g_print("inc = %f\n", gtk_adjustment_get_step_increment(adjustment));
+    // g_print("w width = %i\n", gtk_widget_get_allocated_width (DrawWindow));
+    // g_print("w height = %i\n", gtk_widget_get_allocated_height (ScrollWindow));
+    
     switch(event->scroll.direction)
     {
         case GDK_SCROLL_UP:
-            VscrollProc(SB_LINEUP);
+            if (gtk_adjustment_get_value(adjustment) == gtk_adjustment_get_lower(adjustment))
+                VscrollProc(SB_TOP);
+            else
+                VscrollProc(SB_LINEUP);
             break;
         case GDK_SCROLL_DOWN:
-            VscrollProc(SB_LINEDOWN);
+            if (gtk_adjustment_get_value(adjustment) == gtk_adjustment_get_upper(adjustment) - gtk_widget_get_allocated_height (ScrollWindow))
+                VscrollProc(SB_BOTTOM);
+            else
+                VscrollProc(SB_LINEDOWN);
             break;
         case GDK_SCROLL_LEFT:
             HscrollProc(SB_LINEUP);
@@ -1040,6 +1059,10 @@ gboolean LD_GTK_mouse_scroll_hook(GtkWidget *widget, GdkEvent *event, gpointer u
             break;
 
     }
+
+    MainWindowResized();
+    PaintWindow();
+
     return FALSE;
 }
 
@@ -1071,6 +1094,29 @@ gboolean LD_WM_Paint_call(HWID widget, HCRDC cr, gpointer data)
     * WM_PAINT
     */
 
+    static BOOL Paint_call_first = TRUE;
+
+    if (Paint_call_first)
+    {
+        gtk_widget_override_background_color(GTK_WIDGET(widget), 
+                    GTK_STATE_FLAG_NORMAL, (HBRUSH)GetStockObject(BLACK_BRUSH));
+
+        gint width = gtk_widget_get_allocated_width (widget);
+        gint height = gtk_widget_get_allocated_height (widget);
+
+        COLORREF col;
+        GtkStyleContext *context;
+
+        context = gtk_widget_get_style_context (widget);
+
+        gtk_style_context_get_color (context,
+                        gtk_style_context_get_state (context),
+                        &col);
+        
+        gdk_cairo_set_source_rgba (cr, &col);
+
+        gtk_render_background (context, cr, 0, 0, width, height);
+    }
     // g_print("draw called----------------------------------\n");
 
     // guint width, height;
@@ -1222,6 +1268,12 @@ int main(int argc, char** argv)
         exit(0);
     }
     
+    //we need to initialize all these functions so that gtk knows
+    //to be thread-aware
+    if (!g_thread_supported ()){ g_thread_init(NULL); }
+    gdk_threads_init();
+    gdk_threads_enter();
+
     gtk_init(&argc, &argv);
     Instance = NULL;
     /* TEST
@@ -1300,11 +1352,14 @@ int main(int argc, char** argv)
     NewProgram();
     strcpy(CurrentSaveFile, "");
 
-    // We are running interactively, or we would already have exited. We
-    // can therefore show the window now, and otherwise set up the GUI.
+    /// We are running interactively, or we would already have exited. We
+    /// can therefore show the window now, and otherwise set up the GUI.
 
-    // Displaying the window
+    /// Displaying the window
     gtk_widget_show_all(MainWindow);
+
+    /// Blink cursor
+    g_timeout_add(200, (GSourceFunc)BlinkCursor, DrawWindow);
     // SetTimer(MainWindow, TIMER_BLINK_CURSOR, 800, BlinkCursor);
     
     if(argc >= 2) {
@@ -1354,5 +1409,6 @@ int main(int argc, char** argv)
     // }
     
     gtk_main();
+    gdk_threads_leave();
     return EXIT_SUCCESS;
 }

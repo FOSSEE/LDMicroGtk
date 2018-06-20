@@ -81,15 +81,51 @@ SyntaxHighlightingColours HighlightColours;
 // bottom, left, right) but we don't care; just go from the coordinates
 // computed when we drew the schematic in the paint procedure.
 //-----------------------------------------------------------------------------
-void CALLBACK BlinkCursor(HWND hwnd, UINT msg, UINT_PTR id, DWORD time)
+gboolean BlinkCursor(GtkWidget * window) //(HWND hwnd, UINT msg, UINT_PTR id, DWORD time)
 {
-    // if(!isFocus(MainWindow) && !CursorDrawn) return;
-    // if(Cursor.left == 0) return;
+    static int PREV_x = -100;
+    static int PREV_y = -100;
 
-    // PlcCursor c;
-    // SettingsInstance = gtk_settings_get_default();
-    // gtk_settings_install_property_parser (gtk-cursor-blink ,black);
+    // if(GetFocus(MainWindow) != !CursorDrawn) return TRUE;
+    if(Cursor.left == 0) return TRUE;
 
+    PlcCursor c;
+    memcpy(&c, &Cursor, sizeof(c));
+
+    c.top -= ScrollYOffset*POS_HEIGHT*FONT_HEIGHT;
+    c.left -= ScrollXOffset;
+
+    if(c.top >= IoListTop) return TRUE;
+
+    if(c.top + c.height >= IoListTop) {
+        c.height = IoListTop - c.top - 3;
+    }
+
+    HCRDC hCr = gdk_cairo_create(gtk_widget_get_window(DrawWindow));
+
+    if (PREV_x == -100 || PREV_y == -100)
+    {
+        PREV_x = c.left;
+        PREV_y = c.top;
+    }
+
+    if (PREV_x != c.left || PREV_y != c.top)
+    {
+        PatBlt(hCr, PREV_x, PREV_y, c.width, c.height, PATINVERT, (HBRUSH)GetStockObject(BLACK_BRUSH));
+        PREV_x = c.left;
+        PREV_y = c.top;
+        // PaintWindow();
+    }
+
+    if (CursorDrawn)
+        PatBlt(hCr, c.left, c.top, c.width, c.height, PATINVERT, (HBRUSH)GetStockObject(WHITE_BRUSH));
+    else
+        PatBlt(hCr, c.left, c.top, c.width, c.height, PATINVERT, (HBRUSH)GetStockObject(BLACK_BRUSH));
+    InvalidateRect(DrawWindow, NULL, FALSE);
+    cairo_destroy(hCr);
+    CursorDrawn = !CursorDrawn;
+
+    return TRUE;
 }
 
 //-----------------------------------------------------------------------------
@@ -514,46 +550,46 @@ void ExportDrawingAsText(char *file)
 //-----------------------------------------------------------------------------
 void SetUpScrollbars(BOOL *horizShown, SCROLLINFO *horiz, SCROLLINFO *vert)
 {
-    // int totalHeight = 0;
-    // int i;
-    // for(i = 0; i < Prog.numRungs; i++) {
-    //     totalHeight += CountHeightOfElement(ELEM_SERIES_SUBCKT, Prog.rungs[i]);
-    //     totalHeight++;
-    // }
-    // totalHeight += 1; // for the end rung
+    int totalHeight = 0;
+    int i;
+    for(i = 0; i < Prog.numRungs; i++) {
+        totalHeight += CountHeightOfElement(ELEM_SERIES_SUBCKT, Prog.rungs[i]);
+        totalHeight++;
+    }
+    totalHeight += 1; // for the end rung
 
-    // int totalWidth = ProgCountWidestRow();
+    int totalWidth = ProgCountWidestRow();
 
-    // if(totalWidth <= ScreenColsAvailable()) {
-    //     *horizShown = FALSE;
-    //     ScrollXOffset = 0;
-    //     ScrollXOffsetMax = 0;
-    // } else {
-    //     *horizShown = TRUE;
-    //     memset(horiz, 0, sizeof(*horiz));
-    //     horiz->cbSize = sizeof(*horiz);
-    //     horiz->fMask = SIF_DISABLENOSCROLL | SIF_ALL;
-    //     horiz->nMin = 0;
-    //     horiz->nMax = X_PADDING + totalWidth*POS_WIDTH*FONT_WIDTH;
-    //     RECT r;
-    //     GetClientRect(MainWindow, &r);
-    //     horiz->nPage = r.right - X_PADDING;
-    //     horiz->nPos = ScrollXOffset;
+    if(totalWidth <= ScreenColsAvailable()) {
+        *horizShown = FALSE;
+        ScrollXOffset = 0;
+        ScrollXOffsetMax = 0;
+    } else {
+        *horizShown = TRUE;
+        memset(horiz, 0, sizeof(*horiz));
+        horiz->cbSize = sizeof(*horiz);
+        // horiz->fMask = SIF_DISABLENOSCROLL | SIF_ALL;
+        horiz->nMin = 0;
+        horiz->nMax = X_PADDING + totalWidth*POS_WIDTH*FONT_WIDTH;
+        RECT r;
+        GetClientRect(DrawWindow, &r);
+        horiz->nPage = r.right - X_PADDING;
+        horiz->nPos = ScrollXOffset;
 
-    //     ScrollXOffsetMax = horiz->nMax - horiz->nPage + 1;
-    //     if(ScrollXOffset > ScrollXOffsetMax) ScrollXOffset = ScrollXOffsetMax;
-    //     if(ScrollXOffset < 0) ScrollXOffset = 0;
-    // }
+        ScrollXOffsetMax = horiz->nMax - horiz->nPage + 1;
+        if(ScrollXOffset > ScrollXOffsetMax) ScrollXOffset = ScrollXOffsetMax;
+        if(ScrollXOffset < 0) ScrollXOffset = 0;
+    }
 
-    // vert->cbSize = sizeof(*vert);
+    vert->cbSize = sizeof(*vert);
     // vert->fMask = SIF_DISABLENOSCROLL | SIF_ALL;
-    // vert->nMin = 0;
-    // vert->nMax = totalHeight - 1;
-    // vert->nPos = ScrollYOffset;
-    // vert->nPage = ScreenRowsAvailable();
+    vert->nMin = 0;
+    vert->nMax = totalHeight - 1;
+    vert->nPos = ScrollYOffset;
+    vert->nPage = ScreenRowsAvailable();
 
-    // ScrollYOffsetMax = vert->nMax - vert->nPage + 1;
+    ScrollYOffsetMax = vert->nMax - vert->nPage + 1;
 
-    // if(ScrollYOffset > ScrollYOffsetMax) ScrollYOffset = ScrollYOffsetMax;
-    // if(ScrollYOffset < 0) ScrollYOffset = 0;
+    if(ScrollYOffset > ScrollYOffsetMax) ScrollYOffset = ScrollYOffsetMax;
+    if(ScrollYOffset < 0) ScrollYOffset = 0;
 }

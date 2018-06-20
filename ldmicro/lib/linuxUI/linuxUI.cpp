@@ -303,7 +303,7 @@ void TextOut(HWID hWid, HCRDC hcr, int nXStart, int nYStart, LPCTSTR lpString, i
     if(nYStart+(extents.height/2.0) >= height)
     {
         // g_print("Y extend\n");
-        height += extents.height += 50;
+        height += extents.height + 50;
         resize_flag = TRUE;
     }
     

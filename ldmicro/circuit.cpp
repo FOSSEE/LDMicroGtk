@@ -37,12 +37,10 @@ static ElemSubcktSeries *LoadSeriesFromFile(FILE *f);
 //-----------------------------------------------------------------------------
 ElemLeaf *AllocLeaf(void)
 {
-    cout << "Inside AlocLeaf" << "\n";
     return (ElemLeaf *)CheckMalloc(sizeof(ElemLeaf));
 }
 ElemSubcktSeries *AllocSubcktSeries(void)
 {
-    cout << "Inside AllocSub" << "\n";
     return (ElemSubcktSeries *)CheckMalloc(sizeof(ElemSubcktSeries));
 }
 ElemSubcktParallel *AllocSubcktParallel(void)
@@ -746,15 +744,11 @@ void DeleteSelectedRung(void)
 //-----------------------------------------------------------------------------
 static ElemSubcktSeries *AllocEmptyRung(void)
 {
-    cout << "Inside AllocEmpty" << "\n";
     ElemSubcktSeries *s = AllocSubcktSeries();
-    cout << "Checking series count" << "\n";
     s->count = 1;
-    cout << "Series count done" << "\n";
     s->contents[0].which = ELEM_PLACEHOLDER;
     ElemLeaf *l = AllocLeaf();
     s->contents[0].d.leaf = l;
-    cout << "Exiting AllocEmpty" << "\n";
 
     return s;
 }

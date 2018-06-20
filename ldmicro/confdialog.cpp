@@ -162,7 +162,6 @@ void GetData (GtkWidget* widget, gpointer data){
     char* buf;
         
     buf = const_cast <char*> (gtk_entry_get_text (GTK_ENTRY (CycleTextbox)));
-    // cout << sizeof (buf)/sizeof (*buf) << "\n";
     Prog.cycleTime = (int)(1000*atof(buf) + 0.5);
     if(Prog.cycleTime == 0) {
         Error(_("Zero cycle time not valid; resetting to 10 ms."));

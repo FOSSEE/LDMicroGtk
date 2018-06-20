@@ -24,15 +24,16 @@ void FreezeWindowPosF(HWID hwid, char *subKey, char *name)
 
     if (!Ld_CWD)
         return;
-    char* moveToKeyLocatin = (char *)malloc(strlen(name) + 30);
+    char* moveToKeyLocatin = (char *)malloc(strlen(name) + MAX_PATH);
     if(!moveToKeyLocatin)
     {
         free(Ld_CWD);
         return;
     }
-    sprintf(moveToKeyLocatin, "mkdir -p %s/%s", FREEZE_REGISTER, subKey);
+
+    sprintf(moveToKeyLocatin, "mkdir -p %s/%s/%s", getenv("HOME"), FREEZE_REGISTER, subKey);
     system(moveToKeyLocatin);  
-    sprintf(moveToKeyLocatin, "%s/%s", FREEZE_REGISTER, subKey);
+    sprintf(moveToKeyLocatin, "%s/%s/%s", getenv("HOME"), FREEZE_REGISTER, subKey);
     if (-1 == chdir(moveToKeyLocatin))
     {
         free(Ld_CWD);
@@ -148,13 +149,14 @@ void ThawWindowPosF(HWID hwid, char *subKey, char *name)
     if (!Ld_CWD)
         return;
     
-    char* moveToKeyLocatin = (char *)malloc(strlen(name) + 30);   
+    char* moveToKeyLocatin = (char *)malloc(strlen(name) + MAX_PATH);   
     if(!moveToKeyLocatin)
     {
         free(Ld_CWD);
         return;
     }
-    sprintf(moveToKeyLocatin, "%s/%s", FREEZE_REGISTER, subKey);
+
+    sprintf(moveToKeyLocatin, "%s/%s/%s", getenv("HOME"), FREEZE_REGISTER, subKey);
     if (-1 == chdir(moveToKeyLocatin))
     {
         free(Ld_CWD);
@@ -162,8 +164,8 @@ void ThawWindowPosF(HWID hwid, char *subKey, char *name)
         return;
     }
     free(moveToKeyLocatin);
-    
-    char *keyName = (char *)malloc(strlen(name) + 30);
+
+    char *keyName = (char *)malloc(strlen(name) + MAX_PATH);
     if(!keyName)
     {
         free(Ld_CWD);
@@ -257,15 +259,16 @@ void FreezeDWORDF(DWORD val, char *subKey, char *name)
     if (!Ld_CWD)
         return;
 
-    char* moveToKeyLocatin = (char *)malloc(strlen(name) + 30);   
+    char* moveToKeyLocatin = (char *)malloc(strlen(name) + MAX_PATH);   
     if(!moveToKeyLocatin)
     {
         free(Ld_CWD);
         return;
     }
-    sprintf(moveToKeyLocatin, "mkdir -p %s/%s", FREEZE_REGISTER, subKey);
+
+    sprintf(moveToKeyLocatin, "mkdir -p %s/%s/%s", getenv("HOME"), FREEZE_REGISTER, subKey);
     system(moveToKeyLocatin);  
-    sprintf(moveToKeyLocatin, "%s/%s", FREEZE_REGISTER, subKey);
+    sprintf(moveToKeyLocatin, "%s/%s/%s", getenv("HOME"), FREEZE_REGISTER, subKey);
     if (-1 == chdir(moveToKeyLocatin))
     {
         free(Ld_CWD);
@@ -296,13 +299,14 @@ DWORD ThawDWORDF(DWORD val, char *subKey, char *name)
     if (!Ld_CWD)
         return val;
     
-    char* moveToKeyLocatin = (char *)malloc(strlen(name) + 30);   
+    char* moveToKeyLocatin = (char *)malloc(strlen(name) + MAX_PATH);   
     if(!moveToKeyLocatin)
     {
         free(Ld_CWD);
         return val;
     }
-    sprintf(moveToKeyLocatin, "%s/%s", FREEZE_REGISTER, subKey);
+
+    sprintf(moveToKeyLocatin, "%s/%s/%s", getenv("HOME"), FREEZE_REGISTER, subKey);
     if (-1 == chdir(moveToKeyLocatin))
     {
         free(Ld_CWD);
@@ -340,15 +344,16 @@ void FreezeStringF(char *val, char *subKey, char *name)
     if (!Ld_CWD)
         return;
 
-    char* moveToKeyLocatin = (char *)malloc(strlen(name) + 30);   
+    char* moveToKeyLocatin = (char *)malloc(strlen(name) + MAX_PATH);   
     if(!moveToKeyLocatin)
     {
         free(Ld_CWD);
         return;
     }
-    sprintf(moveToKeyLocatin, "mkdir -p %s/%s", FREEZE_REGISTER, subKey);
+
+    sprintf(moveToKeyLocatin, "mkdir -p %s/%s/%s", getenv("HOME"), FREEZE_REGISTER, subKey);
     system(moveToKeyLocatin);  
-    sprintf(moveToKeyLocatin, "%s/%s", FREEZE_REGISTER, subKey);
+    sprintf(moveToKeyLocatin, "%s/%s/%s", getenv("HOME"), FREEZE_REGISTER, subKey);
     if (-1 == chdir(moveToKeyLocatin))
     {
         free(Ld_CWD);
@@ -356,7 +361,7 @@ void FreezeStringF(char *val, char *subKey, char *name)
         return;
     }
     free(moveToKeyLocatin);
-    
+
     std::ofstream Register(name, std::ios::trunc);
     Register << strlen(val)+1 << "\n";
     Register << val;
@@ -377,13 +382,14 @@ void ThawStringF(char *val, int max, char *subKey, char *name)
     if (!Ld_CWD)
         return;
     
-    char* moveToKeyLocatin = (char *)malloc(strlen(name) + 30);
+    char* moveToKeyLocatin = (char *)malloc(strlen(name) + MAX_PATH);
     if(!moveToKeyLocatin)
     {
         free(Ld_CWD);
         return;
     }
-    sprintf(moveToKeyLocatin, "%s/%s", FREEZE_REGISTER, subKey);
+
+    sprintf(moveToKeyLocatin, "%s/%s/%s", getenv("HOME"), FREEZE_REGISTER, subKey);
     if (-1 == chdir(moveToKeyLocatin))
     {
         free(Ld_CWD);

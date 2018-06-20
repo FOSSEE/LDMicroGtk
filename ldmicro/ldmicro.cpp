@@ -1012,23 +1012,31 @@ gboolean LD_GTK_mouse_scroll_hook(GtkWidget *widget, GdkEvent *event, gpointer u
     * WM_VSCROLL, WM_HSCROLL, WM_MOUSEWHEEL
     */
 
+    MainWindowResized();
+    PaintWindow();
+
     switch(event->scroll.direction)
     {
         case GDK_SCROLL_UP:
+            VscrollProc(SB_LINEUP);
+            break;
         case GDK_SCROLL_DOWN:
-            // VscrollProc(wParam);
+            VscrollProc(SB_LINEDOWN);
             break;
         case GDK_SCROLL_LEFT:
+            HscrollProc(SB_LINEUP);
+            break;
         case GDK_SCROLL_RIGHT:
-            // HscrollProc(wParam);
+            HscrollProc(SB_LINEDOWN);
             break;
         case GDK_SCROLL_SMOOTH:
-            // if((GET_WHEEL_DELTA_WPARAM(wParam)) > 0) {
-            //     VscrollProc(SB_LINEUP);
-            // } else {
-            //     VscrollProc(SB_LINEDOWN);
-            // }
-            // gdk_event_get_scroll_deltas (const GdkEvent *event, gdouble *delta_x, gdouble *delta_y);
+            double d_x, d_y;
+            gdk_event_get_scroll_deltas (event, &d_x, &d_y);
+            if(d_y > 0) {
+                VscrollProc(SB_LINEUP);
+            } else {
+                VscrollProc(SB_LINEDOWN);
+            }
             break;
 
     }
@@ -1063,6 +1071,8 @@ gboolean LD_WM_Paint_call(HWID widget, HCRDC cr, gpointer data)
     * WM_PAINT
     */
 
+    // g_print("draw called----------------------------------\n");
+
     // guint width, height;
     // GdkRGBA color;
     // GtkStyleContext *context;
@@ -1071,10 +1081,10 @@ gboolean LD_WM_Paint_call(HWID widget, HCRDC cr, gpointer data)
     
     // width = gtk_widget_get_allocated_width (widget);
     // height = gtk_widget_get_allocated_height (widget);
-    // // g_print("w = %i\n", width);
-    // // g_print("h = %i\n", height);
+    // g_print("w = %i\n", width);
+    // g_print("h = %i\n", height);
 
-    // // SetBkColor(widget, cr, HighlightColours.bg);
+    // SetBkColor(widget, cr, HighlightColours.bg);
     
     // gtk_render_background (context, cr, 0, 0, width, height);
 
@@ -1093,8 +1103,17 @@ gboolean LD_WM_Paint_call(HWID widget, HCRDC cr, gpointer data)
 
     // cairo_fill (cr);
 
-    Hdc = cr;
+    // SetBkColor(DrawWindow, cr, InSimulationMode ? HighlightColours.simBg :
+    //     HighlightColours.bg);
+    // SetTextColor(cr, InSimulationMode ? HighlightColours.simRungNum :
+    //     HighlightColours.rungNum);
+    // SelectObject(cr, FixedWidthFont);
+    // for (int xp = 0; xp<= width; xp += 7)
+    //     for (int yp = 0; yp <= height; yp += 7)
+    //         TextOut(DrawWindow, cr, xp, yp, "H", 1);
 
+    Hdc = cr;
+    
     /// This draws the schematic.
     PaintWindow();
 

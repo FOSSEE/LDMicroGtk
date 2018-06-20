@@ -604,8 +604,8 @@ void CheckHeap(char *file, int line);
 // maincontrols.cpp
 void MakeMainWindowControls(void);
 HMENU MakeMainWindowMenus(void);
-void VscrollProc(WPARAM wParam);
-void HscrollProc(WPARAM wParam);
+void VscrollProc(int wParam);
+void HscrollProc(int wParam);
 void GenerateIoListDontLoseSelection(void);
 void RefreshControlsToSettings(void);
 void MainWindowResized(void);

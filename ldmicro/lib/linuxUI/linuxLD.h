@@ -16,6 +16,7 @@
 #define CALLBACK
 #define CONST const
 
+/// Meamory flags
 #define HEAP_ZERO_MEMORY 0x00000008
 
 /// Image loading flags
@@ -24,7 +25,6 @@
 
 /// Macro functions
 #define max(_A, _B) std::max(_A, _B)
-// #define min(_A, _B) std::min(_A, _B)
 
 /// Typedefs
 //typedef int64_t __int64;
@@ -112,6 +112,14 @@ typedef class tagColorReferance: public GdkRGBA{
         this->green = g/255.0;
         this->blue = b/255.0;
         this->alpha = 1.0;
+    }
+
+    bool operator== (tagColorReferance& arg1)
+    {
+        if( ((int)arg1.red == (int)this->red) && ((int)arg1.green == (int)this->green) && ((int)arg1.blue == (int)this->blue) )
+            return true;
+        else
+            return false;
     }
 
     GdkRGBA* getThis()

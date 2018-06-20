@@ -295,6 +295,7 @@ void PaintWindow()
     r.left += POS_WIDTH*FONT_WIDTH*ColsAvailable + 2;
     r.right += POS_WIDTH*FONT_WIDTH*ColsAvailable + 2;
     FillRect(Hdc, &r, InSimulationMode ? BusRightBus : BusBrush);
+    InvalidateRect(DrawWindow, NULL, FALSE);
  
     CursorDrawn = FALSE;
 

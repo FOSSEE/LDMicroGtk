@@ -538,37 +538,37 @@ void RefreshScrollbars(void)
 // Respond to a WM_VSCROLL sent to the main window, presumably by the one and
 // only vertical scrollbar that it has as a child.
 //-----------------------------------------------------------------------------
-void VscrollProc(WPARAM wParam)
+void VscrollProc(int wParam)
 {
-    // int prevY = ScrollYOffset;
-    // switch(LOWORD(wParam)) {
-    //     case SB_LINEUP:
-    //     case SB_PAGEUP:
-    //         if(ScrollYOffset > 0) {
-    //             ScrollYOffset--;
-    //         }
-    //         break;
+    int prevY = ScrollYOffset;
+    switch(wParam) {
+        case SB_LINEUP:
+        case SB_PAGEUP:
+            if(ScrollYOffset > 0) {
+                ScrollYOffset--;
+            }
+            break;
 
-    //     case SB_LINEDOWN:
-    //     case SB_PAGEDOWN:
-    //         if(ScrollYOffset < ScrollYOffsetMax) {
-    //             ScrollYOffset++;
-    //         }
-    //         break;
+        case SB_LINEDOWN:
+        case SB_PAGEDOWN:
+            if(ScrollYOffset < ScrollYOffsetMax) {
+                ScrollYOffset++;
+            }
+            break;
 
-    //     case SB_TOP:
-    //         ScrollYOffset = 0;
-    //         break;
+        case SB_TOP:
+            ScrollYOffset = 0;
+            break;
 
-    //     case SB_BOTTOM:
-    //         ScrollYOffset = ScrollYOffsetMax;
-    //         break;
+        case SB_BOTTOM:
+            ScrollYOffset = ScrollYOffsetMax;
+            break;
 
-    //     case SB_THUMBTRACK:
-    //     case SB_THUMBPOSITION:
-    //         ScrollYOffset = HIWORD(wParam);
-    //         break;
-    // }
+        // case SB_THUMBTRACK:
+        // case SB_THUMBPOSITION:
+            // ScrollYOffset = HIWORD(wParam);
+            // break;
+    }
     // if(prevY != ScrollYOffset) {
     //     SCROLLINFO si;
     //     si.cbSize = sizeof(si);
@@ -584,42 +584,42 @@ void VscrollProc(WPARAM wParam)
 // Respond to a WM_HSCROLL sent to the main window, presumably by the one and
 // only horizontal scrollbar that it has as a child.
 //-----------------------------------------------------------------------------
-void HscrollProc(WPARAM wParam)
+void HscrollProc(int wParam)
 {
-    // int prevX = ScrollXOffset;
-    // switch(LOWORD(wParam)) {
-    //     case SB_LINEUP:
-    //         ScrollXOffset -= FONT_WIDTH;
-    //         break;
+    int prevX = ScrollXOffset;
+    switch(wParam) {
+        case SB_LINEUP:
+            ScrollXOffset -= FONT_WIDTH;
+            break;
 
-    //     case SB_PAGEUP:
-    //         ScrollXOffset -= POS_WIDTH*FONT_WIDTH;
-    //         break;
+        case SB_PAGEUP:
+            ScrollXOffset -= POS_WIDTH*FONT_WIDTH;
+            break;
 
-    //     case SB_LINEDOWN:
-    //         ScrollXOffset += FONT_WIDTH;
-    //         break;
+        case SB_LINEDOWN:
+            ScrollXOffset += FONT_WIDTH;
+            break;
 
-    //     case SB_PAGEDOWN:
-    //         ScrollXOffset += POS_WIDTH*FONT_WIDTH;
-    //         break;
+        case SB_PAGEDOWN:
+            ScrollXOffset += POS_WIDTH*FONT_WIDTH;
+            break;
 
-    //     case SB_TOP:
-    //         ScrollXOffset = 0;
-    //         break;
+        case SB_TOP:
+            ScrollXOffset = 0;
+            break;
 
-    //     case SB_BOTTOM:
-    //         ScrollXOffset = ScrollXOffsetMax;
-    //         break;
+        case SB_BOTTOM:
+            ScrollXOffset = ScrollXOffsetMax;
+            break;
 
-    //     case SB_THUMBTRACK:
-    //     case SB_THUMBPOSITION:
-    //         ScrollXOffset = HIWORD(wParam);
-    //         break;
-    // }
+        // case SB_THUMBTRACK:
+        // case SB_THUMBPOSITION:
+            // ScrollXOffset = HIWORD(wParam);
+            // break;
+    }
 
-    // if(ScrollXOffset > ScrollXOffsetMax) ScrollXOffset = ScrollXOffsetMax;
-    // if(ScrollXOffset < 0) ScrollXOffset = 0;
+    if(ScrollXOffset > ScrollXOffsetMax) ScrollXOffset = ScrollXOffsetMax;
+    if(ScrollXOffset < 0) ScrollXOffset = 0;
 
     // if(prevX != ScrollXOffset) {
     //     SCROLLINFO si;

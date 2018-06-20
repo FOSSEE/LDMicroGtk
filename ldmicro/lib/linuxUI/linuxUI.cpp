@@ -262,20 +262,21 @@ void SetBkColor(HWID widget, HCRDC hcr, COLORREF bkCol)
     gtk_widget_override_background_color(GTK_WIDGET(widget), 
                         GTK_STATE_FLAG_NORMAL, &bkCol);
 
-    GtkStyleContext *context;
-    COLORREF col;
-
-    context = gtk_widget_get_style_context (widget);
     gint width = gtk_widget_get_allocated_width (widget);
     gint height = gtk_widget_get_allocated_height (widget);
 
+    COLORREF col;
+    GtkStyleContext *context;
+
+    context = gtk_widget_get_style_context (widget);
+
     gtk_style_context_get_color (context,
-                            gtk_style_context_get_state (context),
-                            &col);
+                        gtk_style_context_get_state (context),
+                        &col);
     
     gdk_cairo_set_source_rgba (hcr, &col);
 
-    gtk_render_background (context, hcr, 0, 0, width, height);
+    cairo_fill (hcr);
 }
 
 void SetTextColor(HCRDC hcr, COLORREF color)
@@ -286,7 +287,7 @@ void SetTextColor(HCRDC hcr, COLORREF color)
 
 void TextOut(HWID hWid, HCRDC hcr, int nXStart, int nYStart, LPCTSTR lpString, int cchString)
 {
-    nYStart += 20;
+    nYStart += 30;
     
     cairo_text_extents_t extents;
     cairo_text_extents (hcr, lpString, &extents);
@@ -297,12 +298,14 @@ void TextOut(HWID hWid, HCRDC hcr, int nXStart, int nYStart, LPCTSTR lpString, i
 
     if(nYStart+(extents.height/2.0) >= height)
     {
-        height += extents.height;
+        // g_print("Y extend\n");
+        height += extents.height += 50;
         resize_flag = TRUE;
     }
     
     if (nXStart+(extents.width/2.0) >= width)
     {
+        // g_print("X extend\n");
         width += extents.width;
         resize_flag = TRUE;
     }
@@ -315,6 +318,8 @@ void TextOut(HWID hWid, HCRDC hcr, int nXStart, int nYStart, LPCTSTR lpString, i
 
     cairo_move_to(hcr, nXStart, nYStart);
     cairo_show_text(hcr, text);
+
+    // g_print("%s", text);
 
     cairo_fill (hcr);
 }
@@ -332,7 +337,10 @@ COLORREF GetTextColor(HCRDC Hdc)
 BOOL InvalidateRect(HWID hWid, const RECT *lpRect, BOOL bErase)
 {
     if(!GDK_IS_WINDOW(hWid))
+    {
+        // g_print("not window\n");
         return FALSE;
+    }
 
     if (lpRect == NULL)
     {

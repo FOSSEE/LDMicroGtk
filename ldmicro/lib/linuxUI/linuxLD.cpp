@@ -1,4 +1,7 @@
 #include "linuxUI.h"
+#include <iostream>
+
+using namespace std;
 
 std::vector<HEAPRECORD> HeapRecords;
 
@@ -23,6 +26,7 @@ HANDLE HeapCreate(DWORD  flOptions, SIZE_T dwInitialSize, SIZE_T dwMaximumSize)
 
 LPVOID HeapAlloc(HANDLE hHeap, DWORD  dwFlags, SIZE_T dwBytes)
 {
+    cout << "Inside HeapAlloc" << "\n";
     if (hHeap == NULL)
     {
         // printf("Alloc**********NULL HEAP***************\n");
@@ -64,6 +68,7 @@ LPVOID HeapAlloc(HANDLE hHeap, DWORD  dwFlags, SIZE_T dwBytes)
     chunck.Chunck = p;
     chunck.dwSize = dwBytes;
     (*it).Element.push_back(chunck);
+    cout << "Exiting HeapAlloc" << "\n";
 
     return p;
 }

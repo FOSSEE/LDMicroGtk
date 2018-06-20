@@ -24,9 +24,11 @@
 #include <linuxUI.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <iostream>
 
 #include "ldmicro.h"
 
+using namespace std;
 
 static ElemSubcktSeries *LoadSeriesFromFile(FILE *f);
 
@@ -35,10 +37,12 @@ static ElemSubcktSeries *LoadSeriesFromFile(FILE *f);
 //-----------------------------------------------------------------------------
 ElemLeaf *AllocLeaf(void)
 {
+    cout << "Inside AlocLeaf" << "\n";
     return (ElemLeaf *)CheckMalloc(sizeof(ElemLeaf));
 }
 ElemSubcktSeries *AllocSubcktSeries(void)
 {
+    cout << "Inside AllocSub" << "\n";
     return (ElemSubcktSeries *)CheckMalloc(sizeof(ElemSubcktSeries));
 }
 ElemSubcktParallel *AllocSubcktParallel(void)
@@ -638,7 +642,7 @@ void FreeCircuit(int which, void *any)
 //-----------------------------------------------------------------------------
 void FreeEntireProgram(void)
 {
-    ForgetEverything();
+    // ForgetEverything();
 
     int i;
     for(i = 0; i < Prog.numRungs; i++) {
@@ -742,11 +746,15 @@ void DeleteSelectedRung(void)
 //-----------------------------------------------------------------------------
 static ElemSubcktSeries *AllocEmptyRung(void)
 {
+    cout << "Inside AllocEmpty" << "\n";
     ElemSubcktSeries *s = AllocSubcktSeries();
+    cout << "Checking series count" << "\n";
     s->count = 1;
+    cout << "Series count done" << "\n";
     s->contents[0].which = ELEM_PLACEHOLDER;
     ElemLeaf *l = AllocLeaf();
     s->contents[0].d.leaf = l;
+    cout << "Exiting AllocEmpty" << "\n";
 
     return s;
 }

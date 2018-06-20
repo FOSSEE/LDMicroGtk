@@ -1041,12 +1041,9 @@ gboolean LD_WM_MouseMove_call(GtkWidget *widget, GdkEvent *event, gpointer user_
     * WM_MOUSEMOVE
     */
 
-<<<<<<< HEAD
-=======
     // g_print("x = %f\n", event->button.x_root);
     // g_print("y = %f\n", event->button.y_root);
 
->>>>>>> akshay-c-GUI_port
     // int x = LOWORD(lParam);
     // int y = HIWORD(lParam);
 
@@ -1282,11 +1279,7 @@ int main(int argc, char** argv)
     /// Keyboard and mouse hooks equivalent to MainWndProc - end
 
     NewProgram();
-<<<<<<< HEAD
-    // strcpy(CurrentSaveFile, "");
-=======
     strcpy(CurrentSaveFile, "");
->>>>>>> akshay-c-GUI_port
 
     // We are running interactively, or we would already have exited. We
     // can therefore show the window now, and otherwise set up the GUI.

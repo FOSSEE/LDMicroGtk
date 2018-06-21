@@ -589,7 +589,6 @@ void RefreshScrollbars(void);
 extern HINSTANCE Instance;
 extern HWID MainWindow;
 extern HWID DrawWindow;
-// extern HGDDC Hdc;
 // extern HCRDC Hcr;
 extern PlcProgram Prog;
 extern char CurrentSaveFile[MAX_PATH];

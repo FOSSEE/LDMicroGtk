@@ -40,7 +40,6 @@ using namespace std;
 HINSTANCE   Instance;
 HWID        MainWindow;
 HWID        DrawWindow;
-// HGDDC       Hdc;
 // HCRDC       Hcr;
 
 // parameters used to capture the mouse when implementing our totally non-

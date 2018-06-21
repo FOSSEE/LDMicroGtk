@@ -67,7 +67,6 @@ typedef HANDLE HINSTANCE;
 typedef HANDLE HGDIOBJ;
 
 typedef cairo_t *HCRDC;
-typedef GdkDrawingContext *HGDDC;
 typedef GtkWidget *HWID;
 typedef GtkWidget *HMENU;
 typedef GtkWindow *HWND;

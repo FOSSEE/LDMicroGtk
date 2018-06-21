@@ -977,13 +977,22 @@ gboolean LD_GTK_mouse_click_hook(GtkWidget *widget, GdkEvent *event, gpointer us
     * WM_LBUTTONDBLCLK, WM_LBUTTONDOWN
     */
     // g_print("mo cl call\n");
+
+    GtkAdjustment *adjustment = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(ScrollWindow));
+    // g_print("---\nadj = %f\n", gtk_adjustment_get_value(adjustment));
+    // g_print("upper = %f\n", gtk_adjustment_get_upper(adjustment) - gtk_widget_get_allocated_height (ScrollWindow));
+    // g_print("lower = %f\n", gtk_adjustment_get_lower(adjustment));
+    // g_print("inc = %f\n", gtk_adjustment_get_step_increment(adjustment));
+    // g_print("w width = %i\n", gtk_widget_get_allocated_width (DrawWindow));
+    // g_print("w height = %i\n---\n", gtk_widget_get_allocated_height (ScrollWindow));
+
     switch(event->button.type)
     {
         case GDK_BUTTON_PRESS:
             if (event->button.button == 1) /// left click
             {
                 int x = event->button.x;
-                int y = event->button.y - 30;
+                int y = event->button.y - 30 + gtk_adjustment_get_value(adjustment);
 
                 // if((y > (IoListTop - 9)) && (y < (IoListTop + 3))) {
                 //     // POINT pt;
@@ -1004,7 +1013,7 @@ gboolean LD_GTK_mouse_click_hook(GtkWidget *widget, GdkEvent *event, gpointer us
             if (event->button.button == 1) /// left click
             {
                 int x = event->button.x;
-                int y = event->button.y - 30;
+                int y = event->button.y - 30 + gtk_adjustment_get_value(adjustment);
 
                 if(InSimulationMode) {
                     EditElementMouseDoubleclick(x, y);

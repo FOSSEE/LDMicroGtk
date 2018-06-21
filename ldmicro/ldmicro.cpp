@@ -40,7 +40,8 @@ using namespace std;
 HINSTANCE   Instance;
 HWID        MainWindow;
 HWID        DrawWindow;
-HCRDC         Hdc;
+// HGDDC       Hdc;
+// HCRDC       Hcr;
 
 // parameters used to capture the mouse when implementing our totally non-
 // general splitter control
@@ -658,6 +659,8 @@ void LD_WM_Close_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)//(
     * WM_CLOSE
     */
 
+    // if(Hdc != NULL)
+        // cairo_destroy(Hdc);
     FreezeWindowPos(MainWindow);
     FreezeDWORD(IoListHeight);
 
@@ -669,7 +672,7 @@ gboolean LD_WM_KeyDown_call(GtkWidget *widget, GdkEvent *event, gpointer user_da
     /* Handles:
     * WM_KEYDOWN
     */
-
+    // g_print("ky call\n");
     switch(event->key.state)
     {
         case GDK_SHIFT_MASK:
@@ -964,6 +967,7 @@ gboolean LD_WM_KeyDown_call(GtkWidget *widget, GdkEvent *event, gpointer user_da
     //         InvalidateRect(MainWindow, NULL, FALSE);
     //     }
     //     break;
+    // g_print("ky call end\n");
     return FALSE;
 }
 
@@ -972,7 +976,7 @@ gboolean LD_GTK_mouse_click_hook(GtkWidget *widget, GdkEvent *event, gpointer us
     /* Handles:
     * WM_LBUTTONDBLCLK, WM_LBUTTONDOWN
     */
-    
+    // g_print("mo cl call\n");
     switch(event->button.type)
     {
         case GDK_BUTTON_PRESS:
@@ -992,7 +996,8 @@ gboolean LD_GTK_mouse_click_hook(GtkWidget *widget, GdkEvent *event, gpointer us
                 if(!InSimulationMode) MoveCursorMouseClick(x, y);
 
                 // SetFocus(MainWindow);
-                InvalidateRect(DrawWindow, NULL, FALSE);
+                // InvalidateRect(DrawWindow, NULL, FALSE);
+                gtk_widget_queue_draw(DrawWindow);
             }
             break;
         case GDK_2BUTTON_PRESS:
@@ -1006,11 +1011,13 @@ gboolean LD_GTK_mouse_click_hook(GtkWidget *widget, GdkEvent *event, gpointer us
                 } else {
                     CHANGING_PROGRAM(EditElementMouseDoubleclick(x, y));
                 }
-                InvalidateRect(DrawWindow, NULL, FALSE);
+                // InvalidateRect(DrawWindow, NULL, FALSE);
+                gtk_widget_queue_draw(DrawWindow);
             }
             break;
 
     }
+    // g_print("mo cl call end\n");
     return FALSE;
 }
 
@@ -1019,7 +1026,7 @@ gboolean LD_GTK_mouse_scroll_hook(GtkWidget *widget, GdkEvent *event, gpointer u
     /* Handles:
     * WM_VSCROLL, WM_HSCROLL, WM_MOUSEWHEEL
     */
-    
+    // g_print("mo sc call\n");
     GtkAdjustment *adjustment = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(ScrollWindow));
     // g_print("adj = %f\n", gtk_adjustment_get_value(adjustment));
     // g_print("upper = %f\n", gtk_adjustment_get_upper(adjustment) - gtk_widget_get_allocated_height (ScrollWindow));
@@ -1060,9 +1067,8 @@ gboolean LD_GTK_mouse_scroll_hook(GtkWidget *widget, GdkEvent *event, gpointer u
 
     }
 
-    MainWindowResized();
-    PaintWindow();
-
+    gtk_widget_queue_draw(DrawWindow);
+    // g_print("mo sc call end\n");
     return FALSE;
 }
 
@@ -1071,7 +1077,7 @@ gboolean LD_WM_MouseMove_call(GtkWidget *widget, GdkEvent *event, gpointer user_
     /* Handles:
     * WM_MOUSEMOVE
     */
-
+    //    g_print("mo mv call\n");
     // g_print("x = %f\n", event->button.x_root);
     // g_print("y = %f\n", event->button.y_root);
 
@@ -1088,81 +1094,77 @@ gboolean LD_WM_MouseMove_call(GtkWidget *widget, GdkEvent *event, gpointer user_
     return FALSE;
 }
 
-gboolean LD_WM_Paint_call(HWID widget, HCRDC cr, gpointer data)
+gboolean LD_WM_Paint_call(HWID widget, HCRDC cr, gpointer data)//(HWID widget, GdkEventExpose *event)//
 {
     /* Handles:
     * WM_PAINT
     */
 
+    // g_print("draw called----------------------------------\n");
     static BOOL Paint_call_first = TRUE;
 
     if (Paint_call_first)
-    {
+    {        
         gtk_widget_override_background_color(GTK_WIDGET(widget), 
                     GTK_STATE_FLAG_NORMAL, (HBRUSH)GetStockObject(BLACK_BRUSH));
-
         gint width = gtk_widget_get_allocated_width (widget);
         gint height = gtk_widget_get_allocated_height (widget);
 
         COLORREF col;
         GtkStyleContext *context;
-
         context = gtk_widget_get_style_context (widget);
-
         gtk_style_context_get_color (context,
                         gtk_style_context_get_state (context),
                         &col);
-        
         gdk_cairo_set_source_rgba (cr, &col);
-
         gtk_render_background (context, cr, 0, 0, width, height);
+        Paint_call_first = FALSE;
     }
-    // g_print("draw called----------------------------------\n");
 
-    // guint width, height;
-    // GdkRGBA color;
-    // GtkStyleContext *context;
-
-    // context = gtk_widget_get_style_context (widget);
-    
-    // width = gtk_widget_get_allocated_width (widget);
-    // height = gtk_widget_get_allocated_height (widget);
-    // g_print("w = %i\n", width);
-    // g_print("h = %i\n", height);
-
-    // SetBkColor(widget, cr, HighlightColours.bg);
-    
-    // gtk_render_background (context, cr, 0, 0, width, height);
-
-    // // cairo_arc (cr,
-    // //             width / 2.0, height / 2.0,
-    // //             MIN (width, height) / 3.0,
-    // //             0, 2 * G_PI);
-
-    // cairo_rectangle(cr, 0, 0, width, height);
-    // cairo_stroke_preserve(cr);
-
-    // gtk_style_context_get_color (context,
-    //                             gtk_style_context_get_state (context),
-    //                             &color);
-    // gdk_cairo_set_source_rgba (cr, &color);
-
-    // cairo_fill (cr);
-
-    // SetBkColor(DrawWindow, cr, InSimulationMode ? HighlightColours.simBg :
-    //     HighlightColours.bg);
-    // SetTextColor(cr, InSimulationMode ? HighlightColours.simRungNum :
-    //     HighlightColours.rungNum);
-    // SelectObject(cr, FixedWidthFont);
-    // for (int xp = 0; xp<= width; xp += 7)
-    //     for (int yp = 0; yp <= height; yp += 7)
-    //         TextOut(DrawWindow, cr, xp, yp, "H", 1);
-
-    Hdc = cr;
-    
     /// This draws the schematic.
-    PaintWindow();
+    MainWindowResized();
+    PaintWindow(cr);
+    
+    /* Cairo test code
+    guint width, height;
+    GdkRGBA color;
+    GtkStyleContext *context;
 
+    context = gtk_widget_get_style_context (widget);
+    
+    width = gtk_widget_get_allocated_width (widget);
+    height = gtk_widget_get_allocated_height (widget);
+    g_print("w = %i\n", width);
+    g_print("h = %i\n", height);
+
+    SetBkColor(widget, cr, HighlightColours.bg);
+    
+    gtk_render_background (context, cr, 0, 0, width, height);
+
+    // cairo_arc (cr,
+    //             width / 2.0, height / 2.0,
+    //             MIN (width, height) / 3.0,
+    //             0, 2 * G_PI);
+
+    cairo_rectangle(cr, 0, 0, width, height);
+    cairo_stroke_preserve(cr);
+
+    gtk_style_context_get_color (context,
+                                gtk_style_context_get_state (context),
+                                &color);
+    gdk_cairo_set_source_rgba (cr, &color);
+
+    cairo_fill (cr);
+
+    SetBkColor(DrawWindow, cr, InSimulationMode ? HighlightColours.simBg :
+        HighlightColours.bg);
+    SetTextColor(cr, InSimulationMode ? HighlightColours.simRungNum :
+        HighlightColours.rungNum);
+    SelectObject(cr, FixedWidthFont);
+    for (int xp = 0; xp<= width; xp += 7)
+        for (int yp = 0; yp <= height; yp += 7)
+            TextOut(DrawWindow, cr, xp, yp, "H", 1);
+    */
     return FALSE;
 }
 
@@ -1171,7 +1173,7 @@ gboolean LD_WM_Destroy_call(GtkWidget *widget, GdkEvent *event, gpointer user_da
     /* Handles:
     * WM_DESTROY
     */
-
+    // g_print("dis call\n");
     // if(CheckSaveUserCancels()) break;
 
     // PostQuitMessage(0);
@@ -1185,9 +1187,9 @@ gboolean LD_WM_Size_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)
     /* Handles:
     * WM_SIZE
     */
-
+    // g_print("size call\n");
     MainWindowResized();
-
+    // g_print("size call end\n");
     return FALSE;
 }
 
@@ -1196,9 +1198,9 @@ gboolean LD_WM_SetFocus_call(GtkWidget *widget, GdkEvent *event, gpointer user_d
     /* Handles:
     * WM_SETFOCUS
     */
-
+    // g_print("focus call\n");
     InvalidateRect(DrawWindow, NULL, FALSE);
-
+    // g_print("focus call end\n");
     return FALSE;
 }
 
@@ -1306,12 +1308,6 @@ int main(int argc, char** argv)
     
     MainHeap = HeapCreate(0, 1024*64, 0);
 
-    // MakeDialogBoxClass();
-    // MakeComponentListClass();
-    // MakeSmplDialogClass();
-    // MakeNamingListClass();
-    HMENU top = MakeMainWindowMenus();
-
     /// Make main window
     MainWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW(MainWindow),  "LDmicro");
@@ -1325,6 +1321,8 @@ int main(int argc, char** argv)
     gtk_window_set_icon(GTK_WINDOW(MainWindow), LoadImage(Instance, LDMICRO_ICON,
                             IMAGE_ICON, 32, 32, 0));
     /// Make main window - end
+
+    MakeMainWindowMenus();
 
     InitForDrawing();
 
@@ -1360,7 +1358,6 @@ int main(int argc, char** argv)
 
     /// Blink cursor
     g_timeout_add(200, (GSourceFunc)BlinkCursor, DrawWindow);
-    // SetTimer(MainWindow, TIMER_BLINK_CURSOR, 800, BlinkCursor);
     
     if(argc >= 2) {
         // g_print("load prog: %s\n", argv[1]);

@@ -622,12 +622,12 @@ void RefreshScrollbars(void)
     SetUpScrollbars(&NeedHoriz, &horiz, &vert);
 
     GtkAdjustment *adjustment = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(ScrollWindow));
-    g_print("adj = %f\n", gtk_adjustment_get_value(adjustment));
-    g_print("upper = %f\n", gtk_adjustment_get_upper(adjustment) - gtk_widget_get_allocated_height (ScrollWindow));
-    g_print("lower = %f\n", gtk_adjustment_get_lower(adjustment));
-    g_print("inc = %f\n", gtk_adjustment_get_step_increment(adjustment));
-    g_print("w width = %i\n", gtk_widget_get_allocated_width (DrawWindow));
-    g_print("w height = %i\n", gtk_widget_get_allocated_height (ScrollWindow));
+    // g_print("adj = %f\n", gtk_adjustment_get_value(adjustment));
+    // g_print("upper = %f\n", gtk_adjustment_get_upper(adjustment) - gtk_widget_get_allocated_height (ScrollWindow));
+    // g_print("lower = %f\n", gtk_adjustment_get_lower(adjustment));
+    // g_print("inc = %f\n", gtk_adjustment_get_step_increment(adjustment));
+    // g_print("w width = %i\n", gtk_widget_get_allocated_width (DrawWindow));
+    // g_print("w height = %i\n", gtk_widget_get_allocated_height (ScrollWindow));
 
     // SetScrollInfo(HorizScrollBar, SB_CTL, &horiz, TRUE);
     // SetScrollInfo(VertScrollBar, SB_CTL, &vert, TRUE);

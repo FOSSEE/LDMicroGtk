@@ -31,7 +31,7 @@
 
 #include "ldmicro.h"
 
-void (*DrawChars)(int, int, const char *);
+void (*DrawChars)(HCRDC Hcr, int, int, const char *);
 
 // After an undo all the memory addresses change but make an effort to put
 // the cursor roughly where it should be.
@@ -83,9 +83,6 @@ SyntaxHighlightingColours HighlightColours;
 //-----------------------------------------------------------------------------
 gboolean BlinkCursor(GtkWidget * window) //(HWND hwnd, UINT msg, UINT_PTR id, DWORD time)
 {
-    static int PREV_x = -100;
-    static int PREV_y = -100;
-
     // if(GetFocus(MainWindow) != !CursorDrawn) return TRUE;
     if(Cursor.left == 0) return TRUE;
 
@@ -101,28 +98,36 @@ gboolean BlinkCursor(GtkWidget * window) //(HWND hwnd, UINT msg, UINT_PTR id, DW
         c.height = IoListTop - c.top - 3;
     }
 
-    HCRDC hCr = gdk_cairo_create(gtk_widget_get_window(DrawWindow));
+    // if(!GDK_IS_DRAWING_CONTEXT(Hdc))
+        // return FALSE;
 
-    if (PREV_x == -100 || PREV_y == -100)
+    HCRDC Hcr = gdk_cairo_create(gtk_widget_get_window(DrawWindow));//gdk_drawing_context_get_cairo_context(Hdc);//
+
+    static int PREV_x = c.left;
+    static int PREV_y = c.top;
+    static int PREV_w = c.width;
+    static int PREV_h = c.height;
+
+    if (PREV_x != c.left || PREV_y != c.top || PREV_w != c.width || PREV_h != c.height)
     {
+        PatBlt(Hcr, PREV_x, PREV_y, PREV_w, PREV_h, PATINVERT, (HBRUSH)GetStockObject(BLACK_BRUSH));
         PREV_x = c.left;
         PREV_y = c.top;
-    }
+        PREV_w = c.width;
+        PREV_h = c.height;
 
-    if (PREV_x != c.left || PREV_y != c.top)
-    {
-        PatBlt(hCr, PREV_x, PREV_y, c.width, c.height, PATINVERT, (HBRUSH)GetStockObject(BLACK_BRUSH));
-        PREV_x = c.left;
-        PREV_y = c.top;
-        // PaintWindow();
+        // MainWindowResized();
+        // PaintWindow(Hcr);
+        gtk_widget_queue_draw(DrawWindow);
     }
 
     if (CursorDrawn)
-        PatBlt(hCr, c.left, c.top, c.width, c.height, PATINVERT, (HBRUSH)GetStockObject(WHITE_BRUSH));
+        PatBlt(Hcr, c.left, c.top, c.width, c.height, PATINVERT, (HBRUSH)GetStockObject(WHITE_BRUSH));
     else
-        PatBlt(hCr, c.left, c.top, c.width, c.height, PATINVERT, (HBRUSH)GetStockObject(BLACK_BRUSH));
+        PatBlt(Hcr, c.left, c.top, c.width, c.height, PATINVERT, (HBRUSH)GetStockObject(BLACK_BRUSH));
     InvalidateRect(DrawWindow, NULL, FALSE);
-    cairo_destroy(hCr);
+    // g_print("BLINK\n");
+    cairo_destroy(Hcr);
     CursorDrawn = !CursorDrawn;
 
     return TRUE;
@@ -132,7 +137,7 @@ gboolean BlinkCursor(GtkWidget * window) //(HWND hwnd, UINT msg, UINT_PTR id, DW
 // Output a string to the screen at a particular location, in character-
 // sized units.
 //-----------------------------------------------------------------------------
-static void DrawCharsToScreen(int cx, int cy, const char *str)
+static void DrawCharsToScreen(HCRDC Hcr, int cx, int cy, const char *str)
 {
     cy -= ScrollYOffset*POS_HEIGHT;
     if(cy < -2) return;
@@ -152,12 +157,12 @@ static void DrawCharsToScreen(int cx, int cy, const char *str)
         if(strchr("{}[]", *str) && hiOk && !inComment)  {
             if(*str == '{' || *str == '[') inBrace++;
             if(inBrace == 1) {
-                prev = GetTextColor(Hdc);
-                SetTextColor(Hdc, HighlightColours.punct);
-                TextOut(DrawWindow, Hdc, x, y, str, 1);
-                SetTextColor(Hdc, prev);
+                prev = GetTextColor(Hcr);
+                SetTextColor(Hcr, HighlightColours.punct);
+                TextOut(DrawWindow, Hcr, x, y, str, 1);
+                SetTextColor(Hcr, prev);
             } else {
-                TextOut(DrawWindow, Hdc, x, y, str, 1);
+                TextOut(DrawWindow, Hcr, x, y, str, 1);
             }
             if(*str == ']' || *str == '}') inBrace--;
         } else if((
@@ -165,42 +170,42 @@ static void DrawCharsToScreen(int cx, int cy, const char *str)
                 || str[-1] == ':' || str[-1] == '[')) ||
             (*str == '-' && isdigit(str[1]))) && hiOk && !inComment)
         {
-            prev = GetTextColor(Hdc);
-            SetTextColor(Hdc, HighlightColours.lit);
-            TextOut(DrawWindow, Hdc, x, y, str, 1);
-            SetTextColor(Hdc, prev);
+            prev = GetTextColor(Hcr);
+            SetTextColor(Hcr, HighlightColours.lit);
+            TextOut(DrawWindow, Hcr, x, y, str, 1);
+            SetTextColor(Hcr, prev);
             inNumber = TRUE;
         } else if(*str == '\x01') {
             cx--;
             if(hiOk) {
-                prev = GetTextColor(Hdc);
-                SetTextColor(Hdc, HighlightColours.op);
+                prev = GetTextColor(Hcr);
+                SetTextColor(Hcr, HighlightColours.op);
             }
         } else if(*str == '\x02') {
             cx--;
             if(hiOk) {
-                SetTextColor(Hdc, prev);
+                SetTextColor(Hcr, prev);
                 inComment = FALSE;
             }
         } else if(*str == '\x03') {
             cx--;
             if(hiOk) {
-                prev = GetTextColor(Hdc);
-                SetTextColor(Hdc, HighlightColours.comment);
+                prev = GetTextColor(Hcr);
+                SetTextColor(Hcr, HighlightColours.comment);
                 inComment = TRUE;
             }
         } else if(inNumber) {
             if(isdigit(*str) || *str == '.') {
-                prev = GetTextColor(Hdc);
-                SetTextColor(Hdc, HighlightColours.lit);
-                TextOut(DrawWindow, Hdc, x, y, str, 1);
-                SetTextColor(Hdc, prev);
+                prev = GetTextColor(Hcr);
+                SetTextColor(Hcr, HighlightColours.lit);
+                TextOut(DrawWindow, Hcr, x, y, str, 1);
+                SetTextColor(Hcr, prev);
             } else {
-                TextOut(DrawWindow, Hdc, x, y, str, 1);
+                TextOut(DrawWindow, Hcr, x, y, str, 1);
                 inNumber = FALSE;
             }
         } else {
-            TextOut(DrawWindow, Hdc, x, y, str, 1);
+            TextOut(DrawWindow, Hcr, x, y, str, 1);
         }
 
         firstTime = FALSE;
@@ -241,7 +246,7 @@ int ScreenRowsAvailable(void)
 // cursor should go and fill in coordinates for BlinkCursor. Not allowed to
 // draw deeper than IoListTop, as we would run in to the I/O listbox.
 //-----------------------------------------------------------------------------
-void PaintWindow()
+void PaintWindow(HCRDC Hcr)
 {
     ok();
    
@@ -273,11 +278,11 @@ void PaintWindow()
         if(((cy + thisHeight) >= (ScrollYOffset - 8)*POS_HEIGHT) &&
             (cy < (ScrollYOffset + rowsAvailable + 8)*POS_HEIGHT))
         {
-            SetBkColor(DrawWindow, Hdc, InSimulationMode ? HighlightColours.simBg :
+            SetBkColor(DrawWindow, Hcr, InSimulationMode ? HighlightColours.simBg :
                 HighlightColours.bg);
-            SetTextColor(Hdc, InSimulationMode ? HighlightColours.simRungNum :
+            SetTextColor(Hcr, InSimulationMode ? HighlightColours.simRungNum :
                 HighlightColours.rungNum);
-            SelectObject(Hdc, FixedWidthFont);
+            SelectObject(Hcr, FixedWidthFont);
             int rung = i + 1;
             int y = Y_PADDING + FONT_HEIGHT*cy;
             int yp = y + FONT_HEIGHT*(POS_HEIGHT/2) - 
@@ -285,14 +290,14 @@ void PaintWindow()
             
             if(rung < 10) {
                 char r[1] = { rung + '0' };
-                TextOut(DrawWindow, Hdc, 8 + FONT_WIDTH, yp, r, 1);
+                TextOut(DrawWindow, Hcr, 8 + FONT_WIDTH, yp, r, 1);
             } else {
                 char r[2] = { (rung / 10) + '0', (rung % 10) + '0' };
-                TextOut(DrawWindow, Hdc, 8, yp, r, 2);
+                TextOut(DrawWindow, Hcr, 8, yp, r, 2);
             }
 
             int cx = 0;
-            DrawElement(ELEM_SERIES_SUBCKT, Prog.rungs[i], &cx, &cy, 
+            DrawElement(Hcr, ELEM_SERIES_SUBCKT, Prog.rungs[i], &cx, &cy, 
                 Prog.rungPowered[i]); 
         }
 
@@ -300,7 +305,7 @@ void PaintWindow()
         cy += POS_HEIGHT;
     }
     cy -= 2;
-    DrawEndRung(0, cy);
+    DrawEndRung(Hcr, 0, cy);
     
     if(SelectedGxAfterNextPaint >= 0) {
         MoveCursorNear(SelectedGxAfterNextPaint, SelectedGyAfterNextPaint);
@@ -327,10 +332,10 @@ void PaintWindow()
     r.top = 0;
     r.right = r.left + 4;
     r.bottom = IoListTop;
-    FillRect(Hdc, &r, InSimulationMode ? BusLeftBrush : BusBrush);
+    FillRect(Hcr, &r, InSimulationMode ? BusLeftBrush : BusBrush);
     r.left += POS_WIDTH*FONT_WIDTH*ColsAvailable + 2;
     r.right += POS_WIDTH*FONT_WIDTH*ColsAvailable + 2;
-    FillRect(Hdc, &r, InSimulationMode ? BusRightBus : BusBrush);
+    FillRect(Hcr, &r, InSimulationMode ? BusRightBus : BusBrush);
     InvalidateRect(DrawWindow, NULL, FALSE);
  
     CursorDrawn = FALSE;
@@ -345,7 +350,6 @@ void PaintWindow()
     //     SetTimer(MainWindow, TIMER_BLINK_CURSOR, 800, BlinkCursor);
     // }
 
-    // Hdc = paintDc;
     ok();
 }
 

@@ -589,7 +589,8 @@ void RefreshScrollbars(void);
 extern HINSTANCE Instance;
 extern HWID MainWindow;
 extern HWID DrawWindow;
-extern HCRDC Hdc;
+// extern HGDDC Hdc;
+// extern HCRDC Hcr;
 extern PlcProgram Prog;
 extern char CurrentSaveFile[MAX_PATH];
 extern char CurrentCompileFile[MAX_PATH];
@@ -624,16 +625,16 @@ extern HMENU ScrollWindow;
 // draw.cpp
 int ProgCountWidestRow(void);
 int CountHeightOfElement(int which, void *elem);
-BOOL DrawElement(int which, void *elem, int *cx, int *cy, BOOL poweredBefore);
-void DrawEndRung(int cx, int cy);
+BOOL DrawElement(HCRDC Hcr, int which, void *elem, int *cx, int *cy, BOOL poweredBefore);
+void DrawEndRung(HCRDC Hcr, int cx, int cy);
 extern int ColsAvailable;
 extern BOOL SelectionActive;
 extern BOOL ThisHighlighted;
 
 // draw_outputdev.cpp
-extern void (*DrawChars)(int, int, const char *);
+extern void (*DrawChars)(HCRDC Hcr, int, int, const char *);
 gboolean BlinkCursor(GtkWidget * window);
-void PaintWindow();
+void PaintWindow(HCRDC Hcr);
 void ExportDrawingAsText(char *file);
 void InitForDrawing(void);
 void SetUpScrollbars(BOOL *horizShown, SCROLLINFO *horiz, SCROLLINFO *vert);

@@ -263,24 +263,24 @@ HFONT CreateFont(int nHeight, int nWidth, int nOrientation, int fnWeight,
 
 void SetBkColor(HWID widget, HCRDC hcr, COLORREF bkCol)
 {
-    gtk_widget_override_background_color(GTK_WIDGET(widget), 
-                        GTK_STATE_FLAG_NORMAL, &bkCol);
+    // gtk_widget_override_background_color(GTK_WIDGET(widget), 
+    //                     GTK_STATE_FLAG_NORMAL, &bkCol);
 
-    gint width = gtk_widget_get_allocated_width (widget);
-    gint height = gtk_widget_get_allocated_height (widget);
+    // gint width = gtk_widget_get_allocated_width (widget);
+    // gint height = gtk_widget_get_allocated_height (widget);
 
-    COLORREF col;
-    GtkStyleContext *context;
+    // COLORREF col;
+    // GtkStyleContext *context;
 
-    context = gtk_widget_get_style_context (widget);
+    // context = gtk_widget_get_style_context (widget);
 
-    gtk_style_context_get_color (context,
-                        gtk_style_context_get_state (context),
-                        &col);
+    // gtk_style_context_get_color (context,
+    //                     gtk_style_context_get_state (context),
+    //                     &col);
     
-    gdk_cairo_set_source_rgba (hcr, &col);
+    // gdk_cairo_set_source_rgba (hcr, &col);
 
-    cairo_fill (hcr);
+    // cairo_fill (hcr);
 }
 
 void SetTextColor(HCRDC hcr, COLORREF color)

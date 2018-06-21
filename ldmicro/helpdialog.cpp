@@ -314,13 +314,4 @@ void ShowHelpDialog(BOOL about)
         return;
     }
     HelpWindowOpen[a] = TRUE;
-
-//     RECT r;
-//     GetClientRect(HelpDialog[a], &r);
-//     TitleHeight = 300 - r.bottom;
-
-//     GetWindowRect(HelpDialog[a], &r);
-//     Resizing(&r, WMSZ_TOP);
-//     SetWindowPos(HelpDialog[a], HWND_TOP, r.left, r.top, r.right - r.left, 
-//         r.bottom - r.top, 0);
 }

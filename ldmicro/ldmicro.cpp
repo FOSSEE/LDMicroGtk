@@ -578,11 +578,11 @@ static void ProcessMenu(int code)
             break;
 
         case MNU_MANUAL:
-            // ShowHelpDialog(FALSE);
+            ShowHelpDialog(FALSE);
             break;
 
         case MNU_ABOUT:
-            // ShowHelpDialog(TRUE);
+            ShowHelpDialog(TRUE);
             break;
     }
 }
@@ -595,6 +595,10 @@ void WM_COMMAND (GtkMenuItem* men, gpointer gpcode){
 void MenuHandler (){
     g_signal_connect(G_OBJECT(McuSettingsMenu), "activate",
         G_CALLBACK(WM_COMMAND), GINT_TO_POINTER(MNU_MCU_SETTINGS));
+    g_signal_connect(G_OBJECT(ManualMenu), "activate",
+        G_CALLBACK(WM_COMMAND), GINT_TO_POINTER(MNU_MANUAL));
+    g_signal_connect(G_OBJECT(AboutMenu), "activate",
+        G_CALLBACK(WM_COMMAND), GINT_TO_POINTER(MNU_ABOUT));
 }
 
 //-----------------------------------------------------------------------------

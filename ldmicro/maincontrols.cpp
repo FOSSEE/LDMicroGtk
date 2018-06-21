@@ -618,8 +618,17 @@ void MakeMainWindowControls(void)
 //-----------------------------------------------------------------------------
 void RefreshScrollbars(void)
 {
-    // SCROLLINFO vert, horiz;
-    // SetUpScrollbars(&NeedHoriz, &horiz, &vert);
+    SCROLLINFO vert, horiz;
+    SetUpScrollbars(&NeedHoriz, &horiz, &vert);
+
+    GtkAdjustment *adjustment = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(ScrollWindow));
+    // g_print("adj = %f\n", gtk_adjustment_get_value(adjustment));
+    // g_print("upper = %f\n", gtk_adjustment_get_upper(adjustment) - gtk_widget_get_allocated_height (ScrollWindow));
+    // g_print("lower = %f\n", gtk_adjustment_get_lower(adjustment));
+    // g_print("inc = %f\n", gtk_adjustment_get_step_increment(adjustment));
+    // g_print("w width = %i\n", gtk_widget_get_allocated_width (DrawWindow));
+    // g_print("w height = %i\n", gtk_widget_get_allocated_height (ScrollWindow));
+
     // SetScrollInfo(HorizScrollBar, SB_CTL, &horiz, TRUE);
     // SetScrollInfo(VertScrollBar, SB_CTL, &vert, TRUE);
 
@@ -640,44 +649,44 @@ void RefreshScrollbars(void)
     // MoveWindow(VertScrollBar, main.right - ScrollWidth - 2, 1, ScrollWidth,
     //     NeedHoriz ? (IoListTop - ScrollHeight - 4) : (IoListTop - 3), TRUE);
 
-    // InvalidateRect(MainWindow, NULL, FALSE);
+    InvalidateRect(DrawWindow, NULL, FALSE);
 }
 
 //-----------------------------------------------------------------------------
 // Respond to a WM_VSCROLL sent to the main window, presumably by the one and
 // only vertical scrollbar that it has as a child.
 //-----------------------------------------------------------------------------
-void VscrollProc(WPARAM wParam)
+void VscrollProc(int wParam)
 {
-    // int prevY = ScrollYOffset;
-    // switch(LOWORD(wParam)) {
-    //     case SB_LINEUP:
-    //     case SB_PAGEUP:
-    //         if(ScrollYOffset > 0) {
-    //             ScrollYOffset--;
-    //         }
-    //         break;
+    int prevY = ScrollYOffset;
+    switch(wParam) {
+        case SB_LINEUP:
+        case SB_PAGEUP:
+            if(ScrollYOffset > 0) {
+                ScrollYOffset--;
+            }
+            break;
 
-    //     case SB_LINEDOWN:
-    //     case SB_PAGEDOWN:
-    //         if(ScrollYOffset < ScrollYOffsetMax) {
-    //             ScrollYOffset++;
-    //         }
-    //         break;
+        case SB_LINEDOWN:
+        case SB_PAGEDOWN:
+            if(ScrollYOffset < ScrollYOffsetMax) {
+                ScrollYOffset++;
+            }
+            break;
 
-    //     case SB_TOP:
-    //         ScrollYOffset = 0;
-    //         break;
+        case SB_TOP:
+            ScrollYOffset = 0;
+            break;
 
-    //     case SB_BOTTOM:
-    //         ScrollYOffset = ScrollYOffsetMax;
-    //         break;
+        case SB_BOTTOM:
+            ScrollYOffset = ScrollYOffsetMax;
+            break;
 
-    //     case SB_THUMBTRACK:
-    //     case SB_THUMBPOSITION:
-    //         ScrollYOffset = HIWORD(wParam);
-    //         break;
-    // }
+        // case SB_THUMBTRACK:
+        // case SB_THUMBPOSITION:
+            // ScrollYOffset = HIWORD(wParam);
+            // break;
+    }
     // if(prevY != ScrollYOffset) {
     //     SCROLLINFO si;
     //     si.cbSize = sizeof(si);
@@ -693,42 +702,42 @@ void VscrollProc(WPARAM wParam)
 // Respond to a WM_HSCROLL sent to the main window, presumably by the one and
 // only horizontal scrollbar that it has as a child.
 //-----------------------------------------------------------------------------
-void HscrollProc(WPARAM wParam)
+void HscrollProc(int wParam)
 {
-    // int prevX = ScrollXOffset;
-    // switch(LOWORD(wParam)) {
-    //     case SB_LINEUP:
-    //         ScrollXOffset -= FONT_WIDTH;
-    //         break;
+    int prevX = ScrollXOffset;
+    switch(wParam) {
+        case SB_LINEUP:
+            ScrollXOffset -= FONT_WIDTH;
+            break;
 
-    //     case SB_PAGEUP:
-    //         ScrollXOffset -= POS_WIDTH*FONT_WIDTH;
-    //         break;
+        case SB_PAGEUP:
+            ScrollXOffset -= POS_WIDTH*FONT_WIDTH;
+            break;
 
-    //     case SB_LINEDOWN:
-    //         ScrollXOffset += FONT_WIDTH;
-    //         break;
+        case SB_LINEDOWN:
+            ScrollXOffset += FONT_WIDTH;
+            break;
 
-    //     case SB_PAGEDOWN:
-    //         ScrollXOffset += POS_WIDTH*FONT_WIDTH;
-    //         break;
+        case SB_PAGEDOWN:
+            ScrollXOffset += POS_WIDTH*FONT_WIDTH;
+            break;
 
-    //     case SB_TOP:
-    //         ScrollXOffset = 0;
-    //         break;
+        case SB_TOP:
+            ScrollXOffset = 0;
+            break;
 
-    //     case SB_BOTTOM:
-    //         ScrollXOffset = ScrollXOffsetMax;
-    //         break;
+        case SB_BOTTOM:
+            ScrollXOffset = ScrollXOffsetMax;
+            break;
 
-    //     case SB_THUMBTRACK:
-    //     case SB_THUMBPOSITION:
-    //         ScrollXOffset = HIWORD(wParam);
-    //         break;
-    // }
+        // case SB_THUMBTRACK:
+        // case SB_THUMBPOSITION:
+            // ScrollXOffset = HIWORD(wParam);
+            // break;
+    }
 
-    // if(ScrollXOffset > ScrollXOffsetMax) ScrollXOffset = ScrollXOffsetMax;
-    // if(ScrollXOffset < 0) ScrollXOffset = 0;
+    if(ScrollXOffset > ScrollXOffsetMax) ScrollXOffset = ScrollXOffsetMax;
+    if(ScrollXOffset < 0) ScrollXOffset = 0;
 
     // if(prevX != ScrollXOffset) {
     //     SCROLLINFO si;

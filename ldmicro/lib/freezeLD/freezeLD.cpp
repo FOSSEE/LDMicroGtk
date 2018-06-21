@@ -20,8 +20,8 @@ void FreezeWindowPosF(HWID hwid, char *subKey, char *name)
 {
     //g_print("freezing");
     char* Ld_CWD = (char *)malloc(MAX_PATH);
-    getcwd(Ld_CWD, sizeof(Ld_CWD));
-
+    getcwd(Ld_CWD, MAX_PATH);
+    
     if (!Ld_CWD)
         return;
     char* moveToKeyLocatin = (char *)malloc(strlen(name) + MAX_PATH);
@@ -144,8 +144,8 @@ static void Clamp(LONG *v, LONG min, LONG max)
 void ThawWindowPosF(HWID hwid, char *subKey, char *name)
 {
     char* Ld_CWD = (char *)malloc(MAX_PATH);
-    getcwd(Ld_CWD, sizeof(Ld_CWD));
-
+    getcwd(Ld_CWD, MAX_PATH);
+    
     if (!Ld_CWD)
         return;
     
@@ -254,7 +254,7 @@ void ThawWindowPosF(HWID hwid, char *subKey, char *name)
 void FreezeDWORDF(DWORD val, char *subKey, char *name)
 {
     char* Ld_CWD = (char *)malloc(MAX_PATH);
-    getcwd(Ld_CWD, sizeof(Ld_CWD));
+    getcwd(Ld_CWD, MAX_PATH);
 
     if (!Ld_CWD)
         return;
@@ -294,7 +294,7 @@ void FreezeDWORDF(DWORD val, char *subKey, char *name)
 DWORD ThawDWORDF(DWORD val, char *subKey, char *name)
 {
     char* Ld_CWD = (char *)malloc(MAX_PATH);
-    getcwd(Ld_CWD, sizeof(Ld_CWD));
+    getcwd(Ld_CWD, MAX_PATH);
 
     if (!Ld_CWD)
         return val;
@@ -339,7 +339,7 @@ DWORD ThawDWORDF(DWORD val, char *subKey, char *name)
 void FreezeStringF(char *val, char *subKey, char *name)
 {
     char* Ld_CWD = (char *)malloc(MAX_PATH);
-    getcwd(Ld_CWD, sizeof(Ld_CWD));
+    getcwd(Ld_CWD, MAX_PATH);
 
     if (!Ld_CWD)
         return;
@@ -377,7 +377,7 @@ void FreezeStringF(char *val, char *subKey, char *name)
 void ThawStringF(char *val, int max, char *subKey, char *name)
 {
     char* Ld_CWD = (char *)malloc(MAX_PATH);
-    getcwd(Ld_CWD, sizeof(Ld_CWD));
+    getcwd(Ld_CWD, MAX_PATH);
 
     if (!Ld_CWD)
         return;

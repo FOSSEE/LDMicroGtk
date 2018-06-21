@@ -33,10 +33,23 @@
 #define MB_ICONWARNING      0x00000040L
 #define MB_ICONINFORMATION  0x00000080L
 
+/// Scroll
+#define SB_LINEUP 0x00000001
+#define SB_PAGEUP 0x00000002
+#define SB_LINEDOWN 0x00000004
+#define SB_PAGEDOWN 0x00000008
+#define SB_TOP 0x00000010
+#define SB_BOTTOM 0x00000020
+#define SB_THUMBTRACK 0x00000040 
+#define SB_THUMBPOSITION 0x00000040 
+
 /// open/save file
 #define OFN_PATHMUSTEXIST     0x00000100L
 #define OFN_HIDEREADONLY      0x00000200L
 #define OFN_OVERWRITEPROMPT   0x00000400L
+
+/// PatBlt paint flags
+#define PATINVERT 0x00000100L
 
 /// window brushes
 #define BS_SOLID       0x00000001L
@@ -87,7 +100,7 @@ typedef struct OpenFileInfoData {
 extern COLORREF HdcCurrentTextColor;
 
 /// functions
-BOOL isFocus(HWID window);
+BOOL GetFocus(HWID window);
 
 COLORREF RGB(
     int red, 
@@ -156,6 +169,15 @@ int FillRect(
     HCRDC        hDC,
     const RECT   *lprc,
     HBRUSH       hbr);
+
+BOOL PatBlt(
+    HCRDC  hdc,
+    int    nXLeft,
+    int    nYLeft,
+    int    nWidth,
+    int    nHeight,
+    DWORD  dwRop,
+    HBRUSH hbr);
 
 BOOL GetClientRect(
     HWID   hWid,

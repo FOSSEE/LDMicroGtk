@@ -122,10 +122,6 @@ typedef class tagColorReferance: public GdkRGBA{
             return false;
     }
 
-    GdkRGBA* getThis()
-    {
-        return this;
-    }
 } COLORREF, *HBRUSH;
 
 /// Structures

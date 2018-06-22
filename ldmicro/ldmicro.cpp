@@ -1115,17 +1115,30 @@ gboolean LD_WM_Paint_call(HWID widget, HCRDC cr, gpointer data)//(HWID widget, G
     {        
         gtk_widget_override_background_color(GTK_WIDGET(widget), 
                     GTK_STATE_FLAG_NORMAL, (HBRUSH)GetStockObject(BLACK_BRUSH));
+
         gint width = gtk_widget_get_allocated_width (widget);
         gint height = gtk_widget_get_allocated_height (widget);
 
-        COLORREF col;
-        GtkStyleContext *context;
-        context = gtk_widget_get_style_context (widget);
-        gtk_style_context_get_color (context,
-                        gtk_style_context_get_state (context),
-                        &col);
-        gdk_cairo_set_source_rgba (cr, &col);
-        gtk_render_background (context, cr, 0, 0, width, height);
+        gdk_cairo_set_source_rgba (cr, (HBRUSH)GetStockObject(BLACK_BRUSH));
+
+        cairo_rectangle(cr, 0, 0, width, height);
+        cairo_stroke_preserve(cr);
+
+        cairo_fill (cr);
+
+        // gint width = gtk_widget_get_allocated_width (widget);
+        // gint height = gtk_widget_get_allocated_height (widget);
+
+        // COLORREF col(0, 0, 0);
+        // GtkStyleContext *context;
+        // context = gtk_widget_get_style_context (widget);
+        // gtk_style_context_get_color (context,
+        //                 gtk_style_context_get_state (context),
+        //                 &col);
+        // g_print("r = %f, g = %f, b = %f\n", col.red * 255, col.green * 255, col.blue * 255);
+        // gdk_cairo_set_source_rgba (cr, &col);
+        // // cairo_fill (cr);
+        // gtk_render_background (context, cr, 0, 0, width, height);
         Paint_call_first = FALSE;
     }
 
@@ -1323,7 +1336,7 @@ int main(int argc, char** argv)
     gtk_window_resize (GTK_WINDOW(MainWindow), 800, 600);
     gtk_window_move(GTK_WINDOW(MainWindow), 10, 10);
     gtk_widget_override_background_color(GTK_WIDGET(MainWindow), 
-                            GTK_STATE_FLAG_NORMAL, ((HBRUSH)GetStockObject(GRAY_BRUSH))->getThis());
+                            GTK_STATE_FLAG_NORMAL, ((HBRUSH)GetStockObject(DKGRAY_BRUSH)));
     gtk_window_set_default_icon(LoadImage(Instance, LDMICRO_ICON,
                             IMAGE_ICON, 32, 32, 0));
     gtk_window_set_icon(GTK_WINDOW(MainWindow), LoadImage(Instance, LDMICRO_ICON,

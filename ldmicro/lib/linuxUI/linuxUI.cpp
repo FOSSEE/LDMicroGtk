@@ -96,6 +96,87 @@ int MessageBox(HWID pWindow, char* message, char* title, UINT mFlags)
 BOOL GetSaveFileName(OPENFILENAME *ofn)
 {
     GtkWidget *dialog;
+    GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_SAVE;
+
+    dialog = gtk_file_chooser_dialog_new (ofn->lpstrTitle,
+                                        GTK_WINDOW(ofn->parentWindow),
+                                        action,
+                                        "_Cancel",
+                                        GTK_RESPONSE_CANCEL,
+                                        "_Save",
+                                        GTK_RESPONSE_ACCEPT,
+                                        NULL);
+    //g_print("filter created\n");
+    char filename[15] = "Untitled";
+
+    if (ofn->lpstrDefExt != NULL)
+        sprintf(filename, "Untitled.%s", ofn->lpstrDefExt);
+    
+    gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER(dialog), filename);
+
+    if (ofn->Flags & OFN_OVERWRITEPROMPT)
+        gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog), TRUE);
+    
+    GtkFileFilter *filter = gtk_file_filter_new ();
+    char* strFilter = new char[strlen(ofn->lpstrFilter)];
+    DWORD strFilterLen = 0;
+    BOOL filterResetFlag = FALSE;
+    
+    for (int i = 0; !(ofn->lpstrFilter[i] == '\0' && ofn->lpstrFilter[i-1] == '\0'); ++i)   
+    {
+        memcpy (strFilter + strFilterLen, &ofn->lpstrFilter[i], 1 );
+        ++strFilterLen;
+        if (ofn->lpstrFilter[i] == '\0')
+            if (filterResetFlag)
+            {
+                gtk_file_filter_add_pattern (GTK_FILE_FILTER(filter), strFilter);
+                gtk_file_chooser_add_filter (GTK_FILE_CHOOSER(dialog), filter);
+                filter = gtk_file_filter_new ();
+                strFilterLen = 0;
+                //g_print("filter pat: %s\n", strFilter);
+                //g_print("filter reset\n");
+                filterResetFlag = FALSE;
+            }
+            else
+            {
+                gtk_file_filter_set_name (GTK_FILE_FILTER(filter), strFilter);
+                //g_print("filter name: %s\n", strFilter);
+                strFilterLen = 0;
+                filterResetFlag = TRUE;
+            }
+    }
+    //g_print("filter rules added\n");
+    
+    sprintf(strFilter, "*.%s", ofn->lpstrDefExt);
+    gtk_file_filter_add_pattern (GTK_FILE_FILTER(filter), strFilter);
+    //gtk_file_filter_set_name (filter, "int files");
+    gtk_file_chooser_set_filter (GTK_FILE_CHOOSER(dialog), filter);
+    
+    delete strFilter;
+
+    //g_print("default filter set\n");
+
+    BOOL exitStatus = gtk_dialog_run (GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT;
+    if (exitStatus)
+    {
+        char* str;
+        str = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER(dialog));
+        
+        strcpy(ofn->lpstrFile, str);
+        g_free(str);
+    }
+    //g_print("file path saved: %s\n", ofn->lpstrFile);
+    
+    gtk_widget_destroy (dialog);
+
+    //g_print("exit\n");
+
+    return exitStatus;
+}
+
+BOOL GetOpenFileName(OPENFILENAME *ofn)
+{
+    GtkWidget *dialog;
     GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
 
     dialog = gtk_file_chooser_dialog_new (ofn->lpstrTitle,
@@ -108,9 +189,6 @@ BOOL GetSaveFileName(OPENFILENAME *ofn)
                                         NULL);
     //g_print("filter created\n");
     
-    if (ofn->Flags & OFN_OVERWRITEPROMPT == OFN_OVERWRITEPROMPT)
-        gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog), TRUE);
-
     GtkFileFilter *filter = gtk_file_filter_new ();
     char* strFilter = new char[strlen(ofn->lpstrFilter)];
     DWORD strFilterLen = 0;
@@ -166,6 +244,7 @@ BOOL GetSaveFileName(OPENFILENAME *ofn)
 
     return exitStatus;
 }
+
 
 void EnableMenuItem(HMENU MenuName, HMENU MenuItem, UINT CheckEnabledItem) 
 {

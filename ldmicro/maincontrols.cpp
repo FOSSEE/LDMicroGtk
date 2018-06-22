@@ -34,7 +34,7 @@
 HMENU NewMenu;
 HMENU OpenMenu;
 HMENU SaveMenu;
-HMENU SaveAsMenu_AS;
+HMENU SaveAsMenu;
 HMENU ExportMenu;
 HMENU ExitMenu;
 
@@ -298,7 +298,7 @@ HMENU MakeMainWindowMenus(void)
     NewMenu = gtk_menu_item_new_with_mnemonic("_New");
     OpenMenu = gtk_menu_item_new_with_mnemonic("_Open");
     SaveMenu = gtk_menu_item_new_with_mnemonic("_Save");
-    SaveAsMenu_AS = gtk_menu_item_new_with_mnemonic("_Save As");
+    SaveAsMenu = gtk_menu_item_new_with_mnemonic("_Save As");
     ExportMenu = gtk_menu_item_new_with_mnemonic("_Export As Text");
     ExitMenu = gtk_menu_item_new_with_mnemonic("_Exit");
 
@@ -306,7 +306,7 @@ HMENU MakeMainWindowMenus(void)
     gtk_menu_shell_append(GTK_MENU_SHELL (FileMenu), NewMenu);       // Appending menu items
     gtk_menu_shell_append(GTK_MENU_SHELL (FileMenu), OpenMenu);
     gtk_menu_shell_append(GTK_MENU_SHELL (FileMenu), SaveMenu);
-    gtk_menu_shell_append(GTK_MENU_SHELL (FileMenu), SaveAsMenu_AS);
+    gtk_menu_shell_append(GTK_MENU_SHELL (FileMenu), SaveAsMenu);
     FileMenuSeparator = gtk_separator_menu_item_new();
     gtk_menu_shell_append(GTK_MENU_SHELL (FileMenu), FileMenuSeparator);
     gtk_menu_shell_append(GTK_MENU_SHELL (FileMenu), ExportMenu);
@@ -621,14 +621,6 @@ void RefreshScrollbars(void)
     SCROLLINFO vert, horiz;
     SetUpScrollbars(&NeedHoriz, &horiz, &vert);
 
-    GtkAdjustment *adjustment = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(ScrollWindow));
-    // g_print("adj = %f\n", gtk_adjustment_get_value(adjustment));
-    // g_print("upper = %f\n", gtk_adjustment_get_upper(adjustment) - gtk_widget_get_allocated_height (ScrollWindow));
-    // g_print("lower = %f\n", gtk_adjustment_get_lower(adjustment));
-    // g_print("inc = %f\n", gtk_adjustment_get_step_increment(adjustment));
-    // g_print("w width = %i\n", gtk_widget_get_allocated_width (DrawWindow));
-    // g_print("w height = %i\n", gtk_widget_get_allocated_height (ScrollWindow));
-
     // SetScrollInfo(HorizScrollBar, SB_CTL, &horiz, TRUE);
     // SetScrollInfo(VertScrollBar, SB_CTL, &vert, TRUE);
 
@@ -867,7 +859,7 @@ void ToggleSimulationMode(void)
 
         EnableMenuItem(FileMenu, OpenMenu, MF_GRAYED);
         EnableMenuItem(FileMenu, SaveMenu, MF_GRAYED);
-        EnableMenuItem(FileMenu, SaveAsMenu_AS, MF_GRAYED);
+        EnableMenuItem(FileMenu, SaveAsMenu, MF_GRAYED);
         EnableMenuItem(FileMenu, NewMenu, MF_GRAYED);
         EnableMenuItem(FileMenu, ExportMenu, MF_GRAYED);
 
@@ -895,7 +887,7 @@ void ToggleSimulationMode(void)
 
         EnableMenuItem(FileMenu, OpenMenu, MF_ENABLED);
         EnableMenuItem(FileMenu, SaveMenu, MF_ENABLED);
-        EnableMenuItem(FileMenu, SaveAsMenu_AS, MF_ENABLED);
+        EnableMenuItem(FileMenu, SaveAsMenu, MF_ENABLED);
         EnableMenuItem(FileMenu, NewMenu, MF_ENABLED);
         EnableMenuItem(FileMenu, ExportMenu, MF_ENABLED);
 

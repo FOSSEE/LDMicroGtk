@@ -44,9 +44,9 @@
 #define SB_THUMBPOSITION 0x00000040 
 
 /// open/save file
-#define OFN_PATHMUSTEXIST     0x00000100L
-#define OFN_HIDEREADONLY      0x00000200L
-#define OFN_OVERWRITEPROMPT   0x00000400L
+#define OFN_PATHMUSTEXIST     0x00000001L
+#define OFN_HIDEREADONLY      0x00000002L
+#define OFN_OVERWRITEPROMPT   0x00000004L
 
 /// PatBlt paint flags
 #define PATINVERT 0x00000100L
@@ -114,6 +114,8 @@ int MessageBox(
     UINT  mFlags);
 
 BOOL GetSaveFileName(OPENFILENAME *ofn);
+
+BOOL GetOpenFileName(OPENFILENAME *ofn);
 
 void EnableMenuItem(
     HMENU MenuName, 

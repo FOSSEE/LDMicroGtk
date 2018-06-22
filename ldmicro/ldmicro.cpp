@@ -66,79 +66,83 @@ char CurrentCompileFile[MAX_PATH];
 // project file.
 PlcProgram Prog;
 
+/// Function to safely quit program gtk main loop
+void LD_WM_Close_call(GtkWidget *widget, GdkEvent *event, gpointer user_data);
+
 //-----------------------------------------------------------------------------
 // Get a filename with a common dialog box and then save the program to that
 // file and then set our default filename to that.
 //-----------------------------------------------------------------------------
-// static BOOL SaveAsDialog(void)
-// {
-//     OPENFILENAME ofn;
+static BOOL SaveAsDialog(void)
+{
+    OPENFILENAME ofn;
 
-//     memset(&ofn, 0, sizeof(ofn));
-//     ofn.lStructSize = sizeof(ofn);
-//     ofn.hInstance = Instance;
-//     ofn.lpstrFilter = LDMICRO_PATTERN;
-//     ofn.lpstrDefExt = "ld";
-//     ofn.lpstrFile = CurrentSaveFile;
-//     ofn.nMaxFile = sizeof(CurrentSaveFile);
-//     ofn.Flags = OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
+    memset(&ofn, 0, sizeof(ofn));
+    ofn.lStructSize = sizeof(ofn);
+    ofn.parentWindow = MainWindow;
+    ofn.lpstrFilter = LDMICRO_PATTERN;
+    ofn.lpstrDefExt = "ld";
+    ofn.lpstrFile = CurrentSaveFile;
+    ofn.nMaxFile = sizeof(CurrentSaveFile);
+    ofn.Flags = OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
 
-//     if(!GetSaveFileName(&ofn))
-//         return FALSE;
+    if(!GetSaveFileName(&ofn))
+        return FALSE;
 
-//     if(!SaveProjectToFile(CurrentSaveFile)) {
-//         Error(_("Couldn't write to '%s'."), CurrentSaveFile);
-//         return FALSE;
-//     } else {
-//         ProgramChangedNotSaved = FALSE;
-//         return TRUE;
-//     }
-// }
+    if(!SaveProjectToFile(CurrentSaveFile)) {
+        Error(_("Couldn't write to '%s'."), CurrentSaveFile);
+        return FALSE;
+    } else {
+        ProgramChangedNotSaved = FALSE;
+        return TRUE;
+    }
+}
 
 //-----------------------------------------------------------------------------
 // Get a filename with a common dialog box and then export the program as
 // an ASCII art drawing.
 //-----------------------------------------------------------------------------
-// static void ExportDialog(void)
-// {
-//     char exportFile[MAX_PATH];
-//     OPENFILENAME ofn;
+static void ExportDialog(void)
+{
+    char exportFile[MAX_PATH];
+    OPENFILENAME ofn;
 
-//     exportFile[0] = '\0';
+    exportFile[0] = '\0';
 
-//     memset(&ofn, 0, sizeof(ofn));
-//     ofn.lStructSize = sizeof(ofn);
-//     ofn.hInstance = Instance;
-//     ofn.lpstrFilter = TXT_PATTERN;
-//     ofn.lpstrFile = exportFile;
-//     ofn.lpstrTitle = _("Export As Text");
-//     ofn.nMaxFile = sizeof(exportFile);
-//     ofn.Flags = OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
+    memset(&ofn, 0, sizeof(ofn));
+    ofn.lStructSize = sizeof(ofn);
+    ofn.parentWindow = MainWindow;
+    ofn.lpstrFilter = TXT_PATTERN;
+    ofn.lpstrFile = exportFile;
+    ofn.lpstrDefExt = "txt";
+    ofn.lpstrTitle = _("Export As Text");
+    ofn.nMaxFile = sizeof(exportFile);
+    ofn.Flags = OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
 
-//     if(!GetSaveFileName(&ofn))
-//         return;
+    if(!GetSaveFileName(&ofn))
+        return;
 
-//     ExportDrawingAsText(exportFile);
-// }
+    ExportDrawingAsText(exportFile);
+}
 
 //-----------------------------------------------------------------------------
 // If we already have a filename, save the program to that. Otherwise same
 // as Save As. Returns TRUE if it worked, else returns FALSE.
 //-----------------------------------------------------------------------------
-// static BOOL SaveProgram(void)
-// {
-//     if(strlen(CurrentSaveFile)) {
-//         if(!SaveProjectToFile(CurrentSaveFile)) {
-//             Error(_("Couldn't write to '%s'."), CurrentSaveFile);
-//             return FALSE;
-//         } else {
-//             ProgramChangedNotSaved = FALSE;
-//             return TRUE;
-//         }
-//     } else {
-//         return SaveAsDialog();
-//     }
-// }
+static BOOL SaveProgram(void)
+{
+    if(strlen(CurrentSaveFile)) {
+        if(!SaveProjectToFile(CurrentSaveFile)) {
+            Error(_("Couldn't write to '%s'."), CurrentSaveFile);
+            return FALSE;
+        } else {
+            ProgramChangedNotSaved = FALSE;
+            return TRUE;
+        }
+    } else {
+        return SaveAsDialog();
+    }
+}
 
 //-----------------------------------------------------------------------------
 // Compile the program to a hex file for the target micro. Get the output
@@ -208,70 +212,71 @@ static void CompileProgram(BOOL compileAs)
 // or to cancel the operation they are performing. Return TRUE if they want
 // to cancel.
 //-----------------------------------------------------------------------------
-// BOOL CheckSaveUserCancels(void)
-// {
-//     if(!ProgramChangedNotSaved) {
-//         // no problem
-//         return FALSE;
-//     }
+BOOL CheckSaveUserCancels(void)
+{
+    if(!ProgramChangedNotSaved) {
+        // no problem
+        return FALSE;
+    }
 
-//     int r = MessageBox(MainWindow, 
-//         _("The program has changed since it was last saved.\r\n\r\n"
-//         "Do you want to save the changes?"), "LDmicro",
-//         MB_YESNOCANCEL | MB_ICONWARNING);
-//     switch(r) {
-//         case IDYES:
-//             if(SaveProgram())
-//                 return FALSE;
-//             else
-//                 return TRUE;
+    int r = MessageBox(MainWindow, 
+        _("The program has changed since it was last saved.\r\n\r\n"
+        "Do you want to save the changes?"), "LDmicro",
+        MB_YESNOCANCEL | MB_ICONWARNING);
+    switch(r) {
+        case IDYES:
+            if(SaveProgram())
+                return FALSE;
+            else
+                return TRUE;
 
-//         case IDNO:
-//             return FALSE;
+        case IDNO:
+            return FALSE;
 
-//         case IDCANCEL:
-//             return TRUE;
+        case IDCANCEL:
+            return TRUE;
 
-//         default:
-//             oops();
-//     }
-// }
+        default:
+            oops();
+    }
+    
+}
 
 //-----------------------------------------------------------------------------
 // Load a new program from a file. If it succeeds then set our default filename
 // to that, else we end up with an empty file then.
 //-----------------------------------------------------------------------------
-// static void OpenDialog(void)
-// {
-//     OPENFILENAME ofn;
+static void OpenDialog(void)
+{
+    OPENFILENAME ofn;
 
-//     char tempSaveFile[MAX_PATH] = "";
+    char tempSaveFile[MAX_PATH] = "";
 
-//     memset(&ofn, 0, sizeof(ofn));
-//     ofn.lStructSize = sizeof(ofn);
-//     ofn.hInstance = Instance;
-//     ofn.lpstrFilter = LDMICRO_PATTERN;
-//     ofn.lpstrDefExt = "ld";
-//     ofn.lpstrFile = tempSaveFile;
-//     ofn.nMaxFile = sizeof(tempSaveFile);
-//     ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
+    memset(&ofn, 0, sizeof(ofn));
+    ofn.lStructSize = sizeof(ofn);
+    ofn.parentWindow = MainWindow;
+    ofn.lpstrFilter = LDMICRO_PATTERN;
+    ofn.lpstrDefExt = "ld";
+    ofn.lpstrFile = tempSaveFile;
+    ofn.nMaxFile = sizeof(tempSaveFile);
+    ofn.Flags = OFN_PATHMUSTEXIST | OFN_HIDEREADONLY;
 
-//     if(!GetOpenFileName(&ofn))
-//         return;
+    if(!GetOpenFileName(&ofn))
+        return;
 
-//     if(!LoadProjectFromFile(tempSaveFile)) {
-//         Error(_("Couldn't open '%s'."), tempSaveFile);
-//         CurrentSaveFile[0] = '\0';
-//     } else {
-//         ProgramChangedNotSaved = FALSE;
-//         strcpy(CurrentSaveFile, tempSaveFile);
-//         UndoFlush();
-//     }
+    if(!LoadProjectFromFile(tempSaveFile)) {
+        Error(_("Couldn't open '%s'."), tempSaveFile);
+        CurrentSaveFile[0] = '\0';
+    } else {
+        ProgramChangedNotSaved = FALSE;
+        strcpy(CurrentSaveFile, tempSaveFile);
+        UndoFlush();
+    }
 
-//     GenerateIoListDontLoseSelection();
-//     RefreshScrollbars();
-//     UpdateMainWindowTitleBar();
-// }
+    GenerateIoListDontLoseSelection();
+    RefreshScrollbars();
+    UpdateMainWindowTitleBar();
+}
 
 //-----------------------------------------------------------------------------
 // Housekeeping required when the program changes: mark the program as
@@ -344,209 +349,210 @@ static void ProcessMenu(int code)
 
     switch(code) {
         case MNU_NEW:
-            // if(CheckSaveUserCancels()) break;
-            // NewProgram();
-            // strcpy(CurrentSaveFile, "");
-            // strcpy(CurrentCompileFile, "");
-            // GenerateIoListDontLoseSelection();
-            // RefreshScrollbars();
-            // UpdateMainWindowTitleBar();
+            if(CheckSaveUserCancels()) break;
+            NewProgram();
+            strcpy(CurrentSaveFile, "");
+            strcpy(CurrentCompileFile, "");
+            GenerateIoListDontLoseSelection();
+            RefreshScrollbars();
+            UpdateMainWindowTitleBar();
             break;
 
         case MNU_OPEN:
-            // if(CheckSaveUserCancels()) break;
-            // OpenDialog();
+            if(CheckSaveUserCancels()) break;
+            OpenDialog();
             break;
 
         case MNU_SAVE:
-            // SaveProgram();
-            // UpdateMainWindowTitleBar();
+            SaveProgram();
+            UpdateMainWindowTitleBar();
             break;
 
         case MNU_SAVE_AS:
-            // SaveAsDialog();
-            // UpdateMainWindowTitleBar();
+            SaveAsDialog();
+            UpdateMainWindowTitleBar();
             break;
 
         case MNU_EXPORT:
-            // ExportDialog();
+            ExportDialog();
             break;
 
         case MNU_EXIT:
-            // if(CheckSaveUserCancels()) break;
+            if(CheckSaveUserCancels()) break;
+            LD_WM_Close_call(NULL, NULL, NULL);
             // PostQuitMessage(0);
             break;
 
         case MNU_INSERT_COMMENT:
-            // CHANGING_PROGRAM(AddComment(_("--add comment here--")));
+            CHANGING_PROGRAM(AddComment(_("--add comment here--")));
             break;
 
         case MNU_INSERT_CONTACTS:
-            // CHANGING_PROGRAM(AddContact());
+            CHANGING_PROGRAM(AddContact());
             break;
 
         case MNU_INSERT_COIL:
-            // CHANGING_PROGRAM(AddCoil());
+            CHANGING_PROGRAM(AddCoil());
             break;
 
         case MNU_INSERT_TON:
-            // CHANGING_PROGRAM(AddTimer(ELEM_TON));
+            CHANGING_PROGRAM(AddTimer(ELEM_TON));
             break;
 
         case MNU_INSERT_TOF:
-            // CHANGING_PROGRAM(AddTimer(ELEM_TOF));
+            CHANGING_PROGRAM(AddTimer(ELEM_TOF));
             break;
 
         case MNU_INSERT_RTO:
-            // CHANGING_PROGRAM(AddTimer(ELEM_RTO));
+            CHANGING_PROGRAM(AddTimer(ELEM_RTO));
             break;
 
         case MNU_INSERT_CTU:
-            // CHANGING_PROGRAM(AddCounter(ELEM_CTU));
+            CHANGING_PROGRAM(AddCounter(ELEM_CTU));
             break;
 
         case MNU_INSERT_CTD:
-            // CHANGING_PROGRAM(AddCounter(ELEM_CTD));
+            CHANGING_PROGRAM(AddCounter(ELEM_CTD));
             break;
 
         case MNU_INSERT_CTC:
-            // CHANGING_PROGRAM(AddCounter(ELEM_CTC));
+            CHANGING_PROGRAM(AddCounter(ELEM_CTC));
             break;
 
         case MNU_INSERT_RES:
-            // CHANGING_PROGRAM(AddReset());
+            CHANGING_PROGRAM(AddReset());
             break;
 
         case MNU_INSERT_OPEN:
-            // CHANGING_PROGRAM(AddEmpty(ELEM_OPEN));
+            CHANGING_PROGRAM(AddEmpty(ELEM_OPEN));
             break;
 
         case MNU_INSERT_SHORT:
-            // CHANGING_PROGRAM(AddEmpty(ELEM_SHORT));
+            CHANGING_PROGRAM(AddEmpty(ELEM_SHORT));
             break;
 
         case MNU_INSERT_MASTER_RLY:
-            // CHANGING_PROGRAM(AddMasterRelay());
+            CHANGING_PROGRAM(AddMasterRelay());
             break;
 
         case MNU_INSERT_SHIFT_REG:
-            // CHANGING_PROGRAM(AddShiftRegister());
+            CHANGING_PROGRAM(AddShiftRegister());
             break;
 
         case MNU_INSERT_LUT:
-            // CHANGING_PROGRAM(AddLookUpTable());
+            CHANGING_PROGRAM(AddLookUpTable());
             break;
         
         case MNU_INSERT_PWL:
-            // CHANGING_PROGRAM(AddPiecewiseLinear());
+            CHANGING_PROGRAM(AddPiecewiseLinear());
             break;
         
         case MNU_INSERT_FMTD_STR:
-            // CHANGING_PROGRAM(AddFormattedString());
+            CHANGING_PROGRAM(AddFormattedString());
             break;
 
         case MNU_INSERT_OSR:
-            // CHANGING_PROGRAM(AddEmpty(ELEM_ONE_SHOT_RISING));
+            CHANGING_PROGRAM(AddEmpty(ELEM_ONE_SHOT_RISING));
             break;
 
         case MNU_INSERT_OSF:
-            // CHANGING_PROGRAM(AddEmpty(ELEM_ONE_SHOT_FALLING));
+            CHANGING_PROGRAM(AddEmpty(ELEM_ONE_SHOT_FALLING));
             break;
 
         case MNU_INSERT_MOV:
-            // CHANGING_PROGRAM(AddMove());
+            CHANGING_PROGRAM(AddMove());
             break;
 
         case MNU_INSERT_SET_PWM:
-            // CHANGING_PROGRAM(AddSetPwm());
+            CHANGING_PROGRAM(AddSetPwm());
             break;
 
         case MNU_INSERT_READ_ADC:
-            // CHANGING_PROGRAM(AddReadAdc());
+            CHANGING_PROGRAM(AddReadAdc());
             break;
 
         case MNU_INSERT_UART_SEND:
-            // CHANGING_PROGRAM(AddUart(ELEM_UART_SEND));
+            CHANGING_PROGRAM(AddUart(ELEM_UART_SEND));
             break;
 
         case MNU_INSERT_UART_RECV:
-            // CHANGING_PROGRAM(AddUart(ELEM_UART_RECV));
+            CHANGING_PROGRAM(AddUart(ELEM_UART_RECV));
             break;
 
         case MNU_INSERT_PERSIST:
-            // CHANGING_PROGRAM(AddPersist());
+            CHANGING_PROGRAM(AddPersist());
             break;
 
-//         {
-//             int elem;
-//             case MNU_INSERT_ADD: elem = ELEM_ADD; goto math;
-//             case MNU_INSERT_SUB: elem = ELEM_SUB; goto math;
-//             case MNU_INSERT_MUL: elem = ELEM_MUL; goto math;
-//             case MNU_INSERT_DIV: elem = ELEM_DIV; goto math;
-// math:
-//                 CHANGING_PROGRAM(AddMath(elem));
-//                 break;
-//         }
+        {
+            int elem;
+            case MNU_INSERT_ADD: elem = ELEM_ADD; goto math;
+            case MNU_INSERT_SUB: elem = ELEM_SUB; goto math;
+            case MNU_INSERT_MUL: elem = ELEM_MUL; goto math;
+            case MNU_INSERT_DIV: elem = ELEM_DIV; goto math;
+math:
+                CHANGING_PROGRAM(AddMath(elem));
+                break;
+        }
 
-//         {
-//             int elem;
-//             case MNU_INSERT_EQU: elem = ELEM_EQU; goto cmp;
-//             case MNU_INSERT_NEQ: elem = ELEM_NEQ; goto cmp;
-//             case MNU_INSERT_GRT: elem = ELEM_GRT; goto cmp;
-//             case MNU_INSERT_GEQ: elem = ELEM_GEQ; goto cmp;
-//             case MNU_INSERT_LES: elem = ELEM_LES; goto cmp;
-//             case MNU_INSERT_LEQ: elem = ELEM_LEQ; goto cmp;
-// cmp:    
-//                 CHANGING_PROGRAM(AddCmp(elem));
-//                 break;
-//         } 
+        {
+            int elem;
+            case MNU_INSERT_EQU: elem = ELEM_EQU; goto cmp;
+            case MNU_INSERT_NEQ: elem = ELEM_NEQ; goto cmp;
+            case MNU_INSERT_GRT: elem = ELEM_GRT; goto cmp;
+            case MNU_INSERT_GEQ: elem = ELEM_GEQ; goto cmp;
+            case MNU_INSERT_LES: elem = ELEM_LES; goto cmp;
+            case MNU_INSERT_LEQ: elem = ELEM_LEQ; goto cmp;
+cmp:    
+                CHANGING_PROGRAM(AddCmp(elem));
+                break;
+        } 
 
         case MNU_MAKE_NORMAL:
-            // CHANGING_PROGRAM(MakeNormalSelected());
+            CHANGING_PROGRAM(MakeNormalSelected());
             break;
 
         case MNU_NEGATE:
-            // CHANGING_PROGRAM(NegateSelected());
+            CHANGING_PROGRAM(NegateSelected());
             break;
 
         case MNU_MAKE_SET_ONLY:
-            // CHANGING_PROGRAM(MakeSetOnlySelected());
+            CHANGING_PROGRAM(MakeSetOnlySelected());
             break;
 
         case MNU_MAKE_RESET_ONLY:
-            // CHANGING_PROGRAM(MakeResetOnlySelected());
+            CHANGING_PROGRAM(MakeResetOnlySelected());
             break;
 
         case MNU_UNDO:
-            // UndoUndo();
+            UndoUndo();
             break;
 
         case MNU_REDO:
-            // UndoRedo();
+            UndoRedo();
             break;
 
         case MNU_INSERT_RUNG_BEFORE:
-            // CHANGING_PROGRAM(InsertRung(FALSE));
+            CHANGING_PROGRAM(InsertRung(FALSE));
             break;
 
         case MNU_INSERT_RUNG_AFTER:
-            // CHANGING_PROGRAM(InsertRung(TRUE));
+            CHANGING_PROGRAM(InsertRung(TRUE));
             break;
 
         case MNU_DELETE_RUNG:
-            // CHANGING_PROGRAM(DeleteSelectedRung());
+            CHANGING_PROGRAM(DeleteSelectedRung());
             break;
 
         case MNU_PUSH_RUNG_UP:
-            // CHANGING_PROGRAM(PushRungUp());
+            CHANGING_PROGRAM(PushRungUp());
             break;
 
         case MNU_PUSH_RUNG_DOWN:
-            // CHANGING_PROGRAM(PushRungDown());
+            CHANGING_PROGRAM(PushRungDown());
             break;
 
         case MNU_DELETE_ELEMENT:
-            // CHANGING_PROGRAM(DeleteSelectedFromProgram());
+            CHANGING_PROGRAM(DeleteSelectedFromProgram());
             break;
 
         case MNU_MCU_SETTINGS:
@@ -570,11 +576,11 @@ static void ProcessMenu(int code)
             break;
 
         case MNU_COMPILE:
-            // CompileProgram(FALSE);
+            CompileProgram(FALSE);
             break;
 
         case MNU_COMPILE_AS:
-            // CompileProgram(TRUE);
+            CompileProgram(TRUE);
             break;
 
         case MNU_MANUAL:
@@ -585,20 +591,7 @@ static void ProcessMenu(int code)
             ShowHelpDialog(TRUE);
             break;
     }
-}
-
-void WM_COMMAND (GtkMenuItem* men, gpointer gpcode){
-    int tempcode = GPOINTER_TO_INT(gpcode);
-    ProcessMenu (tempcode);
-}
-
-void MenuHandler (){
-    g_signal_connect(G_OBJECT(McuSettingsMenu), "activate",
-        G_CALLBACK(WM_COMMAND), GINT_TO_POINTER(MNU_MCU_SETTINGS));
-    g_signal_connect(G_OBJECT(ManualMenu), "activate",
-        G_CALLBACK(WM_COMMAND), GINT_TO_POINTER(MNU_MANUAL));
-    g_signal_connect(G_OBJECT(AboutMenu), "activate",
-        G_CALLBACK(WM_COMMAND), GINT_TO_POINTER(MNU_ABOUT));
+    gtk_widget_queue_draw(DrawWindow);
 }
 
 //-----------------------------------------------------------------------------
@@ -656,14 +649,12 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     return 1;
 }
 
-void LD_WM_Close_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)//(HWND window)
+void LD_WM_Close_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)
 {
     /* Handles:
     * WM_CLOSE
     */
 
-    // if(Hdc != NULL)
-        // cairo_destroy(Hdc);
     FreezeWindowPos(MainWindow);
     FreezeDWORD(IoListHeight);
 
@@ -1218,6 +1209,14 @@ gboolean LD_WM_Size_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)
     return FALSE;
 }
 
+gboolean LD_WM_Command_call(GtkMenuItem* men, gpointer gpcode)
+{
+    int tempcode = GPOINTER_TO_INT(gpcode);
+    ProcessMenu (tempcode);
+
+    return FALSE;
+}
+
 gboolean LD_WM_SetFocus_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)
 {
     /* Handles:
@@ -1227,6 +1226,195 @@ gboolean LD_WM_SetFocus_call(GtkWidget *widget, GdkEvent *event, gpointer user_d
     InvalidateRect(DrawWindow, NULL, FALSE);
     // g_print("focus call end\n");
     return FALSE;
+}
+
+inline void MenuHandler ()
+{
+    g_signal_connect(G_OBJECT(NewMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_NEW));
+
+    g_signal_connect(G_OBJECT(OpenMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_OPEN));
+
+    g_signal_connect(G_OBJECT(SaveMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_SAVE));
+
+    g_signal_connect(G_OBJECT(SaveAsMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_SAVE_AS));
+
+    g_signal_connect(G_OBJECT(ExportMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_EXPORT));
+
+    g_signal_connect(G_OBJECT(ExitMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_EXIT));
+
+    g_signal_connect(G_OBJECT(InsertCommentMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_COMMENT));
+
+    g_signal_connect(G_OBJECT(InsertContactsMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_CONTACTS));
+
+    g_signal_connect(G_OBJECT(InsertCoilMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_COIL));
+
+    g_signal_connect(G_OBJECT(InsertTonMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_TON));
+
+    g_signal_connect(G_OBJECT(InsertTofMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_TOF));
+
+    g_signal_connect(G_OBJECT(InsertRtoMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_RTO));
+
+    g_signal_connect(G_OBJECT(InsertCtuMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_CTU));
+
+    g_signal_connect(G_OBJECT(InsertCtdMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_CTD));
+
+    g_signal_connect(G_OBJECT(InsertCtcMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_CTC));
+
+    g_signal_connect(G_OBJECT(InsertResMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_RES));
+
+    g_signal_connect(G_OBJECT(InsertOpenMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_OPEN));
+
+    g_signal_connect(G_OBJECT(InsertShortMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_SHORT));    
+
+    g_signal_connect(G_OBJECT(InsertMasterRlyMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_MASTER_RLY));
+
+    g_signal_connect(G_OBJECT(InsertShiftRegMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_SHIFT_REG));
+
+    g_signal_connect(G_OBJECT(InsertLutMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_LUT));
+
+    g_signal_connect(G_OBJECT(InsertPwlMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_PWL));
+
+    g_signal_connect(G_OBJECT(InsertFmtdStrMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_FMTD_STR));
+
+    g_signal_connect(G_OBJECT(InsertOsrMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_OSR));
+
+    g_signal_connect(G_OBJECT(InsertOsfMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_OSF));
+
+    g_signal_connect(G_OBJECT(InsertMovMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_MOV));
+
+    g_signal_connect(G_OBJECT(InsertSetPwmMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_SET_PWM));
+
+    g_signal_connect(G_OBJECT(InsertReadAdcMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_READ_ADC));
+
+    g_signal_connect(G_OBJECT(InsertUartSendMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_UART_SEND));
+
+    g_signal_connect(G_OBJECT(InsertUartRecvMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_UART_RECV)); 
+
+    g_signal_connect(G_OBJECT(InsertPersistMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_PERSIST)); 
+
+    g_signal_connect(G_OBJECT(InsertAddMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_ADD)); 
+
+    g_signal_connect(G_OBJECT(InsertSubMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_SUB)); 
+
+    g_signal_connect(G_OBJECT(InsertMulMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_MUL)); 
+
+    g_signal_connect(G_OBJECT(InsertDivMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_DIV)); 
+
+    g_signal_connect(G_OBJECT(InsertEquMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_EQU)); 
+
+    g_signal_connect(G_OBJECT(InsertNeqMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_NEQ)); 
+
+    g_signal_connect(G_OBJECT(InsertGrtMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_GRT)); 
+
+    g_signal_connect(G_OBJECT(InsertGeqMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_GEQ)); 
+
+    g_signal_connect(G_OBJECT(InsertLesMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_LES)); 
+
+    g_signal_connect(G_OBJECT(InsertLeqMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_LEQ)); 
+
+    g_signal_connect(G_OBJECT(MakeNormalMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_MAKE_NORMAL)); 
+
+    g_signal_connect(G_OBJECT(NegateMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_NEGATE)); 
+
+    g_signal_connect(G_OBJECT(MakeSetOnlyMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_MAKE_SET_ONLY)); 
+
+    g_signal_connect(G_OBJECT(MakeResetOnlyMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_MAKE_RESET_ONLY)); 
+
+    g_signal_connect(G_OBJECT(UndoMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_UNDO)); 
+
+    g_signal_connect(G_OBJECT(RedoMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_REDO)); 
+
+    g_signal_connect(G_OBJECT(InsertRungBeforeMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_RUNG_BEFORE)); 
+
+    g_signal_connect(G_OBJECT(InsertRungAfterMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_RUNG_AFTER)); 
+
+    g_signal_connect(G_OBJECT(DeleteRungMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_DELETE_RUNG)); 
+
+    g_signal_connect(G_OBJECT(PushRungUpMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_PUSH_RUNG_UP)); 
+
+    g_signal_connect(G_OBJECT(PushRungDownMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_PUSH_RUNG_DOWN)); 
+
+    g_signal_connect(G_OBJECT(DeleteElementMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_DELETE_ELEMENT)); 
+
+    g_signal_connect(G_OBJECT(McuSettingsMenu), "activate", 
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_MCU_SETTINGS));
+
+    g_signal_connect(G_OBJECT(SimulationModeMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_SIMULATION_MODE)); 
+
+    g_signal_connect(G_OBJECT(StartSimulationMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_START_SIMULATION)); 
+
+    g_signal_connect(G_OBJECT(StopSimulationMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_STOP_SIMULATION)); 
+
+    g_signal_connect(G_OBJECT(SingleCycleMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_SINGLE_CYCLE)); 
+
+    g_signal_connect(G_OBJECT(CompileMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_COMPILE)); 
+
+    g_signal_connect(G_OBJECT(CompileAsMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_COMPILE_AS)); 
+
+    g_signal_connect(G_OBJECT(ManualMenu), "activate",  
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_MANUAL));
+ 
+    g_signal_connect(G_OBJECT(AboutMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_ABOUT));
 }
 
 //-----------------------------------------------------------------------------
@@ -1358,18 +1546,19 @@ int main(int argc, char** argv)
     MakeMainWindowControls(); /// takes care of MakeMainWindowMenus()
     MainWindowResized();
     // CHANGING_PROGRAM(ShowConfDialog());
-    MenuHandler();
 
     /// Keyboard and mouse hooks equivalent to MainWndProc
     g_signal_connect (MainWindow, "delete_event", G_CALLBACK (LD_WM_Close_call), NULL);
-    // g_signal_connect (MainWindow, "key_press_event", G_CALLBACK (LD_WM_KeyDown_call), NULL);
+    g_signal_connect (MainWindow, "key_press_event", G_CALLBACK (LD_WM_KeyDown_call), NULL);
     g_signal_connect (MainWindow, "button_press_event", G_CALLBACK (LD_GTK_mouse_click_hook), NULL);
     g_signal_connect (MainWindow, "scroll_event", G_CALLBACK (LD_GTK_mouse_scroll_hook), NULL);
     g_signal_connect (MainWindow, "motion_notify_event", G_CALLBACK (LD_WM_MouseMove_call), NULL);
     g_signal_connect (DrawWindow, "draw", G_CALLBACK (LD_WM_Paint_call), NULL);
     g_signal_connect (MainWindow, "destroy_event", G_CALLBACK (LD_WM_Destroy_call), NULL);
     g_signal_connect (MainWindow, "configure_event", G_CALLBACK (LD_WM_Size_call), NULL);
+    g_signal_connect (MainWindow, "configure_event", G_CALLBACK (LD_WM_Size_call), NULL);
     // g_signal_connect (MainWindow, "focus_in_event", G_CALLBACK (LD_WM_SetFocus_call), NULL);
+    MenuHandler();
     /// Keyboard and mouse hooks equivalent to MainWndProc - end
 
     NewProgram();

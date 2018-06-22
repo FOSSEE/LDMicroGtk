@@ -166,65 +166,65 @@ void AddMenuAccelerators (void){
     gtk_widget_add_accelerator (PushRungDownMenu, "activate", AccelGroup, GDK_KEY_downarrow,
                                 GDK_SHIFT_MASK, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (DeleteElementMenu, "activate", AccelGroup, GDK_KEY_Delete,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (DeleteRungMenu, "activate", AccelGroup, GDK_KEY_Delete,
                                 GDK_SHIFT_MASK, GTK_ACCEL_VISIBLE);
     
     // Creating keyboard shortcuts for Instructions menu
     gtk_widget_add_accelerator (InsertCommentMenu, "activate", AccelGroup, GDK_KEY_semicolon,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertContactsMenu, "activate", AccelGroup, GDK_KEY_C,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertOsrMenu, "activate", AccelGroup, GDK_KEY_backslash,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertOsfMenu, "activate", AccelGroup, GDK_KEY_slash,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertTonMenu, "activate", AccelGroup, GDK_KEY_O,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertTofMenu, "activate", AccelGroup, GDK_KEY_F,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertRtoMenu, "activate", AccelGroup, GDK_KEY_T,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertCtuMenu, "activate", AccelGroup, GDK_KEY_U,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertCtdMenu, "activate", AccelGroup, GDK_KEY_I,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertCtcMenu, "activate", AccelGroup, GDK_KEY_J,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertEquMenu, "activate", AccelGroup, GDK_KEY_equal,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertGrtMenu, "activate", AccelGroup, GDK_KEY_greater,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertGeqMenu, "activate", AccelGroup, GDK_KEY_Stop,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertLesMenu, "activate", AccelGroup, GDK_KEY_less,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertLeqMenu, "activate", AccelGroup, GDK_KEY_comma,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertCoilMenu, "activate", AccelGroup, GDK_KEY_L,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertResMenu, "activate", AccelGroup, GDK_KEY_E,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertMovMenu, "activate", AccelGroup, GDK_KEY_M,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertAddMenu, "activate", AccelGroup, GDK_KEY_plus,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertSubMenu, "activate", AccelGroup, GDK_KEY_minus,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertMulMenu, "activate", AccelGroup, GDK_KEY_multiply,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertDivMenu, "activate", AccelGroup, GDK_KEY_D,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertReadAdcMenu, "activate", AccelGroup, GDK_KEY_P,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (MakeNormalMenu, "activate", AccelGroup, GDK_KEY_A,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (NegateMenu, "activate", AccelGroup, GDK_KEY_N,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (MakeSetOnlyMenu, "activate", AccelGroup, GDK_KEY_S,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (MakeResetOnlyMenu, "activate", AccelGroup, GDK_KEY_R,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     
     // Creating keyboard shortcuts for Simulation menu
     gtk_widget_add_accelerator (SimulationModeMenu, "activate", AccelGroup, GDK_KEY_M,
@@ -234,15 +234,15 @@ void AddMenuAccelerators (void){
     gtk_widget_add_accelerator (StopSimulationMenu, "activate", AccelGroup, GDK_KEY_H,
                                 GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (SingleCycleMenu, "activate", AccelGroup, GDK_KEY_space,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     
     // Creating keyboard shortcuts for Compile menu
     gtk_widget_add_accelerator (CompileMenu, "activate", AccelGroup, GDK_KEY_F5,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     
     // Creating keyboard shortcuts for Help menu
     gtk_widget_add_accelerator (ManualMenu, "activate", AccelGroup, GDK_KEY_F1,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     
     gtk_window_add_accel_group (GTK_WINDOW (MainWindow), AccelGroup);
 

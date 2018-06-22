@@ -1114,6 +1114,8 @@ gboolean LD_WM_Paint_call(HWID widget, HCRDC cr, gpointer data)//(HWID widget, G
         gint width = gtk_widget_get_allocated_width (widget);
         gint height = gtk_widget_get_allocated_height (widget);
 
+        gtk_widget_set_size_request(widget, width, height+1);
+
         gdk_cairo_set_source_rgba (cr, (HBRUSH)GetStockObject(BLACK_BRUSH));
 
         cairo_rectangle(cr, 0, 0, width, height);
@@ -1545,11 +1547,10 @@ int main(int argc, char** argv)
 
     MakeMainWindowControls(); /// takes care of MakeMainWindowMenus()
     MainWindowResized();
-    // CHANGING_PROGRAM(ShowConfDialog());
 
     /// Keyboard and mouse hooks equivalent to MainWndProc
     g_signal_connect (MainWindow, "delete_event", G_CALLBACK (LD_WM_Close_call), NULL);
-    g_signal_connect (MainWindow, "key_press_event", G_CALLBACK (LD_WM_KeyDown_call), NULL);
+    // g_signal_connect (MainWindow, "key_press_event", G_CALLBACK (LD_WM_KeyDown_call), NULL);
     g_signal_connect (MainWindow, "button_press_event", G_CALLBACK (LD_GTK_mouse_click_hook), NULL);
     g_signal_connect (MainWindow, "scroll_event", G_CALLBACK (LD_GTK_mouse_scroll_hook), NULL);
     g_signal_connect (MainWindow, "motion_notify_event", G_CALLBACK (LD_WM_MouseMove_call), NULL);
@@ -1557,7 +1558,7 @@ int main(int argc, char** argv)
     g_signal_connect (MainWindow, "destroy_event", G_CALLBACK (LD_WM_Destroy_call), NULL);
     g_signal_connect (MainWindow, "configure_event", G_CALLBACK (LD_WM_Size_call), NULL);
     g_signal_connect (MainWindow, "configure_event", G_CALLBACK (LD_WM_Size_call), NULL);
-    // g_signal_connect (MainWindow, "focus_in_event", G_CALLBACK (LD_WM_SetFocus_call), NULL);
+    g_signal_connect (MainWindow, "focus_in_event", G_CALLBACK (LD_WM_SetFocus_call), NULL);
     MenuHandler();
     /// Keyboard and mouse hooks equivalent to MainWndProc - end
 
@@ -1593,9 +1594,9 @@ int main(int argc, char** argv)
         UndoFlush();
     }
 
-    GenerateIoListDontLoseSelection(); //~
-    // RefreshScrollbars();
-    UpdateMainWindowTitleBar(); //~
+    GenerateIoListDontLoseSelection(); 
+    RefreshScrollbars();
+    UpdateMainWindowTitleBar();
 
     // MSG msg;
     // DWORD ret;

@@ -106,7 +106,6 @@ BOOL GetSaveFileName(OPENFILENAME *ofn)
                                         "_Save",
                                         GTK_RESPONSE_ACCEPT,
                                         NULL);
-    //g_print("filter created\n");
     char filename[15] = "Untitled";
 
     if (ofn->lpstrDefExt != NULL)
@@ -133,28 +132,21 @@ BOOL GetSaveFileName(OPENFILENAME *ofn)
                 gtk_file_chooser_add_filter (GTK_FILE_CHOOSER(dialog), filter);
                 filter = gtk_file_filter_new ();
                 strFilterLen = 0;
-                //g_print("filter pat: %s\n", strFilter);
-                //g_print("filter reset\n");
                 filterResetFlag = FALSE;
             }
             else
             {
                 gtk_file_filter_set_name (GTK_FILE_FILTER(filter), strFilter);
-                //g_print("filter name: %s\n", strFilter);
                 strFilterLen = 0;
                 filterResetFlag = TRUE;
             }
     }
-    //g_print("filter rules added\n");
     
     sprintf(strFilter, "*.%s", ofn->lpstrDefExt);
     gtk_file_filter_add_pattern (GTK_FILE_FILTER(filter), strFilter);
-    //gtk_file_filter_set_name (filter, "int files");
     gtk_file_chooser_set_filter (GTK_FILE_CHOOSER(dialog), filter);
     
     delete strFilter;
-
-    //g_print("default filter set\n");
 
     BOOL exitStatus = gtk_dialog_run (GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT;
     if (exitStatus)
@@ -165,11 +157,8 @@ BOOL GetSaveFileName(OPENFILENAME *ofn)
         strcpy(ofn->lpstrFile, str);
         g_free(str);
     }
-    //g_print("file path saved: %s\n", ofn->lpstrFile);
     
     gtk_widget_destroy (dialog);
-
-    //g_print("exit\n");
 
     return exitStatus;
 }
@@ -187,7 +176,6 @@ BOOL GetOpenFileName(OPENFILENAME *ofn)
                                         "_Open",
                                         GTK_RESPONSE_ACCEPT,
                                         NULL);
-    //g_print("filter created\n");
     
     GtkFileFilter *filter = gtk_file_filter_new ();
     char* strFilter = new char[strlen(ofn->lpstrFilter)];
@@ -205,19 +193,15 @@ BOOL GetOpenFileName(OPENFILENAME *ofn)
                 gtk_file_chooser_add_filter (GTK_FILE_CHOOSER(dialog), filter);
                 filter = gtk_file_filter_new ();
                 strFilterLen = 0;
-                //g_print("filter pat: %s\n", strFilter);
-                //g_print("filter reset\n");
                 filterResetFlag = FALSE;
             }
             else
             {
                 gtk_file_filter_set_name (GTK_FILE_FILTER(filter), strFilter);
-                //g_print("filter name: %s\n", strFilter);
                 strFilterLen = 0;
                 filterResetFlag = TRUE;
             }
     }
-    //g_print("filter rules added\n");
     
     sprintf(strFilter, "*.%s", ofn->lpstrDefExt);
     gtk_file_filter_add_pattern (GTK_FILE_FILTER(filter), strFilter);
@@ -225,8 +209,6 @@ BOOL GetOpenFileName(OPENFILENAME *ofn)
     gtk_file_chooser_set_filter (GTK_FILE_CHOOSER(dialog), filter);
     
     delete strFilter;
-
-    //g_print("default filter set\n");
 
     BOOL exitStatus = gtk_dialog_run (GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT;
     if (exitStatus)
@@ -236,11 +218,8 @@ BOOL GetOpenFileName(OPENFILENAME *ofn)
         strcpy(ofn->lpstrFile, str);
         g_free(str);
     }
-    //g_print("file path saved: %s\n", ofn->lpstrFile);
     
     gtk_widget_destroy (dialog);
-
-    //g_print("exit\n");
 
     return exitStatus;
 }
@@ -310,8 +289,6 @@ void SelectObject(HCRDC hcr, HFONT hfont)
  
     // cairo_set_font_matrix (hcr, &matrix);
 
-    // g_print("wR = %f\nhR = %f\n", (double)hfont->nWidth / extents.width, (double)hfont->nHeight / extents.height);
-    // g_print("tW = %f tH = %f\n", extents.width, extents.width);
     cairo_set_font_size(hcr, 10);
 }
 
@@ -378,18 +355,15 @@ void TextOut(HWID hWid, HCRDC hcr, int nXStart, int nYStart, LPCTSTR lpString, i
     int width = gtk_widget_get_allocated_width (hWid);
     int height= gtk_widget_get_allocated_height (hWid);
     BOOL resize_flag = FALSE;
-    // g_print("w = %f h = %f")
 
     if(nYStart+(extents.height/2.0) >= height)
     {
-        // g_print("Y extend\n");
         height += extents.height + 50;
         resize_flag = TRUE;
     }
     
     if (nXStart+(extents.width/2.0) >= width)
     {
-        // g_print("X extend\n");
         width += extents.width;
         resize_flag = TRUE;
     }
@@ -403,8 +377,6 @@ void TextOut(HWID hWid, HCRDC hcr, int nXStart, int nYStart, LPCTSTR lpString, i
 
     cairo_move_to(hcr, nXStart, nYStart);
     cairo_show_text(hcr, text);
-
-    // g_print("%s", text);
 
     cairo_fill (hcr);
 }
@@ -422,10 +394,7 @@ COLORREF GetTextColor(HCRDC Hdc)
 BOOL InvalidateRect(HWID hWid, const RECT *lpRect, BOOL bErase)
 {
     if(!GDK_IS_WINDOW(hWid))
-    {
-        // g_print("not window\n");
         return FALSE;
-    }
 
     if (lpRect == NULL)
     {

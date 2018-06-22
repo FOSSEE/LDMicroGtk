@@ -126,7 +126,6 @@ gboolean BlinkCursor(GtkWidget * window) //(HWND hwnd, UINT msg, UINT_PTR id, DW
     else
         PatBlt(Hcr, c.left, c.top, c.width, c.height, PATINVERT, (HBRUSH)GetStockObject(BLACK_BRUSH));
     InvalidateRect(DrawWindow, NULL, FALSE);
-    // g_print("BLINK\n");
     cairo_destroy(Hcr);
     CursorDrawn = !CursorDrawn;
 

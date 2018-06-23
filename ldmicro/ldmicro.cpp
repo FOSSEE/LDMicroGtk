@@ -154,7 +154,7 @@ static void CompileProgram(BOOL compileAs)
 
         memset(&ofn, 0, sizeof(ofn));
         ofn.lStructSize = sizeof(ofn);
-        ofn.parentWindow = NULL;
+        ofn.parentWindow = MainWindow;
         ofn.lpstrTitle = _("Compile To");
         if(Prog.mcu && Prog.mcu->whichIsa == ISA_ANSIC) {
             ofn.lpstrFilter = C_PATTERN;
@@ -178,12 +178,12 @@ static void CompileProgram(BOOL compileAs)
     }
 
     if(!GenerateIntermediateCode()) return;
-
+ 
     if(Prog.mcu == NULL) {
         Error(_("Must choose a target microcontroller before compiling."));
         return;
     } 
-
+    
     if(UartFunctionUsed() && Prog.mcu->uartNeeds.rxPin == 0) {
         Error(_("UART function used but not supported for this micro."));
         return;
@@ -193,7 +193,7 @@ static void CompileProgram(BOOL compileAs)
         Error(_("PWM function used but not supported for this micro."));
         return;
     }
-  
+    
     switch(Prog.mcu->whichIsa) {
         case ISA_AVR:           CompileAvr(CurrentCompileFile); break;
         case ISA_PIC16:         CompilePic16(CurrentCompileFile); break;
@@ -203,7 +203,8 @@ static void CompileProgram(BOOL compileAs)
 
         default: oops();
     }
-   IntDumpListing("t.pl");
+    
+    IntDumpListing("t.pl");
 }
 
 //-----------------------------------------------------------------------------
@@ -286,7 +287,7 @@ void ProgramChanged(void)
 {
     ProgramChangedNotSaved = TRUE;
     GenerateIoListDontLoseSelection();
-    // RefreshScrollbars();
+    RefreshScrollbars();
 }
 #define CHANGING_PROGRAM(x) { \
         UndoRemember(); \
@@ -1178,7 +1179,7 @@ int main(int argc, char** argv)
     }
 
     GenerateIoListDontLoseSelection(); 
-    RefreshScrollbars();
+        RefreshScrollbars();
     UpdateMainWindowTitleBar();
 
     // MSG msg;

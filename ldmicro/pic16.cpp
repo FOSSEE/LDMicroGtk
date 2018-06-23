@@ -508,7 +508,7 @@ static void CompileFromIntermediate(BOOL topLevel)
     // Keep track of which 2k section we are using. When it looks like we
     // are about to run out, fill with nops and move on to the next one.
     DWORD section = 0;
-
+ 
     for(; IntPc < IntCodeLen; IntPc++) {
         // Try for a margin of about 400 words, which is a little bit
         // wasteful but considering that the formatted output commands
@@ -518,6 +518,7 @@ static void CompileFromIntermediate(BOOL topLevel)
         if(topLevel && (((PicProgWriteP + 400) >> 11) != section) &&
             ((PicProgWriteP + 400) < Prog.mcu->flashWords))
         {
+ 
             // Jump to the beginning of the next section
             Instruction(OP_MOVLW, (PicProgWriteP >> 8) + (1<<3), 0);
             Instruction(OP_MOVWF, REG_PCLATH, 0);
@@ -532,7 +533,7 @@ static void CompileFromIntermediate(BOOL topLevel)
         }
         IntOp *a = &IntCode[IntPc];
         switch(a->op) {
-            case INT_SET_BIT:   
+            case INT_SET_BIT:
                 MemForSingleBit(a->name1, FALSE, &addr, &bit);
                 SetBit(addr, bit);
                 break;
@@ -579,7 +580,7 @@ static void CompileFromIntermediate(BOOL topLevel)
                 CompileIfBody(condFalse);
                 break;
             }
-            case INT_IF_VARIABLE_LES_LITERAL: {
+            case INT_IF_VARIABLE_LES_LITERAL: { 
                 DWORD notTrue = AllocFwdAddr();
                 DWORD isTrue = AllocFwdAddr();
                 DWORD lsbDecides = AllocFwdAddr();
@@ -693,7 +694,7 @@ static void CompileFromIntermediate(BOOL topLevel)
                 CompileIfBody(notTrue);
                 break;
             }
-            case INT_SET_VARIABLE_TO_VARIABLE:
+            case INT_SET_VARIABLE_TO_VARIABLE: 
                 MemForVariable(a->name1, &addrl, &addrh);
                 MemForVariable(a->name2, &addrl2, &addrh2);
 
@@ -708,7 +709,7 @@ static void CompileFromIntermediate(BOOL topLevel)
             // results if the destination and one of the operands happen to
             // be the same registers (e.g. for B = A - B).
 
-            case INT_SET_VARIABLE_ADD:
+            case INT_SET_VARIABLE_ADD:  
                 MemForVariable(a->name1, &addrl, &addrh);
                 MemForVariable(a->name2, &addrl2, &addrh2);
                 MemForVariable(a->name3, &addrl3, &addrh3);
@@ -746,7 +747,7 @@ static void CompileFromIntermediate(BOOL topLevel)
                 Instruction(OP_DECF, addrh, DEST_F);
                 break;
 
-            case INT_SET_VARIABLE_MULTIPLY:
+            case INT_SET_VARIABLE_MULTIPLY:   
                 MultiplyNeeded = TRUE;
                 
                 MemForVariable(a->name1, &addrl, &addrh);
@@ -823,7 +824,7 @@ static void CompileFromIntermediate(BOOL topLevel)
 
                 break;
             }
-            case INT_UART_RECV: {
+            case INT_UART_RECV: {   
                 MemForVariable(a->name1, &addrl, &addrh);
                 MemForSingleBit(a->name2, TRUE, &addr, &bit);
 
@@ -1171,7 +1172,7 @@ static void CompileFromIntermediate(BOOL topLevel)
                 oops();
                 break;
         }
-        if(((PicProgWriteP >> 11) != section) && topLevel) {
+        if(((PicProgWriteP >> 11) != section) && topLevel) { 
             // This is particularly prone to happening in the last section,
             // if the program doesn't fit (since we won't have attempted
             // to add padding).
@@ -1415,6 +1416,7 @@ void CompilePic16(char *outFile)
     WipeMemory();
 
     AllocStart();
+
     Scratch0 = AllocOctetRam();
     Scratch1 = AllocOctetRam();
     Scratch2 = AllocOctetRam();
@@ -1423,7 +1425,7 @@ void CompilePic16(char *outFile)
     Scratch5 = AllocOctetRam();
     Scratch6 = AllocOctetRam();
     Scratch7 = AllocOctetRam();
-   
+
     // Allocate the register used to hold the high byte of the EEPROM word
     // that's queued up to program, plus the bit to indicate that it is
     // valid.
@@ -1435,6 +1437,7 @@ void CompilePic16(char *outFile)
     // bootloaders rewrite the beginning of the program to do their magic.
     // PCLATH is init to 0, but apparently some bootloaders want to see us
     // initialize it again.
+
     Instruction(OP_BCF, REG_PCLATH, 3);
     Instruction(OP_BCF, REG_PCLATH, 4);
     Instruction(OP_GOTO, progStart, 0);
@@ -1576,7 +1579,7 @@ void CompilePic16(char *outFile)
             ComplainAboutBaudRateError(divisor, actual, percentErr);
         }
         if(divisor > 255) ComplainAboutBaudRateOverflow();
-        
+
         WriteRegister(REG_SPBRG, divisor);
         WriteRegister(REG_TXSTA, 0x20); // only TXEN set
         WriteRegister(REG_RCSTA, 0x90); // only SPEN, CREN set

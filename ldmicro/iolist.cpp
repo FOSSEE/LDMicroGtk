@@ -551,8 +551,8 @@ void ShowAnalogSliderPopup(char *name)
 //-----------------------------------------------------------------------------
 // Create our window class; nothing exciting.
 //-----------------------------------------------------------------------------
-// static BOOL MakeWindowClass()
-// {
+static BOOL MakeWindowClass()
+{
 //     WNDCLASSEX wc;
 //     memset(&wc, 0, sizeof(wc));
 //     wc.cbSize = sizeof(wc);
@@ -571,10 +571,10 @@ void ShowAnalogSliderPopup(char *name)
 //                             IMAGE_ICON, 16, 16, 0);
 
 //     return RegisterClassEx(&wc);
-// }
+}
 
-// static void MakeControls(void)
-// {
+static void MakeControls(void)
+{
 //     HWND textLabel = CreateWindowEx(0, WC_STATIC, _("Assign:"),
 //         WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE,
 //         6, 1, 80, 17, IoDialog, NULL, Instance, NULL);
@@ -594,10 +594,10 @@ void ShowAnalogSliderPopup(char *name)
 //         WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE,
 //         6, 356, 95, 23, IoDialog, NULL, Instance, NULL); 
 //     NiceFont(CancelButton);
-// }
+}
 
-// void ShowIoDialog(int item)
-// {
+void ShowIoDialog(int item)
+{
 //     if(!Prog.mcu) {
 //         MessageBox(MainWindow,
 //             _("No microcontroller has been selected. You must select a "
@@ -759,7 +759,7 @@ void ShowAnalogSliderPopup(char *name)
 //     EnableWindow(MainWindow, TRUE);
 //     DestroyWindow(IoDialog);
 //     return;
-// }
+}
 
 //-----------------------------------------------------------------------------
 // Called in response to a notify for the listview. Handles click, text-edit
@@ -767,119 +767,129 @@ void ShowAnalogSliderPopup(char *name)
 // where (LPSTR_TEXTCALLBACK); that way we don't have two parallel copies of
 // the I/O list to keep in sync.
 //-----------------------------------------------------------------------------
-// void IoListProc(NMHDR *h)
-// {
-//     switch(h->code) {
-//         case LVN_GETDISPINFO: {
-//             NMLVDISPINFO *i = (NMLVDISPINFO *)h;
-//             int item = i->item.iItem;
-//             switch(i->item.iSubItem) {
-//                 case LV_IO_PIN:
-//                     // Don't confuse people by displaying bogus pin assignments
-//                     // for the C target.
-//                     if(Prog.mcu && (Prog.mcu->whichIsa == ISA_ANSIC ||
-//                                     Prog.mcu->whichIsa == ISA_INTERPRETED) )
-//                     {
-//                         strcpy(i->item.pszText, "");
-//                         break;
-//                     }
+void IoListProc(NMHDR *h)
+{
+    switch(h->code) {
+        case LVN_GETDISPINFO: {
+            
+            int item = h->item.iItem;
+            /// Don't confuse people by displaying bogus pin assignments
+            /// for the C target.
 
-//                     PinNumberForIo(i->item.pszText,
-//                         &(Prog.io.assignment[item]));
-//                     break;
+            char IO_value_holder[60];
 
-//                 case LV_IO_TYPE: {
-//                     char *s = IoTypeToString(Prog.io.assignment[item].type);
-//                     strcpy(i->item.pszText, s);
-//                     break;
-//                 }
-//                 case LV_IO_NAME:
-//                     strcpy(i->item.pszText, Prog.io.assignment[item].name);
-//                     break;
+            GValue val = G_VALUE_INIT;
+            g_value_init (&val, G_TYPE_STRING);
 
-//                 case LV_IO_PORT: {
-//                     // Don't confuse people by displaying bogus pin assignments
-//                     // for the C target.
-//                     if(Prog.mcu && Prog.mcu->whichIsa == ISA_ANSIC) {
-//                         strcpy(i->item.pszText, "");
-//                         break;
-//                     }
+            /// case LV_IO_PIN:
+            if(Prog.mcu && (Prog.mcu->whichIsa == ISA_ANSIC ||
+                            Prog.mcu->whichIsa == ISA_INTERPRETED) )
+            {
+                strcpy(IO_value_holder, "");
 
-//                     int type = Prog.io.assignment[item].type;
-//                     if(type != IO_TYPE_DIG_INPUT && type != IO_TYPE_DIG_OUTPUT
-//                         && type != IO_TYPE_READ_ADC)
-//                     {
-//                         strcpy(i->item.pszText, "");
-//                         break;
-//                     }
+                g_value_set_string(&val, (const char*)&IO_value_holder);
+                gtk_list_store_set_value (GTK_LIST_STORE(h->hlistFrom), h->hlistIter, LV_IO_PIN, &val);
+            }
+            else
+            {
+                PinNumberForIo(IO_value_holder, &(Prog.io.assignment[item]));
+                g_value_set_string(&val, (const char*)&IO_value_holder);                    
+                gtk_list_store_set_value (GTK_LIST_STORE(h->hlistFrom), h->hlistIter, LV_IO_PIN, &val);
+            }
 
-//                     int pin = Prog.io.assignment[item].pin;
-//                     if(pin == NO_PIN_ASSIGNED || !Prog.mcu) {
-//                         strcpy(i->item.pszText, "");
-//                         break;
-//                     }
+            /// case LV_IO_TYPE: 
+            char *s = IoTypeToString(Prog.io.assignment[item].type);
 
-//                     if(UartFunctionUsed() && Prog.mcu) {
-//                         if((Prog.mcu->uartNeeds.rxPin == pin) ||
-//                            (Prog.mcu->uartNeeds.txPin == pin))
-//                         {
-//                             strcpy(i->item.pszText, _("<UART needs!>"));
-//                             break;
-//                         }
-//                     }
+            g_value_set_string(&val, (const char*)s);                    
+            gtk_list_store_set_value (GTK_LIST_STORE(h->hlistFrom), h->hlistIter, LV_IO_TYPE, &val);
 
-//                     if(PwmFunctionUsed() && Prog.mcu) {
-//                         if(Prog.mcu->pwmNeedsPin == pin) {
-//                             strcpy(i->item.pszText, _("<PWM needs!>"));
-//                             break;
-//                         }
-//                     }
+            /// case LV_IO_NAME:
+            g_value_set_string(&val, (const char*)Prog.io.assignment[item].name);                    
+            gtk_list_store_set_value (GTK_LIST_STORE(h->hlistFrom), h->hlistIter, LV_IO_NAME, &val);
+            
+            /// case LV_IO_PORT: 
+            /// Don't confuse people by displaying bogus pin assignments
+            /// for the C target.
+            if(Prog.mcu && Prog.mcu->whichIsa == ISA_ANSIC) {
+                strcpy(IO_value_holder, "");
+                break;
+            }
 
-//                     int j;
-//                     for(j = 0; j < Prog.mcu->pinCount; j++) {
-//                         if(Prog.mcu->pinInfo[j].pin == pin) {
-//                             sprintf(i->item.pszText, "%c%c%d",
-//                                 Prog.mcu->portPrefix,
-//                                 Prog.mcu->pinInfo[j].port,
-//                                 Prog.mcu->pinInfo[j].bit);
-//                             break;
-//                         }
-//                     }
-//                     if(j == Prog.mcu->pinCount) {
-//                         sprintf(i->item.pszText, _("<not an I/O!>"));
-//                     }
-//                     break;
-//                 }
+            int type = Prog.io.assignment[item].type;
+            if(type != IO_TYPE_DIG_INPUT && type != IO_TYPE_DIG_OUTPUT
+                && type != IO_TYPE_READ_ADC)
+            {
+                strcpy(IO_value_holder, "");
+                break;
+            }
 
-//                 case LV_IO_STATE: {
-//                     if(InSimulationMode) {
-//                         char *name = Prog.io.assignment[item].name;
-//                         DescribeForIoList(name, i->item.pszText);
-//                     } else {
-//                         strcpy(i->item.pszText, "");
-//                     }
-//                     break;
-//                 }
+            int pin = Prog.io.assignment[item].pin;
+            if(pin == NO_PIN_ASSIGNED || !Prog.mcu) {
+                strcpy(IO_value_holder, "");
+                break;
+            }
 
-//             }
-//             break;
-//         }
-//         case LVN_ITEMACTIVATE: {
-//             NMITEMACTIVATE *i = (NMITEMACTIVATE *)h;
-//             if(InSimulationMode) {
-//                 char *name = Prog.io.assignment[i->iItem].name;
-//                 if(name[0] == 'X') {
-//                     SimulationToggleContact(name);
-//                 } else if(name[0] == 'A') {
-//                     ShowAnalogSliderPopup(name);
-//                 }
-//             } else {
-//                 UndoRemember();
-//                 ShowIoDialog(i->iItem);
-//                 ProgramChanged();
-//                 InvalidateRect(MainWindow, NULL, FALSE);
-//             }
-//             break;
-//         }
-//     }
-// }
+            if(UartFunctionUsed() && Prog.mcu) {
+                if((Prog.mcu->uartNeeds.rxPin == pin) ||
+                    (Prog.mcu->uartNeeds.txPin == pin))
+                {
+                    strcpy(IO_value_holder, _("<UART needs!>"));
+                    break;
+                }
+            }
+
+            if(PwmFunctionUsed() && Prog.mcu) {
+                if(Prog.mcu->pwmNeedsPin == pin) {
+                    strcpy(IO_value_holder, _("<PWM needs!>"));
+                    break;
+                }
+            }
+
+            int j;
+            for(j = 0; j < Prog.mcu->pinCount; j++) {
+                if(Prog.mcu->pinInfo[j].pin == pin) {
+                    sprintf(IO_value_holder, "%c%c%d",
+                        Prog.mcu->portPrefix,
+                        Prog.mcu->pinInfo[j].port,
+                        Prog.mcu->pinInfo[j].bit);
+                    break;
+                }
+            }
+            if(j == Prog.mcu->pinCount) {
+                sprintf(IO_value_holder, _("<not an I/O!>"));
+            }
+
+            g_value_set_string(&val, (const char*)IO_value_holder);                    
+            gtk_list_store_set_value (GTK_LIST_STORE(h->hlistFrom), h->hlistIter, LV_IO_PORT, &val);
+
+            /// case LV_IO_STATE: 
+            if(InSimulationMode) {
+                char *name = Prog.io.assignment[item].name;
+                DescribeForIoList(name, IO_value_holder);
+            } else {
+                strcpy(IO_value_holder, "");
+            }
+            
+            g_value_set_string(&val, (const char*)IO_value_holder);                    
+            gtk_list_store_set_value (GTK_LIST_STORE(h->hlistFrom), h->hlistIter, LV_IO_STATE, &val);
+            
+            break;
+        }
+        case LVN_ITEMACTIVATE: {
+            // if(InSimulationMode) {
+            //     char *name = Prog.io.assignment[h->item.iItem].name;
+            //     if(name[0] == 'X') {
+            //         SimulationToggleContact(name);
+            //     } else if(name[0] == 'A') {
+            //         ShowAnalogSliderPopup(name);
+            //     }
+            // } else {
+            //     UndoRemember();
+            //     ShowIoDialog(h->item.iItem);
+            //     ProgramChanged();
+            //     InvalidateRect(MainWindow, NULL, FALSE);
+            // }
+            break;
+        }
+    }
+}

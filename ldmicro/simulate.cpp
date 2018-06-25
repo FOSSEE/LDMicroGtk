@@ -764,32 +764,32 @@ void ClearSimulationData(void)
 // Provide a description for an item (Xcontacts, Ycoil, Rrelay, Ttimer,
 // or other) in the I/O list.
 //-----------------------------------------------------------------------------
-// void DescribeForIoList(char *name, char *out)
-// {
-//     switch(name[0]) {
-//         case 'R':
-//         case 'X':
-//         case 'Y':
-//             sprintf(out, "%d", SingleBitOn(name));
-//             break;
+void DescribeForIoList(char *name, char *out)
+{
+    switch(name[0]) {
+        case 'R':
+        case 'X':
+        case 'Y':
+            sprintf(out, "%d", SingleBitOn(name));
+            break;
 
-//         case 'T': {
-//             double dtms = GetSimulationVariable(name) *
-//                 (Prog.cycleTime / 1000.0);
-//             if(dtms < 1000) {
-//                 sprintf(out, "%.2f ms", dtms);
-//             } else {
-//                 sprintf(out, "%.3f s", dtms / 1000);
-//             }
-//             break;
-//         }
-//         default: {
-//             SWORD v = GetSimulationVariable(name);
-//             sprintf(out, "%hd (0x%04hx)", v, v);
-//             break;
-//         }
-//     }
-// }
+        case 'T': {
+            double dtms = GetSimulationVariable(name) *
+                (Prog.cycleTime / 1000.0);
+            if(dtms < 1000) {
+                sprintf(out, "%.2f ms", dtms);
+            } else {
+                sprintf(out, "%.3f s", dtms / 1000);
+            }
+            break;
+        }
+        default: {
+            SWORD v = GetSimulationVariable(name);
+            sprintf(out, "%hd (0x%04hx)", v, v);
+            break;
+        }
+    }
+}
 
 //-----------------------------------------------------------------------------
 // Toggle the state of a contact input; for simulation purposes, so that we

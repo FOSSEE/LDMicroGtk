@@ -624,20 +624,12 @@ cmp:
 //     //     case WM_SIZE:
 
 //     //     case WM_NOTIFY: {
-//     //         NMHDR *h = (NMHDR *)lParam;
-//     //         if(h->hwndFrom == IoList) {
-//     //             IoListProc(h);
-//     //         }
-//     //         return 0;
-//     //     }
+
 //     //     case WM_VSCROLL:
 
 //     //     case WM_HSCROLL:
 
 //     //     case WM_COMMAND:
-//     //         ProcessMenu(LOWORD(wParam));
-//     //         InvalidateRect(MainWindow, NULL, FALSE);
-//     //         break;
 
 //     //     case WM_CLOSE:
 //     //     case WM_DESTROY:
@@ -804,7 +796,7 @@ gboolean LD_WM_Paint_call(HWID widget, HCRDC cr, gpointer data)
     /// This draws the schematic.
     MainWindowResized();
     PaintWindow(cr);
-    
+
     return FALSE;
 }
 
@@ -848,6 +840,57 @@ gboolean LD_WM_SetFocus_call(GtkWidget *widget, GdkEvent *event, gpointer user_d
     InvalidateRect(DrawWindow, NULL, FALSE);
 
     return FALSE;
+}
+
+void LD_WM_Notify_Row_Activate_call(GtkTreeView *tree_view, GtkTreePath *path, GtkTreeViewColumn *column, gpointer user_data)
+{
+    /* Handles:
+    * WM_NOTIFY
+    */
+
+    g_print("Row activated!\n");
+    
+    int *ip = gtk_tree_path_get_indices ( path );
+
+    NMHDR h;
+    h.code = LVN_ITEMACTIVATE;
+    h.item.iItem = ip[0];
+    h.hlistFrom = IoList;
+    
+    IoListProc(&h);
+}
+
+void LD_WM_Notify_Cursor_Change_call(GtkTreeView *tree_view, gpointer user_data)
+{
+    /* Handles:
+    * WM_NOTIFY
+    */
+    
+    ITLIST iter;
+
+    BOOL empty = !gtk_tree_model_get_iter_first (IoList, &iter);
+    // g_print("empty = %i\n", (empty == TRUE) );
+
+    HLIST pTreeModel;
+    int *ip;
+    GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
+    gtk_tree_selection_set_mode(selection, GTK_SELECTION_SINGLE);
+    
+    if(gtk_tree_selection_get_selected (selection, &pTreeModel, &iter))
+    {
+        GtkTreePath *path = gtk_tree_model_get_path ( pTreeModel , &iter ) ;
+        ip = gtk_tree_path_get_indices ( path );
+    }
+    else
+        gtk_tree_model_get_iter_first (IoList, &iter);
+
+    NMHDR h;
+    h.code = LVN_GETDISPINFO;
+    h.item.iItem = (ip == NULL) ? 0 : ip[0];
+    h.hlistFrom = IoList;
+    h.hlistIter = &iter;
+
+    IoListProc(&h);
 }
 
 inline void MenuHandler ()
@@ -1143,8 +1186,9 @@ int main(int argc, char** argv)
     g_signal_connect (DrawWindow, "draw", G_CALLBACK (LD_WM_Paint_call), NULL);
     g_signal_connect (MainWindow, "destroy_event", G_CALLBACK (LD_WM_Destroy_call), NULL);
     g_signal_connect (MainWindow, "configure_event", G_CALLBACK (LD_WM_Size_call), NULL);
-    g_signal_connect (MainWindow, "configure_event", G_CALLBACK (LD_WM_Size_call), NULL);
     g_signal_connect (MainWindow, "focus_in_event", G_CALLBACK (LD_WM_SetFocus_call), NULL);
+    g_signal_connect (view, "row_activated", G_CALLBACK (LD_WM_Notify_Row_Activate_call), NULL);
+    g_signal_connect (view, "cursor_changed", G_CALLBACK (LD_WM_Notify_Cursor_Change_call), NULL);
     MenuHandler();
     /// Keyboard and mouse hooks equivalent to MainWndProc - end
 

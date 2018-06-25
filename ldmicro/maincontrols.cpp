@@ -947,7 +947,7 @@ void RefreshControlsToSettings(void)
 {   
     GtkTreeIter iter;
     BOOL path_not_empty = gtk_tree_model_get_iter_first (GTK_TREE_MODEL(IoList), &iter);
-    g_print("path e = %i\n", path_not_empty);
+    // g_print("path e = %i\n", path_not_empty);
     
     int * ip;
     int i = 0;
@@ -970,9 +970,16 @@ void RefreshControlsToSettings(void)
 
     gtk_list_store_clear (GTK_LIST_STORE(IoList));
 
+    /// Fill IO List
+    NMHDR h;
+    h.code = LVN_GETDISPINFO;
+    h.hlistFrom = IoList;
+
     for(i = 0; i < Prog.io.count; i++) {
         gtk_list_store_append (GTK_LIST_STORE(IoList), &iter);
-
+        h.item.iItem = i;
+        h.hlistIter = &iter;
+        IoListProc(&h);
     }
 
     if(IoListSelectionPoint >= 0) {

@@ -666,8 +666,8 @@ gboolean LD_GTK_mouse_click_hook(GtkWidget *widget, GdkEvent *event, gpointer us
         case GDK_BUTTON_PRESS:
             if (event->button.button == 1) /// left click
             {
-                GLOBAL_mouse_last_clicked_x = event->button.x;
-                GLOBAL_mouse_last_clicked_y = event->button.y;
+                GLOBAL_mouse_last_clicked_x = event->button.x_root;
+                GLOBAL_mouse_last_clicked_y = event->button.y_root;
 
                 int x = event->button.x;
                 int y = event->button.y - 30 + gtk_adjustment_get_value(adjustment);
@@ -689,8 +689,8 @@ gboolean LD_GTK_mouse_click_hook(GtkWidget *widget, GdkEvent *event, gpointer us
         case GDK_2BUTTON_PRESS:
             if (event->button.button == 1) /// left click
             {
-                GLOBAL_mouse_last_clicked_x = event->button.x;
-                GLOBAL_mouse_last_clicked_y = event->button.y;
+                GLOBAL_mouse_last_clicked_x = event->button.x_root;
+                GLOBAL_mouse_last_clicked_y = event->button.y_root;
                 
                 int x = event->button.x;
                 int y = event->button.y - 30 + gtk_adjustment_get_value(adjustment);

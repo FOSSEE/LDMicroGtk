@@ -397,6 +397,7 @@ void SaveIoListToFile(FILE *f)
 static gboolean AnalogSliderDialogKeyboardProc(GtkWidget* widget, GdkEventKey* event, gpointer name)
 {
     // g_print("key click!\n");
+
     SWORD v = (SWORD)gtk_range_get_value(GTK_RANGE(AnalogSliderTrackbar));
     SetAdcShadow((char*)name, v);
     if (AnalogSliderDone == TRUE || AnalogSliderCancel == TRUE)
@@ -464,6 +465,8 @@ void ShowAnalogSliderPopup(char *name)
         return;
     }
     
+    // int x, y;
+    // gtk_window_get_position(GTK_WINDOW(MainWindow), &x, &y);
     int left = GLOBAL_mouse_last_clicked_x - 10;
     // try to put the slider directly under the cursor (though later we might
     // realize that that would put the popup off the screen)
@@ -475,18 +478,24 @@ void ShowAnalogSliderPopup(char *name)
     // if(top + 110 >= r.bottom) {
     //     top = r.bottom - 110;
     // }
-    if(top < 0) top = 30;
-    if(left < 0) left = 50;
+    if(top < 0) top = 100;
+    if(left < 0) left = 100;
     
-    AnalogSliderMain = gtk_window_new(GTK_WINDOW_POPUP);
-    gtk_window_set_title(GTK_WINDOW(AnalogSliderMain),  "I/O Pin");
-    gtk_window_resize (GTK_WINDOW(AnalogSliderMain), 30, 100);
-    gtk_window_move(GTK_WINDOW(AnalogSliderMain), left, top);
+    if (!GTK_IS_WINDOW(AnalogSliderMain))
+    {
+        AnalogSliderMain = gtk_window_new(GTK_WINDOW_POPUP);
+        gtk_window_set_title(GTK_WINDOW(AnalogSliderMain),  "I/O Pin");
+        gtk_window_resize (GTK_WINDOW(AnalogSliderMain), 30, 100);
+        gtk_window_move(GTK_WINDOW(AnalogSliderMain), left, top);
+    }
 
-    AnalogSliderTrackbar = gtk_scale_new_with_range (GTK_ORIENTATION_VERTICAL,
+    if (!GTK_IS_SCALE(AnalogSliderTrackbar))
+    {
+        AnalogSliderTrackbar = gtk_scale_new_with_range (GTK_ORIENTATION_VERTICAL,
                         0,
                         maxVal,
                         1);
+    }
     
     gtk_range_set_value (GTK_RANGE(AnalogSliderTrackbar), currentVal);
     // gtk_scale_add_mark (GTK_SCALE(AnalogSliderTrackbar), (maxVal + 1)/8,  GTK_POS_LEFT, NULL);
@@ -509,7 +518,9 @@ void ShowAnalogSliderPopup(char *name)
     gtk_container_add(GTK_CONTAINER(AnalogSliderMain), AnalogSliderTrackbar);
     
     // SetFocus(AnalogSliderTrackbar);
-    // gtk_window_set_focus (GTK_WINDOW(AnalogSliderMain), AnalogSliderTrackbar);
+    gtk_window_set_focus_visible (GTK_WINDOW(AnalogSliderMain), TRUE);
+    gtk_window_set_keep_above (GTK_WINDOW(AnalogSliderMain), TRUE);
+    // gtk_window_set_focus (, AnalogSliderTrackbar);
     
     g_signal_connect (AnalogSliderMain, "key-press-event",
                     G_CALLBACK(AnalogSliderDialogKeyboardProc), (PVOID)name);

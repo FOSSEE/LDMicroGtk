@@ -596,8 +596,18 @@ void MakeMainWindowControls(void)
     gtk_paned_pack1 (GTK_PANED (pane), ScrollWindow, TRUE, TRUE);
     gtk_paned_set_position (GTK_PANED (pane), 0);    
 
+    /// Appending tree view to scrolled window 
+    HWID ViewScroll = gtk_scrolled_window_new (NULL, NULL);
+    gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (ViewScroll),
+				                          GTK_POLICY_AUTOMATIC, 
+				                          GTK_POLICY_ALWAYS);
+    gtk_widget_set_hexpand(GTK_WIDGET(ViewScroll), TRUE);  
+    gtk_widget_set_vexpand(GTK_WIDGET(ViewScroll), TRUE);
+
+    gtk_container_add (GTK_CONTAINER(ViewScroll), view);
+
     /// Appending tree view to pane and pane to grid
-    gtk_paned_pack2 (GTK_PANED(pane), view, FALSE, FALSE);
+    gtk_paned_pack2 (GTK_PANED(pane), ViewScroll, FALSE, FALSE);
     gtk_paned_set_position (GTK_PANED (pane), 400);
     gtk_grid_attach (GTK_GRID (grid), pane, 0, 0, 1, 1); 
     
@@ -605,6 +615,7 @@ void MakeMainWindowControls(void)
 
     /// Grid for status bars
     HWID StatusGrid = gtk_grid_new();
+
     /// Creating Status Bar 1 and attaching to grid
     StatusBar[0] = gtk_statusbar_new();
    

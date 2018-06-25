@@ -564,15 +564,15 @@ cmp:
             break;
 
         case MNU_START_SIMULATION:
-            // StartSimulation();
+            StartSimulation();
             break;
 
         case MNU_STOP_SIMULATION:
-            // StopSimulation();
+            StopSimulation();
             break;
 
         case MNU_SINGLE_CYCLE:
-            // SimulateOneCycle(TRUE);
+            SimulateOneCycle(TRUE);
             break;
 
         case MNU_COMPILE:
@@ -1202,7 +1202,8 @@ int main(int argc, char** argv)
     gtk_widget_show_all(MainWindow);
 
     /// Blink cursor
-    g_timeout_add(200, (GSourceFunc)BlinkCursor, DrawWindow);
+    SetTimer(DrawWindow, TIMER_BLINK_CURSOR, 200, BlinkCursor);
+    // SetTimer(MainWindow, TIMER_BLINK_CURSOR, 800, BlinkCursor);
     
     if(argc >= 2) {
         char line[MAX_PATH];

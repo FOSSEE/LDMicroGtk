@@ -10,6 +10,9 @@ const COLORREF DKGRAY_BR(169, 169, 169);
 /// Variable to current text color
 COLORREF HdcCurrentTextColor;
 
+/// Variable to hold timers
+std::vector<TimerRecord> timerRecords;
+
 /// EnableMenuItem Variables
 const UINT MF_ENABLED = 0;
 const UINT MF_GRAYED = 1;
@@ -468,6 +471,36 @@ BOOL GetWindowRect(HWID hWid, PRECT pRect)
     pRect->left = allocation.y;
     pRect->right = allocation.width;
     pRect->bottom = allocation.height;
+
+    return TRUE;
+}
+
+UINT SetTimer(HWID hWid, UINT  nIDEvent, UINT uElapse, BOOL (*lpTimerFunc)(BOOL) )
+{
+    auto record_it = std::find_if(timerRecords.begin(), timerRecords.end(),  [&nIDEvent](TimerRecord &Record) { return Record.ufID == nIDEvent; });
+
+    if (record_it != timerRecords.end())
+        return 0;
+
+    TimerRecord tr;
+    tr.pfun = lpTimerFunc;
+    tr.ufID = nIDEvent;
+    tr.utID = g_timeout_add(uElapse, (GSourceFunc)lpTimerFunc, FALSE);
+
+    timerRecords.push_back(tr);
+    return tr.utID;
+}
+
+BOOL KillTimer(HWID hWid, UINT uIDEvent)
+{
+    auto record_it = std::find_if(timerRecords.begin(), timerRecords.end(),  [&uIDEvent](TimerRecord &Record) { return Record.ufID == uIDEvent; });
+
+    if (record_it == timerRecords.end())
+        return FALSE;
+    
+    record_it->pfun(TRUE);
+    g_source_remove (record_it->utID);
+    timerRecords.erase(record_it);
 
     return TRUE;
 }

@@ -673,13 +673,14 @@ math:
 // Called by the Windows timer that triggers cycles when we are running
 // in real time.
 //-----------------------------------------------------------------------------
-// void CALLBACK PlcCycleTimer(HWND hwnd, UINT msg, UINT_PTR id, DWORD time)
-// {
-//     int i;
-//     for(i = 0; i < CyclesPerTimerTick; i++) {
-//         SimulateOneCycle(FALSE);
-//     }
-// }
+BOOL PlcCycleTimer(BOOL kill = FALSE)
+{
+    for(int i = 0; i < CyclesPerTimerTick; i++) {
+        SimulateOneCycle(FALSE);
+    }
+
+    return !kill;
+}
 
 //-----------------------------------------------------------------------------
 // Simulate one cycle of the PLC. Update everything, and keep track of whether
@@ -709,7 +710,8 @@ void SimulateOneCycle(BOOL forceRefresh)
     SimulateIntCode();
 
     if(NeedRedraw || SimulateRedrawAfterNextCycle || forceRefresh) {
-        InvalidateRect(MainWindow, NULL, FALSE);
+        InvalidateRect(DrawWindow, NULL, FALSE);
+        gtk_widget_queue_draw(DrawWindow);
         // ListView_RedrawItems(IoList, 0, Prog.io.count - 1);
     }
 
@@ -725,17 +727,17 @@ void SimulateOneCycle(BOOL forceRefresh)
 // is about as fast as anyone could follow by eye. Faster timers will just
 // go instantly.
 //-----------------------------------------------------------------------------
-// void StartSimulationTimer(void)
-// {
-//     int p = Prog.cycleTime/1000;
-//     if(p < 5) {
-//         SetTimer(MainWindow, TIMER_SIMULATE, 10, PlcCycleTimer);
-//         CyclesPerTimerTick = 10000 / Prog.cycleTime;
-//     } else {
-//         SetTimer(MainWindow, TIMER_SIMULATE, p, PlcCycleTimer);
-//         CyclesPerTimerTick = 1;
-//     }
-// }
+void StartSimulationTimer(void)
+{
+    int p = Prog.cycleTime/1000;
+    if(p < 5) {
+        SetTimer(MainWindow, TIMER_SIMULATE, 10, PlcCycleTimer);
+        CyclesPerTimerTick = 10000 / Prog.cycleTime;
+    } else {
+        SetTimer(MainWindow, TIMER_SIMULATE, p, PlcCycleTimer);
+        CyclesPerTimerTick = 1;
+    }
+}
 
 //-----------------------------------------------------------------------------
 // Clear out all the parameters relating to the previous simulation.
@@ -852,8 +854,8 @@ void SimulationToggleContact(char *name)
 // characters that you type go into UART RECV instruction and whatever
 // the program puts into UART SEND shows up as text.
 //-----------------------------------------------------------------------------
-// void ShowUartSimulationWindow(void)
-// {
+void ShowUartSimulationWindow(void)
+{
 //     WNDCLASSEX wc;
 //     memset(&wc, 0, sizeof(wc));
 //     wc.cbSize = sizeof(wc);
@@ -909,13 +911,13 @@ void SimulationToggleContact(char *name)
 
 //     ShowWindow(UartSimulationWindow, TRUE);
 //     SetFocus(MainWindow);
-// }
+}
 
 //-----------------------------------------------------------------------------
 // Get rid of the UART simulation terminal-type window.
 //-----------------------------------------------------------------------------
-// void DestroyUartSimulationWindow(void)
-// {
+void DestroyUartSimulationWindow(void)
+{
 //     // Try not to destroy the window if it is already destroyed; that is
 //     // not for the sake of the window, but so that we don't trash the
 //     // stored position.
@@ -939,7 +941,7 @@ void SimulationToggleContact(char *name)
 
 //     DestroyWindow(UartSimulationWindow);
 //     UartSimulationWindow = NULL;
-// }
+}
 
 //-----------------------------------------------------------------------------
 // Append a received character to the terminal buffer.

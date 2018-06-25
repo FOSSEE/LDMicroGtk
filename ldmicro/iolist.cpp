@@ -415,104 +415,109 @@ void SaveIoListToFile(FILE *f)
 //-----------------------------------------------------------------------------
 void ShowAnalogSliderPopup(char *name)
 {
-//     WNDCLASSEX wc;
-//     memset(&wc, 0, sizeof(wc));
-//     wc.cbSize = sizeof(wc);
-
-//     wc.style            = CS_BYTEALIGNCLIENT | CS_BYTEALIGNWINDOW | CS_OWNDC |
-//                             CS_DBLCLKS;
-//     wc.lpfnWndProc      = (WNDPROC)AnalogSliderDialogProc;
-//     wc.hInstance        = Instance;
-//     wc.hbrBackground    = (HBRUSH)COLOR_BTNSHADOW;
-//     wc.lpszClassName    = "LDmicroAnalogSlider";
-//     wc.lpszMenuName     = NULL;
-//     wc.hCursor          = LoadCursor(NULL, IDC_ARROW);
-
-//     RegisterClassEx(&wc);
-
-//     POINT pt;
-//     GetCursorPos(&pt);
-
-//     SWORD currentVal = GetAdcShadow(name);
-
-//     SWORD maxVal;
-//     if(Prog.mcu) {
-//         maxVal = Prog.mcu->adcMax;
-//     } else {
-//         maxVal = 1023;
-//     }
-//     if(maxVal == 0) {
-//         Error(_("No ADC or ADC not supported for selected micro."));
-//         return;
-//     }
-
-//     int left = pt.x - 10;
-//     // try to put the slider directly under the cursor (though later we might
-//     // realize that that would put the popup off the screen)
-//     int top = pt.y - (15 + (73*currentVal)/maxVal);
-
-//     RECT r;
-//     SystemParametersInfo(SPI_GETWORKAREA, 0, &r, 0);
-
-//     if(top + 110 >= r.bottom) {
-//         top = r.bottom - 110;
-//     }
-//     if(top < 0) top = 0;
+    HWID scale = gtk_scale_new_with_range (GTK_ORIENTATION_HORIZONTAL,
+                        0,
+                        1024,
+                        1);
     
-//     AnalogSliderMain = CreateWindowClient(0, "LDmicroAnalogSlider", "I/O Pin",
-//         WS_VISIBLE | WS_POPUP | WS_DLGFRAME,
-//         left, top, 30, 100, NULL, NULL, Instance, NULL);
+    // WNDCLASSEX wc;
+    // memset(&wc, 0, sizeof(wc));
+    // wc.cbSize = sizeof(wc);
 
-//     AnalogSliderTrackbar = CreateWindowEx(0, TRACKBAR_CLASS, "", WS_CHILD |
-//         TBS_AUTOTICKS | TBS_VERT | TBS_TOOLTIPS | WS_CLIPSIBLINGS | WS_VISIBLE, 
-//         0, 0, 30, 100, AnalogSliderMain, NULL, Instance, NULL);
-//     SendMessage(AnalogSliderTrackbar, TBM_SETRANGE, FALSE,
-//         MAKELONG(0, maxVal));
-//     SendMessage(AnalogSliderTrackbar, TBM_SETTICFREQ, (maxVal + 1)/8, 0);
-//     SendMessage(AnalogSliderTrackbar, TBM_SETPOS, TRUE, currentVal);
+    // wc.style            = CS_BYTEALIGNCLIENT | CS_BYTEALIGNWINDOW | CS_OWNDC |
+    //                         CS_DBLCLKS;
+    // wc.lpfnWndProc      = (WNDPROC)AnalogSliderDialogProc;
+    // wc.hInstance        = Instance;
+    // wc.hbrBackground    = (HBRUSH)COLOR_BTNSHADOW;
+    // wc.lpszClassName    = "LDmicroAnalogSlider";
+    // wc.lpszMenuName     = NULL;
+    // wc.hCursor          = LoadCursor(NULL, IDC_ARROW);
 
-//     EnableWindow(MainWindow, FALSE);
-//     ShowWindow(AnalogSliderMain, TRUE);
-//     SetFocus(AnalogSliderTrackbar);
+    // RegisterClassEx(&wc);
 
-//     DWORD ret;
-//     MSG msg;
-//     AnalogSliderDone = FALSE;
-//     AnalogSliderCancel = FALSE;
+    // POINT pt;
+    // GetCursorPos(&pt);
 
-//     SWORD orig = GetAdcShadow(name);
+    // SWORD currentVal = GetAdcShadow(name);
 
-//     while(!AnalogSliderDone && (ret = GetMessage(&msg, NULL, 0, 0))) {
-//         SWORD v = (SWORD)SendMessage(AnalogSliderTrackbar, TBM_GETPOS, 0, 0);
+    // SWORD maxVal;
+    // if(Prog.mcu) {
+    //     maxVal = Prog.mcu->adcMax;
+    // } else {
+    //     maxVal = 1023;
+    // }
+    // if(maxVal == 0) {
+    //     Error(_("No ADC or ADC not supported for selected micro."));
+    //     return;
+    // }
 
-//         if(msg.message == WM_KEYDOWN) {
-//             if(msg.wParam == VK_RETURN) {
-//                 AnalogSliderDone = TRUE;
-//                 break;
-//             } else if(msg.wParam == VK_ESCAPE) {
-//                 AnalogSliderDone = TRUE;
-//                 AnalogSliderCancel = TRUE;
-//                 break;
-//             }
-//         } else if(msg.message == WM_LBUTTONUP) {
-//             if(v != orig) {
-//                 AnalogSliderDone = TRUE;
-//             }
-//         }
-//         SetAdcShadow(name, v);
+    // int left = pt.x - 10;
+    // // try to put the slider directly under the cursor (though later we might
+    // // realize that that would put the popup off the screen)
+    // int top = pt.y - (15 + (73*currentVal)/maxVal);
 
-//         TranslateMessage(&msg);
-//         DispatchMessage(&msg);
-//     }
+    // RECT r;
+    // SystemParametersInfo(SPI_GETWORKAREA, 0, &r, 0);
 
-//     if(!AnalogSliderCancel) {
-//         SWORD v = (SWORD)SendMessage(AnalogSliderTrackbar, TBM_GETPOS, 0, 0);
-//         SetAdcShadow(name, v);
-//     }
+    // if(top + 110 >= r.bottom) {
+    //     top = r.bottom - 110;
+    // }
+    // if(top < 0) top = 0;
+    
+    // AnalogSliderMain = CreateWindowClient(0, "LDmicroAnalogSlider", "I/O Pin",
+    //     WS_VISIBLE | WS_POPUP | WS_DLGFRAME,
+    //     left, top, 30, 100, NULL, NULL, Instance, NULL);
 
-//     EnableWindow(MainWindow, TRUE);
-//     DestroyWindow(AnalogSliderMain);
-//     ListView_RedrawItems(IoList, 0, Prog.io.count - 1);
+    // AnalogSliderTrackbar = CreateWindowEx(0, TRACKBAR_CLASS, "", WS_CHILD |
+    //     TBS_AUTOTICKS | TBS_VERT | TBS_TOOLTIPS | WS_CLIPSIBLINGS | WS_VISIBLE, 
+    //     0, 0, 30, 100, AnalogSliderMain, NULL, Instance, NULL);
+    // SendMessage(AnalogSliderTrackbar, TBM_SETRANGE, FALSE,
+    //     MAKELONG(0, maxVal));
+    // SendMessage(AnalogSliderTrackbar, TBM_SETTICFREQ, (maxVal + 1)/8, 0);
+    // SendMessage(AnalogSliderTrackbar, TBM_SETPOS, TRUE, currentVal);
+
+    // EnableWindow(MainWindow, FALSE);
+    // ShowWindow(AnalogSliderMain, TRUE);
+    // SetFocus(AnalogSliderTrackbar);
+
+    // DWORD ret;
+    // MSG msg;
+    // AnalogSliderDone = FALSE;
+    // AnalogSliderCancel = FALSE;
+
+    // SWORD orig = GetAdcShadow(name);
+
+    // while(!AnalogSliderDone && (ret = GetMessage(&msg, NULL, 0, 0))) {
+    //     SWORD v = (SWORD)SendMessage(AnalogSliderTrackbar, TBM_GETPOS, 0, 0);
+
+    //     if(msg.message == WM_KEYDOWN) {
+    //         if(msg.wParam == VK_RETURN) {
+    //             AnalogSliderDone = TRUE;
+    //             break;
+    //         } else if(msg.wParam == VK_ESCAPE) {
+    //             AnalogSliderDone = TRUE;
+    //             AnalogSliderCancel = TRUE;
+    //             break;
+    //         }
+    //     } else if(msg.message == WM_LBUTTONUP) {
+    //         if(v != orig) {
+    //             AnalogSliderDone = TRUE;
+    //         }
+    //     }
+    //     SetAdcShadow(name, v);
+
+    //     TranslateMessage(&msg);
+    //     DispatchMessage(&msg);
+    // }
+
+    // if(!AnalogSliderCancel) {
+    //     SWORD v = (SWORD)SendMessage(AnalogSliderTrackbar, TBM_GETPOS, 0, 0);
+    //     SetAdcShadow(name, v);
+    // }
+
+    // EnableWindow(MainWindow, TRUE);
+    // DestroyWindow(AnalogSliderMain);
+    // ListView_RedrawItems(IoList, 0, Prog.io.count - 1);
 }
 
 //-----------------------------------------------------------------------------
@@ -876,19 +881,19 @@ void IoListProc(NMHDR *h)
             break;
         }
         case LVN_ITEMACTIVATE: {
-            // if(InSimulationMode) {
-            //     char *name = Prog.io.assignment[h->item.iItem].name;
-            //     if(name[0] == 'X') {
-            //         SimulationToggleContact(name);
-            //     } else if(name[0] == 'A') {
-            //         ShowAnalogSliderPopup(name);
-            //     }
-            // } else {
-            //     UndoRemember();
-            //     ShowIoDialog(h->item.iItem);
-            //     ProgramChanged();
-            //     InvalidateRect(MainWindow, NULL, FALSE);
-            // }
+            if(InSimulationMode) {
+                char *name = Prog.io.assignment[h->item.iItem].name;
+                if(name[0] == 'X') {
+                    SimulationToggleContact(name);
+                } else if(name[0] == 'A') {
+                    ShowAnalogSliderPopup(name);
+                }
+            } else {
+                // UndoRemember();
+                // ShowIoDialog(h->item.iItem);
+                // ProgramChanged();
+                // InvalidateRect(MainWindow, NULL, FALSE);
+            }
             break;
         }
     }

@@ -100,8 +100,15 @@ typedef struct OpenFileInfoData {
     LPCTSTR       lpstrDefExt;
 } OPENFILENAME;
 
+typedef struct TimerRecordTag {
+    BOOL (*pfun)(BOOL);
+    UINT  ufID;
+    UINT  utID;
+} TimerRecord;
+
 /// Variables
 extern COLORREF HdcCurrentTextColor;
+extern std::vector<TimerRecord> timerRecords;
 
 /// functions
 BOOL GetFocus(HWID window);
@@ -200,5 +207,15 @@ BOOL MoveWindow(
 BOOL GetWindowRect(
     HWID   hWid,
     PRECT  pRect);
+
+UINT SetTimer(
+    HWID  hWid,
+    UINT  nIDEvent,
+    UINT  uElapse,
+    BOOL (*lpTimerFunc)(BOOL));
+
+BOOL KillTimer(
+    HWID hWid,
+    UINT uIDEvent);
 
 #endif

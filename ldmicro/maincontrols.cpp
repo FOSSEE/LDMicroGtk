@@ -594,7 +594,7 @@ void MakeMainWindowControls(void)
     gtk_container_add (GTK_CONTAINER(ViewPortMenu), DrawWindow);
     gtk_container_add (GTK_CONTAINER(ScrollWindow), ViewPortMenu);
     gtk_paned_pack1 (GTK_PANED (pane), ScrollWindow, TRUE, TRUE);
-    gtk_paned_set_position (GTK_PANED (pane), 0);    
+    gtk_paned_set_position (GTK_PANED (pane), 0);
 
     /// Appending tree view to scrolled window 
     HWID ViewScroll = gtk_scrolled_window_new (NULL, NULL);
@@ -912,16 +912,16 @@ void ToggleSimulationMode(void)
     
         CheckMenuItem(SimulateMenu, SimulationModeMenu, MF_CHECKED);
 
-        // ClearSimulationData(); // simulation.cpp, ldmicro.h
+        ClearSimulationData(); // simulation.cpp, ldmicro.h
         // Recheck InSimulationMode, because there could have been a Compile
         // error, which would have kicked us out of simulation mode.
-        // if(UartFunctionUsed() && InSimulationMode) {
-        //     ShowUartSimulationWindow(); // simulate.cpp
-        // }
+        if(UartFunctionUsed() && InSimulationMode) {
+            ShowUartSimulationWindow(); // simulate.cpp
+        }
     }
     else {
         RealTimeSimulationRunning = FALSE;
-        // KillTimer(MainWindow, TIMER_SIMULATE);
+        KillTimer(MainWindow, TIMER_SIMULATE);
 
         EnableMenuItem(SimulateMenu, StartSimulationMenu, MF_GRAYED);
         EnableMenuItem(SimulateMenu, StopSimulationMenu, MF_GRAYED);
@@ -1144,7 +1144,7 @@ void StartSimulation(void)
     RealTimeSimulationRunning = TRUE;
     EnableMenuItem(SimulateMenu, StartSimulationMenu, MF_GRAYED);
     EnableMenuItem(SimulateMenu, StopSimulationMenu, MF_ENABLED);
-    // StartSimulationTimer();
+    StartSimulationTimer();
     UpdateMainWindowTitleBar();
 }
 
@@ -1158,7 +1158,7 @@ void StopSimulation(void)
 
     EnableMenuItem(SimulateMenu, StartSimulationMenu, MF_ENABLED);
     EnableMenuItem(SimulateMenu, StopSimulationMenu, MF_GRAYED);
-    // KillTimer(MainWindow, TIMER_SIMULATE);
+    KillTimer(MainWindow, TIMER_SIMULATE);
 
     UpdateMainWindowTitleBar();
 }

@@ -631,7 +631,7 @@ extern BOOL ThisHighlighted;
 
 // draw_outputdev.cpp
 extern void (*DrawChars)(HCRDC Hcr, int, int, const char *);
-gboolean BlinkCursor(GtkWidget * window);
+BOOL BlinkCursor(BOOL kill);
 void PaintWindow(HCRDC Hcr);
 void ExportDrawingAsText(char *file);
 void InitForDrawing(void);
@@ -804,7 +804,7 @@ char *_(char *in);
 
 // simulate.cpp
 void SimulateOneCycle(BOOL forceRefresh);
-void CALLBACK PlcCycleTimer(HWND hwnd, UINT msg, UINT_PTR id, DWORD time);
+BOOL PlcCycleTimer(BOOL kill);
 void StartSimulationTimer(void);
 void ClearSimulationData(void);
 void DescribeForIoList(char *name, char *out);

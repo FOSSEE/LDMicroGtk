@@ -560,7 +560,7 @@ cmp:
             break;
 
         case MNU_SIMULATION_MODE:
-            // ToggleSimulationMode();
+            ToggleSimulationMode();
             break;
 
         case MNU_START_SIMULATION:

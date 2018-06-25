@@ -70,7 +70,7 @@ typedef cairo_t *HCRDC;
 typedef GtkWidget *HWID;
 typedef GtkWidget *HMENU;
 typedef GtkWindow *HWND;
-typedef GtkListStore *HLIST;
+typedef GtkTreeModel *HLIST;
 typedef GtkApplication *HAPP;
 typedef GtkTreeViewColumn *HTVC;
 typedef GdkPixbuf *HICON;

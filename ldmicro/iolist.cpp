@@ -413,8 +413,8 @@ void SaveIoListToFile(FILE *f)
 // A little toolbar-style window that pops up to allow the user to set the
 // simulated value of an ADC pin.
 //-----------------------------------------------------------------------------
-// void ShowAnalogSliderPopup(char *name)
-// {
+void ShowAnalogSliderPopup(char *name)
+{
 //     WNDCLASSEX wc;
 //     memset(&wc, 0, sizeof(wc));
 //     wc.cbSize = sizeof(wc);
@@ -513,7 +513,7 @@ void SaveIoListToFile(FILE *f)
 //     EnableWindow(MainWindow, TRUE);
 //     DestroyWindow(AnalogSliderMain);
 //     ListView_RedrawItems(IoList, 0, Prog.io.count - 1);
-// }
+}
 
 //-----------------------------------------------------------------------------
 // Window proc for the contacts dialog box

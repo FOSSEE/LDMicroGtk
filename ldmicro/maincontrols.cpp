@@ -110,7 +110,7 @@ int                 ScrollHeight;
 BOOL                NeedHoriz;
 
 // status bar at the bottom of the screen, to display settings
-static HMENU        StatusBar;
+static HMENU        StatusBar[3];
 
 // have to get back to the menus to gray/ungray, check/uncheck things
 static HMENU        FileMenu;
@@ -131,7 +131,6 @@ static int          IoListSelectionPoint;
 static BOOL         IoListOutOfSync;
 int                 IoListHeight;
 int                 IoListTop;
-GtkTreeIter* iter = new GtkTreeIter;
 GtkTreeModel **IoListPtr = (GtkTreeModel**)GTK_TREE_MODEL (IoList);
 
 // whether the simulation is running in real time
@@ -347,12 +346,15 @@ HMENU MakeMainWindowMenus(void)
     gtk_menu_shell_append (GTK_MENU_SHELL (Settings), MicroControllerMenu);
 
     // Appending the microcontroller names to "Microcontroller" item
+    GSList* mcuList = NULL;
     for (i = 0; i < NUM_SUPPORTED_MCUS; i++){
-    ProcessorMenuItems[i] = gtk_check_menu_item_new_with_label (SupportedMcus[i].mcuName);
+    ProcessorMenuItems[i] = gtk_radio_menu_item_new_with_label (mcuList, SupportedMcus[i].mcuName);
+    mcuList = gtk_radio_menu_item_get_group (GTK_RADIO_MENU_ITEM (ProcessorMenuItems[i]));
     gtk_menu_shell_append (GTK_MENU_SHELL (ProcessorMenu), ProcessorMenuItems[i]);
     }
 
-    ProcessorMenuItems[NUM_SUPPORTED_MCUS] = gtk_check_menu_item_new_with_label ("(no microcontroller)");
+    ProcessorMenuItems[NUM_SUPPORTED_MCUS] = gtk_radio_menu_item_new_with_label (mcuList, "(no microcontroller)");
+    mcuList = gtk_radio_menu_item_get_group (GTK_RADIO_MENU_ITEM (ProcessorMenuItems[NUM_SUPPORTED_MCUS]));
     gtk_menu_shell_append (GTK_MENU_SHELL (ProcessorMenu), ProcessorMenuItems[NUM_SUPPORTED_MCUS]);
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(MicroControllerMenu), ProcessorMenu);
 
@@ -526,7 +528,7 @@ void MakeMainWindowControls(void)
     /// Pane to separate Scrolled Window and other widgets
     HWID pane = gtk_paned_new (GTK_ORIENTATION_VERTICAL);
 
-    IoList = gtk_list_store_new (5, 
+    IoList = (GtkTreeModel*)gtk_list_store_new (5, 
                                 G_TYPE_STRING,   
                                 G_TYPE_STRING,    
                                 G_TYPE_STRING,
@@ -598,16 +600,45 @@ void MakeMainWindowControls(void)
     gtk_paned_pack2 (GTK_PANED(pane), view, FALSE, FALSE);
     gtk_paned_set_position (GTK_PANED (pane), 400);
     gtk_grid_attach (GTK_GRID (grid), pane, 0, 0, 1, 1); 
+    
+    gtk_box_pack_start(GTK_BOX(PackBoxMenu), grid, FALSE, TRUE, 0);
 
-    /// Creating Status Bar and attaching to grid
-    StatusBar = gtk_statusbar_new();
-    gtk_statusbar_push (GTK_STATUSBAR (StatusBar),
-                        gtk_statusbar_get_context_id (GTK_STATUSBAR (StatusBar),
+    /// Grid for status bars
+    HWID StatusGrid = gtk_grid_new();
+    /// Creating Status Bar 1 and attaching to grid
+    StatusBar[0] = gtk_statusbar_new();
+   
+    gtk_statusbar_push (GTK_STATUSBAR (StatusBar[0]),
+                        gtk_statusbar_get_context_id (GTK_STATUSBAR (StatusBar[0]),
                         "Introduction"), "LDMicro Started");
 
-    /// Appneding Status Bar to box which is then added to Main Window
-    gtk_box_pack_start(GTK_BOX(PackBoxMenu), grid, FALSE, TRUE, 0);
-    gtk_box_pack_start(GTK_BOX(PackBoxMenu), StatusBar, FALSE, FALSE, 0);
+    /// Appneding Status Bar 1 to the status grid
+    gtk_grid_attach (GTK_GRID (StatusGrid), StatusBar[0], 0, 0, 1, 1);
+    
+    /// Creating Status Bar 2 and attaching to grid
+    StatusBar[1] = gtk_statusbar_new();
+   
+    gtk_statusbar_push (GTK_STATUSBAR (StatusBar[1]),
+                        gtk_statusbar_get_context_id (GTK_STATUSBAR (StatusBar[1]),
+                        "Introduction"), "LDMicro Started");
+
+    /// Appneding Status Bar 2 to the status box
+    gtk_grid_attach (GTK_GRID (StatusGrid), StatusBar[1], 1, 0, 1, 1);
+    
+    /// Creating Status Bar 3 and attaching to grid
+    StatusBar[2] = gtk_statusbar_new();
+   
+    gtk_statusbar_push (GTK_STATUSBAR (StatusBar[2]),
+                        gtk_statusbar_get_context_id (GTK_STATUSBAR (StatusBar[2]),
+                        "Introduction"), "LDMicro Started");
+
+    /// Appneding Status Bar 3 to the status box
+    gtk_grid_attach (GTK_GRID (StatusGrid), StatusBar[2], 2, 0, 1, 1);
+
+    /// Attach status grid to box
+    gtk_box_pack_start(GTK_BOX(PackBoxMenu), StatusGrid, FALSE, FALSE, 0);
+
+    /// Adding box to Main Window
     gtk_container_add(GTK_CONTAINER(MainWindow), PackBoxMenu);
 }
 
@@ -914,36 +945,79 @@ void ToggleSimulationMode(void)
 //-----------------------------------------------------------------------------
 void RefreshControlsToSettings(void)
 {   
-    int i;
-    gtk_tree_model_get_iter_first (GTK_TREE_MODEL(IoList), iter);
-    gtk_tree_selection_set_mode(gtk_tree_view_get_selection(GTK_TREE_VIEW(view)),
-                                    GTK_SELECTION_SINGLE);
+    GtkTreeIter iter;
+    BOOL path_not_empty = gtk_tree_model_get_iter_first (GTK_TREE_MODEL(IoList), &iter);
+    g_print("path e = %i\n", path_not_empty);
+    
+    int * ip;
+    int i = 0;
+
+
     if(!IoListOutOfSync) {
         IoListSelectionPoint = -1;
-        for(i = 0; i < Prog.io.count; i++) {
-            gtk_tree_model_iter_next (GTK_TREE_MODEL(IoList), iter);
-            if(gtk_tree_selection_get_selected (gtk_tree_view_get_selection(GTK_TREE_VIEW(view)),
-                                        IoListPtr, iter)) {
-                IoListSelectionPoint = i;
-                break;
-            }
+
+        GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
+        gtk_tree_selection_set_mode(selection, GTK_SELECTION_SINGLE);
+        
+        if(gtk_tree_selection_get_selected (selection, IoListPtr, &iter))
+        {
+            GtkTreePath *path = gtk_tree_model_get_path ( *IoListPtr , &iter ) ;
+            ip = gtk_tree_path_get_indices ( path ) ;
+            i = ip[0];
+            IoListSelectionPoint = i;
         }
     }
-    gtk_list_store_clear (IoList);
+
+    gtk_list_store_clear (GTK_LIST_STORE(IoList));
+
+    for(i = 0; i < Prog.io.count; i++) {
+        gtk_list_store_append (GTK_LIST_STORE(IoList), &iter);
+
+    }
+
+    if(IoListSelectionPoint >= 0) {
+        GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
+        gtk_tree_selection_set_mode(selection, GTK_SELECTION_SINGLE);
+
+        gtk_tree_selection_unselect_all (selection);
+        GtkTreePath *path = gtk_tree_path_new_from_indices ( IoListSelectionPoint, -1);
+        gtk_tree_selection_select_path (selection, path);
+
+        // ListView_EnsureVisible(IoList, IoListSelectionPoint, FALSE);
+    }
+
     IoListOutOfSync = FALSE;
 
     if(Prog.mcu) {
-        gtk_statusbar_push (GTK_STATUSBAR (StatusBar),
-                        gtk_statusbar_get_context_id (GTK_STATUSBAR (StatusBar), "MCU Name"), 
+        gtk_statusbar_push (GTK_STATUSBAR (StatusBar[0]),
+                        gtk_statusbar_get_context_id (GTK_STATUSBAR (StatusBar[0]), "MCU Name"), 
                         (gchar*)Prog.mcu->mcuName);
-        // SendMessage(StatusBar, SB_SETTEXT, 0, (LPARAM)Prog.mcu->mcuName);
     } 
     else {
-        // SendMessage(StatusBar, SB_SETTEXT, 0, (LPARAM)_("no MCU selected"));
-        gtk_statusbar_push (GTK_STATUSBAR (StatusBar),
-                        gtk_statusbar_get_context_id (GTK_STATUSBAR (StatusBar), "MCU Name"), 
+        gtk_statusbar_push (GTK_STATUSBAR (StatusBar[0]),
+                        gtk_statusbar_get_context_id (GTK_STATUSBAR (StatusBar[0]), "MCU Name"), 
                         "no MCU selected");
     }
+    char buf[256];
+    sprintf(buf, _("cycle time %.2f ms"), (double)Prog.cycleTime/1000.0);
+
+    gtk_statusbar_push (GTK_STATUSBAR (StatusBar[1]),
+                        gtk_statusbar_get_context_id (GTK_STATUSBAR (StatusBar[1]), "Cycle time"), 
+                        buf);
+
+    if(Prog.mcu && (Prog.mcu->whichIsa == ISA_ANSIC ||
+        Prog.mcu->whichIsa == ISA_INTERPRETED))
+    {
+        strcpy(buf, "");
+    } else {
+        sprintf(buf, _("processor clock %.4f MHz"),
+            (double)Prog.mcuClock/1000000.0);
+    }
+    gtk_statusbar_push (GTK_STATUSBAR (StatusBar[2]),
+                        gtk_statusbar_get_context_id (GTK_STATUSBAR (StatusBar[2]), "Processor time"), 
+                        buf);
+
+
     for(i = 0; i < NUM_SUPPORTED_MCUS; i++) {
         if(&SupportedMcus[i] == Prog.mcu) {
             CheckMenuItem(ProcessorMenu, ProcessorMenuItems[i], MF_CHECKED);
@@ -967,19 +1041,38 @@ void RefreshControlsToSettings(void)
 //-----------------------------------------------------------------------------
 void GenerateIoListDontLoseSelection(void)
 {
-    int i;
-    gtk_tree_model_get_iter_first (GTK_TREE_MODEL(IoList), iter);
-    gtk_tree_selection_set_mode(gtk_tree_view_get_selection(GTK_TREE_VIEW(view)),
-                                    GTK_SELECTION_SINGLE);
+    GtkTreeIter iter;
+    BOOL path_not_empty = gtk_tree_model_get_iter_first (GTK_TREE_MODEL(IoList), &iter);
+    // g_print("path e = %i\n", path_not_empty);
+
+    int * i ;
     IoListSelectionPoint = -1;
-    for(i = 0; i < Prog.io.count; i++) {
-        gtk_tree_model_iter_next (GTK_TREE_MODEL (IoList), iter);
-        if(gtk_tree_selection_get_selected (gtk_tree_view_get_selection(GTK_TREE_VIEW(view)),
-                                        IoListPtr, iter)) {
-            IoListSelectionPoint = i;
-            break;
-        }
+
+    // GtkTreeSelection * tsel = gtk_tree_view_get_selection (tv);
+    // GtkTreeModel * tm ;
+    GtkTreePath * path ;
+
+    GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
+    gtk_tree_selection_set_mode(selection, GTK_SELECTION_SINGLE);
+
+    if(gtk_tree_selection_get_selected (selection, IoListPtr, &iter))
+    {
+        path = gtk_tree_model_get_path ( *IoListPtr , &iter ) ;
+        i = gtk_tree_path_get_indices ( path ) ;
+        IoListSelectionPoint = i[0];
     }
+
+    // gtk_tree_model_iter_next (GTK_TREE_MODEL(IoList), iter);
+    //     BOOL iter_v = gtk_list_store_iter_is_valid(GTK_LIST_STORE(IoList), iter);
+    //     g_print("iter = %i\n", iter_v);
+
+    
+    // if ( gtk_tree_selection_get_selected ( tsel , &tm , &iter ) )
+    // {
+        
+    //     return i [ 0 ] ;
+    // }
+
     IoListSelectionPoint = GenerateIoList(IoListSelectionPoint);
     
     // can't just update the listview index; if I/O has been added then the
@@ -999,8 +1092,8 @@ void MainWindowResized(void)
     GetClientRect(DrawWindow, &main);
 
     RECT status;
-    GetWindowRect(StatusBar, &status);
-    int statusHeight = status.bottom - status.top;
+    // GetWindowRect(StatusBar, &status);
+    // int statusHeight = status.bottom - status.top;
 
     // MoveWindow(StatusBar, 0, main.bottom - statusHeight, main.right,
         // statusHeight, TRUE);
@@ -1014,8 +1107,8 @@ void MainWindowResized(void)
     // Make sure that we can't drag the top of the I/O list above the
     // bottom of the menu bar, because it then becomes inaccessible.
     if(IoListTop < 5) {
-        IoListHeight = main.bottom - statusHeight - 5;
-        IoListTop = main.bottom - IoListHeight - statusHeight;
+        IoListHeight = main.bottom - 5;//- statusHeight - 5;
+        IoListTop = main.bottom - IoListHeight;// - statusHeight;
     }
     // MoveWindow(IoList, 0, IoListTop, main.right, IoListHeight, TRUE);
 

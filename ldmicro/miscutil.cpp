@@ -53,12 +53,12 @@ HFONT MyFixedFont;
 //-----------------------------------------------------------------------------
 void dbp(char *str, ...)
 {
-    va_list f;
-    char buf[1024];
-    va_start(f, str);
-    vsprintf(buf, str, f);
-    OutputDebugString(buf);
-    OutputDebugString("\n");
+    // va_list f;
+    // char buf[1024];
+    // va_start(f, str);
+    // vsprintf(buf, str, f);
+    // OutputDebugString(buf);
+    // OutputDebugString("\n");
 }
 
 //-----------------------------------------------------------------------------
@@ -132,26 +132,26 @@ void CompileSuccessfulMessage(char *str)
 //-----------------------------------------------------------------------------
 void CheckHeap(char *file, int line)
 {
-    static unsigned int SkippedCalls;
-    static SDWORD LastCallTime;
-    SDWORD now = GetTickCount();
+    // static unsigned int SkippedCalls;
+    // static SDWORD LastCallTime;
+    // SDWORD now = GetTickCount();
 
-    // It slows us down too much to do the check every time we are called;
-    // but let's still do the check periodically; let's do it every 70
-    // calls or every 20 ms, whichever is sooner.
-    if(SkippedCalls < 70 && (now - LastCallTime) < 20) {
-        SkippedCalls++;
-        return;
-    }
-
-    SkippedCalls = 0;
-    LastCallTime = now;
-
-    // if(!HeapValidate(MainHeap, 0, NULL)) {
-    //     dbp("file %s line %d", file, line);
-    //     Error("Noticed memory corruption at file '%s' line %d.", file, line);
-    //     oops();
+    // // It slows us down too much to do the check every time we are called;
+    // // but let's still do the check periodically; let's do it every 70
+    // // calls or every 20 ms, whichever is sooner.
+    // if(SkippedCalls < 70 && (now - LastCallTime) < 20) {
+    //     SkippedCalls++;
+    //     return;
     // }
+
+    // SkippedCalls = 0;
+    // LastCallTime = now;
+
+    // // if(!HeapValidate(MainHeap, 0, NULL)) {
+    // //     dbp("file %s line %d", file, line);
+    // //     Error("Noticed memory corruption at file '%s' line %d.", file, line);
+    // //     oops();
+    // // }
 }
 
 //-----------------------------------------------------------------------------

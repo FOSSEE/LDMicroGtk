@@ -106,117 +106,117 @@ static char *MarkUsedVariable(char *name, DWORD flag);
 // Looks in the SingleBitItems list; if an item is not present then it is
 // FALSE by default.
 //-----------------------------------------------------------------------------
-// static BOOL SingleBitOn(char *name)
-// {
-//     int i;
-//     for(i = 0; i < SingleBitItemsCount; i++) {
-//         if(strcmp(SingleBitItems[i].name, name)==0) {
-//             return SingleBitItems[i].powered;
-//         }
-//     }
-//     return FALSE;
-// }
+static BOOL SingleBitOn(char *name)
+{
+    int i;
+    for(i = 0; i < SingleBitItemsCount; i++) {
+        if(strcmp(SingleBitItems[i].name, name)==0) {
+            return SingleBitItems[i].powered;
+        }
+    }
+    return FALSE;
+}
 
 //-----------------------------------------------------------------------------
 // Set the state of a single-bit item. Adds it to the list if it is not there
 // already.
 //-----------------------------------------------------------------------------
-// static void SetSingleBit(char *name, BOOL state)
-// {
-//     int i;
-//     for(i = 0; i < SingleBitItemsCount; i++) {
-//         if(strcmp(SingleBitItems[i].name, name)==0) {
-//             SingleBitItems[i].powered = state;
-//             return;
-//         }
-//     }
-//     if(i < MAX_IO) {
-//         strcpy(SingleBitItems[i].name, name);
-//         SingleBitItems[i].powered = state;
-//         SingleBitItemsCount++;
-//     }
-// }
+static void SetSingleBit(char *name, BOOL state)
+{
+    int i;
+    for(i = 0; i < SingleBitItemsCount; i++) {
+        if(strcmp(SingleBitItems[i].name, name)==0) {
+            SingleBitItems[i].powered = state;
+            return;
+        }
+    }
+    if(i < MAX_IO) {
+        strcpy(SingleBitItems[i].name, name);
+        SingleBitItems[i].powered = state;
+        SingleBitItemsCount++;
+    }
+}
 
 //-----------------------------------------------------------------------------
 // Count a timer up (i.e. increment its associated count by 1). Must already
 // exist in the table.
 //-----------------------------------------------------------------------------
-// static void IncrementVariable(char *name)
-// {
-//     int i;
-//     for(i = 0; i < VariablesCount; i++) {
-//         if(strcmp(Variables[i].name, name)==0) {
-//             (Variables[i].val)++;
-//             return;
-//         }
-//     }
-//     oops();
-// }
+static void IncrementVariable(char *name)
+{
+    int i;
+    for(i = 0; i < VariablesCount; i++) {
+        if(strcmp(Variables[i].name, name)==0) {
+            (Variables[i].val)++;
+            return;
+        }
+    }
+    oops();
+}
 
 //-----------------------------------------------------------------------------
 // Set a variable to a value.
 //-----------------------------------------------------------------------------
-// static void SetSimulationVariable(char *name, SWORD val)
-// {
-//     int i;
-//     for(i = 0; i < VariablesCount; i++) {
-//         if(strcmp(Variables[i].name, name)==0) {
-//             Variables[i].val = val;
-//             return;
-//         }
-//     }
-//     MarkUsedVariable(name, VAR_FLAG_OTHERWISE_FORGOTTEN);
-//     SetSimulationVariable(name, val);
-// }
+static void SetSimulationVariable(char *name, SWORD val)
+{
+    int i;
+    for(i = 0; i < VariablesCount; i++) {
+        if(strcmp(Variables[i].name, name)==0) {
+            Variables[i].val = val;
+            return;
+        }
+    }
+    MarkUsedVariable(name, VAR_FLAG_OTHERWISE_FORGOTTEN);
+    SetSimulationVariable(name, val);
+}
 
 //-----------------------------------------------------------------------------
 // Read a variable's value.
 //-----------------------------------------------------------------------------
-// SWORD GetSimulationVariable(char *name)
-// {
-//     int i;
-//     for(i = 0; i < VariablesCount; i++) {
-//         if(strcmp(Variables[i].name, name)==0) {
-//             return Variables[i].val;
-//         }
-//     }
-//     MarkUsedVariable(name, VAR_FLAG_OTHERWISE_FORGOTTEN);
-//     return GetSimulationVariable(name);
-// }
+SWORD GetSimulationVariable(char *name)
+{
+    int i;
+    for(i = 0; i < VariablesCount; i++) {
+        if(strcmp(Variables[i].name, name)==0) {
+            return Variables[i].val;
+        }
+    }
+    MarkUsedVariable(name, VAR_FLAG_OTHERWISE_FORGOTTEN);
+    return GetSimulationVariable(name);
+}
 
 //-----------------------------------------------------------------------------
 // Set the shadow copy of a variable associated with a READ ADC operation. This
 // will get committed to the real copy when the rung-in condition to the
 // READ ADC is true.
 //-----------------------------------------------------------------------------
-// void SetAdcShadow(char *name, SWORD val)
-// {
-//     int i;
-//     for(i = 0; i < AdcShadowsCount; i++) {
-//         if(strcmp(AdcShadows[i].name, name)==0) {
-//             AdcShadows[i].val = val;
-//             return;
-//         }
-//     }
-//     strcpy(AdcShadows[i].name, name);
-//     AdcShadows[i].val = val;
-//     AdcShadowsCount++;
-// }
+void SetAdcShadow(char *name, SWORD val)
+{
+    int i;
+    for(i = 0; i < AdcShadowsCount; i++) {
+        if(strcmp(AdcShadows[i].name, name)==0) {
+            AdcShadows[i].val = val;
+            return;
+        }
+    }
+    strcpy(AdcShadows[i].name, name);
+    AdcShadows[i].val = val;
+    AdcShadowsCount++;
+}
 
 //-----------------------------------------------------------------------------
 // Return the shadow value of a variable associated with a READ ADC. This is
 // what gets copied into the real variable when an ADC read is simulated.
 //-----------------------------------------------------------------------------
-// SWORD GetAdcShadow(char *name)
-// {
-//     int i;
-//     for(i = 0; i < AdcShadowsCount; i++) {
-//         if(strcmp(AdcShadows[i].name, name)==0) {
-//             return AdcShadows[i].val;
-//         }
-//     }
-//     return 0;
-// }
+SWORD GetAdcShadow(char *name)
+{
+    int i;
+    for(i = 0; i < AdcShadowsCount; i++) {
+        if(strcmp(AdcShadows[i].name, name)==0) {
+            return AdcShadows[i].val;
+        }
+    }
+    return 0;
+}
 
 //-----------------------------------------------------------------------------
 // Mark how a variable is used; a series of flags that we can OR together,
@@ -224,62 +224,62 @@ static char *MarkUsedVariable(char *name, DWORD flag);
 // (e.g. just a TON, an RTO with its reset, etc.). Returns NULL for success,
 // else an error string.
 //-----------------------------------------------------------------------------
-// static char *MarkUsedVariable(char *name, DWORD flag)
-// {
-//     int i;
-//     for(i = 0; i < VariablesCount; i++) {
-//         if(strcmp(Variables[i].name, name)==0) {
-//             break;
-//         }
-//     }
-//     if(i >= MAX_IO) return "";
+static char *MarkUsedVariable(char *name, DWORD flag)
+{
+    int i;
+    for(i = 0; i < VariablesCount; i++) {
+        if(strcmp(Variables[i].name, name)==0) {
+            break;
+        }
+    }
+    if(i >= MAX_IO) return "";
 
-//     if(i == VariablesCount) {
-//         strcpy(Variables[i].name, name);
-//         Variables[i].usedFlags = 0;
-//         Variables[i].val = 0;
-//         VariablesCount++;
-//     }
+    if(i == VariablesCount) {
+        strcpy(Variables[i].name, name);
+        Variables[i].usedFlags = 0;
+        Variables[i].val = 0;
+        VariablesCount++;
+    }
 
-//     switch(flag) {
-//         case VAR_FLAG_TOF:
-//             if(Variables[i].usedFlags != 0) 
-//                 return _("TOF: variable cannot be used elsewhere");
-//             break;
+    switch(flag) {
+        case VAR_FLAG_TOF:
+            if(Variables[i].usedFlags != 0) 
+                return _("TOF: variable cannot be used elsewhere");
+            break;
 
-//         case VAR_FLAG_TON:
-//             if(Variables[i].usedFlags != 0)
-//                 return _("TON: variable cannot be used elsewhere");
-//             break;
+        case VAR_FLAG_TON:
+            if(Variables[i].usedFlags != 0)
+                return _("TON: variable cannot be used elsewhere");
+            break;
         
-//         case VAR_FLAG_RTO:
-//             if(Variables[i].usedFlags & ~VAR_FLAG_RES)
-//                 return _("RTO: variable can only be used for RES elsewhere");
-//             break;
+        case VAR_FLAG_RTO:
+            if(Variables[i].usedFlags & ~VAR_FLAG_RES)
+                return _("RTO: variable can only be used for RES elsewhere");
+            break;
 
-//         case VAR_FLAG_CTU:
-//         case VAR_FLAG_CTD:
-//         case VAR_FLAG_CTC:
-//         case VAR_FLAG_RES:
-//         case VAR_FLAG_ANY:
-//             break;
+        case VAR_FLAG_CTU:
+        case VAR_FLAG_CTD:
+        case VAR_FLAG_CTC:
+        case VAR_FLAG_RES:
+        case VAR_FLAG_ANY:
+            break;
 
-//         case VAR_FLAG_OTHERWISE_FORGOTTEN:
-//             if(name[0] != '$') {
-//                 Error(_("Variable '%s' not assigned to, e.g. with a "
-//                     "MOV statement, an ADD statement, etc.\r\n\r\n"
-//                     "This is probably a programming error; now it "
-//                     "will always be zero."), name);
-//             }
-//             break;
+        case VAR_FLAG_OTHERWISE_FORGOTTEN:
+            if(name[0] != '$') {
+                Error(_("Variable '%s' not assigned to, e.g. with a "
+                    "MOV statement, an ADD statement, etc.\r\n\r\n"
+                    "This is probably a programming error; now it "
+                    "will always be zero."), name);
+            }
+            break;
 
-//         default:
-//             oops();
-//     }
+        default:
+            oops();
+    }
 
-//     Variables[i].usedFlags |= flag;
-//     return NULL;
-// }
+    Variables[i].usedFlags |= flag;
+    return NULL;
+}
 
 //-----------------------------------------------------------------------------
 // Check for duplicate uses of a single variable. For example, there should
@@ -287,207 +287,207 @@ static char *MarkUsedVariable(char *name, DWORD flag);
 // to have an RTO with the same name as its reset; in fact, verify that
 // there must be a reset for each RTO.
 //-----------------------------------------------------------------------------
-// static void MarkWithCheck(char *name, int flag)
-// {
-//     char *s = MarkUsedVariable(name, flag);
-//     if(s) {
-//         Error(_("Variable for '%s' incorrectly assigned: %s."), name, s);
-//     }
-// }
+static void MarkWithCheck(char *name, int flag)
+{
+    char *s = MarkUsedVariable(name, flag);
+    if(s) {
+        Error(_("Variable for '%s' incorrectly assigned: %s."), name, s);
+    }
+}
 
-// static void CheckVariableNamesCircuit(int which, void *elem)
-// {
-//     ElemLeaf *l = (ElemLeaf *)elem;
-//     char *name = NULL;
-//     DWORD flag;
+static void CheckVariableNamesCircuit(int which, void *elem)
+{
+    ElemLeaf *l = (ElemLeaf *)elem;
+    char *name = NULL;
+    DWORD flag;
 
-//     switch(which) {
-//         case ELEM_SERIES_SUBCKT: {
-//             int i;
-//             ElemSubcktSeries *s = (ElemSubcktSeries *)elem;
-//             for(i = 0; i < s->count; i++) {
-//                 CheckVariableNamesCircuit(s->contents[i].which,
-//                     s->contents[i].d.any);
-//             }
-//             break;
-//         }
+    switch(which) {
+        case ELEM_SERIES_SUBCKT: {
+            int i;
+            ElemSubcktSeries *s = (ElemSubcktSeries *)elem;
+            for(i = 0; i < s->count; i++) {
+                CheckVariableNamesCircuit(s->contents[i].which,
+                    s->contents[i].d.any);
+            }
+            break;
+        }
 
-//         case ELEM_PARALLEL_SUBCKT: {
-//             int i;
-//             ElemSubcktParallel *p = (ElemSubcktParallel *)elem;
-//             for(i = 0; i < p->count; i++) {
-//                 CheckVariableNamesCircuit(p->contents[i].which,
-//                     p->contents[i].d.any);
-//             }
-//             break;
-//         }
+        case ELEM_PARALLEL_SUBCKT: {
+            int i;
+            ElemSubcktParallel *p = (ElemSubcktParallel *)elem;
+            for(i = 0; i < p->count; i++) {
+                CheckVariableNamesCircuit(p->contents[i].which,
+                    p->contents[i].d.any);
+            }
+            break;
+        }
         
-//         case ELEM_RTO:
-//         case ELEM_TOF:
-//         case ELEM_TON:
-//             if(which == ELEM_RTO)
-//                 flag = VAR_FLAG_RTO;
-//             else if(which == ELEM_TOF)
-//                 flag = VAR_FLAG_TOF;
-//             else if(which == ELEM_TON)
-//                 flag = VAR_FLAG_TON;
-//             else oops();
+        case ELEM_RTO:
+        case ELEM_TOF:
+        case ELEM_TON:
+            if(which == ELEM_RTO)
+                flag = VAR_FLAG_RTO;
+            else if(which == ELEM_TOF)
+                flag = VAR_FLAG_TOF;
+            else if(which == ELEM_TON)
+                flag = VAR_FLAG_TON;
+            else oops();
 
-//             MarkWithCheck(l->d.timer.name, flag);
+            MarkWithCheck(l->d.timer.name, flag);
 
-//             break;
+            break;
 
-//         case ELEM_CTU:
-//         case ELEM_CTD:
-//         case ELEM_CTC:
-//             if(which == ELEM_CTU)
-//                 flag = VAR_FLAG_CTU;
-//             else if(which == ELEM_CTD)
-//                 flag = VAR_FLAG_CTD;
-//             else if(which == ELEM_CTC)
-//                 flag = VAR_FLAG_CTC;
-//             else oops();
+        case ELEM_CTU:
+        case ELEM_CTD:
+        case ELEM_CTC:
+            if(which == ELEM_CTU)
+                flag = VAR_FLAG_CTU;
+            else if(which == ELEM_CTD)
+                flag = VAR_FLAG_CTD;
+            else if(which == ELEM_CTC)
+                flag = VAR_FLAG_CTC;
+            else oops();
 
-//             MarkWithCheck(l->d.counter.name, flag);
+            MarkWithCheck(l->d.counter.name, flag);
 
-//             break;
+            break;
 
-//         case ELEM_RES:
-//             MarkWithCheck(l->d.reset.name, VAR_FLAG_RES);
-//             break;
+        case ELEM_RES:
+            MarkWithCheck(l->d.reset.name, VAR_FLAG_RES);
+            break;
 
-//         case ELEM_MOVE:
-//             MarkWithCheck(l->d.move.dest, VAR_FLAG_ANY);
-//             break;
+        case ELEM_MOVE:
+            MarkWithCheck(l->d.move.dest, VAR_FLAG_ANY);
+            break;
 
-//         case ELEM_LOOK_UP_TABLE:
-//             MarkWithCheck(l->d.lookUpTable.dest, VAR_FLAG_ANY);
-//             break;
+        case ELEM_LOOK_UP_TABLE:
+            MarkWithCheck(l->d.lookUpTable.dest, VAR_FLAG_ANY);
+            break;
 
-//         case ELEM_PIECEWISE_LINEAR:
-//             MarkWithCheck(l->d.piecewiseLinear.dest, VAR_FLAG_ANY);
-//             break;
+        case ELEM_PIECEWISE_LINEAR:
+            MarkWithCheck(l->d.piecewiseLinear.dest, VAR_FLAG_ANY);
+            break;
 
-//         case ELEM_READ_ADC:
-//             MarkWithCheck(l->d.readAdc.name, VAR_FLAG_ANY);
-//             break;
+        case ELEM_READ_ADC:
+            MarkWithCheck(l->d.readAdc.name, VAR_FLAG_ANY);
+            break;
 
-//         case ELEM_ADD:
-//         case ELEM_SUB:
-//         case ELEM_MUL:
-//         case ELEM_DIV:
-//             MarkWithCheck(l->d.math.dest, VAR_FLAG_ANY);
-//             break;
+        case ELEM_ADD:
+        case ELEM_SUB:
+        case ELEM_MUL:
+        case ELEM_DIV:
+            MarkWithCheck(l->d.math.dest, VAR_FLAG_ANY);
+            break;
 
-//         case ELEM_UART_RECV:
-//             MarkWithCheck(l->d.uart.name, VAR_FLAG_ANY);
-//             break;
+        case ELEM_UART_RECV:
+            MarkWithCheck(l->d.uart.name, VAR_FLAG_ANY);
+            break;
 
-//         case ELEM_SHIFT_REGISTER: {
-//             int i;
-//             for(i = 1; i < l->d.shiftRegister.stages; i++) {
-//                 char str[MAX_NAME_LEN+10];
-//                 sprintf(str, "%s%d", l->d.shiftRegister.name, i);
-//                 MarkWithCheck(str, VAR_FLAG_ANY);
-//             }
-//             break;
-//         }
+        case ELEM_SHIFT_REGISTER: {
+            int i;
+            for(i = 1; i < l->d.shiftRegister.stages; i++) {
+                char str[MAX_NAME_LEN+10];
+                sprintf(str, "%s%d", l->d.shiftRegister.name, i);
+                MarkWithCheck(str, VAR_FLAG_ANY);
+            }
+            break;
+        }
 
-//         case ELEM_PERSIST:
-//         case ELEM_FORMATTED_STRING:
-//         case ELEM_SET_PWM:
-//         case ELEM_MASTER_RELAY:
-//         case ELEM_UART_SEND:
-//         case ELEM_PLACEHOLDER:
-//         case ELEM_COMMENT:
-//         case ELEM_OPEN:
-//         case ELEM_SHORT:
-//         case ELEM_COIL:
-//         case ELEM_CONTACTS:
-//         case ELEM_ONE_SHOT_RISING:
-//         case ELEM_ONE_SHOT_FALLING:
-//         case ELEM_EQU:
-//         case ELEM_NEQ:
-//         case ELEM_GRT:
-//         case ELEM_GEQ:
-//         case ELEM_LES:
-//         case ELEM_LEQ:
-//             break;
+        case ELEM_PERSIST:
+        case ELEM_FORMATTED_STRING:
+        case ELEM_SET_PWM:
+        case ELEM_MASTER_RELAY:
+        case ELEM_UART_SEND:
+        case ELEM_PLACEHOLDER:
+        case ELEM_COMMENT:
+        case ELEM_OPEN:
+        case ELEM_SHORT:
+        case ELEM_COIL:
+        case ELEM_CONTACTS:
+        case ELEM_ONE_SHOT_RISING:
+        case ELEM_ONE_SHOT_FALLING:
+        case ELEM_EQU:
+        case ELEM_NEQ:
+        case ELEM_GRT:
+        case ELEM_GEQ:
+        case ELEM_LES:
+        case ELEM_LEQ:
+            break;
 
-//         default:
-//             oops();
-//     }
-// }
+        default:
+            oops();
+    }
+}
 
-// static void CheckVariableNames(void)
-// {
-//     int i;
-//     for(i = 0; i < Prog.numRungs; i++) {
-//         CheckVariableNamesCircuit(ELEM_SERIES_SUBCKT, Prog.rungs[i]);
-//     }
-// }
+static void CheckVariableNames(void)
+{
+    int i;
+    for(i = 0; i < Prog.numRungs; i++) {
+        CheckVariableNamesCircuit(ELEM_SERIES_SUBCKT, Prog.rungs[i]);
+    }
+}
 
 //-----------------------------------------------------------------------------
 // The IF condition is true. Execute the body, up until the ELSE or the
 // END IF, and then skip the ELSE if it is present. Called with PC on the
 // IF, returns with PC on the END IF.
 //-----------------------------------------------------------------------------
-// static void IfConditionTrue(void)
-// {
-//     IntPc++;
-//     // now PC is on the first statement of the IF body
-//     SimulateIntCode();
-//     // now PC is on the ELSE or the END IF
-//     if(IntCode[IntPc].op == INT_ELSE) {
-//         int nesting = 1;
-//         for(; ; IntPc++) {
-//             if(IntPc >= IntCodeLen) oops();
+static void IfConditionTrue(void)
+{
+    IntPc++;
+    // now PC is on the first statement of the IF body
+    SimulateIntCode();
+    // now PC is on the ELSE or the END IF
+    if(IntCode[IntPc].op == INT_ELSE) {
+        int nesting = 1;
+        for(; ; IntPc++) {
+            if(IntPc >= IntCodeLen) oops();
 
-//             if(IntCode[IntPc].op == INT_END_IF) {
-//                 nesting--;
-//             } else if(INT_IF_GROUP(IntCode[IntPc].op)) {
-//                 nesting++;
-//             }
-//             if(nesting == 0) break;
-//         }
-//     } else if(IntCode[IntPc].op == INT_END_IF) {
-//         return;
-//     } else {
-//         oops();
-//     }
-// }
+            if(IntCode[IntPc].op == INT_END_IF) {
+                nesting--;
+            } else if(INT_IF_GROUP(IntCode[IntPc].op)) {
+                nesting++;
+            }
+            if(nesting == 0) break;
+        }
+    } else if(IntCode[IntPc].op == INT_END_IF) {
+        return;
+    } else {
+        oops();
+    }
+}
 
 //-----------------------------------------------------------------------------
 // The IF condition is false. Skip the body, up until the ELSE or the END
 // IF, and then execute the ELSE if it is present. Called with PC on the IF,
 // returns with PC on the END IF.
 //-----------------------------------------------------------------------------
-// static void IfConditionFalse(void)
-// {
-//     int nesting = 0;
-//     for(; ; IntPc++) {
-//         if(IntPc >= IntCodeLen) oops();
+static void IfConditionFalse(void)
+{
+    int nesting = 0;
+    for(; ; IntPc++) {
+        if(IntPc >= IntCodeLen) oops();
 
-//         if(IntCode[IntPc].op == INT_END_IF) {
-//             nesting--;
-//         } else if(INT_IF_GROUP(IntCode[IntPc].op)) {
-//             nesting++;
-//         } else if(IntCode[IntPc].op == INT_ELSE && nesting == 1) {
-//             break;
-//         }
-//         if(nesting == 0) break;
-//     }
+        if(IntCode[IntPc].op == INT_END_IF) {
+            nesting--;
+        } else if(INT_IF_GROUP(IntCode[IntPc].op)) {
+            nesting++;
+        } else if(IntCode[IntPc].op == INT_ELSE && nesting == 1) {
+            break;
+        }
+        if(nesting == 0) break;
+    }
 
-//     // now PC is on the ELSE or the END IF
-//     if(IntCode[IntPc].op == INT_ELSE) {
-//         IntPc++;
-//         SimulateIntCode();
-//     } else if(IntCode[IntPc].op == INT_END_IF) {
-//         return;
-//     } else {
-//         oops();
-//     }
-// }
+    // now PC is on the ELSE or the END IF
+    if(IntCode[IntPc].op == INT_ELSE) {
+        IntPc++;
+        SimulateIntCode();
+    } else if(IntCode[IntPc].op == INT_END_IF) {
+        return;
+    } else {
+        oops();
+    }
+}
 
 //-----------------------------------------------------------------------------
 // Evaluate a circuit, calling ourselves recursively to evaluate if/else
@@ -495,179 +495,179 @@ static char *MarkUsedVariable(char *name, DWORD flag);
 // internal tables. Returns when it reaches an end if or an else construct,
 // or at the end of the program.
 //-----------------------------------------------------------------------------
-// static void SimulateIntCode(void)
-// {
-//     for(; IntPc < IntCodeLen; IntPc++) {
-//         IntOp *a = &IntCode[IntPc];
-//         switch(a->op) {
-//             case INT_SIMULATE_NODE_STATE:
-//                 if(*(a->poweredAfter) != SingleBitOn(a->name1))
-//                     NeedRedraw = TRUE;
-//                 *(a->poweredAfter) = SingleBitOn(a->name1);
-//                 break;
+static void SimulateIntCode(void)
+{
+    for(; IntPc < IntCodeLen; IntPc++) {
+        IntOp *a = &IntCode[IntPc];
+        switch(a->op) {
+            case INT_SIMULATE_NODE_STATE:
+                if(*(a->poweredAfter) != SingleBitOn(a->name1))
+                    NeedRedraw = TRUE;
+                *(a->poweredAfter) = SingleBitOn(a->name1);
+                break;
 
-//             case INT_SET_BIT:
-//                 SetSingleBit(a->name1, TRUE);
-//                 break;
+            case INT_SET_BIT:
+                SetSingleBit(a->name1, TRUE);
+                break;
 
-//             case INT_CLEAR_BIT:
-//                 SetSingleBit(a->name1, FALSE);
-//                 break;
+            case INT_CLEAR_BIT:
+                SetSingleBit(a->name1, FALSE);
+                break;
 
-//             case INT_COPY_BIT_TO_BIT:
-//                 SetSingleBit(a->name1, SingleBitOn(a->name2));
-//                 break;
+            case INT_COPY_BIT_TO_BIT:
+                SetSingleBit(a->name1, SingleBitOn(a->name2));
+                break;
 
-//             case INT_SET_VARIABLE_TO_LITERAL:
-//                 if(GetSimulationVariable(a->name1) !=
-//                     a->literal && a->name1[0] != '$')
-//                 {
-//                     NeedRedraw = TRUE;
-//                 }
-//                 SetSimulationVariable(a->name1, a->literal);
-//                 break;
+            case INT_SET_VARIABLE_TO_LITERAL:
+                if(GetSimulationVariable(a->name1) !=
+                    a->literal && a->name1[0] != '$')
+                {
+                    NeedRedraw = TRUE;
+                }
+                SetSimulationVariable(a->name1, a->literal);
+                break;
 
-//             case INT_SET_VARIABLE_TO_VARIABLE:
-//                 if(GetSimulationVariable(a->name1) != 
-//                     GetSimulationVariable(a->name2))
-//                 {
-//                     NeedRedraw = TRUE;
-//                 }
-//                 SetSimulationVariable(a->name1,
-//                     GetSimulationVariable(a->name2));
-//                 break;
+            case INT_SET_VARIABLE_TO_VARIABLE:
+                if(GetSimulationVariable(a->name1) != 
+                    GetSimulationVariable(a->name2))
+                {
+                    NeedRedraw = TRUE;
+                }
+                SetSimulationVariable(a->name1,
+                    GetSimulationVariable(a->name2));
+                break;
 
-//             case INT_INCREMENT_VARIABLE:
-//                 IncrementVariable(a->name1);
-//                 break;
+            case INT_INCREMENT_VARIABLE:
+                IncrementVariable(a->name1);
+                break;
 
-//             {
-//                 SWORD v;
-//                 case INT_SET_VARIABLE_ADD:
-//                     v = GetSimulationVariable(a->name2) +
-//                         GetSimulationVariable(a->name3);
-//                     goto math;
-//                 case INT_SET_VARIABLE_SUBTRACT:
-//                     v = GetSimulationVariable(a->name2) -
-//                         GetSimulationVariable(a->name3);
-//                     goto math;
-//                 case INT_SET_VARIABLE_MULTIPLY:
-//                     v = GetSimulationVariable(a->name2) *
-//                         GetSimulationVariable(a->name3);
-//                     goto math;
-//                 case INT_SET_VARIABLE_DIVIDE:
-//                     if(GetSimulationVariable(a->name3) != 0) {
-//                         v = GetSimulationVariable(a->name2) /
-//                             GetSimulationVariable(a->name3);
-//                     } else {
-//                         v = 0;
-//                         Error(_("Division by zero; halting simulation"));
-//                         StopSimulation();
-//                     }
-//                     goto math;
-// math:
-//                     if(GetSimulationVariable(a->name1) != v) {
-//                         NeedRedraw = TRUE;
-//                         SetSimulationVariable(a->name1, v);
-//                     }
-//                     break;
-//             }
+            {
+                SWORD v;
+                case INT_SET_VARIABLE_ADD:
+                    v = GetSimulationVariable(a->name2) +
+                        GetSimulationVariable(a->name3);
+                    goto math;
+                case INT_SET_VARIABLE_SUBTRACT:
+                    v = GetSimulationVariable(a->name2) -
+                        GetSimulationVariable(a->name3);
+                    goto math;
+                case INT_SET_VARIABLE_MULTIPLY:
+                    v = GetSimulationVariable(a->name2) *
+                        GetSimulationVariable(a->name3);
+                    goto math;
+                case INT_SET_VARIABLE_DIVIDE:
+                    if(GetSimulationVariable(a->name3) != 0) {
+                        v = GetSimulationVariable(a->name2) /
+                            GetSimulationVariable(a->name3);
+                    } else {
+                        v = 0;
+                        Error(_("Division by zero; halting simulation"));
+                        StopSimulation();
+                    }
+                    goto math;
+math:
+                    if(GetSimulationVariable(a->name1) != v) {
+                        NeedRedraw = TRUE;
+                        SetSimulationVariable(a->name1, v);
+                    }
+                    break;
+            }
 
-// #define IF_BODY \
-//     { \
-//         IfConditionTrue(); \
-//     } else { \
-//         IfConditionFalse(); \
-//     }
-//             case INT_IF_BIT_SET:
-//                 if(SingleBitOn(a->name1))
-//                     IF_BODY
-//                 break;
+#define IF_BODY \
+    { \
+        IfConditionTrue(); \
+    } else { \
+        IfConditionFalse(); \
+    }
+            case INT_IF_BIT_SET:
+                if(SingleBitOn(a->name1))
+                    IF_BODY
+                break;
 
-//             case INT_IF_BIT_CLEAR:
-//                 if(!SingleBitOn(a->name1))
-//                     IF_BODY
-//                 break;
+            case INT_IF_BIT_CLEAR:
+                if(!SingleBitOn(a->name1))
+                    IF_BODY
+                break;
 
-//             case INT_IF_VARIABLE_LES_LITERAL:
-//                 if(GetSimulationVariable(a->name1) < a->literal)
-//                     IF_BODY
-//                 break;
+            case INT_IF_VARIABLE_LES_LITERAL:
+                if(GetSimulationVariable(a->name1) < a->literal)
+                    IF_BODY
+                break;
 
-//             case INT_IF_VARIABLE_EQUALS_VARIABLE:
-//                 if(GetSimulationVariable(a->name1) ==
-//                     GetSimulationVariable(a->name2))
-//                     IF_BODY
-//                 break;
+            case INT_IF_VARIABLE_EQUALS_VARIABLE:
+                if(GetSimulationVariable(a->name1) ==
+                    GetSimulationVariable(a->name2))
+                    IF_BODY
+                break;
 
-//             case INT_IF_VARIABLE_GRT_VARIABLE:
-//                 if(GetSimulationVariable(a->name1) >
-//                     GetSimulationVariable(a->name2))
-//                     IF_BODY
-//                 break;
+            case INT_IF_VARIABLE_GRT_VARIABLE:
+                if(GetSimulationVariable(a->name1) >
+                    GetSimulationVariable(a->name2))
+                    IF_BODY
+                break;
 
-//             case INT_SET_PWM:
-//                 // Dummy call will cause a warning if no one ever assigned
-//                 // to that variable.
-//                 (void)GetSimulationVariable(a->name1);
-//                 break;
+            case INT_SET_PWM:
+                // Dummy call will cause a warning if no one ever assigned
+                // to that variable.
+                (void)GetSimulationVariable(a->name1);
+                break;
 
-//             // Don't try to simulate the EEPROM stuff: just hold the EEPROM
-//             // busy all the time, so that the program never does anything
-//             // with it.
-//             case INT_EEPROM_BUSY_CHECK:
-//                 SetSingleBit(a->name1, TRUE);
-//                 break;
+            // Don't try to simulate the EEPROM stuff: just hold the EEPROM
+            // busy all the time, so that the program never does anything
+            // with it.
+            case INT_EEPROM_BUSY_CHECK:
+                SetSingleBit(a->name1, TRUE);
+                break;
 
-//             case INT_EEPROM_READ:
-//             case INT_EEPROM_WRITE:
-//                 oops();
-//                 break;
+            case INT_EEPROM_READ:
+            case INT_EEPROM_WRITE:
+                oops();
+                break;
 
-//             case INT_READ_ADC:
-//                 // Keep the shadow copies of the ADC variables because in
-//                 // the real device they will not be updated until an actual
-//                 // read is performed, which occurs only for a true rung-in
-//                 // condition there.
-//                 SetSimulationVariable(a->name1, GetAdcShadow(a->name1));
-//                 break;
+            case INT_READ_ADC:
+                // Keep the shadow copies of the ADC variables because in
+                // the real device they will not be updated until an actual
+                // read is performed, which occurs only for a true rung-in
+                // condition there.
+                SetSimulationVariable(a->name1, GetAdcShadow(a->name1));
+                break;
 
-//             case INT_UART_SEND:
-//                 if(SingleBitOn(a->name2) && (SimulateUartTxCountdown == 0)) {
-//                     SimulateUartTxCountdown = 2;
-//                     AppendToUartSimulationTextControl(
-//                         (BYTE)GetSimulationVariable(a->name1));
-//                 }
-//                 if(SimulateUartTxCountdown == 0) {
-//                     SetSingleBit(a->name2, FALSE);
-//                 } else {
-//                     SetSingleBit(a->name2, TRUE);
-//                 }
-//                 break;
+            case INT_UART_SEND:
+                if(SingleBitOn(a->name2) && (SimulateUartTxCountdown == 0)) {
+                    SimulateUartTxCountdown = 2;
+                    AppendToUartSimulationTextControl(
+                        (BYTE)GetSimulationVariable(a->name1));
+                }
+                if(SimulateUartTxCountdown == 0) {
+                    SetSingleBit(a->name2, FALSE);
+                } else {
+                    SetSingleBit(a->name2, TRUE);
+                }
+                break;
 
-//             case INT_UART_RECV:
-//                 if(QueuedUartCharacter >= 0) {
-//                     SetSingleBit(a->name2, TRUE);
-//                     SetSimulationVariable(a->name1, (SWORD)QueuedUartCharacter);
-//                     QueuedUartCharacter = -1;
-//                 } else {
-//                     SetSingleBit(a->name2, FALSE);
-//                 }
-//                 break;
+            case INT_UART_RECV:
+                if(QueuedUartCharacter >= 0) {
+                    SetSingleBit(a->name2, TRUE);
+                    SetSimulationVariable(a->name1, (SWORD)QueuedUartCharacter);
+                    QueuedUartCharacter = -1;
+                } else {
+                    SetSingleBit(a->name2, FALSE);
+                }
+                break;
 
-//             case INT_END_IF:
-//             case INT_ELSE:
-//                 return;
+            case INT_END_IF:
+            case INT_ELSE:
+                return;
 
-//             case INT_COMMENT:
-//                 break;
+            case INT_COMMENT:
+                break;
             
-//             default:
-//                 oops();
-//                 break;
-//         }
-//     }
-// }
+            default:
+                oops();
+                break;
+        }
+    }
+}
 
 //-----------------------------------------------------------------------------
 // Called by the Windows timer that triggers cycles when we are running
@@ -686,38 +686,38 @@ static char *MarkUsedVariable(char *name, DWORD flag);
 // any outputs have changed. If so, force a screen refresh. If requested do
 // a screen refresh regardless.
 //-----------------------------------------------------------------------------
-// void SimulateOneCycle(BOOL forceRefresh)
-// {
-//     // When there is an error message up, the modal dialog makes its own
-//     // event loop, and there is risk that we would go recursive. So let
-//     // us fix that. (Note that there are no concurrency issues; we really
-//     // would get called recursively, not just reentrantly.)
-//     static BOOL Simulating = FALSE;
+void SimulateOneCycle(BOOL forceRefresh)
+{
+    // When there is an error message up, the modal dialog makes its own
+    // event loop, and there is risk that we would go recursive. So let
+    // us fix that. (Note that there are no concurrency issues; we really
+    // would get called recursively, not just reentrantly.)
+    static BOOL Simulating = FALSE;
 
-//     if(Simulating) return;
-//     Simulating = TRUE;
+    if(Simulating) return;
+    Simulating = TRUE;
 
-//     NeedRedraw = FALSE;
+    NeedRedraw = FALSE;
 
-//     if(SimulateUartTxCountdown > 0) {
-//         SimulateUartTxCountdown--;
-//     } else {
-//         SimulateUartTxCountdown = 0;
-//     }
+    if(SimulateUartTxCountdown > 0) {
+        SimulateUartTxCountdown--;
+    } else {
+        SimulateUartTxCountdown = 0;
+    }
 
-//     IntPc = 0;
-//     SimulateIntCode();
+    IntPc = 0;
+    SimulateIntCode();
 
-//     if(NeedRedraw || SimulateRedrawAfterNextCycle || forceRefresh) {
-//         InvalidateRect(MainWindow, NULL, FALSE);
-//         ListView_RedrawItems(IoList, 0, Prog.io.count - 1);
-//     }
+    if(NeedRedraw || SimulateRedrawAfterNextCycle || forceRefresh) {
+        InvalidateRect(MainWindow, NULL, FALSE);
+        // ListView_RedrawItems(IoList, 0, Prog.io.count - 1);
+    }
 
-//     SimulateRedrawAfterNextCycle = FALSE;
-//     if(NeedRedraw) SimulateRedrawAfterNextCycle = TRUE;
+    SimulateRedrawAfterNextCycle = FALSE;
+    if(NeedRedraw) SimulateRedrawAfterNextCycle = TRUE;
 
-//     Simulating = FALSE;
-// }
+    Simulating = FALSE;
+}
 
 //-----------------------------------------------------------------------------
 // Start the timer that we use to trigger PLC cycles in approximately real
@@ -740,25 +740,25 @@ static char *MarkUsedVariable(char *name, DWORD flag);
 //-----------------------------------------------------------------------------
 // Clear out all the parameters relating to the previous simulation.
 //-----------------------------------------------------------------------------
-// void ClearSimulationData(void)
-// {
-//     VariablesCount = 0;
-//     SingleBitItemsCount = 0;
-//     AdcShadowsCount = 0;
-//     QueuedUartCharacter = -1;
-//     SimulateUartTxCountdown = 0;
+void ClearSimulationData(void)
+{
+    VariablesCount = 0;
+    SingleBitItemsCount = 0;
+    AdcShadowsCount = 0;
+    QueuedUartCharacter = -1;
+    SimulateUartTxCountdown = 0;
 
-//     CheckVariableNames();
+    CheckVariableNames();
 
-//     SimulateRedrawAfterNextCycle = TRUE;
+    SimulateRedrawAfterNextCycle = TRUE;
 
-//     if(!GenerateIntermediateCode()) {
-//         ToggleSimulationMode();
-//         return;
-//     }
+    if(!GenerateIntermediateCode()) {
+        ToggleSimulationMode();
+        return;
+    }
 
-//     SimulateOneCycle(TRUE);
-// }
+    SimulateOneCycle(TRUE);
+}
 
 //-----------------------------------------------------------------------------
 // Provide a description for an item (Xcontacts, Ycoil, Rrelay, Ttimer,
@@ -795,11 +795,11 @@ static char *MarkUsedVariable(char *name, DWORD flag);
 // Toggle the state of a contact input; for simulation purposes, so that we
 // can set the input state of the program.
 //-----------------------------------------------------------------------------
-// void SimulationToggleContact(char *name)
-// {
-//     SetSingleBit(name, !SingleBitOn(name));
-//     ListView_RedrawItems(IoList, 0, Prog.io.count - 1);
-// }
+void SimulationToggleContact(char *name)
+{
+    SetSingleBit(name, !SingleBitOn(name));
+    // ListView_RedrawItems(IoList, 0, Prog.io.count - 1);
+}
 
 //-----------------------------------------------------------------------------
 // Dialog proc for the popup that lets you interact with the UART stuff.
@@ -944,8 +944,8 @@ static char *MarkUsedVariable(char *name, DWORD flag);
 //-----------------------------------------------------------------------------
 // Append a received character to the terminal buffer.
 //-----------------------------------------------------------------------------
-// static void AppendToUartSimulationTextControl(BYTE b)
-// {
+static void AppendToUartSimulationTextControl(BYTE b)
+{
 //     char append[5];
 
 //     if((isalnum(b) || strchr("[]{};':\",.<>/?`~ !@#$%^&*()-=_+|", b) ||
@@ -971,4 +971,4 @@ static char *MarkUsedVariable(char *name, DWORD flag);
 
 //     SendMessage(UartSimulationTextControl, WM_SETTEXT, 0, (LPARAM)buf);
 //     SendMessage(UartSimulationTextControl, EM_LINESCROLL, 0, (LPARAM)INT_MAX);
-// }
+}

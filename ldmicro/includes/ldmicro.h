@@ -793,10 +793,10 @@ void CompileSuccessfulMessage(char *str);
 extern BOOL RunningInBatchMode;
 extern HFONT MyNiceFont;
 extern HFONT MyFixedFont;
-extern HWND OkButton;
-extern HWND CancelButton;
-extern BOOL DialogDone;
-extern BOOL DialogCancel;
+// extern HWND OkButton;
+// extern HWND CancelButton;
+// extern BOOL DialogDone;
+// extern BOOL DialogCancel;
 
 // lang.cpp
 char *_(char *in);

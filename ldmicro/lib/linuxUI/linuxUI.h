@@ -109,7 +109,8 @@ typedef struct TimerRecordTag {
 /// Variables
 extern COLORREF HdcCurrentTextColor;
 extern std::vector<TimerRecord> timerRecords;
-
+extern int GLOBAL_mouse_last_clicked_x;
+extern int GLOBAL_mouse_last_clicked_y;
 /// functions
 BOOL GetFocus(HWID window);
 

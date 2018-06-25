@@ -43,20 +43,20 @@ static struct {
 static int IoSeenPreviouslyCount;
 
 // // stuff for the dialog box that lets you choose pin assignments
-// static BOOL DialogDone;
-// static BOOL DialogCancel;
+static BOOL DialogDone;
+static BOOL DialogCancel;
 
-// static HWND IoDialog;
+static HWID IoDialog;
 
-// static HWND PinList;
-// static HWND OkButton;
-// static HWND CancelButton;
+static HWID PinList;
+static HWID OkButton;
+static HWID CancelButton;
 
 // // stuff for the popup that lets you set the simulated value of an analog in
-// static HWND AnalogSliderMain;
-// static HWND AnalogSliderTrackbar;
-// static BOOL AnalogSliderDone;
-// static BOOL AnalogSliderCancel;
+static HWID AnalogSliderMain;
+static HWID AnalogSliderTrackbar;
+static BOOL AnalogSliderDone;
+static BOOL AnalogSliderCancel;
 
 
 //-----------------------------------------------------------------------------
@@ -394,20 +394,53 @@ void SaveIoListToFile(FILE *f)
 // Dialog proc for the popup that lets you set the value of an analog input for
 // simulation.
 //-----------------------------------------------------------------------------
-// static LRESULT CALLBACK AnalogSliderDialogProc(HWND hwnd, UINT msg,
-//     WPARAM wParam, LPARAM lParam)
-// {
-//     switch (msg) {
-//         case WM_CLOSE:
-//         case WM_DESTROY:
-//             AnalogSliderDone = TRUE;
-//             AnalogSliderCancel = TRUE;
-//             return 1;
+static gboolean AnalogSliderDialogKeyboardProc(GtkWidget* widget, GdkEventKey* event, gpointer name)
+{
+    // g_print("key click!\n");
+    SWORD v = (SWORD)gtk_range_get_value(GTK_RANGE(AnalogSliderTrackbar));
+    SetAdcShadow((char*)name, v);
+    if (AnalogSliderDone == TRUE || AnalogSliderCancel == TRUE)
+    {
+        gtk_widget_destroy (AnalogSliderTrackbar);
+        gtk_widget_destroy (AnalogSliderMain);
+        return FALSE;
+    }
 
-//         default:
-//             return DefWindowProc(hwnd, msg, wParam, lParam);
-//     }
-// }
+    if (event->keyval == GDK_KEY_Return){
+        gtk_widget_destroy (AnalogSliderTrackbar);
+        gtk_widget_destroy (AnalogSliderMain);
+        AnalogSliderDone = TRUE;
+    }
+    else if (event->keyval == GDK_KEY_Escape){
+        gtk_widget_destroy (AnalogSliderTrackbar);
+        gtk_widget_destroy (AnalogSliderMain);
+        AnalogSliderDone = TRUE;
+        AnalogSliderCancel = TRUE;
+    }
+
+    return FALSE;
+}
+
+static gboolean AnalogSliderDialogMouseProc(GtkWidget *widget, GdkEventButton *event, gpointer name)
+{
+    // g_print("mouse click! %i, %i\n", event->button, event->type == GDK_BUTTON_PRESS);
+    SWORD v = (SWORD)gtk_range_get_value(GTK_RANGE(AnalogSliderTrackbar));
+    SetAdcShadow((char*)name, v);
+    if (event->button == 1 && event->type == GDK_BUTTON_RELEASE){
+        gtk_widget_destroy (AnalogSliderTrackbar);
+        gtk_widget_destroy (AnalogSliderMain);
+        AnalogSliderDone = TRUE;
+    }
+
+    return FALSE;
+}
+
+void AnalogSliderUpdateProc (GtkRange *range, GtkScrollType step, gpointer name)
+{
+    // g_print("dlide bar adj\n");
+    SWORD v = (SWORD)gtk_range_get_value(GTK_RANGE(AnalogSliderTrackbar));
+    SetAdcShadow((char*)name, v);
+}
 
 //-----------------------------------------------------------------------------
 // A little toolbar-style window that pops up to allow the user to set the
@@ -415,46 +448,26 @@ void SaveIoListToFile(FILE *f)
 //-----------------------------------------------------------------------------
 void ShowAnalogSliderPopup(char *name)
 {
-    HWID scale = gtk_scale_new_with_range (GTK_ORIENTATION_HORIZONTAL,
-                        0,
-                        1024,
-                        1);
-    
-    // WNDCLASSEX wc;
-    // memset(&wc, 0, sizeof(wc));
-    // wc.cbSize = sizeof(wc);
-
-    // wc.style            = CS_BYTEALIGNCLIENT | CS_BYTEALIGNWINDOW | CS_OWNDC |
-    //                         CS_DBLCLKS;
-    // wc.lpfnWndProc      = (WNDPROC)AnalogSliderDialogProc;
-    // wc.hInstance        = Instance;
-    // wc.hbrBackground    = (HBRUSH)COLOR_BTNSHADOW;
-    // wc.lpszClassName    = "LDmicroAnalogSlider";
-    // wc.lpszMenuName     = NULL;
-    // wc.hCursor          = LoadCursor(NULL, IDC_ARROW);
-
-    // RegisterClassEx(&wc);
-
     // POINT pt;
     // GetCursorPos(&pt);
 
-    // SWORD currentVal = GetAdcShadow(name);
+    SWORD currentVal = GetAdcShadow(name);
 
-    // SWORD maxVal;
-    // if(Prog.mcu) {
-    //     maxVal = Prog.mcu->adcMax;
-    // } else {
-    //     maxVal = 1023;
-    // }
-    // if(maxVal == 0) {
-    //     Error(_("No ADC or ADC not supported for selected micro."));
-    //     return;
-    // }
-
-    // int left = pt.x - 10;
-    // // try to put the slider directly under the cursor (though later we might
-    // // realize that that would put the popup off the screen)
-    // int top = pt.y - (15 + (73*currentVal)/maxVal);
+    SWORD maxVal;
+    if(Prog.mcu) {
+        maxVal = Prog.mcu->adcMax;
+    } else {
+        maxVal = 1023;
+    }
+    if(maxVal == 0) {
+        Error(_("No ADC or ADC not supported for selected micro."));
+        return;
+    }
+    
+    int left = GLOBAL_mouse_last_clicked_x - 10;
+    // try to put the slider directly under the cursor (though later we might
+    // realize that that would put the popup off the screen)
+    int top = GLOBAL_mouse_last_clicked_y - (15 + (73*currentVal)/maxVal);
 
     // RECT r;
     // SystemParametersInfo(SPI_GETWORKAREA, 0, &r, 0);
@@ -462,7 +475,21 @@ void ShowAnalogSliderPopup(char *name)
     // if(top + 110 >= r.bottom) {
     //     top = r.bottom - 110;
     // }
-    // if(top < 0) top = 0;
+    if(top < 0) top = 30;
+    if(left < 0) left = 50;
+    
+    AnalogSliderMain = gtk_window_new(GTK_WINDOW_POPUP);
+    gtk_window_set_title(GTK_WINDOW(AnalogSliderMain),  "I/O Pin");
+    gtk_window_resize (GTK_WINDOW(AnalogSliderMain), 30, 100);
+    gtk_window_move(GTK_WINDOW(AnalogSliderMain), left, top);
+
+    AnalogSliderTrackbar = gtk_scale_new_with_range (GTK_ORIENTATION_VERTICAL,
+                        0,
+                        maxVal,
+                        1);
+    
+    gtk_range_set_value (GTK_RANGE(AnalogSliderTrackbar), currentVal);
+    // gtk_scale_add_mark (GTK_SCALE(AnalogSliderTrackbar), (maxVal + 1)/8,  GTK_POS_LEFT, NULL);
     
     // AnalogSliderMain = CreateWindowClient(0, "LDmicroAnalogSlider", "I/O Pin",
     //     WS_VISIBLE | WS_POPUP | WS_DLGFRAME,
@@ -478,45 +505,26 @@ void ShowAnalogSliderPopup(char *name)
 
     // EnableWindow(MainWindow, FALSE);
     // ShowWindow(AnalogSliderMain, TRUE);
+    
+    gtk_container_add(GTK_CONTAINER(AnalogSliderMain), AnalogSliderTrackbar);
+    
     // SetFocus(AnalogSliderTrackbar);
+    // gtk_window_set_focus (GTK_WINDOW(AnalogSliderMain), AnalogSliderTrackbar);
+    
+    g_signal_connect (AnalogSliderMain, "key-press-event",
+                    G_CALLBACK(AnalogSliderDialogKeyboardProc), (PVOID)name);
+    g_signal_connect (GTK_RANGE(AnalogSliderTrackbar), "button-release-event", 
+                    G_CALLBACK (AnalogSliderDialogMouseProc), (PVOID)name);
+    g_signal_connect (GTK_SCALE(AnalogSliderTrackbar), "move-slider", 
+                    G_CALLBACK (AnalogSliderUpdateProc), (PVOID)name);
 
-    // DWORD ret;
-    // MSG msg;
-    // AnalogSliderDone = FALSE;
-    // AnalogSliderCancel = FALSE;
+    gtk_widget_show_all(AnalogSliderMain);
+
+    AnalogSliderDone = FALSE;
+    AnalogSliderCancel = FALSE;
 
     // SWORD orig = GetAdcShadow(name);
-
-    // while(!AnalogSliderDone && (ret = GetMessage(&msg, NULL, 0, 0))) {
-    //     SWORD v = (SWORD)SendMessage(AnalogSliderTrackbar, TBM_GETPOS, 0, 0);
-
-    //     if(msg.message == WM_KEYDOWN) {
-    //         if(msg.wParam == VK_RETURN) {
-    //             AnalogSliderDone = TRUE;
-    //             break;
-    //         } else if(msg.wParam == VK_ESCAPE) {
-    //             AnalogSliderDone = TRUE;
-    //             AnalogSliderCancel = TRUE;
-    //             break;
-    //         }
-    //     } else if(msg.message == WM_LBUTTONUP) {
-    //         if(v != orig) {
-    //             AnalogSliderDone = TRUE;
-    //         }
-    //     }
-    //     SetAdcShadow(name, v);
-
-    //     TranslateMessage(&msg);
-    //     DispatchMessage(&msg);
-    // }
-
-    // if(!AnalogSliderCancel) {
-    //     SWORD v = (SWORD)SendMessage(AnalogSliderTrackbar, TBM_GETPOS, 0, 0);
-    //     SetAdcShadow(name, v);
-    // }
-
-    // EnableWindow(MainWindow, TRUE);
-    // DestroyWindow(AnalogSliderMain);
+    
     // ListView_RedrawItems(IoList, 0, Prog.io.count - 1);
 }
 

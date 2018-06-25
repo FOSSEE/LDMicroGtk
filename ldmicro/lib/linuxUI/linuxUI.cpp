@@ -1,5 +1,9 @@
 #include "linuxUI.h"
 
+/// Global variables to hole mouse click positions
+int GLOBAL_mouse_last_clicked_x;
+int GLOBAL_mouse_last_clicked_y;
+
 /// Brushes
 const COLORREF BLACK_BR(0, 0, 0);
 const COLORREF WHITE_BR(255, 255, 255);

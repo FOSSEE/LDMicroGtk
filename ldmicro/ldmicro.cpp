@@ -646,6 +646,8 @@ void LD_WM_Close_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)
     /* Handles:
     * WM_CLOSE
     */
+    
+    CheckSaveUserCancels();
 
     FreezeWindowPos(MainWindow);
     FreezeDWORD(IoListHeight);
@@ -806,18 +808,18 @@ gboolean LD_WM_Paint_call(HWID widget, HCRDC cr, gpointer data)
     return FALSE;
 }
 
-gboolean LD_WM_Destroy_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+void LD_WM_Destroy_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)
 {
     /* Handles:
     * WM_DESTROY
     */
 
-    // if(CheckSaveUserCancels()) break;
+    CheckSaveUserCancels();
 
-    // PostQuitMessage(0);
-    // return 1;
+    FreezeWindowPos(MainWindow);
+    FreezeDWORD(IoListHeight);
 
-    return FALSE;
+    gtk_main_quit();
 }
 
 gboolean LD_WM_Size_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)
@@ -854,15 +856,15 @@ void LD_WM_Notify_Row_Activate_call(GtkTreeView *tree_view, GtkTreePath *path, G
     * WM_NOTIFY
     */
 
-    g_print("Row activated!\n");
-    
+    // g_print("Row activated!\n");
+
     int *ip = gtk_tree_path_get_indices ( path );
 
     NMHDR h;
     h.code = LVN_ITEMACTIVATE;
     h.item.iItem = ip[0];
     h.hlistFrom = IoList;
-    
+
     IoListProc(&h);
 }
 
@@ -874,28 +876,27 @@ void LD_WM_Notify_Cursor_Change_call(GtkTreeView *tree_view, gpointer user_data)
     
     ITLIST iter;
 
-    BOOL empty = !gtk_tree_model_get_iter_first (IoList, &iter);
+    // BOOL empty = !gtk_tree_model_get_iter_first (IoList, &iter);
     // g_print("empty = %i\n", (empty == TRUE) );
 
     HLIST pTreeModel;
     int *ip;
     GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
     gtk_tree_selection_set_mode(selection, GTK_SELECTION_SINGLE);
-    
     if(gtk_tree_selection_get_selected (selection, &pTreeModel, &iter))
     {
         GtkTreePath *path = gtk_tree_model_get_path ( pTreeModel , &iter ) ;
         ip = gtk_tree_path_get_indices ( path );
     }
     else
-        gtk_tree_model_get_iter_first (IoList, &iter);
+        if(!gtk_tree_model_get_iter_first (IoList, &iter))
+            return;
 
     NMHDR h;
     h.code = LVN_GETDISPINFO;
     h.item.iItem = (ip == NULL) ? 0 : ip[0];
     h.hlistFrom = IoList;
     h.hlistIter = &iter;
-
     IoListProc(&h);
 }
 
@@ -1174,6 +1175,7 @@ int main(int argc, char** argv)
     /// Make main window - end
 
     MakeMainWindowMenus();
+    MakeDialogBoxClass();
 
     InitForDrawing();
 

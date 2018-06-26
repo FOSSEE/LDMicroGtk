@@ -902,8 +902,8 @@ void ShowUartSimulationWindow(void)
     if(TerminalW > 800) TerminalW = 100;
     if(TerminalH > 800) TerminalH = 100;
 
-    UartSimulationWindow = CreateWindowClient(GTK_WINDOW_TOPLEVEL, "UART Simulation (Terminal)", 
-        TerminalX, TerminalY, TerminalW, TerminalH, NULL);
+    UartSimulationWindow = CreateWindowClient(GTK_WINDOW_TOPLEVEL, GDK_WINDOW_TYPE_HINT_NORMAL, 
+        "UART Simulation (Terminal)", TerminalX, TerminalY, TerminalW, TerminalH, NULL);
     /// remove close button
     gtk_window_set_deletable (GTK_WINDOW(UartSimulationWindow), FALSE);
 

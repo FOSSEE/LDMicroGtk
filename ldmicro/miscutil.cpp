@@ -204,13 +204,15 @@ void FinishIhex(FILE *f)
 //-----------------------------------------------------------------------------
 // Create a window with a given client area.
 //-----------------------------------------------------------------------------
-HWID CreateWindowClient(GtkWindowType wType, char *windowName,
+HWID CreateWindowClient(GtkWindowType wType, GdkWindowTypeHint wthint, char *windowName,
     int x, int y, int width, int height, HWND parent)
 {
     HWID h = gtk_window_new(wType);
     gtk_window_set_title(GTK_WINDOW(h),  windowName);
     gtk_window_resize (GTK_WINDOW(h), width, height);
     gtk_window_move(GTK_WINDOW(h), x, y);
+    gtk_window_set_type_hint (GTK_WINDOW(h), wthint);
+
     // HWND h = CreateWindowEx(exStyle, className, windowName, style, x, y,
     //     width, height, parent, menu, instance, param);
 
@@ -266,7 +268,19 @@ static LRESULT CALLBACK DialogProc(HWND hwnd, UINT msg, WPARAM wParam,
 //-----------------------------------------------------------------------------
 void NiceFont(HWID h)
 {
-    gtk_widget_override_font(GTK_WIDGET(h), pango_font_description_from_string(MyNiceFont->lpszFace));
+    GtkCssProvider *provider = gtk_css_provider_new ();
+    
+    char *cssdata = new char[strlen(MyNiceFont->lpszFace) + 26];
+    int fontSize = 10;
+    sprintf(cssdata, "textview { font: %ipx %s; }", fontSize, MyNiceFont->lpszFace);
+    
+    gtk_css_provider_load_from_data (provider, cssdata, -1, NULL);
+    
+    delete cssdata;
+
+    gtk_style_context_add_provider (gtk_widget_get_style_context(h), 
+        GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+
 //    SendMessage(h, WM_SETFONT, (WPARAM)MyNiceFont, TRUE);
 }
 
@@ -274,8 +288,21 @@ void NiceFont(HWID h)
 // Set the font of a control to a pretty fixed-width font (typ. Lucida
 // Console).
 //-----------------------------------------------------------------------------
-void FixedFont(HWND h)
+void FixedFont(HWID h)
 {
+    GtkCssProvider *provider = gtk_css_provider_new ();
+    
+    char *cssdata = new char[strlen(MyFixedFont->lpszFace) + 26];
+    int fontSize = 10;
+    sprintf(cssdata, "textview { font: %ipx %s; }", fontSize, MyFixedFont->lpszFace);
+    
+    gtk_css_provider_load_from_data (provider, cssdata, -1, NULL);
+    
+    delete cssdata;
+
+    gtk_style_context_add_provider (gtk_widget_get_style_context(h), 
+        GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+
   //  SendMessage(h, WM_SETFONT, (WPARAM)MyFixedFont, TRUE);
 }
 

@@ -47,7 +47,6 @@ static BOOL DialogDone;
 static BOOL DialogCancel;
 
 static HWID IoDialog;
-static HWID textLabel;
 
 static HWID PinList;
 static HWID OkButton;
@@ -397,8 +396,6 @@ void SaveIoListToFile(FILE *f)
 //-----------------------------------------------------------------------------
 static gboolean AnalogSliderDialogKeyboardProc(GtkWidget* widget, GdkEventKey* event, gpointer name)
 {
-    // g_print("key click!\n");
-
     SWORD v = (SWORD)gtk_range_get_value(GTK_RANGE(AnalogSliderTrackbar));
     SetAdcShadow((char*)name, v);
     if (AnalogSliderDone == TRUE || AnalogSliderCancel == TRUE)
@@ -422,7 +419,6 @@ static gboolean AnalogSliderDialogKeyboardProc(GtkWidget* widget, GdkEventKey* e
 
 static gboolean AnalogSliderDialogMouseProc(GtkWidget *widget, GdkEventButton *event, gpointer name)
 {
-    // g_print("mouse click! %i, %i\n", event->button, event->type == GDK_BUTTON_PRESS);
     SWORD v = (SWORD)gtk_range_get_value(GTK_RANGE(AnalogSliderTrackbar));
     SetAdcShadow((char*)name, v);
     if (event->button == 1 && event->type == GDK_BUTTON_RELEASE){
@@ -435,7 +431,6 @@ static gboolean AnalogSliderDialogMouseProc(GtkWidget *widget, GdkEventButton *e
 
 void AnalogSliderUpdateProc (GtkRange *range, GtkScrollType step, gpointer name)
 {
-    // g_print("dlide bar adj\n");
     SWORD v = (SWORD)gtk_range_get_value(GTK_RANGE(AnalogSliderTrackbar));
     SetAdcShadow((char*)name, v);
 }
@@ -446,9 +441,6 @@ void AnalogSliderUpdateProc (GtkRange *range, GtkScrollType step, gpointer name)
 //-----------------------------------------------------------------------------
 void ShowAnalogSliderPopup(char *name)
 {
-    // POINT pt;
-    // GetCursorPos(&pt);
-
     SWORD currentVal = GetAdcShadow(name);
 
     SWORD maxVal;
@@ -487,22 +479,6 @@ void ShowAnalogSliderPopup(char *name)
                     1);
 
     gtk_range_set_value (GTK_RANGE(AnalogSliderTrackbar), currentVal);
-    // gtk_scale_add_mark (GTK_SCALE(AnalogSliderTrackbar), (maxVal + 1)/8,  GTK_POS_LEFT, NULL);
-    
-    // AnalogSliderMain = CreateWindowClient(0, "LDmicroAnalogSlider", "I/O Pin",
-    //     WS_VISIBLE | WS_POPUP | WS_DLGFRAME,
-    //     left, top, 30, 100, NULL, NULL, Instance, NULL);
-
-    // AnalogSliderTrackbar = CreateWindowEx(0, TRACKBAR_CLASS, "", WS_CHILD |
-    //     TBS_AUTOTICKS | TBS_VERT | TBS_TOOLTIPS | WS_CLIPSIBLINGS | WS_VISIBLE, 
-    //     0, 0, 30, 100, AnalogSliderMain, NULL, Instance, NULL);
-    // SendMessage(AnalogSliderTrackbar, TBM_SETRANGE, FALSE,
-    //     MAKELONG(0, maxVal));
-    // SendMessage(AnalogSliderTrackbar, TBM_SETTICFREQ, (maxVal + 1)/8, 0);
-    // SendMessage(AnalogSliderTrackbar, TBM_SETPOS, TRUE, currentVal);
-
-    // EnableWindow(MainWindow, FALSE);
-    // ShowWindow(AnalogSliderMain, TRUE);
     
     gtk_container_add(GTK_CONTAINER(AnalogSliderMain), AnalogSliderTrackbar);
     
@@ -529,41 +505,95 @@ void ShowAnalogSliderPopup(char *name)
 //-----------------------------------------------------------------------------
 // Window proc for the contacts dialog box
 //-----------------------------------------------------------------------------
-// static LRESULT CALLBACK IoDialogProc(HWND hwnd, UINT msg, WPARAM wParam,
-//     LPARAM lParam)
-// {
-//     switch (msg) {
-//         case WM_COMMAND: {
-//             HWND h = (HWND)lParam;
-//             if(h == OkButton && wParam == BN_CLICKED) {
-//                 DialogDone = TRUE;
-//             } else if(h == CancelButton && wParam == BN_CLICKED) {
-//                 DialogDone = TRUE;
-//                 DialogCancel = TRUE;
-//             } else if(h == PinList && HIWORD(wParam) == LBN_DBLCLK) {
-//                 DialogDone = TRUE;
-//             }
-//             break;
-//         }
+static void IoDialogProc(BOOL DialogDone, int item)
+{
+    if(DialogDone)
+    {
+        char pin[16];
+        ITLIST iter;
 
-//         case WM_CLOSE:
-//         case WM_DESTROY:
-//             DialogDone = TRUE;
-//             DialogCancel = TRUE;
-//             return 1;
+        GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(PinList));
+        gtk_tree_selection_set_mode(selection, GTK_SELECTION_SINGLE);
 
-//         default:
-//             return DefWindowProc(hwnd, msg, wParam, lParam);
-//     }
+        if(gtk_tree_selection_get_selected (selection, NULL, &iter))
+        {
+            GValue valproc = G_VALUE_INIT;
 
-//     return 1;
-// }
+            gtk_tree_model_get_value (gtk_tree_view_get_model (GTK_TREE_VIEW(PinList)),
+                            &iter, 0, &valproc);
+            gchar* str = (char*)g_value_get_string(&valproc);
+            strcpy(pin, str);
+            g_free(str);
+        }
+        else
+            strcpy(pin, _("(no pin)"));
+
+        if(strcmp(pin, _("(no pin)"))==0) 
+        {
+            int i;
+            for(i = 0; i < IoSeenPreviouslyCount; i++) {
+                if(strcmp(IoSeenPreviously[i].name,
+                    Prog.io.assignment[item].name)==0)
+                {
+                    IoSeenPreviously[i].pin = NO_PIN_ASSIGNED;
+                }
+            }
+            Prog.io.assignment[item].pin = NO_PIN_ASSIGNED;
+        } 
+        else 
+        {
+            Prog.io.assignment[item].pin = atoi(pin);
+            // Only one name can be bound to each pin; make sure that there's
+            // not another entry for this pin in the IoSeenPreviously list,
+            // that might get used if the user creates a new pin with that
+            // name.
+            int i;
+            for(i = 0; i < IoSeenPreviouslyCount; i++) {
+                if(IoSeenPreviously[i].pin == atoi(pin)) {
+                    IoSeenPreviously[i].pin = NO_PIN_ASSIGNED;
+                }
+            }
+        }
+        RefreshControlsToSettings();
+    }
+
+    DestroyWindow(IoDialog);
+}
+
+void IoDialogRowActivateProc(GtkTreeView *tree_view, GtkTreePath *path, GtkTreeViewColumn *column, gpointer user_data)
+{
+    IoDialogProc(TRUE, GPOINTER_TO_INT(user_data));
+}
+
+void IoDialogCancelProc(HWID widget, gpointer data)
+{
+    IoDialogProc(FALSE, GPOINTER_TO_INT(data));
+}
+
+void IoDialogOkProc(HWID widget, gpointer data)
+{
+    IoDialogProc(TRUE, GPOINTER_TO_INT(data));
+}
+
+static gboolean IoDialogKeyPressProc(HWID widget, GdkEventKey* event, gpointer data)
+{
+    if (event -> keyval == GDK_KEY_Return)
+    {
+        IoDialogProc(TRUE, GPOINTER_TO_INT(data));
+    }
+    else if (event -> keyval == GDK_KEY_Escape)
+    {
+        IoDialogProc(FALSE, GPOINTER_TO_INT(data));
+    }
+
+    return FALSE;
+}
 
 //-----------------------------------------------------------------------------
 // Create our window class; nothing exciting.
 //-----------------------------------------------------------------------------
-static BOOL MakeWindowClass()
-{
+// static BOOL MakeWindowClass()
+// {
 //     WNDCLASSEX wc;
 //     memset(&wc, 0, sizeof(wc));
 //     wc.cbSize = sizeof(wc);
@@ -582,30 +612,42 @@ static BOOL MakeWindowClass()
 //                             IMAGE_ICON, 16, 16, 0);
 
 //     return RegisterClassEx(&wc);
-}
+// }
 
-static void MakeControls(void)
+static void MakeControls(HWID Dialog)
 {
-    // textLabel = gtk_text_view_new ();
-//     HWND textLabel = CreateWindowEx(0, WC_STATIC, _("Assign:"),
-//         WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE,
-//         6, 1, 80, 17, IoDialog, NULL, Instance, NULL);
-    // NiceFont(textLabel);
+    HLIST IoPinList = (GtkTreeModel*)gtk_list_store_new (1, G_TYPE_STRING);
+    
+    PinList = gtk_tree_view_new_with_model (GTK_TREE_MODEL(IoPinList));
+    HTVC column = gtk_tree_view_column_new_with_attributes(_("Assign:"),
+                                                    gtk_cell_renderer_text_new(),
+                                                    "text", 0,
+                                                    NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(PinList), column);
+    FixedFont(PinList);
 
-//     PinList = CreateWindowEx(WS_EX_CLIENTEDGE, WC_LISTBOX, "",
-//         WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE | WS_VSCROLL |
-//         LBS_NOTIFY, 6, 18, 95, 320, IoDialog, NULL, Instance, NULL);
-//     FixedFont(PinList);
+    OkButton = gtk_button_new_with_label (_("OK"));
+    NiceFont(OkButton);
 
-//     OkButton = CreateWindowEx(0, WC_BUTTON, _("OK"),
-//         WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE | BS_DEFPUSHBUTTON,
-//         6, 325, 95, 23, IoDialog, NULL, Instance, NULL); 
-//     NiceFont(OkButton);
+    CancelButton = gtk_button_new_with_label (_("Cancel"));
+    NiceFont(CancelButton);
 
-//     CancelButton = CreateWindowEx(0, WC_BUTTON, _("Cancel"),
-//         WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE,
-//         6, 356, 95, 23, IoDialog, NULL, Instance, NULL); 
-//     NiceFont(CancelButton);
+    /// Add list to scrolled window to enable scrolling
+    HWID PinScroll = gtk_scrolled_window_new (NULL, NULL);
+    gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (PinScroll),
+				                          GTK_POLICY_AUTOMATIC, 
+				                          GTK_POLICY_ALWAYS);
+    gtk_widget_set_hexpand(GTK_WIDGET(PinScroll), TRUE);  
+    gtk_widget_set_vexpand(GTK_WIDGET(PinScroll), TRUE);
+
+    gtk_container_add (GTK_CONTAINER(PinScroll), PinList);
+
+    /// Pack all the widgets into main window
+    HWID PinBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_box_pack_start(GTK_BOX(PinBox), PinScroll, FALSE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(PinBox), OkButton, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(PinBox), CancelButton, FALSE, FALSE, 0);
+    gtk_container_add(GTK_CONTAINER(Dialog), PinBox);
 }
 
 void ShowIoDialog(int item)
@@ -651,128 +693,85 @@ void ShowIoDialog(int item)
         return;
     }
 
-    // MakeWindowClass();
-
     // We need the TOOLWINDOW style, or else the window will be forced to
     // a minimum width greater than our current width. And without the
     // APPWINDOW style, it becomes impossible to get the window back (by
     // Alt+Tab or taskbar).
+    IoDialog = CreateWindowClient(GTK_WINDOW_TOPLEVEL, GDK_WINDOW_TYPE_HINT_MENU, _("I/O Pin"),
+        100, 100, 107, 387, NULL);
     
-    // IoDialog = CreateWindowClient(WS_EX_TOOLWINDOW | WS_EX_APPWINDOW,
-    //     "LDmicroIo", _("I/O Pin"),
-    //     WS_OVERLAPPED | WS_SYSMENU,
-    //     100, 100, 107, 387, NULL, NULL, Instance, NULL);
+    MakeControls(IoDialog);
 
-    // MakeControls();
+    ITLIST iter;
+    GValue val = G_VALUE_INIT;
+    g_value_init (&val, G_TYPE_STRING);
+    
+    HLIST model = gtk_tree_view_get_model (GTK_TREE_VIEW(PinList));
+    
+    gtk_tree_model_get_iter_first (GTK_TREE_MODEL(model), &iter);
 
-//     SendMessage(PinList, LB_ADDSTRING, 0, (LPARAM)_("(no pin)"));
-//     int i;
-//     for(i = 0; i < Prog.mcu->pinCount; i++) {
-//         int j;
-//         for(j = 0; j < Prog.io.count; j++) {
-//             if(j == item) continue;
-//             if(Prog.io.assignment[j].pin == Prog.mcu->pinInfo[i].pin) {
-//                 goto cant_use_this_io;
-//             }
-//         }
+    gtk_list_store_append (GTK_LIST_STORE(model), &iter);
+    
+    g_value_set_string(&val, _("(no pin)"));
+    gtk_list_store_set_value (GTK_LIST_STORE(model), &iter, 0, &val);
+    
+    int i;
+    for(i = 0; i < Prog.mcu->pinCount; i++) {
+        int j;
+        for(j = 0; j < Prog.io.count; j++) {
+            if(j == item) continue;
+            if(Prog.io.assignment[j].pin == Prog.mcu->pinInfo[i].pin) {
+                goto cant_use_this_io;
+            }
+        }
 
-//         if(UartFunctionUsed() && Prog.mcu &&
-//                 ((Prog.mcu->pinInfo[i].pin == Prog.mcu->uartNeeds.rxPin) ||
-//                  (Prog.mcu->pinInfo[i].pin == Prog.mcu->uartNeeds.txPin)))
-//         {
-//             goto cant_use_this_io;
-//         }
+        if(UartFunctionUsed() && Prog.mcu &&
+                ((Prog.mcu->pinInfo[i].pin == Prog.mcu->uartNeeds.rxPin) ||
+                 (Prog.mcu->pinInfo[i].pin == Prog.mcu->uartNeeds.txPin)))
+        {
+            goto cant_use_this_io;
+        }
 
-//         if(PwmFunctionUsed() && 
-//             Prog.mcu->pinInfo[i].pin == Prog.mcu->pwmNeedsPin)
-//         {
-//             goto cant_use_this_io;
-//         }
+        if(PwmFunctionUsed() && 
+            Prog.mcu->pinInfo[i].pin == Prog.mcu->pwmNeedsPin)
+        {
+            goto cant_use_this_io;
+        }
 
-//         if(Prog.io.assignment[item].name[0] == 'A') {
-//             for(j = 0; j < Prog.mcu->adcCount; j++) {
-//                 if(Prog.mcu->adcInfo[j].pin == Prog.mcu->pinInfo[i].pin) {
-//                     // okay; we know how to connect it up to the ADC
-//                     break;
-//                 }
-//             }
-//             if(j == Prog.mcu->adcCount) {
-//                 goto cant_use_this_io;
-//             }
-//         }
+        if(Prog.io.assignment[item].name[0] == 'A') {
+            for(j = 0; j < Prog.mcu->adcCount; j++) {
+                if(Prog.mcu->adcInfo[j].pin == Prog.mcu->pinInfo[i].pin) {
+                    // okay; we know how to connect it up to the ADC
+                    break;
+                }
+            }
+            if(j == Prog.mcu->adcCount) {
+                goto cant_use_this_io;
+            }
+        }
 
-//         char buf[40];
-//         if(Prog.mcu->pinCount <= 21) {
-//             sprintf(buf, "%3d   %c%c%d", Prog.mcu->pinInfo[i].pin,
-//                 Prog.mcu->portPrefix, Prog.mcu->pinInfo[i].port,
-//                 Prog.mcu->pinInfo[i].bit);
-//         } else {
-//             sprintf(buf, "%3d  %c%c%d", Prog.mcu->pinInfo[i].pin,
-//                 Prog.mcu->portPrefix, Prog.mcu->pinInfo[i].port,
-//                 Prog.mcu->pinInfo[i].bit);
-//         }
-//         SendMessage(PinList, LB_ADDSTRING, 0, (LPARAM)buf);
-// cant_use_this_io:;
-//     }
+        char buf[40];
+        if(Prog.mcu->pinCount <= 21) {
+            sprintf(buf, "%3d   %c%c%d", Prog.mcu->pinInfo[i].pin,
+                Prog.mcu->portPrefix, Prog.mcu->pinInfo[i].port,
+                Prog.mcu->pinInfo[i].bit);
+        } else {
+            sprintf(buf, "%3d  %c%c%d", Prog.mcu->pinInfo[i].pin,
+                Prog.mcu->portPrefix, Prog.mcu->pinInfo[i].port,
+                Prog.mcu->pinInfo[i].bit);
+        }
+        gtk_list_store_append (GTK_LIST_STORE(model), &iter);
+        g_value_set_string(&val, buf);
+        gtk_list_store_set_value (GTK_LIST_STORE(model), &iter, 0, &val);
+cant_use_this_io:;
+    }
 
-//     EnableWindow(MainWindow, FALSE);
-    // ShowWindow(IoDialog, TRUE);
-    // gtk_widget_show_all(IoDialog);
-//     SetFocus(PinList);
+    gtk_widget_show_all(IoDialog);
 
-//     MSG msg;
-//     DWORD ret;
-//     DialogDone = FALSE;
-//     DialogCancel = FALSE;
-//     while((ret = GetMessage(&msg, NULL, 0, 0)) && !DialogDone) {
-//         if(msg.message == WM_KEYDOWN) {
-//             if(msg.wParam == VK_RETURN) {
-//                 DialogDone = TRUE;
-//                 break;
-//             } else if(msg.wParam == VK_ESCAPE) {
-//                 DialogDone = TRUE;
-//                 DialogCancel = TRUE;
-//                 break;
-//             }
-//         }
-
-//         if(IsDialogMessage(IoDialog, &msg)) continue;
-//         TranslateMessage(&msg);
-//         DispatchMessage(&msg);
-//     }
-
-//     if(!DialogCancel) {
-//         int sel = SendMessage(PinList, LB_GETCURSEL, 0, 0);
-//         char pin[16];
-//         SendMessage(PinList, LB_GETTEXT, (WPARAM)sel, (LPARAM)pin);
-//         if(strcmp(pin, _("(no pin)"))==0) {
-//             int i;
-//             for(i = 0; i < IoSeenPreviouslyCount; i++) {
-//                 if(strcmp(IoSeenPreviously[i].name,
-//                     Prog.io.assignment[item].name)==0)
-//                 {
-//                     IoSeenPreviously[i].pin = NO_PIN_ASSIGNED;
-//                 }
-//             }
-//             Prog.io.assignment[item].pin = NO_PIN_ASSIGNED;
-//         } else {
-//             Prog.io.assignment[item].pin = atoi(pin);
-//             // Only one name can be bound to each pin; make sure that there's
-//             // not another entry for this pin in the IoSeenPreviously list,
-//             // that might get used if the user creates a new pin with that
-//             // name.
-//             int i;
-//             for(i = 0; i < IoSeenPreviouslyCount; i++) {
-//                 if(IoSeenPreviously[i].pin == atoi(pin)) {
-//                     IoSeenPreviously[i].pin = NO_PIN_ASSIGNED;
-//                 }
-//             }
-//         }
-//     }
-
-//     EnableWindow(MainWindow, TRUE);
-//     DestroyWindow(IoDialog);
-//     return;
+    g_signal_connect (PinList, "row_activated", G_CALLBACK (IoDialogRowActivateProc), GINT_TO_POINTER(item));
+    g_signal_connect (IoDialog, "key_press_event", G_CALLBACK (IoDialogKeyPressProc), GINT_TO_POINTER(item));
+    g_signal_connect (CancelButton, "clicked", G_CALLBACK (IoDialogCancelProc), GINT_TO_POINTER(item));
+    g_signal_connect (OkButton, "clicked", G_CALLBACK (IoDialogOkProc), GINT_TO_POINTER(item));
 }
 
 //-----------------------------------------------------------------------------
@@ -810,7 +809,6 @@ void IoListProc(NMHDR *h)
                 g_value_set_string(&val, (const char*)&IO_value_holder);                    
                 gtk_list_store_set_value (GTK_LIST_STORE(h->hlistFrom), h->hlistIter, LV_IO_PIN, &val);
             }
-
             /// case LV_IO_TYPE: 
             char *s = IoTypeToString(Prog.io.assignment[item].type);
 

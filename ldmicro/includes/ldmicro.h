@@ -780,7 +780,7 @@ void WriteIhex(FILE *f, BYTE b);
 void FinishIhex(FILE *f);
 char *IoTypeToString(int ioType);
 void PinNumberForIo(char *dest, PlcProgramSingleIo *io);
-HWID CreateWindowClient(GtkWindowType wType, char *windowName,
+HWID CreateWindowClient(GtkWindowType wType, GdkWindowTypeHint wthint, char *windowName,
     int x, int y, int width, int height, HWND parent);
 
 void MakeComponentListClass(void);

@@ -34,24 +34,28 @@
 #define MB_ICONINFORMATION  0x00000080L
 
 /// Scroll
-#define SB_LINEUP 0x00000001
-#define SB_PAGEUP 0x00000002
-#define SB_LINEDOWN 0x00000004
-#define SB_PAGEDOWN 0x00000008
-#define SB_TOP 0x00000010
-#define SB_BOTTOM 0x00000020
-#define SB_THUMBTRACK 0x00000040 
-#define SB_THUMBPOSITION 0x00000040 
+#define SB_LINEUP        0x00000001
+#define SB_PAGEUP        0x00000002
+#define SB_LINEDOWN      0x00000004
+#define SB_PAGEDOWN      0x00000008
+#define SB_TOP           0x00000010
+#define SB_BOTTOM        0x00000020
+#define SB_THUMBTRACK    0x00000040 
+#define SB_THUMBPOSITION 0x00000080 
 
-/// open/save file
-#define OFN_PATHMUSTEXIST     0x00000100L
-#define OFN_HIDEREADONLY      0x00000200L
-#define OFN_OVERWRITEPROMPT   0x00000400L
+/// List view flags
+#define LVN_ITEMACTIVATE 0x00000001
+#define LVN_GETDISPINFO  0x00000002
+
+/// Open/save file
+#define OFN_PATHMUSTEXIST     0x00000001L
+#define OFN_HIDEREADONLY      0x00000002L
+#define OFN_OVERWRITEPROMPT   0x00000004L
 
 /// PatBlt paint flags
 #define PATINVERT 0x00000100L
 
-/// window brushes
+/// Window brushes
 #define BS_SOLID       0x00000001L
 #define BS_HOLLOW      0x00000002L
 #define BLACK_BRUSH    0x00000004L
@@ -96,9 +100,17 @@ typedef struct OpenFileInfoData {
     LPCTSTR       lpstrDefExt;
 } OPENFILENAME;
 
+typedef struct TimerRecordTag {
+    BOOL (*pfun)(BOOL);
+    UINT  ufID;
+    UINT  utID;
+} TimerRecord;
+
 /// Variables
 extern COLORREF HdcCurrentTextColor;
-
+extern std::vector<TimerRecord> timerRecords;
+extern int GLOBAL_mouse_last_clicked_x;
+extern int GLOBAL_mouse_last_clicked_y;
 /// functions
 BOOL GetFocus(HWID window);
 
@@ -114,6 +126,8 @@ int MessageBox(
     UINT  mFlags);
 
 BOOL GetSaveFileName(OPENFILENAME *ofn);
+
+BOOL GetOpenFileName(OPENFILENAME *ofn);
 
 void EnableMenuItem(
     HMENU MenuName, 
@@ -198,5 +212,15 @@ void DestroyWindow (
 BOOL GetWindowRect(
     HWID   hWid,
     PRECT  pRect);
+
+UINT SetTimer(
+    HWID  hWid,
+    UINT  nIDEvent,
+    UINT  uElapse,
+    BOOL (*lpTimerFunc)(BOOL));
+
+BOOL KillTimer(
+    HWID hWid,
+    UINT uIDEvent);
 
 #endif

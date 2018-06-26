@@ -43,20 +43,20 @@ static struct {
 static int IoSeenPreviouslyCount;
 
 // // stuff for the dialog box that lets you choose pin assignments
-// static BOOL DialogDone;
-// static BOOL DialogCancel;
+static BOOL DialogDone;
+static BOOL DialogCancel;
 
-// static HWND IoDialog;
+static HWID IoDialog;
 
-// static HWND PinList;
-// static HWND OkButton;
-// static HWND CancelButton;
+static HWID PinList;
+static HWID OkButton;
+static HWID CancelButton;
 
 // // stuff for the popup that lets you set the simulated value of an analog in
-// static HWND AnalogSliderMain;
-// static HWND AnalogSliderTrackbar;
-// static BOOL AnalogSliderDone;
-// static BOOL AnalogSliderCancel;
+static HWID AnalogSliderMain;
+static HWID AnalogSliderTrackbar;
+static BOOL AnalogSliderDone;
+static BOOL AnalogSliderCancel;
 
 
 //-----------------------------------------------------------------------------
@@ -394,126 +394,150 @@ void SaveIoListToFile(FILE *f)
 // Dialog proc for the popup that lets you set the value of an analog input for
 // simulation.
 //-----------------------------------------------------------------------------
-// static LRESULT CALLBACK AnalogSliderDialogProc(HWND hwnd, UINT msg,
-//     WPARAM wParam, LPARAM lParam)
-// {
-//     switch (msg) {
-//         case WM_CLOSE:
-//         case WM_DESTROY:
-//             AnalogSliderDone = TRUE;
-//             AnalogSliderCancel = TRUE;
-//             return 1;
+static gboolean AnalogSliderDialogKeyboardProc(GtkWidget* widget, GdkEventKey* event, gpointer name)
+{
+    // g_print("key click!\n");
 
-//         default:
-//             return DefWindowProc(hwnd, msg, wParam, lParam);
-//     }
-// }
+    SWORD v = (SWORD)gtk_range_get_value(GTK_RANGE(AnalogSliderTrackbar));
+    SetAdcShadow((char*)name, v);
+    if (AnalogSliderDone == TRUE || AnalogSliderCancel == TRUE)
+    {
+        gtk_widget_destroy (AnalogSliderTrackbar);
+        gtk_widget_destroy (AnalogSliderMain);
+        return FALSE;
+    }
+
+    if (event->keyval == GDK_KEY_Return){
+        gtk_widget_destroy (AnalogSliderTrackbar);
+        gtk_widget_destroy (AnalogSliderMain);
+        AnalogSliderDone = TRUE;
+    }
+    else if (event->keyval == GDK_KEY_Escape){
+        gtk_widget_destroy (AnalogSliderTrackbar);
+        gtk_widget_destroy (AnalogSliderMain);
+        AnalogSliderDone = TRUE;
+        AnalogSliderCancel = TRUE;
+    }
+
+    return FALSE;
+}
+
+static gboolean AnalogSliderDialogMouseProc(GtkWidget *widget, GdkEventButton *event, gpointer name)
+{
+    // g_print("mouse click! %i, %i\n", event->button, event->type == GDK_BUTTON_PRESS);
+    SWORD v = (SWORD)gtk_range_get_value(GTK_RANGE(AnalogSliderTrackbar));
+    SetAdcShadow((char*)name, v);
+    if (event->button == 1 && event->type == GDK_BUTTON_RELEASE){
+        gtk_widget_destroy (AnalogSliderTrackbar);
+        gtk_widget_destroy (AnalogSliderMain);
+        AnalogSliderDone = TRUE;
+    }
+
+    return FALSE;
+}
+
+void AnalogSliderUpdateProc (GtkRange *range, GtkScrollType step, gpointer name)
+{
+    // g_print("dlide bar adj\n");
+    SWORD v = (SWORD)gtk_range_get_value(GTK_RANGE(AnalogSliderTrackbar));
+    SetAdcShadow((char*)name, v);
+}
 
 //-----------------------------------------------------------------------------
 // A little toolbar-style window that pops up to allow the user to set the
 // simulated value of an ADC pin.
 //-----------------------------------------------------------------------------
-// void ShowAnalogSliderPopup(char *name)
-// {
-//     WNDCLASSEX wc;
-//     memset(&wc, 0, sizeof(wc));
-//     wc.cbSize = sizeof(wc);
+void ShowAnalogSliderPopup(char *name)
+{
+    // POINT pt;
+    // GetCursorPos(&pt);
 
-//     wc.style            = CS_BYTEALIGNCLIENT | CS_BYTEALIGNWINDOW | CS_OWNDC |
-//                             CS_DBLCLKS;
-//     wc.lpfnWndProc      = (WNDPROC)AnalogSliderDialogProc;
-//     wc.hInstance        = Instance;
-//     wc.hbrBackground    = (HBRUSH)COLOR_BTNSHADOW;
-//     wc.lpszClassName    = "LDmicroAnalogSlider";
-//     wc.lpszMenuName     = NULL;
-//     wc.hCursor          = LoadCursor(NULL, IDC_ARROW);
+    SWORD currentVal = GetAdcShadow(name);
 
-//     RegisterClassEx(&wc);
-
-//     POINT pt;
-//     GetCursorPos(&pt);
-
-//     SWORD currentVal = GetAdcShadow(name);
-
-//     SWORD maxVal;
-//     if(Prog.mcu) {
-//         maxVal = Prog.mcu->adcMax;
-//     } else {
-//         maxVal = 1023;
-//     }
-//     if(maxVal == 0) {
-//         Error(_("No ADC or ADC not supported for selected micro."));
-//         return;
-//     }
-
-//     int left = pt.x - 10;
-//     // try to put the slider directly under the cursor (though later we might
-//     // realize that that would put the popup off the screen)
-//     int top = pt.y - (15 + (73*currentVal)/maxVal);
-
-//     RECT r;
-//     SystemParametersInfo(SPI_GETWORKAREA, 0, &r, 0);
-
-//     if(top + 110 >= r.bottom) {
-//         top = r.bottom - 110;
-//     }
-//     if(top < 0) top = 0;
+    SWORD maxVal;
+    if(Prog.mcu) {
+        maxVal = Prog.mcu->adcMax;
+    } else {
+        maxVal = 1023;
+    }
+    if(maxVal == 0) {
+        Error(_("No ADC or ADC not supported for selected micro."));
+        return;
+    }
     
-//     AnalogSliderMain = CreateWindowClient(0, "LDmicroAnalogSlider", "I/O Pin",
-//         WS_VISIBLE | WS_POPUP | WS_DLGFRAME,
-//         left, top, 30, 100, NULL, NULL, Instance, NULL);
+    // int x, y;
+    // gtk_window_get_position(GTK_WINDOW(MainWindow), &x, &y);
+    int left = GLOBAL_mouse_last_clicked_x - 10;
+    // try to put the slider directly under the cursor (though later we might
+    // realize that that would put the popup off the screen)
+    int top = GLOBAL_mouse_last_clicked_y - (15 + (73*currentVal)/maxVal);
 
-//     AnalogSliderTrackbar = CreateWindowEx(0, TRACKBAR_CLASS, "", WS_CHILD |
-//         TBS_AUTOTICKS | TBS_VERT | TBS_TOOLTIPS | WS_CLIPSIBLINGS | WS_VISIBLE, 
-//         0, 0, 30, 100, AnalogSliderMain, NULL, Instance, NULL);
-//     SendMessage(AnalogSliderTrackbar, TBM_SETRANGE, FALSE,
-//         MAKELONG(0, maxVal));
-//     SendMessage(AnalogSliderTrackbar, TBM_SETTICFREQ, (maxVal + 1)/8, 0);
-//     SendMessage(AnalogSliderTrackbar, TBM_SETPOS, TRUE, currentVal);
+    // RECT r;
+    // SystemParametersInfo(SPI_GETWORKAREA, 0, &r, 0);
 
-//     EnableWindow(MainWindow, FALSE);
-//     ShowWindow(AnalogSliderMain, TRUE);
-//     SetFocus(AnalogSliderTrackbar);
+    // if(top + 110 >= r.bottom) {
+    //     top = r.bottom - 110;
+    // }
+    if(top < 0) top = 100;
+    if(left < 0) left = 100;
+    
+    if (!GTK_IS_WINDOW(AnalogSliderMain))
+    {
+        AnalogSliderMain = gtk_window_new(GTK_WINDOW_POPUP);
+        gtk_window_set_title(GTK_WINDOW(AnalogSliderMain),  "I/O Pin");
+        gtk_window_resize (GTK_WINDOW(AnalogSliderMain), 30, 100);
+        gtk_window_move(GTK_WINDOW(AnalogSliderMain), left, top);
+    }
 
-//     DWORD ret;
-//     MSG msg;
-//     AnalogSliderDone = FALSE;
-//     AnalogSliderCancel = FALSE;
+    if (!GTK_IS_SCALE(AnalogSliderTrackbar))
+    {
+        AnalogSliderTrackbar = gtk_scale_new_with_range (GTK_ORIENTATION_VERTICAL,
+                        0,
+                        maxVal,
+                        1);
+    }
+    
+    gtk_range_set_value (GTK_RANGE(AnalogSliderTrackbar), currentVal);
+    // gtk_scale_add_mark (GTK_SCALE(AnalogSliderTrackbar), (maxVal + 1)/8,  GTK_POS_LEFT, NULL);
+    
+    // AnalogSliderMain = CreateWindowClient(0, "LDmicroAnalogSlider", "I/O Pin",
+    //     WS_VISIBLE | WS_POPUP | WS_DLGFRAME,
+    //     left, top, 30, 100, NULL, NULL, Instance, NULL);
 
-//     SWORD orig = GetAdcShadow(name);
+    // AnalogSliderTrackbar = CreateWindowEx(0, TRACKBAR_CLASS, "", WS_CHILD |
+    //     TBS_AUTOTICKS | TBS_VERT | TBS_TOOLTIPS | WS_CLIPSIBLINGS | WS_VISIBLE, 
+    //     0, 0, 30, 100, AnalogSliderMain, NULL, Instance, NULL);
+    // SendMessage(AnalogSliderTrackbar, TBM_SETRANGE, FALSE,
+    //     MAKELONG(0, maxVal));
+    // SendMessage(AnalogSliderTrackbar, TBM_SETTICFREQ, (maxVal + 1)/8, 0);
+    // SendMessage(AnalogSliderTrackbar, TBM_SETPOS, TRUE, currentVal);
 
-//     while(!AnalogSliderDone && (ret = GetMessage(&msg, NULL, 0, 0))) {
-//         SWORD v = (SWORD)SendMessage(AnalogSliderTrackbar, TBM_GETPOS, 0, 0);
+    // EnableWindow(MainWindow, FALSE);
+    // ShowWindow(AnalogSliderMain, TRUE);
+    
+    gtk_container_add(GTK_CONTAINER(AnalogSliderMain), AnalogSliderTrackbar);
+    
+    // SetFocus(AnalogSliderTrackbar);
+    gtk_window_set_focus_visible (GTK_WINDOW(AnalogSliderMain), TRUE);
+    gtk_window_set_keep_above (GTK_WINDOW(AnalogSliderMain), TRUE);
+    // gtk_window_set_focus (, AnalogSliderTrackbar);
+    
+    g_signal_connect (AnalogSliderMain, "key-press-event",
+                    G_CALLBACK(AnalogSliderDialogKeyboardProc), (PVOID)name);
+    g_signal_connect (GTK_RANGE(AnalogSliderTrackbar), "button-release-event", 
+                    G_CALLBACK (AnalogSliderDialogMouseProc), (PVOID)name);
+    g_signal_connect (GTK_SCALE(AnalogSliderTrackbar), "move-slider", 
+                    G_CALLBACK (AnalogSliderUpdateProc), (PVOID)name);
 
-//         if(msg.message == WM_KEYDOWN) {
-//             if(msg.wParam == VK_RETURN) {
-//                 AnalogSliderDone = TRUE;
-//                 break;
-//             } else if(msg.wParam == VK_ESCAPE) {
-//                 AnalogSliderDone = TRUE;
-//                 AnalogSliderCancel = TRUE;
-//                 break;
-//             }
-//         } else if(msg.message == WM_LBUTTONUP) {
-//             if(v != orig) {
-//                 AnalogSliderDone = TRUE;
-//             }
-//         }
-//         SetAdcShadow(name, v);
+    gtk_widget_show_all(AnalogSliderMain);
 
-//         TranslateMessage(&msg);
-//         DispatchMessage(&msg);
-//     }
+    AnalogSliderDone = FALSE;
+    AnalogSliderCancel = FALSE;
 
-//     if(!AnalogSliderCancel) {
-//         SWORD v = (SWORD)SendMessage(AnalogSliderTrackbar, TBM_GETPOS, 0, 0);
-//         SetAdcShadow(name, v);
-//     }
-
-//     EnableWindow(MainWindow, TRUE);
-//     DestroyWindow(AnalogSliderMain);
-//     ListView_RedrawItems(IoList, 0, Prog.io.count - 1);
-// }
+    // SWORD orig = GetAdcShadow(name);
+    
+    // ListView_RedrawItems(IoList, 0, Prog.io.count - 1);
+}
 
 //-----------------------------------------------------------------------------
 // Window proc for the contacts dialog box
@@ -551,8 +575,8 @@ void SaveIoListToFile(FILE *f)
 //-----------------------------------------------------------------------------
 // Create our window class; nothing exciting.
 //-----------------------------------------------------------------------------
-// static BOOL MakeWindowClass()
-// {
+static BOOL MakeWindowClass()
+{
 //     WNDCLASSEX wc;
 //     memset(&wc, 0, sizeof(wc));
 //     wc.cbSize = sizeof(wc);
@@ -571,10 +595,10 @@ void SaveIoListToFile(FILE *f)
 //                             IMAGE_ICON, 16, 16, 0);
 
 //     return RegisterClassEx(&wc);
-// }
+}
 
-// static void MakeControls(void)
-// {
+static void MakeControls(void)
+{
 //     HWND textLabel = CreateWindowEx(0, WC_STATIC, _("Assign:"),
 //         WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE,
 //         6, 1, 80, 17, IoDialog, NULL, Instance, NULL);
@@ -594,10 +618,10 @@ void SaveIoListToFile(FILE *f)
 //         WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE,
 //         6, 356, 95, 23, IoDialog, NULL, Instance, NULL); 
 //     NiceFont(CancelButton);
-// }
+}
 
-// void ShowIoDialog(int item)
-// {
+void ShowIoDialog(int item)
+{
 //     if(!Prog.mcu) {
 //         MessageBox(MainWindow,
 //             _("No microcontroller has been selected. You must select a "
@@ -759,7 +783,7 @@ void SaveIoListToFile(FILE *f)
 //     EnableWindow(MainWindow, TRUE);
 //     DestroyWindow(IoDialog);
 //     return;
-// }
+}
 
 //-----------------------------------------------------------------------------
 // Called in response to a notify for the listview. Handles click, text-edit
@@ -767,119 +791,129 @@ void SaveIoListToFile(FILE *f)
 // where (LPSTR_TEXTCALLBACK); that way we don't have two parallel copies of
 // the I/O list to keep in sync.
 //-----------------------------------------------------------------------------
-// void IoListProc(NMHDR *h)
-// {
-//     switch(h->code) {
-//         case LVN_GETDISPINFO: {
-//             NMLVDISPINFO *i = (NMLVDISPINFO *)h;
-//             int item = i->item.iItem;
-//             switch(i->item.iSubItem) {
-//                 case LV_IO_PIN:
-//                     // Don't confuse people by displaying bogus pin assignments
-//                     // for the C target.
-//                     if(Prog.mcu && (Prog.mcu->whichIsa == ISA_ANSIC ||
-//                                     Prog.mcu->whichIsa == ISA_INTERPRETED) )
-//                     {
-//                         strcpy(i->item.pszText, "");
-//                         break;
-//                     }
+void IoListProc(NMHDR *h)
+{
+    switch(h->code) {
+        case LVN_GETDISPINFO: {
+            
+            int item = h->item.iItem;
+            /// Don't confuse people by displaying bogus pin assignments
+            /// for the C target.
 
-//                     PinNumberForIo(i->item.pszText,
-//                         &(Prog.io.assignment[item]));
-//                     break;
+            char IO_value_holder[60];
 
-//                 case LV_IO_TYPE: {
-//                     char *s = IoTypeToString(Prog.io.assignment[item].type);
-//                     strcpy(i->item.pszText, s);
-//                     break;
-//                 }
-//                 case LV_IO_NAME:
-//                     strcpy(i->item.pszText, Prog.io.assignment[item].name);
-//                     break;
+            GValue val = G_VALUE_INIT;
+            g_value_init (&val, G_TYPE_STRING);
 
-//                 case LV_IO_PORT: {
-//                     // Don't confuse people by displaying bogus pin assignments
-//                     // for the C target.
-//                     if(Prog.mcu && Prog.mcu->whichIsa == ISA_ANSIC) {
-//                         strcpy(i->item.pszText, "");
-//                         break;
-//                     }
+            /// case LV_IO_PIN:
+            if(Prog.mcu && (Prog.mcu->whichIsa == ISA_ANSIC ||
+                            Prog.mcu->whichIsa == ISA_INTERPRETED) )
+            {
+                strcpy(IO_value_holder, "");
 
-//                     int type = Prog.io.assignment[item].type;
-//                     if(type != IO_TYPE_DIG_INPUT && type != IO_TYPE_DIG_OUTPUT
-//                         && type != IO_TYPE_READ_ADC)
-//                     {
-//                         strcpy(i->item.pszText, "");
-//                         break;
-//                     }
+                g_value_set_string(&val, (const char*)&IO_value_holder);
+                gtk_list_store_set_value (GTK_LIST_STORE(h->hlistFrom), h->hlistIter, LV_IO_PIN, &val);
+            }
+            else
+            {
+                PinNumberForIo(IO_value_holder, &(Prog.io.assignment[item]));
+                g_value_set_string(&val, (const char*)&IO_value_holder);                    
+                gtk_list_store_set_value (GTK_LIST_STORE(h->hlistFrom), h->hlistIter, LV_IO_PIN, &val);
+            }
 
-//                     int pin = Prog.io.assignment[item].pin;
-//                     if(pin == NO_PIN_ASSIGNED || !Prog.mcu) {
-//                         strcpy(i->item.pszText, "");
-//                         break;
-//                     }
+            /// case LV_IO_TYPE: 
+            char *s = IoTypeToString(Prog.io.assignment[item].type);
 
-//                     if(UartFunctionUsed() && Prog.mcu) {
-//                         if((Prog.mcu->uartNeeds.rxPin == pin) ||
-//                            (Prog.mcu->uartNeeds.txPin == pin))
-//                         {
-//                             strcpy(i->item.pszText, _("<UART needs!>"));
-//                             break;
-//                         }
-//                     }
+            g_value_set_string(&val, (const char*)s);                    
+            gtk_list_store_set_value (GTK_LIST_STORE(h->hlistFrom), h->hlistIter, LV_IO_TYPE, &val);
 
-//                     if(PwmFunctionUsed() && Prog.mcu) {
-//                         if(Prog.mcu->pwmNeedsPin == pin) {
-//                             strcpy(i->item.pszText, _("<PWM needs!>"));
-//                             break;
-//                         }
-//                     }
+            /// case LV_IO_NAME:
+            g_value_set_string(&val, (const char*)Prog.io.assignment[item].name);                    
+            gtk_list_store_set_value (GTK_LIST_STORE(h->hlistFrom), h->hlistIter, LV_IO_NAME, &val);
+            
+            /// case LV_IO_PORT: 
+            /// Don't confuse people by displaying bogus pin assignments
+            /// for the C target.
+            if(Prog.mcu && Prog.mcu->whichIsa == ISA_ANSIC) {
+                strcpy(IO_value_holder, "");
+                break;
+            }
 
-//                     int j;
-//                     for(j = 0; j < Prog.mcu->pinCount; j++) {
-//                         if(Prog.mcu->pinInfo[j].pin == pin) {
-//                             sprintf(i->item.pszText, "%c%c%d",
-//                                 Prog.mcu->portPrefix,
-//                                 Prog.mcu->pinInfo[j].port,
-//                                 Prog.mcu->pinInfo[j].bit);
-//                             break;
-//                         }
-//                     }
-//                     if(j == Prog.mcu->pinCount) {
-//                         sprintf(i->item.pszText, _("<not an I/O!>"));
-//                     }
-//                     break;
-//                 }
+            int type = Prog.io.assignment[item].type;
+            if(type != IO_TYPE_DIG_INPUT && type != IO_TYPE_DIG_OUTPUT
+                && type != IO_TYPE_READ_ADC)
+            {
+                strcpy(IO_value_holder, "");
+                break;
+            }
 
-//                 case LV_IO_STATE: {
-//                     if(InSimulationMode) {
-//                         char *name = Prog.io.assignment[item].name;
-//                         DescribeForIoList(name, i->item.pszText);
-//                     } else {
-//                         strcpy(i->item.pszText, "");
-//                     }
-//                     break;
-//                 }
+            int pin = Prog.io.assignment[item].pin;
+            if(pin == NO_PIN_ASSIGNED || !Prog.mcu) {
+                strcpy(IO_value_holder, "");
+                break;
+            }
 
-//             }
-//             break;
-//         }
-//         case LVN_ITEMACTIVATE: {
-//             NMITEMACTIVATE *i = (NMITEMACTIVATE *)h;
-//             if(InSimulationMode) {
-//                 char *name = Prog.io.assignment[i->iItem].name;
-//                 if(name[0] == 'X') {
-//                     SimulationToggleContact(name);
-//                 } else if(name[0] == 'A') {
-//                     ShowAnalogSliderPopup(name);
-//                 }
-//             } else {
-//                 UndoRemember();
-//                 ShowIoDialog(i->iItem);
-//                 ProgramChanged();
-//                 InvalidateRect(MainWindow, NULL, FALSE);
-//             }
-//             break;
-//         }
-//     }
-// }
+            if(UartFunctionUsed() && Prog.mcu) {
+                if((Prog.mcu->uartNeeds.rxPin == pin) ||
+                    (Prog.mcu->uartNeeds.txPin == pin))
+                {
+                    strcpy(IO_value_holder, _("<UART needs!>"));
+                    break;
+                }
+            }
+
+            if(PwmFunctionUsed() && Prog.mcu) {
+                if(Prog.mcu->pwmNeedsPin == pin) {
+                    strcpy(IO_value_holder, _("<PWM needs!>"));
+                    break;
+                }
+            }
+
+            int j;
+            for(j = 0; j < Prog.mcu->pinCount; j++) {
+                if(Prog.mcu->pinInfo[j].pin == pin) {
+                    sprintf(IO_value_holder, "%c%c%d",
+                        Prog.mcu->portPrefix,
+                        Prog.mcu->pinInfo[j].port,
+                        Prog.mcu->pinInfo[j].bit);
+                    break;
+                }
+            }
+            if(j == Prog.mcu->pinCount) {
+                sprintf(IO_value_holder, _("<not an I/O!>"));
+            }
+
+            g_value_set_string(&val, (const char*)IO_value_holder);                    
+            gtk_list_store_set_value (GTK_LIST_STORE(h->hlistFrom), h->hlistIter, LV_IO_PORT, &val);
+
+            /// case LV_IO_STATE: 
+            if(InSimulationMode) {
+                char *name = Prog.io.assignment[item].name;
+                DescribeForIoList(name, IO_value_holder);
+            } else {
+                strcpy(IO_value_holder, "");
+            }
+            
+            g_value_set_string(&val, (const char*)IO_value_holder);                    
+            gtk_list_store_set_value (GTK_LIST_STORE(h->hlistFrom), h->hlistIter, LV_IO_STATE, &val);
+            
+            break;
+        }
+        case LVN_ITEMACTIVATE: {
+            if(InSimulationMode) {
+                char *name = Prog.io.assignment[h->item.iItem].name;
+                if(name[0] == 'X') {
+                    SimulationToggleContact(name);
+                } else if(name[0] == 'A') {
+                    ShowAnalogSliderPopup(name);
+                }
+            } else {
+                // UndoRemember();
+                // ShowIoDialog(h->item.iItem);
+                // ProgramChanged();
+                // InvalidateRect(MainWindow, NULL, FALSE);
+            }
+            break;
+        }
+    }
+}

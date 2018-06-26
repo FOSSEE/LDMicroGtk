@@ -81,9 +81,10 @@ SyntaxHighlightingColours HighlightColours;
 // bottom, left, right) but we don't care; just go from the coordinates
 // computed when we drew the schematic in the paint procedure.
 //-----------------------------------------------------------------------------
-gboolean BlinkCursor(GtkWidget * window) //(HWND hwnd, UINT msg, UINT_PTR id, DWORD time)
+BOOL BlinkCursor(BOOL kill = FALSE)
 {
     // if(GetFocus(MainWindow) != !CursorDrawn) return TRUE;
+    
     if(Cursor.left == 0) return TRUE;
 
     PlcCursor c;
@@ -126,11 +127,10 @@ gboolean BlinkCursor(GtkWidget * window) //(HWND hwnd, UINT msg, UINT_PTR id, DW
     else
         PatBlt(Hcr, c.left, c.top, c.width, c.height, PATINVERT, (HBRUSH)GetStockObject(BLACK_BRUSH));
     InvalidateRect(DrawWindow, NULL, FALSE);
-    // g_print("BLINK\n");
     cairo_destroy(Hcr);
     CursorDrawn = !CursorDrawn;
 
-    return TRUE;
+    return !kill;
 }
 
 //-----------------------------------------------------------------------------
@@ -342,13 +342,11 @@ void PaintWindow(HCRDC Hcr)
 
     // BitBlt(paintDc, 0, 0, bw, bh, BackDc, ScrollXOffset, 0, SRCCOPY);
 
-    // if(InSimulationMode) {
-    //     KillTimer(MainWindow, TIMER_BLINK_CURSOR);
-    // } else {
-    //     KillTimer(MainWindow, TIMER_BLINK_CURSOR);
-    //     BlinkCursor(NULL, 0, NULL, 0);
-    //     SetTimer(MainWindow, TIMER_BLINK_CURSOR, 800, BlinkCursor);
-    // }
+    if(InSimulationMode) {
+        KillTimer(DrawWindow, TIMER_BLINK_CURSOR);
+    } else {
+        SetTimer(DrawWindow, TIMER_BLINK_CURSOR, 200, BlinkCursor);
+    }
 
     ok();
 }

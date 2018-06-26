@@ -589,7 +589,6 @@ void RefreshScrollbars(void);
 extern HINSTANCE Instance;
 extern HWID MainWindow;
 extern HWID DrawWindow;
-// extern HCRDC Hcr;
 extern PlcProgram Prog;
 extern char CurrentSaveFile[MAX_PATH];
 extern char CurrentCompileFile[MAX_PATH];
@@ -632,7 +631,7 @@ extern BOOL ThisHighlighted;
 
 // draw_outputdev.cpp
 extern void (*DrawChars)(HCRDC Hcr, int, int, const char *);
-gboolean BlinkCursor(GtkWidget * window);
+BOOL BlinkCursor(BOOL kill);
 void PaintWindow(HCRDC Hcr);
 void ExportDrawingAsText(char *file);
 void InitForDrawing(void);
@@ -794,10 +793,17 @@ void CompileSuccessfulMessage(char *str);
 extern BOOL RunningInBatchMode;
 extern HFONT MyNiceFont;
 extern HFONT MyFixedFont;
+<<<<<<< HEAD
 extern HWID OkButton;
 extern HWID CancelButton;
 extern BOOL DialogDone;
 extern BOOL DialogCancel;
+=======
+// extern HWND OkButton;
+// extern HWND CancelButton;
+// extern BOOL DialogDone;
+// extern BOOL DialogCancel;
+>>>>>>> akshay-c-GUI_port
 
 // lang.cpp
 char *_(char *in);
@@ -805,7 +811,7 @@ char *_(char *in);
 
 // simulate.cpp
 void SimulateOneCycle(BOOL forceRefresh);
-void CALLBACK PlcCycleTimer(HWND hwnd, UINT msg, UINT_PTR id, DWORD time);
+BOOL PlcCycleTimer(BOOL kill);
 void StartSimulationTimer(void);
 void ClearSimulationData(void);
 void DescribeForIoList(char *name, char *out);

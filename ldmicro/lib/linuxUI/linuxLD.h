@@ -68,14 +68,16 @@ typedef HANDLE HGDIOBJ;
 
 typedef cairo_t *HCRDC;
 typedef GtkWidget *HWID;
-typedef GtkWidget *HMENU;
 typedef GtkWindow *HWND;
-typedef GtkListStore *HLIST;
+typedef GtkTreeModel *HLIST;
+typedef GtkTreeIter ITLIST;
 typedef GtkApplication *HAPP;
 typedef GtkTreeViewColumn *HTVC;
 typedef GdkPixbuf *HICON;
 typedef GdkRectangle GDRECT;
-typedef GdkRectangle *PGDRECT;
+typedef GDRECT *PGDRECT;
+typedef HWID HMENU;
+typedef ITLIST *HITLIST;
 
 /// Check if system is x64 or x86
 #if defined(__UNIX64)
@@ -122,10 +124,6 @@ typedef class tagColorReferance: public GdkRGBA{
             return false;
     }
 
-    GdkRGBA* getThis()
-    {
-        return this;
-    }
 } COLORREF, *HBRUSH;
 
 /// Structures
@@ -144,19 +142,38 @@ typedef struct HeapRecordTag{
 } HEAPRECORD;
 
 typedef struct tagSCROLLINFO {
-  UINT cbSize;
-  UINT fMask;
-  int  nMin;
-  int  nMax;
-  UINT nPage;
-  int  nPos;
-  int  nTrackPos;
+    UINT cbSize;
+    UINT fMask;
+    int  nMin;
+    int  nMax;
+    UINT nPage;
+    int  nPos;
+    int  nTrackPos;
 } SCROLLINFO, *LPCSCROLLINFO;
 
+typedef struct {
+  UINT   mask;
+  int    iItem;
+  int    iSubItem;
+//   UINT   state;
+//   UINT   stateMask;
+  LPTSTR pszText;
+//   int    cchTextMax;
+//   int    iImage;
+//   LPARAM lParam;
+//   int    iIndent;
+//   int    iGroupId;
+//   UINT   cColumns;
+//   PUINT  puColumns;
+//   int    *piColFmt;
+//   int    iGroup;
+} LVITEM, *LPLVITEM;
+
 typedef struct tagNMHDR {
-  HWND     hwndFrom;
-  UINT_PTR idFrom;
-  UINT     code;
+    HLIST    hlistFrom;
+    HITLIST  hlistIter;   
+    UINT     code;
+    LVITEM item;
 } NMHDR;
 
 typedef struct FontTag {

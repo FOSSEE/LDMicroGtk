@@ -118,8 +118,8 @@ static void MemForPin(char *name, DWORD *addr, int *bit, BOOL asInput)
         if(strcmp(Prog.io.assignment[i].name, name)==0)
             break;
     }
-    if(i >= Prog.io.count) oops();
 
+    if(i >= Prog.io.count) oops();
     if(asInput && Prog.io.assignment[i].type == IO_TYPE_DIG_OUTPUT) oops();
     if(!asInput && Prog.io.assignment[i].type == IO_TYPE_DIG_INPUT) oops();
 

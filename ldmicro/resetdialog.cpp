@@ -24,8 +24,10 @@
 #include "linuxUI.h"
 #include <stdio.h>
 //#include <commctrl.h>
-
+#include <iostream>
 #include "ldmicro.h"
+
+using namespace std;
 
 static HWID ResetDialog;
 
@@ -91,11 +93,18 @@ void ResetDialogGetData (char* name){
     else {
         name[0] = 'C';
     }
-    strcpy (name, gtk_entry_get_text (GTK_ENTRY (NameTextbox)));
+    strcpy (name+1, gtk_entry_get_text (GTK_ENTRY (NameTextbox)));
+    gtk_widget_set_sensitive (MainWindow, TRUE);
+    DestroyWindow (ResetDialog, NULL);
+}
+
+// Mouse click callback
+void ResetDialogMouseClick (HWID widget, gpointer data){
+    ResetDialogGetData((char*)data);
 }
 
 // Checks for the required key press
-gboolean ResetDialogKeyPress (GtkWidget* widget, GdkEventKey* event, gpointer data){
+gboolean ResetDialogKeyPress (HWID widget, GdkEventKey* event, gpointer data){
     if (event -> keyval == GDK_KEY_Return){
         ResetDialogGetData((char*)data);
     }
@@ -132,10 +141,9 @@ void ShowResetDialog(char *name)
     else {
         gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (TypeCounterRadio), TRUE);
     }
-    // ************What does name+1 mean in original file??***************
-    gtk_entry_set_text (GTK_ENTRY (NameTextbox), name + 1);
+    gtk_entry_set_text (GTK_ENTRY (NameTextbox), name+1);
 
-    gtk_widget_set_sensitive (MainWindow, TRUE);
+    gtk_widget_set_sensitive (MainWindow, FALSE);
     gtk_widget_show_all (ResetDialog);
     gtk_widget_grab_focus (NameTextbox);
     
@@ -144,7 +152,7 @@ void ShowResetDialog(char *name)
     g_signal_connect (G_OBJECT (ResetDialog), "key-press-event",
                     G_CALLBACK(ResetDialogKeyPress), (gpointer)name);
     g_signal_connect (G_OBJECT (OkButton), "clicked",
-                    G_CALLBACK(ResetDialogGetData), (gpointer)name);
+                    G_CALLBACK(ResetDialogMouseClick), (gpointer)name);
     g_signal_connect (G_OBJECT (CancelButton), "clicked",
                     G_CALLBACK(ResetCallDestroyWindow), NULL);
 }

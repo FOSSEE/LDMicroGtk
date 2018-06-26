@@ -482,6 +482,7 @@ BOOL GetWindowRect(HWID hWid, PRECT pRect)
 void DestroyWindow (GtkWidget* widget, gpointer data){
     gtk_widget_destroy (widget);
 }
+
 UINT SetTimer(HWID hWid, UINT  nIDEvent, UINT uElapse, BOOL (*lpTimerFunc)(BOOL) )
 {
     auto record_it = std::find_if(timerRecords.begin(), timerRecords.end(),  [&nIDEvent](TimerRecord &Record) { return Record.ufID == nIDEvent; });

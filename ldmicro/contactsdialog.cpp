@@ -125,13 +125,20 @@ void ContactsDialogGetData (BOOL* negated, char* name){
         else {
             name[0] = 'Y';
         }
-        strcpy (name, gtk_entry_get_text (GTK_ENTRY (NameTextbox)));
+        strcpy (name+1, gtk_entry_get_text (GTK_ENTRY (NameTextbox)));
         // ******** Check this *******
         // SendMessage(NameTextbox, WM_GETTEXT, (WPARAM)16, (LPARAM)(name+1));
+    DestroyWindow (ContactsDialog, NULL);
+    gtk_widget_set_sensitive (MainWindow, TRUE);
+}
+
+// Mouse click callback
+void ContactsDialogMouseClick(HWID widget, gpointer data){
+    ContactsDialogGetData(tmpnegated, tmpname);
 }
 
 // Checks for the required key press
-gboolean ContactsDialogKeyPress (GtkWidget* widget, GdkEventKey* event, gpointer data){
+gboolean ContactsDialogKeyPress (HWID widget, GdkEventKey* event, gpointer data){
     if (event -> keyval == GDK_KEY_Return){
         ContactsDialogGetData(tmpnegated, tmpname);
     }
@@ -163,26 +170,20 @@ void ShowContactsDialog(BOOL *negated, char *name)
     MakeControls();
    
     if(name[0] == 'R') {
-        // SendMessage(SourceInternalRelayRadio, BM_SETCHECK, BST_CHECKED, 0);
         gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (SourceInternalRelayRadio), TRUE);
     }
     else if(name[0] == 'Y') {
-        // SendMessage(SourceOutputPinRadio, BM_SETCHECK, BST_CHECKED, 0);
         gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (SourceOutputPinRadio), TRUE);
     }
     else {
-        // SendMessage(SourceInputPinRadio, BM_SETCHECK, BST_CHECKED, 0);
         gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (SourceInputPinRadio), TRUE);
     }
     if(*negated) {
-        // SendMessage(NegatedCheckbox, BM_SETCHECK, BST_CHECKED, 0);
         gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (NegatedCheckbox), TRUE);
     }
-    // SendMessage(NameTextbox, WM_SETTEXT, 0, (LPARAM)(name + 1));
-    // ************What does name+1 mean in original file??***************
     gtk_entry_set_text (GTK_ENTRY (NameTextbox), name + 1);
 
-    gtk_widget_set_sensitive (MainWindow, TRUE);
+    gtk_widget_set_sensitive (MainWindow, FALSE);
     gtk_widget_show_all (ContactsDialog);
     gtk_widget_grab_focus (NameTextbox);
     tmpname = name;
@@ -193,7 +194,7 @@ void ShowContactsDialog(BOOL *negated, char *name)
     g_signal_connect (G_OBJECT (ContactsDialog), "key-press-event",
                     G_CALLBACK(ContactsDialogKeyPress), NULL);
     g_signal_connect (G_OBJECT (OkButton), "clicked",
-                    G_CALLBACK(ContactsDialogGetData), NULL);
+                    G_CALLBACK(ContactsDialogMouseClick), NULL);
     g_signal_connect (G_OBJECT (CancelButton), "clicked",
                     G_CALLBACK(ContactsCallDestroyWindow), NULL);
 

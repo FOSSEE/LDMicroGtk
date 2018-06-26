@@ -204,10 +204,13 @@ void FinishIhex(FILE *f)
 //-----------------------------------------------------------------------------
 // Create a window with a given client area.
 //-----------------------------------------------------------------------------
-HWND CreateWindowClient(DWORD exStyle, char *className, char *windowName,
-    DWORD style, int x, int y, int width, int height, HWND parent,
-    HMENU menu, HINSTANCE instance, void *param)
+HWID CreateWindowClient(GtkWindowType wType, char *windowName,
+    int x, int y, int width, int height, HWND parent)
 {
+    HWID h = gtk_window_new(wType);
+    gtk_window_set_title(GTK_WINDOW(h),  windowName);
+    gtk_window_resize (GTK_WINDOW(h), width, height);
+    gtk_window_move(GTK_WINDOW(h), x, y);
     // HWND h = CreateWindowEx(exStyle, className, windowName, style, x, y,
     //     width, height, parent, menu, instance, param);
 
@@ -218,7 +221,7 @@ HWND CreateWindowClient(DWORD exStyle, char *className, char *windowName,
     
     // SetWindowPos(h, HWND_TOP, x, y, width, height, 0);
 
-    return NULL;
+    return h;
 }
 
 //-----------------------------------------------------------------------------
@@ -263,7 +266,7 @@ static LRESULT CALLBACK DialogProc(HWND hwnd, UINT msg, WPARAM wParam,
 //-----------------------------------------------------------------------------
 void NiceFont(HWID h)
 {
-    // gtk_widget_override_font(GTK_WIDGET(h), pango_font_description_from_string("Times New Roman"));
+    gtk_widget_override_font(GTK_WIDGET(h), pango_font_description_from_string(MyNiceFont->lpszFace));
 //    SendMessage(h, WM_SETFONT, (WPARAM)MyNiceFont, TRUE);
 }
 
@@ -300,15 +303,13 @@ void MakeDialogBoxClass(void)
 
     // RegisterClassEx(&wc);
 
-    // MyNiceFont = CreateFont(16, 0, 0, 0, FW_REGULAR, FALSE, FALSE, FALSE,
-    //     ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
-    //     FF_DONTCARE, "Tahoma");
+    MyNiceFont = CreateFont(16, 0, 0, FW_REGULAR, FALSE, "Tahoma");
+
     // if(!MyNiceFont)
     //     MyNiceFont = (HFONT)GetStockObject(SYSTEM_FONT);
 
-    // MyFixedFont = CreateFont(14, 0, 0, 0, FW_REGULAR, FALSE, FALSE, FALSE,
-    //     ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
-    //     FF_DONTCARE, "Lucida Console");
+    MyFixedFont = CreateFont(14, 0, 0, FW_REGULAR, FALSE, "Lucida Console");
+
     // if(!MyFixedFont)
     //     MyFixedFont = (HFONT)GetStockObject(SYSTEM_FONT);
 }

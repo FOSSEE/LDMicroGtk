@@ -89,8 +89,8 @@ static int IntPc;
 
 // A window to allow simulation with the UART stuff (insert keystrokes into
 // the program, view the output, like a terminal window).
-static HWND UartSimulationWindow;
-static HWND UartSimulationTextControl;
+static HWID UartSimulationWindow;
+static HWID UartSimulationTextControl;
 static LONG_PTR PrevTextProc;
 
 static int QueuedUartCharacter = -1;
@@ -837,17 +837,53 @@ void SimulationToggleContact(char *name)
 //-----------------------------------------------------------------------------
 // Intercept WM_CHAR messages that to the terminal simulation window so that
 // we can redirect them to the PLC program.
+//
+// Ported: Read and write text fron the text view widget.
 //-----------------------------------------------------------------------------
-// static LRESULT CALLBACK UartSimulationTextProc(HWND hwnd, UINT msg, 
-//     WPARAM wParam, LPARAM lParam)
-// {
-//     if(msg == WM_CHAR) {
-//         QueuedUartCharacter = (BYTE)wParam;
-//         return 0;
-//     }
+static void UartSimulationTextProc(HWID hwid, UINT umsg, char *text, UINT uszbuf)
+{
+    switch(umsg)
+    {
+        case WM_SETTEXT:
+        {
+            GtkTextBuffer *buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW(hwid));
+            gtk_text_buffer_set_text (buffer, text, -1);
+            gtk_text_view_set_buffer (GTK_TEXT_VIEW(hwid), buffer);
+            
+            GtkTextIter end;
+            gtk_text_buffer_get_end_iter (buffer, &end);
+            gtk_text_view_scroll_to_iter (GTK_TEXT_VIEW(hwid), &end, 0.2, FALSE, 1, 1);
+            break;
+        }
+        case WM_SETTEXT_END:
+        {
+            GtkTextBuffer *buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW(hwid));
+            gtk_text_buffer_insert_at_cursor (buffer, text, -1);
+            gtk_text_view_set_buffer (GTK_TEXT_VIEW(hwid), buffer);
 
-//     return CallWindowProc((WNDPROC)PrevTextProc, hwnd, msg, wParam, lParam);
-// }
+            GtkTextIter end;
+            gtk_text_buffer_get_end_iter (buffer, &end);
+            gtk_text_view_scroll_to_iter (GTK_TEXT_VIEW(hwid), &end, 0.2, FALSE, 1, 1);
+            break;
+        }
+        case WM_GETTEXT:
+        {
+            GtkTextBuffer *buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW(hwid));
+            GtkTextIter start, end;
+            gtk_text_buffer_get_start_iter (buffer, &start);
+            gtk_text_buffer_get_end_iter (buffer, &end);
+
+            char *txtBuf = gtk_text_buffer_get_text (buffer, &start, &end, FALSE);
+
+            strcpy(text, txtBuf);
+            strcat(text, "\0");
+            g_free(txtBuf);
+            break;
+        }
+        default:
+            break;
+    }
+}
 
 //-----------------------------------------------------------------------------
 // Pop up the UART simulation window; like a terminal window where the
@@ -856,61 +892,41 @@ void SimulationToggleContact(char *name)
 //-----------------------------------------------------------------------------
 void ShowUartSimulationWindow(void)
 {
-//     WNDCLASSEX wc;
-//     memset(&wc, 0, sizeof(wc));
-//     wc.cbSize = sizeof(wc);
+    DWORD TerminalX = 200, TerminalY = 200, TerminalW = 300, TerminalH = 150;
 
-//     wc.style            = CS_BYTEALIGNCLIENT | CS_BYTEALIGNWINDOW | CS_OWNDC |
-//                             CS_DBLCLKS;
-//     wc.lpfnWndProc      = (WNDPROC)UartSimulationProc;
-//     wc.hInstance        = Instance;
-//     wc.hbrBackground    = (HBRUSH)COLOR_BTNSHADOW;
-//     wc.lpszClassName    = "LDmicroUartSimulationWindow";
-//     wc.lpszMenuName     = NULL;
-//     wc.hCursor          = LoadCursor(NULL, IDC_ARROW);
+    ThawDWORD(TerminalX);
+    ThawDWORD(TerminalY);
+    ThawDWORD(TerminalW);
+    ThawDWORD(TerminalH);
 
-//     RegisterClassEx(&wc);
+    if(TerminalW > 800) TerminalW = 100;
+    if(TerminalH > 800) TerminalH = 100;
 
-//     DWORD TerminalX = 200, TerminalY = 200, TerminalW = 300, TerminalH = 150;
+    UartSimulationWindow = CreateWindowClient(GTK_WINDOW_TOPLEVEL, "UART Simulation (Terminal)", 
+        TerminalX, TerminalY, TerminalW, TerminalH, NULL);
+    /// remove close button
+    gtk_window_set_deletable (GTK_WINDOW(UartSimulationWindow), FALSE);
 
-//     ThawDWORD(TerminalX);
-//     ThawDWORD(TerminalY);
-//     ThawDWORD(TerminalW);
-//     ThawDWORD(TerminalH);
+    UartSimulationTextControl = gtk_text_view_new();
 
-//     if(TerminalW > 800) TerminalW = 100;
-//     if(TerminalH > 800) TerminalH = 100;
+    gtk_widget_override_font(GTK_WIDGET(UartSimulationTextControl), pango_font_description_from_string("Lucida Console"));
 
-//     RECT r;
-//     GetClientRect(GetDesktopWindow(), &r);
-//     if(TerminalX >= (DWORD)(r.right - 10)) TerminalX = 100;
-//     if(TerminalY >= (DWORD)(r.bottom - 10)) TerminalY = 100;
+    /// Add text view into a scrolled window to enable scrolling functionality
+    HWID TextViewScroll = gtk_scrolled_window_new (NULL, NULL);
+    gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (TextViewScroll),
+				                          GTK_POLICY_AUTOMATIC, 
+				                          GTK_POLICY_AUTOMATIC);
+    gtk_widget_set_hexpand(GTK_WIDGET(TextViewScroll), TRUE);  
+    gtk_widget_set_vexpand(GTK_WIDGET(TextViewScroll), TRUE);
 
-//     UartSimulationWindow = CreateWindowClient(WS_EX_TOOLWINDOW |
-//         WS_EX_APPWINDOW, "LDmicroUartSimulationWindow",
-//         "UART Simulation (Terminal)", WS_VISIBLE | WS_SIZEBOX,
-//         TerminalX, TerminalY, TerminalW, TerminalH,
-//         NULL, NULL, Instance, NULL);
+    gtk_container_add (GTK_CONTAINER(TextViewScroll), UartSimulationTextControl);
+    gtk_container_add (GTK_CONTAINER(UartSimulationWindow), TextViewScroll);
 
-//     UartSimulationTextControl = CreateWindowEx(0, WC_EDIT, "", WS_CHILD |
-//         WS_CLIPSIBLINGS | WS_VISIBLE | ES_AUTOVSCROLL | ES_MULTILINE |
-//         WS_VSCROLL, 0, 0, TerminalW, TerminalH, UartSimulationWindow, NULL,
-//         Instance, NULL);
-
-//     HFONT fixedFont = CreateFont(14, 0, 0, 0, FW_REGULAR, FALSE, FALSE, FALSE,
-//         ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
-//         FF_DONTCARE, "Lucida Console");
-//     if(!fixedFont)
-//         fixedFont = (HFONT)GetStockObject(SYSTEM_FONT);
-
-//     SendMessage((HWND)UartSimulationTextControl, WM_SETFONT, (WPARAM)fixedFont,
-//         TRUE);
-
-//     PrevTextProc = SetWindowLongPtr(UartSimulationTextControl,
-//         GWLP_WNDPROC, (LONG_PTR)UartSimulationTextProc);
-
-//     ShowWindow(UartSimulationWindow, TRUE);
-//     SetFocus(MainWindow);
+    gtk_widget_show_all(UartSimulationWindow);
+    
+    gtk_window_set_keep_above (GTK_WINDOW(MainWindow), TRUE);
+    gtk_window_set_focus_visible (GTK_WINDOW(MainWindow), TRUE);   
+    gtk_window_set_keep_above (GTK_WINDOW(MainWindow), FALSE);
 }
 
 //-----------------------------------------------------------------------------
@@ -918,29 +934,29 @@ void ShowUartSimulationWindow(void)
 //-----------------------------------------------------------------------------
 void DestroyUartSimulationWindow(void)
 {
-//     // Try not to destroy the window if it is already destroyed; that is
-//     // not for the sake of the window, but so that we don't trash the
-//     // stored position.
-//     if(UartSimulationWindow == NULL) return;
+    // Try not to destroy the window if it is already destroyed; that is
+    // not for the sake of the window, but so that we don't trash the
+    // stored position.
+    if(UartSimulationWindow == NULL) return;
 
-//     DWORD TerminalX, TerminalY, TerminalW, TerminalH;
-//     RECT r;
+    DWORD TerminalX, TerminalY, TerminalW, TerminalH;
+    RECT r;
 
-//     GetClientRect(UartSimulationWindow, &r);
-//     TerminalW = r.right - r.left;
-//     TerminalH = r.bottom - r.top;
+    GetClientRect(UartSimulationWindow, &r);
+    TerminalW = r.right - r.left;
+    TerminalH = r.bottom - r.top;
 
-//     GetWindowRect(UartSimulationWindow, &r);
-//     TerminalX = r.left;
-//     TerminalY = r.top;
+    GetWindowRect(UartSimulationWindow, &r);
+    TerminalX = r.left;
+    TerminalY = r.top;
 
-//     FreezeDWORD(TerminalX);
-//     FreezeDWORD(TerminalY);
-//     FreezeDWORD(TerminalW);
-//     FreezeDWORD(TerminalH);
+    FreezeDWORD(TerminalX);
+    FreezeDWORD(TerminalY);
+    FreezeDWORD(TerminalW);
+    FreezeDWORD(TerminalH);
 
-//     DestroyWindow(UartSimulationWindow);
-//     UartSimulationWindow = NULL;
+    DestroyWindow(UartSimulationWindow);
+    UartSimulationWindow = NULL;
 }
 
 //-----------------------------------------------------------------------------
@@ -948,29 +964,27 @@ void DestroyUartSimulationWindow(void)
 //-----------------------------------------------------------------------------
 static void AppendToUartSimulationTextControl(BYTE b)
 {
-//     char append[5];
+    char append[5];
 
-//     if((isalnum(b) || strchr("[]{};':\",.<>/?`~ !@#$%^&*()-=_+|", b) ||
-//         b == '\r' || b == '\n') && b != '\0')
-//     {
-//         append[0] = b;
-//         append[1] = '\0';
-//     } else {
-//         sprintf(append, "\\x%02x", b);
-//     }
+    if((isalnum(b) || strchr("[]{};':\",.<>/?`~ !@#$%^&*()-=_+|", b) ||
+        b == '\r' || b == '\n') && b != '\0')
+    {
+        append[0] = b;
+        append[1] = '\0';
+    } else {
+        sprintf(append, "\\x%02x", b);
+    }
 
-// #define MAX_SCROLLBACK 256
-//     char buf[MAX_SCROLLBACK];
+#define MAX_SCROLLBACK 256
+    char buf[MAX_SCROLLBACK];
 
-//     SendMessage(UartSimulationTextControl, WM_GETTEXT, (WPARAM)sizeof(buf),
-//         (LPARAM)buf);
+    UartSimulationTextProc(UartSimulationTextControl, WM_GETTEXT, buf, strlen(buf));
 
-//     int overBy = (strlen(buf) + strlen(append) + 1) - sizeof(buf);
-//     if(overBy > 0) {
-//         memmove(buf, buf + overBy, strlen(buf));
-//     }
-//     strcat(buf, append);
+    int overBy = (strlen(buf) + strlen(append) + 1) - sizeof(buf);
+    if(overBy > 0) {
+        memmove(buf, buf + overBy, strlen(buf));
+    }
+    strcat(buf, append);
 
-//     SendMessage(UartSimulationTextControl, WM_SETTEXT, 0, (LPARAM)buf);
-//     SendMessage(UartSimulationTextControl, EM_LINESCROLL, 0, (LPARAM)INT_MAX);
+    UartSimulationTextProc(UartSimulationTextControl, WM_SETTEXT, buf, strlen(buf));
 }

@@ -47,6 +47,7 @@ static BOOL DialogDone;
 static BOOL DialogCancel;
 
 static HWID IoDialog;
+static HWID textLabel;
 
 static HWID PinList;
 static HWID OkButton;
@@ -402,19 +403,16 @@ static gboolean AnalogSliderDialogKeyboardProc(GtkWidget* widget, GdkEventKey* e
     SetAdcShadow((char*)name, v);
     if (AnalogSliderDone == TRUE || AnalogSliderCancel == TRUE)
     {
-        gtk_widget_destroy (AnalogSliderTrackbar);
-        gtk_widget_destroy (AnalogSliderMain);
+        DestroyWindow (AnalogSliderMain);
         return FALSE;
     }
 
     if (event->keyval == GDK_KEY_Return){
-        gtk_widget_destroy (AnalogSliderTrackbar);
-        gtk_widget_destroy (AnalogSliderMain);
+        DestroyWindow (AnalogSliderMain);
         AnalogSliderDone = TRUE;
     }
     else if (event->keyval == GDK_KEY_Escape){
-        gtk_widget_destroy (AnalogSliderTrackbar);
-        gtk_widget_destroy (AnalogSliderMain);
+        DestroyWindow (AnalogSliderMain);
         AnalogSliderDone = TRUE;
         AnalogSliderCancel = TRUE;
     }
@@ -428,8 +426,7 @@ static gboolean AnalogSliderDialogMouseProc(GtkWidget *widget, GdkEventButton *e
     SWORD v = (SWORD)gtk_range_get_value(GTK_RANGE(AnalogSliderTrackbar));
     SetAdcShadow((char*)name, v);
     if (event->button == 1 && event->type == GDK_BUTTON_RELEASE){
-        gtk_widget_destroy (AnalogSliderTrackbar);
-        gtk_widget_destroy (AnalogSliderMain);
+        DestroyWindow (AnalogSliderMain);
         AnalogSliderDone = TRUE;
     }
 
@@ -465,22 +462,13 @@ void ShowAnalogSliderPopup(char *name)
         return;
     }
 
-    int x, y;
-    // gtk_window_get_position(GTK_WINDOW(view), &x, &y);
-    // gint wx, wy;
-    gdk_window_get_origin (gtk_widget_get_window (view), &x, &y);
-
     int left = GLOBAL_mouse_last_clicked_x - 10;
     // try to put the slider directly under the cursor (though later we might
     // realize that that would put the popup off the screen)
     int top = GLOBAL_mouse_last_clicked_y - (15 + (73*currentVal)/maxVal);
 
-    // RECT r;
-    // SystemParametersInfo(SPI_GETWORKAREA, 0, &r, 0);
-
-    // if(top + 110 >= r.bottom) {
-    //     top = r.bottom - 110;
-    // }
+    int x, y;
+    gdk_window_get_origin (gtk_widget_get_window (view), &x, &y);
 
     if(top < 0) top = y + 10;
     if(left < 0) left = x + 20;
@@ -489,7 +477,7 @@ void ShowAnalogSliderPopup(char *name)
         return;
     
     AnalogSliderMain = gtk_window_new(GTK_WINDOW_POPUP);
-    gtk_window_set_title(GTK_WINDOW(AnalogSliderMain),  "I/O Pin");
+    gtk_window_set_title(GTK_WINDOW(AnalogSliderMain),  _("I/O Pin"));
     gtk_window_resize (GTK_WINDOW(AnalogSliderMain), 30, 100);
     gtk_window_move(GTK_WINDOW(AnalogSliderMain), left, top);
 
@@ -534,9 +522,7 @@ void ShowAnalogSliderPopup(char *name)
 
     AnalogSliderDone = FALSE;
     AnalogSliderCancel = FALSE;
-
-    // SWORD orig = GetAdcShadow(name);
-    
+  
     // ListView_RedrawItems(IoList, 0, Prog.io.count - 1);
 }
 
@@ -600,10 +586,11 @@ static BOOL MakeWindowClass()
 
 static void MakeControls(void)
 {
+    // textLabel = gtk_text_view_new ();
 //     HWND textLabel = CreateWindowEx(0, WC_STATIC, _("Assign:"),
 //         WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE,
 //         6, 1, 80, 17, IoDialog, NULL, Instance, NULL);
-//     NiceFont(textLabel);
+    // NiceFont(textLabel);
 
 //     PinList = CreateWindowEx(WS_EX_CLIENTEDGE, WC_LISTBOX, "",
 //         WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE | WS_VSCROLL |
@@ -623,59 +610,60 @@ static void MakeControls(void)
 
 void ShowIoDialog(int item)
 {
-//     if(!Prog.mcu) {
-//         MessageBox(MainWindow,
-//             _("No microcontroller has been selected. You must select a "
-//             "microcontroller before you can assign I/O pins.\r\n\r\n"
-//             "Select a microcontroller under the Settings menu and try "
-//             "again."), _("I/O Pin Assignment"), MB_OK | MB_ICONWARNING);
-//         return;
-//     }
+    if(!Prog.mcu) {
+        MessageBox(MainWindow,
+            _("No microcontroller has been selected. You must select a "
+            "microcontroller before you can assign I/O pins.\r\n\r\n"
+            "Select a microcontroller under the Settings menu and try "
+            "again."), _("I/O Pin Assignment"), MB_OK | MB_ICONWARNING);
+        return;
+    }
 
-//     if(Prog.mcu->whichIsa == ISA_ANSIC) {
-//         Error(_("Can't specify I/O assignment for ANSI C target; compile and "
-//             "see comments in generated source code."));
-//         return;
-//     }
+    if(Prog.mcu->whichIsa == ISA_ANSIC) {
+        Error(_("Can't specify I/O assignment for ANSI C target; compile and "
+            "see comments in generated source code."));
+        return;
+    }
 
-//     if(Prog.mcu->whichIsa == ISA_INTERPRETED) {
-//         Error(_("Can't specify I/O assignment for interpretable target; see "
-//             "comments in reference implementation of interpreter."));
-//         return;
-//     }
+    if(Prog.mcu->whichIsa == ISA_INTERPRETED) {
+        Error(_("Can't specify I/O assignment for interpretable target; see "
+            "comments in reference implementation of interpreter."));
+        return;
+    }
 
-//     if(Prog.io.assignment[item].name[0] != 'X' && 
-//        Prog.io.assignment[item].name[0] != 'Y' &&
-//        Prog.io.assignment[item].name[0] != 'A')
-//     {
-//         Error(_("Can only assign pin number to input/output pins (Xname or "
-//             "Yname or Aname)."));
-//         return;
-//     }
+    if(Prog.io.assignment[item].name[0] != 'X' && 
+       Prog.io.assignment[item].name[0] != 'Y' &&
+       Prog.io.assignment[item].name[0] != 'A')
+    {
+        Error(_("Can only assign pin number to input/output pins (Xname or "
+            "Yname or Aname)."));
+        return;
+    }
 
-//     if(Prog.io.assignment[item].name[0] == 'A' && Prog.mcu->adcCount == 0) {
-//         Error(_("No ADC or ADC not supported for this micro."));
-//         return;
-//     }
+    if(Prog.io.assignment[item].name[0] == 'A' && Prog.mcu->adcCount == 0) {
+        Error(_("No ADC or ADC not supported for this micro."));
+        return;
+    }
 
-//     if(strcmp(Prog.io.assignment[item].name+1, "new")==0) {
-//         Error(_("Rename I/O from default name ('%s') before assigning "
-//             "MCU pin."), Prog.io.assignment[item].name);
-//         return;
-//     }
+    if(strcmp(Prog.io.assignment[item].name+1, "new")==0) {
+        Error(_("Rename I/O from default name ('%s') before assigning "
+            "MCU pin."), Prog.io.assignment[item].name);
+        return;
+    }
 
-//     MakeWindowClass();
+    // MakeWindowClass();
 
-//     // We need the TOOLWINDOW style, or else the window will be forced to
-//     // a minimum width greater than our current width. And without the
-//     // APPWINDOW style, it becomes impossible to get the window back (by
-//     // Alt+Tab or taskbar).
-//     IoDialog = CreateWindowClient(WS_EX_TOOLWINDOW | WS_EX_APPWINDOW,
-//         "LDmicroIo", _("I/O Pin"),
-//         WS_OVERLAPPED | WS_SYSMENU,
-//         100, 100, 107, 387, NULL, NULL, Instance, NULL);
+    // We need the TOOLWINDOW style, or else the window will be forced to
+    // a minimum width greater than our current width. And without the
+    // APPWINDOW style, it becomes impossible to get the window back (by
+    // Alt+Tab or taskbar).
+    
+    // IoDialog = CreateWindowClient(WS_EX_TOOLWINDOW | WS_EX_APPWINDOW,
+    //     "LDmicroIo", _("I/O Pin"),
+    //     WS_OVERLAPPED | WS_SYSMENU,
+    //     100, 100, 107, 387, NULL, NULL, Instance, NULL);
 
-//     MakeControls();
+    // MakeControls();
 
 //     SendMessage(PinList, LB_ADDSTRING, 0, (LPARAM)_("(no pin)"));
 //     int i;
@@ -728,7 +716,8 @@ void ShowIoDialog(int item)
 //     }
 
 //     EnableWindow(MainWindow, FALSE);
-//     ShowWindow(IoDialog, TRUE);
+    // ShowWindow(IoDialog, TRUE);
+    // gtk_widget_show_all(IoDialog);
 //     SetFocus(PinList);
 
 //     MSG msg;
@@ -909,10 +898,10 @@ void IoListProc(NMHDR *h)
                     ShowAnalogSliderPopup(name);
                 }
             } else {
-                // UndoRemember();
-                // ShowIoDialog(h->item.iItem);
-                // ProgramChanged();
-                // InvalidateRect(MainWindow, NULL, FALSE);
+                UndoRemember();
+                ShowIoDialog(h->item.iItem);
+                ProgramChanged();
+                InvalidateRect(MainWindow, NULL, FALSE);
             }
             break;
         }

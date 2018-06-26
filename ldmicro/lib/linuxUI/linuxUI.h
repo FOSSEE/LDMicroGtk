@@ -43,6 +43,11 @@
 #define SB_THUMBTRACK    0x00000040 
 #define SB_THUMBPOSITION 0x00000080 
 
+/// UART terminal flags
+#define WM_GETTEXT     0x00000001
+#define WM_SETTEXT     0x00000002
+#define WM_SETTEXT_END 0x00000004
+
 /// List view flags
 #define LVN_ITEMACTIVATE 0x00000001
 #define LVN_GETDISPINFO  0x00000002
@@ -218,5 +223,7 @@ UINT SetTimer(
 BOOL KillTimer(
     HWID hWid,
     UINT uIDEvent);
+
+void DestroyWindow (HWID widget);
 
 #endif

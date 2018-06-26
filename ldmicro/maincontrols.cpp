@@ -940,9 +940,9 @@ void ToggleSimulationMode(void)
 
         CheckMenuItem(SimulateMenu, SimulationModeMenu, MF_UNCHECKED);
 
-        // if(UartFunctionUsed()) {
-        //     DestroyUartSimulationWindow();
-        // }
+        if(UartFunctionUsed()) {
+            DestroyUartSimulationWindow();
+        }
         }
 
     UpdateMainWindowTitleBar();
@@ -1159,6 +1159,6 @@ void StopSimulation(void)
     EnableMenuItem(SimulateMenu, StartSimulationMenu, MF_ENABLED);
     EnableMenuItem(SimulateMenu, StopSimulationMenu, MF_GRAYED);
     KillTimer(MainWindow, TIMER_SIMULATE);
-
+    
     UpdateMainWindowTitleBar();
 }

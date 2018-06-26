@@ -138,11 +138,6 @@ static void MakeControls(void)
 //         (LONG_PTR)MyNumberProc);
 }
 
-void DestroyWindow (GtkWidget* widget, gpointer data){
-    gtk_widget_destroy (ConfDialog);
-    gtk_widget_set_sensitive (MainWindow, TRUE);
-}
-
 //-----------------------------------------------------------------------------
 // Don't allow any characters other than 0-9. in the text boxes.
 //-----------------------------------------------------------------------------
@@ -173,7 +168,7 @@ void GetData (GtkWidget* widget, gpointer data){
 
     buf = const_cast <char*> (gtk_entry_get_text (GTK_ENTRY(BaudTextbox)));
     Prog.baudRate = atoi(buf);        
-    DestroyWindow (ConfDialog, NULL);
+    DestroyWindow (ConfDialog);
 }
 
 // Checks for the required key press
@@ -182,7 +177,7 @@ gboolean KeyPress (GtkWidget* widget, GdkEventKey* event, gpointer data){
         GetData(NULL, NULL);
     }
     else if (event -> keyval == GDK_KEY_Escape){
-        DestroyWindow (ConfDialog, NULL);
+        DestroyWindow (ConfDialog);
     }
     return FALSE;
 }

@@ -36,15 +36,15 @@ static HWID ConfDialog;
 static HWID CrystalTextbox;
 static HWID CycleTextbox;
 static HWID BaudTextbox;
-static HWID ButtonOk;
-static HWID ButtonCancel;
+// static HWID ButtonOk;
+// static HWID ButtonCancel;
 
 static LONG_PTR PrevCrystalProc;
 static LONG_PTR PrevCycleProc;
 static LONG_PTR PrevBaudProc;
 
-HWID Grid;
-HWID PackingBox;
+HWID ConfGrid;
+HWID ConfPackingBox;
 
 static void MakeControls(void)
 {      
@@ -74,8 +74,8 @@ static void MakeControls(void)
         gtk_widget_set_sensitive (textLabel2, FALSE);
     }
 
-    ButtonOk = gtk_button_new_with_label ("OK");
-    ButtonCancel = gtk_button_new_with_label ("Cancel");
+    OkButton = gtk_button_new_with_label ("OK");
+    CancelButton = gtk_button_new_with_label ("Cancel");
 
     char explanation[1024] = "";
 
@@ -111,22 +111,22 @@ static void MakeControls(void)
     HWID textLabel4 = gtk_label_new (explanation);
 
     // Creating required containers for packing
-    Grid = gtk_grid_new();
-    PackingBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    ConfGrid = gtk_grid_new();
+    ConfPackingBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
-    gtk_grid_attach (GTK_GRID (Grid), textLabel, 1, 2, 1, 1);
-    gtk_grid_attach (GTK_GRID (Grid), CycleTextbox, 3, 2, 1, 1);
-    gtk_grid_attach (GTK_GRID (Grid), ButtonOk, 6, 2, 2, 1);
-    gtk_grid_attach (GTK_GRID (Grid), textLabel2, 1, 4, 1, 1);
-    gtk_grid_attach (GTK_GRID (Grid), CrystalTextbox, 3, 4, 1, 1);
-    gtk_grid_attach (GTK_GRID (Grid), ButtonCancel, 6, 4, 2, 1);
-    gtk_grid_attach (GTK_GRID (Grid), textLabel3, 1, 6, 1, 1);
-    gtk_grid_attach (GTK_GRID (Grid), BaudTextbox, 3, 6, 1, 1);
+    gtk_grid_attach (GTK_GRID (ConfGrid), textLabel, 1, 2, 1, 1);
+    gtk_grid_attach (GTK_GRID (ConfGrid), CycleTextbox, 3, 2, 1, 1);
+    gtk_grid_attach (GTK_GRID (ConfGrid), OkButton, 6, 2, 2, 1);
+    gtk_grid_attach (GTK_GRID (ConfGrid), textLabel2, 1, 4, 1, 1);
+    gtk_grid_attach (GTK_GRID (ConfGrid), CrystalTextbox, 3, 4, 1, 1);
+    gtk_grid_attach (GTK_GRID (ConfGrid), CancelButton, 6, 4, 2, 1);
+    gtk_grid_attach (GTK_GRID (ConfGrid), textLabel3, 1, 6, 1, 1);
+    gtk_grid_attach (GTK_GRID (ConfGrid), BaudTextbox, 3, 6, 1, 1);
     
-    gtk_grid_set_column_spacing (GTK_GRID (Grid), 2);
+    gtk_grid_set_column_spacing (GTK_GRID (ConfGrid), 2);
 
-    gtk_box_pack_start(GTK_BOX(PackingBox), Grid, TRUE, TRUE, 0);
-    gtk_box_pack_start(GTK_BOX(PackingBox), textLabel4, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(ConfPackingBox), ConfGrid, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(ConfPackingBox), textLabel4, TRUE, TRUE, 0);
 
 //     PrevCycleProc = SetWindowLongPtr(CycleTextbox, GWLP_WNDPROC, 
 //         (LONG_PTR)MyNumberProc);
@@ -138,17 +138,13 @@ static void MakeControls(void)
 //         (LONG_PTR)MyNumberProc);
 }
 
-void DestroyWindow (GtkWidget* widget, gpointer data){
-    gtk_widget_destroy (ConfDialog);
-    gtk_widget_set_sensitive (MainWindow, TRUE);
-}
-
 //-----------------------------------------------------------------------------
 // Don't allow any characters other than 0-9. in the text boxes.
 //-----------------------------------------------------------------------------
 
-void MyNumberProc (GtkEditable *editable, gchar *NewText, gint length, 
+void ConfDialogMyNumberProc (GtkEditable *editable, gchar *NewText, gint length, 
     gint *position, gpointer data){
+    gtk_widget_set_sensitive (MainWindow, TRUE);
     for (int i = 0; i < length; i++){
         if (!(isdigit (NewText[i]) || NewText[i] == '.' || NewText[i] == '\b')){
             g_signal_stop_emission_by_name (G_OBJECT (editable), "insert-text");
@@ -158,7 +154,7 @@ void MyNumberProc (GtkEditable *editable, gchar *NewText, gint length,
 }
 
 // Gets data from the text boxes
-void GetData (GtkWidget* widget, gpointer data){
+void ConfDialogGetData (GtkWidget* widget, gpointer data){
     char* buf;
         
     buf = const_cast <char*> (gtk_entry_get_text (GTK_ENTRY (CycleTextbox)));
@@ -174,33 +170,40 @@ void GetData (GtkWidget* widget, gpointer data){
     buf = const_cast <char*> (gtk_entry_get_text (GTK_ENTRY(BaudTextbox)));
     Prog.baudRate = atoi(buf);        
     DestroyWindow (ConfDialog, NULL);
+    gtk_widget_set_sensitive (MainWindow, TRUE);
 }
 
 // Checks for the required key press
-gboolean KeyPress (GtkWidget* widget, GdkEventKey* event, gpointer data){
+gboolean ConfDialogKeyPress (GtkWidget* widget, GdkEventKey* event, gpointer data){
     if (event -> keyval == GDK_KEY_Return){
-        GetData(NULL, NULL);
+        ConfDialogGetData(NULL, NULL);
     }
     else if (event -> keyval == GDK_KEY_Escape){
         DestroyWindow (ConfDialog, NULL);
+        gtk_widget_set_sensitive (MainWindow, TRUE);
     }
     return FALSE;
 }
 
+void ConfCallDestroyWindow (HWID widget, gpointer data){
+    DestroyWindow (ConfDialog, NULL);
+    gtk_widget_set_sensitive (MainWindow, TRUE);
+}
+
 // Consists of all the signal calls
-void SignalCall () {
+void ConfDialogSignalCall () {
     g_signal_connect (G_OBJECT(CycleTextbox), "insert-text",
-		     G_CALLBACK(MyNumberProc), NULL);
+		     G_CALLBACK(ConfDialogMyNumberProc), NULL);
     g_signal_connect (G_OBJECT(CrystalTextbox), "insert-text",
-		     G_CALLBACK(MyNumberProc), NULL);
+		     G_CALLBACK(ConfDialogMyNumberProc), NULL);
     g_signal_connect (G_OBJECT(BaudTextbox), "insert-text",
-		     G_CALLBACK(MyNumberProc), NULL);
+		     G_CALLBACK(ConfDialogMyNumberProc), NULL);
     g_signal_connect (G_OBJECT (ConfDialog), "key-press-event",
-                    G_CALLBACK(KeyPress), NULL);
-    g_signal_connect (G_OBJECT (ButtonOk), "clicked",
-                    G_CALLBACK(GetData), NULL);
-    g_signal_connect (G_OBJECT (ButtonCancel), "clicked",
-                    G_CALLBACK(DestroyWindow), NULL);
+                    G_CALLBACK(ConfDialogKeyPress), NULL);
+    g_signal_connect (G_OBJECT (OkButton), "clicked",
+                    G_CALLBACK(ConfDialogGetData), NULL);
+    g_signal_connect (G_OBJECT (CancelButton), "clicked",
+                    G_CALLBACK(ConfCallDestroyWindow), NULL);
 }
 
 void ShowConfDialog(void)
@@ -213,7 +216,7 @@ void ShowConfDialog(void)
     gtk_window_set_title(GTK_WINDOW(ConfDialog), "PLC Configuration");
     gtk_window_set_default_size(GTK_WINDOW(ConfDialog), 200, 250);
     gtk_window_set_resizable (GTK_WINDOW (ConfDialog), FALSE);
-    gtk_container_add(GTK_CONTAINER(ConfDialog), PackingBox);
+    gtk_container_add(GTK_CONTAINER(ConfDialog), ConfPackingBox);
     gtk_widget_add_events (ConfDialog, GDK_KEY_PRESS_MASK);
     gtk_widget_add_events (ConfDialog, GDK_BUTTON_PRESS_MASK);
 
@@ -228,12 +231,12 @@ void ShowConfDialog(void)
     gtk_entry_set_text (GTK_ENTRY (BaudTextbox), buf);
 
     gtk_widget_set_sensitive (MainWindow, FALSE);
-    gtk_widget_grab_focus (ButtonOk);
+    gtk_widget_grab_focus (OkButton);
     gtk_widget_set_state_flags (CycleTextbox, GTK_STATE_FLAG_FOCUSED, TRUE);
     gtk_widget_grab_focus (CycleTextbox);
     gtk_widget_show_all (ConfDialog);
 
-    SignalCall();
+    ConfDialogSignalCall();
 
     return;
 }

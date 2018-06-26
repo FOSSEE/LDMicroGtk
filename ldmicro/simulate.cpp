@@ -281,12 +281,12 @@ static char *MarkUsedVariable(char *name, DWORD flag);
 //     return NULL;
 // }
 
-//-----------------------------------------------------------------------------
-// Check for duplicate uses of a single variable. For example, there should
-// not be two TONs with the same name. On the other hand, it would be okay
-// to have an RTO with the same name as its reset; in fact, verify that
-// there must be a reset for each RTO.
-//-----------------------------------------------------------------------------
+// //-----------------------------------------------------------------------------
+// // Check for duplicate uses of a single variable. For example, there should
+// // not be two TONs with the same name. On the other hand, it would be okay
+// // to have an RTO with the same name as its reset; in fact, verify that
+// // there must be a reset for each RTO.
+// //-----------------------------------------------------------------------------
 // static void MarkWithCheck(char *name, int flag)
 // {
 //     char *s = MarkUsedVariable(name, flag);
@@ -303,23 +303,23 @@ static char *MarkUsedVariable(char *name, DWORD flag);
 
 //     switch(which) {
 //         case ELEM_SERIES_SUBCKT: {
-//             int i;
-//             ElemSubcktSeries *s = (ElemSubcktSeries *)elem;
-//             for(i = 0; i < s->count; i++) {
-//                 CheckVariableNamesCircuit(s->contents[i].which,
-//                     s->contents[i].d.any);
-//             }
-//             break;
+//             // int i;
+//             // ElemSubcktSeries *s = (ElemSubcktSeries *)elem;
+//             // for(i = 0; i < s->count; i++) {
+//             //     CheckVariableNamesCircuit(s->contents[i].which,
+//             //         s->contents[i].d.any);
+//             // }
+//             // break;
 //         }
 
 //         case ELEM_PARALLEL_SUBCKT: {
-//             int i;
-//             ElemSubcktParallel *p = (ElemSubcktParallel *)elem;
-//             for(i = 0; i < p->count; i++) {
-//                 CheckVariableNamesCircuit(p->contents[i].which,
-//                     p->contents[i].d.any);
-//             }
-//             break;
+//             // int i;
+//             // ElemSubcktParallel *p = (ElemSubcktParallel *)elem;
+//             // for(i = 0; i < p->count; i++) {
+//             //     CheckVariableNamesCircuit(p->contents[i].which,
+//             //         p->contents[i].d.any);
+//             // }
+//             // break;
 //         }
         
 //         case ELEM_RTO:
@@ -365,31 +365,31 @@ static char *MarkUsedVariable(char *name, DWORD flag);
 //             break;
 
 //         case ELEM_PIECEWISE_LINEAR:
-//             MarkWithCheck(l->d.piecewiseLinear.dest, VAR_FLAG_ANY);
+//             // MarkWithCheck(l->d.piecewiseLinear.dest, VAR_FLAG_ANY);
 //             break;
 
 //         case ELEM_READ_ADC:
-//             MarkWithCheck(l->d.readAdc.name, VAR_FLAG_ANY);
+//             // MarkWithCheck(l->d.readAdc.name, VAR_FLAG_ANY);
 //             break;
 
 //         case ELEM_ADD:
 //         case ELEM_SUB:
 //         case ELEM_MUL:
 //         case ELEM_DIV:
-//             MarkWithCheck(l->d.math.dest, VAR_FLAG_ANY);
+//             // MarkWithCheck(l->d.math.dest, VAR_FLAG_ANY);
 //             break;
 
 //         case ELEM_UART_RECV:
-//             MarkWithCheck(l->d.uart.name, VAR_FLAG_ANY);
+//             // MarkWithCheck(l->d.uart.name, VAR_FLAG_ANY);
 //             break;
 
 //         case ELEM_SHIFT_REGISTER: {
-//             int i;
-//             for(i = 1; i < l->d.shiftRegister.stages; i++) {
-//                 char str[MAX_NAME_LEN+10];
-//                 sprintf(str, "%s%d", l->d.shiftRegister.name, i);
-//                 MarkWithCheck(str, VAR_FLAG_ANY);
-//             }
+//             // int i;
+//             // for(i = 1; i < l->d.shiftRegister.stages; i++) {
+//             //     char str[MAX_NAME_LEN+10];
+//             //     sprintf(str, "%s%d", l->d.shiftRegister.name, i);
+//             //     MarkWithCheck(str, VAR_FLAG_ANY);
+//             // }
 //             break;
 //         }
 
@@ -688,35 +688,35 @@ static char *MarkUsedVariable(char *name, DWORD flag);
 //-----------------------------------------------------------------------------
 // void SimulateOneCycle(BOOL forceRefresh)
 // {
-//     // When there is an error message up, the modal dialog makes its own
-//     // event loop, and there is risk that we would go recursive. So let
-//     // us fix that. (Note that there are no concurrency issues; we really
-//     // would get called recursively, not just reentrantly.)
-//     static BOOL Simulating = FALSE;
+    // When there is an error message up, the modal dialog makes its own
+    // event loop, and there is risk that we would go recursive. So let
+    // us fix that. (Note that there are no concurrency issues; we really
+    // would get called recursively, not just reentrantly.)
+    // static BOOL Simulating = FALSE;
 
-//     if(Simulating) return;
-//     Simulating = TRUE;
+    // if(Simulating) return;
+    // Simulating = TRUE;
 
-//     NeedRedraw = FALSE;
+    // NeedRedraw = FALSE;
 
-//     if(SimulateUartTxCountdown > 0) {
-//         SimulateUartTxCountdown--;
-//     } else {
-//         SimulateUartTxCountdown = 0;
-//     }
+    // if(SimulateUartTxCountdown > 0) {
+    //     SimulateUartTxCountdown--;
+    // } else {
+    //     SimulateUartTxCountdown = 0;
+    // }
 
-//     IntPc = 0;
-//     SimulateIntCode();
+    // IntPc = 0;
+    // SimulateIntCode();
 
-//     if(NeedRedraw || SimulateRedrawAfterNextCycle || forceRefresh) {
-//         InvalidateRect(MainWindow, NULL, FALSE);
-//         ListView_RedrawItems(IoList, 0, Prog.io.count - 1);
-//     }
+    // if(NeedRedraw || SimulateRedrawAfterNextCycle || forceRefresh) {
+    //     InvalidateRect(MainWindow, NULL, FALSE);
+    //     ListView_RedrawItems(IoList, 0, Prog.io.count - 1);
+    // }
 
-//     SimulateRedrawAfterNextCycle = FALSE;
-//     if(NeedRedraw) SimulateRedrawAfterNextCycle = TRUE;
+    // SimulateRedrawAfterNextCycle = FALSE;
+    // if(NeedRedraw) SimulateRedrawAfterNextCycle = TRUE;
 
-//     Simulating = FALSE;
+    // Simulating = FALSE;
 // }
 
 //-----------------------------------------------------------------------------

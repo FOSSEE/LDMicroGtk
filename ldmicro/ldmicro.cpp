@@ -434,7 +434,7 @@ static void ProcessMenu(int code)
             break;
 
         case MNU_INSERT_LUT:
-            // CHANGING_PROGRAM(AddLookUpTable());
+            CHANGING_PROGRAM(AddLookUpTable());
             break;
         
         case MNU_INSERT_PWL:
@@ -593,6 +593,8 @@ void WM_COMMAND (GtkMenuItem* men, gpointer gpcode){
 }
 
 void MenuHandler (){
+    g_signal_connect(G_OBJECT(McuSettingsMenu), "activate",
+        G_CALLBACK(WM_COMMAND), GINT_TO_POINTER(MNU_INSERT_LUT));
     g_signal_connect(G_OBJECT(McuSettingsMenu), "activate",
         G_CALLBACK(WM_COMMAND), GINT_TO_POINTER(MNU_MCU_SETTINGS));
     g_signal_connect(G_OBJECT(ManualMenu), "activate",
@@ -1334,7 +1336,7 @@ int main(int argc, char** argv)
                             IMAGE_ICON, 32, 32, 0));
     /// Make main window - end
 
-    MakeMainWindowMenus();
+    // MakeMainWindowMenus();
 
     InitForDrawing();
 
@@ -1346,6 +1348,8 @@ int main(int argc, char** argv)
     MainWindowResized();
     // CHANGING_PROGRAM(ShowConfDialog());
     MenuHandler();
+    // CHANGING_PROGRAM(AddLookUpTable());
+    // CHANGING_PROGRAM(EditSelectedElement());
 
     /// Keyboard and mouse hooks equivalent to MainWndProc
     g_signal_connect (MainWindow, "delete_event", G_CALLBACK (LD_WM_Close_call), NULL);

@@ -27,122 +27,122 @@
 
 #include "ldmicro.h"
 
-static HWND ResetDialog;
+static HWID ResetDialog;
 
-static HWND TypeTimerRadio;
-static HWND TypeCounterRadio;
-static HWND NameTextbox;
+static HWID TypeTimerRadio;
+static HWID TypeCounterRadio;
+static HWID NameTextbox;
 
 static LONG_PTR PrevNameProc;
+HWID ResetGrid;
+HWID ResetPackingBox;
 
 //-----------------------------------------------------------------------------
 // Don't allow any characters other than A-Za-z0-9_ in the name.
 //-----------------------------------------------------------------------------
-// static LRESULT CALLBACK MyNameProc(HWND hwnd, UINT msg, WPARAM wParam,
-//     LPARAM lParam)
-// {
-//     if(msg == WM_CHAR) {
-//         if(!(isalpha(wParam) || isdigit(wParam) || wParam == '_' ||
-//             wParam == '\b'))
-//         {
-//             return 0;
-//         }
-//     }
 
-//     return CallWindowProc((WNDPROC)PrevNameProc, hwnd, msg, wParam, lParam);
-// }
+void ResetDialogMyNameProc (GtkEditable *editable, gchar *NewText, gint length, 
+    gint *position, gpointer data){
+    // gtk_widget_set_sensitive (MainWindow, TRUE);
+    for (int i = 0; i < length; i++){
+        if (!(isalpha (NewText[i]) || NewText[i] == '_' || isdigit (NewText[i])
+                                     || NewText[i] == '\b' )){
+            g_signal_stop_emission_by_name (G_OBJECT (editable), "insert-text");
+            return;
+        }
+    }
+}
 
-// static void MakeControls(void)
-// {
-//     HWND grouper = CreateWindowEx(0, WC_BUTTON, _("Type"),
-//         WS_CHILD | BS_GROUPBOX | WS_VISIBLE,
-//         7, 3, 120, 65, ResetDialog, NULL, Instance, NULL);
-//     NiceFont(grouper);
+static void MakeControls(void)
+{
+    TypeTimerRadio = gtk_radio_button_new_with_label (NULL, "Timer");
 
-//     TypeTimerRadio = CreateWindowEx(0, WC_BUTTON, _("Timer"),
-//         WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE,
-//         16, 21, 100, 20, ResetDialog, NULL, Instance, NULL);
-//     NiceFont(TypeTimerRadio);
+    TypeCounterRadio = gtk_radio_button_new_with_label_from_widget
+                        (GTK_RADIO_BUTTON (TypeTimerRadio), "Counter");
+    
+    HWID textLabel = gtk_label_new ("Name");
+    
+    NameTextbox = gtk_entry_new();
+    gtk_entry_set_max_length (GTK_ENTRY (NameTextbox), 0);
 
-//     TypeCounterRadio = CreateWindowEx(0, WC_BUTTON, _("Counter"),
-//         WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE,
-//         16, 41, 100, 20, ResetDialog, NULL, Instance, NULL);
-//     NiceFont(TypeCounterRadio);
+    OkButton = gtk_button_new_with_label ("OK");
+    CancelButton = gtk_button_new_with_label ("Cancel");
 
-//     HWND textLabel = CreateWindowEx(0, WC_STATIC, _("Name:"),
-//         WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE | SS_RIGHT,
-//         135, 16, 50, 21, ResetDialog, NULL, Instance, NULL);
-//     NiceFont(textLabel);
+    gtk_grid_attach (GTK_GRID (ResetGrid), TypeTimerRadio, 1, 2, 1, 1);
+    gtk_grid_attach (GTK_GRID (ResetGrid), TypeCounterRadio, 1, 3, 1, 1);
+    gtk_grid_attach (GTK_GRID (ResetGrid), textLabel, 2, 2, 1, 1);
+    gtk_grid_attach (GTK_GRID (ResetGrid), NameTextbox, 3, 2, 1, 1);
+    gtk_grid_attach (GTK_GRID (ResetGrid), OkButton, 4, 2, 1, 1);
+    gtk_grid_attach (GTK_GRID (ResetGrid), CancelButton, 4, 3, 1, 1);
 
-//     NameTextbox = CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "",
-//         WS_CHILD | ES_AUTOHSCROLL | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE,
-//         190, 16, 115, 21, ResetDialog, NULL, Instance, NULL);
-//     FixedFont(NameTextbox);
+    gtk_grid_set_column_spacing (GTK_GRID (ResetGrid), 1);
+    gtk_box_pack_start(GTK_BOX(ResetPackingBox), ResetGrid, TRUE, TRUE, 0);
 
-//     OkButton = CreateWindowEx(0, WC_BUTTON, _("OK"),
-//         WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE | BS_DEFPUSHBUTTON,
-//         321, 10, 70, 23, ResetDialog, NULL, Instance, NULL); 
-//     NiceFont(OkButton);
+    // PrevNameProc = SetWindowLongPtr(NameTextbox, GWLP_WNDPROC, 
+    //     (LONG_PTR)MyNameProc);
+}
 
-//     CancelButton = CreateWindowEx(0, WC_BUTTON, _("Cancel"),
-//         WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE,
-//         321, 40, 70, 23, ResetDialog, NULL, Instance, NULL); 
-//     NiceFont(CancelButton);
+void ResetDialogGetData (char* name){
+    if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (TypeTimerRadio))){
+        name[0] = 'T';
+    }
+    else {
+        name[0] = 'C';
+    }
+    strcpy (name, gtk_entry_get_text (GTK_ENTRY (NameTextbox)));
+}
 
-//     PrevNameProc = SetWindowLongPtr(NameTextbox, GWLP_WNDPROC, 
-//         (LONG_PTR)MyNameProc);
-// }
+// Checks for the required key press
+gboolean ResetDialogKeyPress (GtkWidget* widget, GdkEventKey* event, gpointer data){
+    if (event -> keyval == GDK_KEY_Return){
+        ResetDialogGetData((char*)data);
+    }
+    else if (event -> keyval == GDK_KEY_Escape){
+        DestroyWindow (ResetDialog, NULL);
+        gtk_widget_set_sensitive (MainWindow, TRUE);
+    }
+    return FALSE;
+}
 
-// void ShowResetDialog(char *name)
-// {
-//     ResetDialog = CreateWindowClient(0, "LDmicroDialog",
-//         _("Reset"), WS_OVERLAPPED | WS_SYSMENU,
-//         100, 100, 404, 75, NULL, NULL, Instance, NULL);
+void ResetCallDestroyWindow (HWID widget, gpointer data){
+    DestroyWindow (ResetDialog, NULL);
+    gtk_widget_set_sensitive (MainWindow, TRUE);
+}
 
-//     MakeControls();
+void ShowResetDialog(char *name)
+{
+    ResetGrid = gtk_grid_new();
+    ResetPackingBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+
+    ResetDialog = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title(GTK_WINDOW(ResetDialog), "Reset");
+    gtk_window_set_default_size(GTK_WINDOW(ResetDialog), 100, 50);
+    gtk_window_set_resizable (GTK_WINDOW (ResetDialog), FALSE);
+    gtk_container_add(GTK_CONTAINER(ResetDialog), ResetPackingBox);
+    gtk_widget_add_events (ResetDialog, GDK_KEY_PRESS_MASK);
+    gtk_widget_add_events (ResetDialog, GDK_BUTTON_PRESS_MASK);
+
+    MakeControls();
    
-//     if(name[0] == 'T') {
-//         SendMessage(TypeTimerRadio, BM_SETCHECK, BST_CHECKED, 0);
-//     } else {
-//         SendMessage(TypeCounterRadio, BM_SETCHECK, BST_CHECKED, 0);
-//     }
-//     SendMessage(NameTextbox, WM_SETTEXT, 0, (LPARAM)(name + 1));
+    if(name[0] == 'T') {
+        gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (TypeTimerRadio), TRUE);
+    }
+    else {
+        gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (TypeCounterRadio), TRUE);
+    }
+    // ************What does name+1 mean in original file??***************
+    gtk_entry_set_text (GTK_ENTRY (NameTextbox), name + 1);
 
-//     EnableWindow(MainWindow, FALSE);
-//     ShowWindow(ResetDialog, TRUE);
-//     SetFocus(NameTextbox);
-//     SendMessage(NameTextbox, EM_SETSEL, 0, -1);
-
-//     MSG msg;
-//     DWORD ret;
-//     DialogDone = FALSE;
-//     DialogCancel = FALSE;
-//     while((ret = GetMessage(&msg, NULL, 0, 0)) && !DialogDone) {
-//         if(msg.message == WM_KEYDOWN) {
-//             if(msg.wParam == VK_RETURN) {
-//                 DialogDone = TRUE;
-//                 break;
-//             } else if(msg.wParam == VK_ESCAPE) {
-//                 DialogDone = TRUE;
-//                 DialogCancel = TRUE;
-//                 break;
-//             }
-//         }
-
-//         if(IsDialogMessage(ResetDialog, &msg)) continue;
-//         TranslateMessage(&msg);
-//         DispatchMessage(&msg);
-//     }
-
-//     if(!DialogCancel) {
-//         if(SendMessage(TypeTimerRadio, BM_GETSTATE, 0, 0) & BST_CHECKED) {
-//             name[0] = 'T';
-//         } else {
-//             name[0] = 'C';
-//         }
-//         SendMessage(NameTextbox, WM_GETTEXT, (WPARAM)16, (LPARAM)(name+1));
-//     }
-
-//     EnableWindow(MainWindow, TRUE);
-//     DestroyWindow(ResetDialog);
-// }
+    gtk_widget_set_sensitive (MainWindow, TRUE);
+    gtk_widget_show_all (ResetDialog);
+    gtk_widget_grab_focus (NameTextbox);
+    
+    g_signal_connect (G_OBJECT(NameTextbox), "insert-text",
+		     G_CALLBACK(ResetDialogMyNameProc), NULL);
+    g_signal_connect (G_OBJECT (ResetDialog), "key-press-event",
+                    G_CALLBACK(ResetDialogKeyPress), (gpointer)name);
+    g_signal_connect (G_OBJECT (OkButton), "clicked",
+                    G_CALLBACK(ResetDialogGetData), (gpointer)name);
+    g_signal_connect (G_OBJECT (CancelButton), "clicked",
+                    G_CALLBACK(ResetCallDestroyWindow), NULL);
+}

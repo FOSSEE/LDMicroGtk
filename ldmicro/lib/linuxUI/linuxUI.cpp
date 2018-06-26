@@ -421,3 +421,7 @@ BOOL GetWindowRect(HWID hWid, PRECT pRect)
 
     return TRUE;
 }
+
+void DestroyWindow (GtkWidget* widget, gpointer data){
+    gtk_widget_destroy (widget);
+}

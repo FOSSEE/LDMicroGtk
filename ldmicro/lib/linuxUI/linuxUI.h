@@ -191,6 +191,10 @@ BOOL MoveWindow(
     int  nHeight,
     BOOL bRepaint);
 
+void DestroyWindow (
+    HWID widget,
+    gpointer data);
+
 BOOL GetWindowRect(
     HWID   hWid,
     PRECT  pRect);

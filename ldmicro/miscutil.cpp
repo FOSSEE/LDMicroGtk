@@ -230,9 +230,9 @@ HWID CreateWindowClient(GtkWindowType wType, GdkWindowTypeHint wthint, char *win
 // Window proc for the dialog boxes. This Ok/Cancel stuff is common to a lot
 // of places, and there are no other callbacks from the children.
 //-----------------------------------------------------------------------------
-static LRESULT CALLBACK DialogProc(HWND hwnd, UINT msg, WPARAM wParam,
-    LPARAM lParam)
-{
+// static LRESULT CALLBACK DialogProc(HWND hwnd, UINT msg, WPARAM wParam,
+//     LPARAM lParam)
+// {
     // switch (msg) {
     //     case WM_NOTIFY:
     //         break;
@@ -258,8 +258,8 @@ static LRESULT CALLBACK DialogProc(HWND hwnd, UINT msg, WPARAM wParam,
     //         return DefWindowProc(hwnd, msg, wParam, lParam);
     // }
 
-    return 1;
-}
+//     return 1;
+// }
 
 
 

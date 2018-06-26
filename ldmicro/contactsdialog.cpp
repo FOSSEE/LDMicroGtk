@@ -34,6 +34,8 @@ static HWID SourceInternalRelayRadio;
 static HWID SourceInputPinRadio;
 static HWID SourceOutputPinRadio;
 static HWID NameTextbox;
+static HWID OkButton;
+static HWID CancelButton;
 
 static LONG_PTR PrevNameProc;
 HWID ContactsGrid;

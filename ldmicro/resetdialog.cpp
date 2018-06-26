@@ -32,6 +32,8 @@ static HWID ResetDialog;
 static HWID TypeTimerRadio;
 static HWID TypeCounterRadio;
 static HWID NameTextbox;
+static HWID OkButton;
+static HWID CancelButton;
 
 static LONG_PTR PrevNameProc;
 HWID ResetGrid;

@@ -36,8 +36,8 @@ static HWID ConfDialog;
 static HWID CrystalTextbox;
 static HWID CycleTextbox;
 static HWID BaudTextbox;
-// static HWID ButtonOk;
-// static HWID ButtonCancel;
+static HWID OkButton;
+static HWID CancelButton;
 
 static LONG_PTR PrevCrystalProc;
 static LONG_PTR PrevCycleProc;

@@ -793,17 +793,10 @@ void CompileSuccessfulMessage(char *str);
 extern BOOL RunningInBatchMode;
 extern HFONT MyNiceFont;
 extern HFONT MyFixedFont;
-<<<<<<< HEAD
-extern HWID OkButton;
-extern HWID CancelButton;
-extern BOOL DialogDone;
-extern BOOL DialogCancel;
-=======
-// extern HWND OkButton;
-// extern HWND CancelButton;
+// extern HWID OkButton;
+// extern HWID CancelButton;
 // extern BOOL DialogDone;
 // extern BOOL DialogCancel;
->>>>>>> akshay-c-GUI_port
 
 // lang.cpp
 char *_(char *in);

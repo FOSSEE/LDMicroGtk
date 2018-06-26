@@ -36,6 +36,8 @@ static HWID NormalRadio;
 static HWID SetOnlyRadio;
 static HWID ResetOnlyRadio;
 static HWID NameTextbox;
+static HWID OkButton;
+static HWID CancelButton;
 
 static LONG_PTR PrevNameProc;
 

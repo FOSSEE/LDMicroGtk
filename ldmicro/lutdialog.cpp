@@ -55,6 +55,8 @@ static SWORD ValuesCache[MAX_LOOK_UP_TABLE_LEN];
 static LONG_PTR PrevDestProc;
 static LONG_PTR PrevIndexProc;
 static LONG_PTR PrevCountProc;
+static HWID OkButton;
+static HWID CancelButton;
 
 HWID LutGrid[2];
 HWID LutPackingBox;

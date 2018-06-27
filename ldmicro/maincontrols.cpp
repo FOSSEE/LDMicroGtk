@@ -541,6 +541,7 @@ void MakeMainWindowControls(void)
     /// Creating a list
     view = gtk_tree_view_new_with_model (GTK_TREE_MODEL(IoList));
     gtk_tree_view_set_model (GTK_TREE_VIEW (view), GTK_TREE_MODEL (IoList));
+    gtk_tree_view_set_enable_search (GTK_TREE_VIEW (view), FALSE);
 
     column = gtk_tree_view_column_new_with_attributes("Name",
                                                     gtk_cell_renderer_text_new(),
@@ -908,7 +909,7 @@ void ToggleSimulationMode(void)
         EnableMenuItem(TopMenu, Settings, MF_GRAYED);
         EnableMenuItem(TopMenu, InstructionMenu, MF_GRAYED);
         EnableMenuItem(TopMenu, Compile, MF_GRAYED);
-    
+
         CheckMenuItem(SimulateMenu, SimulationModeMenu, MF_CHECKED);
 
         ClearSimulationData(); // simulation.cpp, ldmicro.h

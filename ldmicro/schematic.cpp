@@ -400,9 +400,9 @@ void MoveCursorKeyboard(int keyCode)
 //-----------------------------------------------------------------------------
 
 void EditSelectedElement(void)
-{
+{   
     ShowLookUpTableDialog(Selected);
-    // ShowContactsDialog(&(Selected->d.contacts.negated),Selected->d.contacts.name);
+    // ShowCommentDialog(Selected->d.comment.str);
 
 //     if(!Selected || Selected->selectedState == SELECTED_NONE) return;
 

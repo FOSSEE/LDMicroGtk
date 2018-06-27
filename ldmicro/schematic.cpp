@@ -401,103 +401,103 @@ void MoveCursorKeyboard(int keyCode)
 
 void EditSelectedElement(void)
 {
-    ShowLookUpTableDialog(Selected);
-    // ShowContactsDialog(&(Selected->d.contacts.negated),Selected->d.contacts.name);
+    
+    ShowContactsDialog(&(Selected->d.contacts.negated),Selected->d.contacts.name);
 
-//     if(!Selected || Selected->selectedState == SELECTED_NONE) return;
+    if(!Selected || Selected->selectedState == SELECTED_NONE) return;
 
-//     switch(SelectedWhich) {
-//         case ELEM_COMMENT:
-//             ShowCommentDialog(Selected->d.comment.str);
-//             break;
+    switch(SelectedWhich) {
+        case ELEM_COMMENT:
+            // ShowCommentDialog(Selected->d.comment.str);
+            break;
 
-//         case ELEM_CONTACTS:
-//             ShowContactsDialog(&(Selected->d.contacts.negated),
-//                 Selected->d.contacts.name);
-//             break;
+        case ELEM_CONTACTS:
+            // ShowContactsDialog(&(Selected->d.contacts.negated),
+            //     Selected->d.contacts.name);
+            break;
 
-//         case ELEM_COIL:
-//             ShowCoilDialog(&(Selected->d.coil.negated),
-//                 &(Selected->d.coil.setOnly), &(Selected->d.coil.resetOnly),
-//                 Selected->d.coil.name);
-//             break;
+        case ELEM_COIL:
+            // ShowCoilDialog(&(Selected->d.coil.negated),
+            //     &(Selected->d.coil.setOnly), &(Selected->d.coil.resetOnly),
+            //     Selected->d.coil.name);
+            break;
 
-//         case ELEM_TON:
-//         case ELEM_TOF:
-//         case ELEM_RTO:
-//             ShowTimerDialog(SelectedWhich, &(Selected->d.timer.delay),
-//                 Selected->d.timer.name);
-//             break;
+        case ELEM_TON:
+        case ELEM_TOF:
+        case ELEM_RTO:
+            // ShowTimerDialog(SelectedWhich, &(Selected->d.timer.delay),
+            //     Selected->d.timer.name);
+            break;
 
-//         case ELEM_CTU:
-//         case ELEM_CTD:
-//         case ELEM_CTC:
-//             ShowCounterDialog(SelectedWhich, &(Selected->d.counter.max),
-//                 Selected->d.counter.name);
-//             break;
+        case ELEM_CTU:
+        case ELEM_CTD:
+        case ELEM_CTC:
+            // ShowCounterDialog(SelectedWhich, &(Selected->d.counter.max),
+            //     Selected->d.counter.name);
+            break;
 
-//         case ELEM_EQU:
-//         case ELEM_NEQ:
-//         case ELEM_GRT:
-//         case ELEM_GEQ:
-//         case ELEM_LES:
-//         case ELEM_LEQ:
-//             ShowCmpDialog(SelectedWhich, Selected->d.cmp.op1,
-//                 Selected->d.cmp.op2);
-//             break;
+        case ELEM_EQU:
+        case ELEM_NEQ:
+        case ELEM_GRT:
+        case ELEM_GEQ:
+        case ELEM_LES:
+        case ELEM_LEQ:
+            // ShowCmpDialog(SelectedWhich, Selected->d.cmp.op1,
+            //     Selected->d.cmp.op2);
+            break;
 
-//         case ELEM_ADD:
-//         case ELEM_SUB:
-//         case ELEM_MUL:
-//         case ELEM_DIV:
-//             ShowMathDialog(SelectedWhich, Selected->d.math.dest, 
-//                 Selected->d.math.op1, Selected->d.math.op2);
-//             break;
+        case ELEM_ADD:
+        case ELEM_SUB:
+        case ELEM_MUL:
+        case ELEM_DIV:
+            // ShowMathDialog(SelectedWhich, Selected->d.math.dest, 
+            //     Selected->d.math.op1, Selected->d.math.op2);
+            break;
 
-//         case ELEM_RES:
-//             ShowResetDialog(Selected->d.reset.name);
-//             break;
+        case ELEM_RES:
+            // ShowResetDialog(Selected->d.reset.name);
+            break;
 
-//         case ELEM_MOVE:
-//             ShowMoveDialog(Selected->d.move.dest, Selected->d.move.src);
-//             break;
+        case ELEM_MOVE:
+            // ShowMoveDialog(Selected->d.move.dest, Selected->d.move.src);
+            break;
 
-//         case ELEM_SET_PWM:
-//             ShowSetPwmDialog(Selected->d.setPwm.name,
-//                 &(Selected->d.setPwm.targetFreq));
-//             break;
+        case ELEM_SET_PWM:
+            // ShowSetPwmDialog(Selected->d.setPwm.name,
+            //     &(Selected->d.setPwm.targetFreq));
+            break;
 
-//         case ELEM_READ_ADC:
-//             ShowReadAdcDialog(Selected->d.readAdc.name+1);
-//             break;
+        case ELEM_READ_ADC:
+            // ShowReadAdcDialog(Selected->d.readAdc.name+1);
+            break;
 
-//         case ELEM_UART_RECV:
-//         case ELEM_UART_SEND:
-//             ShowUartDialog(SelectedWhich, Selected->d.uart.name);
-//             break;
+        case ELEM_UART_RECV:
+        case ELEM_UART_SEND:
+            // ShowUartDialog(SelectedWhich, Selected->d.uart.name);
+            break;
 
-//         case ELEM_PERSIST:
-//             ShowPersistDialog(Selected->d.persist.var);
-//             break;
+        case ELEM_PERSIST:
+            // ShowPersistDialog(Selected->d.persist.var);
+            break;
 
-//         case ELEM_SHIFT_REGISTER:
-//             ShowShiftRegisterDialog(Selected->d.shiftRegister.name,
-//                 &(Selected->d.shiftRegister.stages));
-//             break;
+        case ELEM_SHIFT_REGISTER:
+            // ShowShiftRegisterDialog(Selected->d.shiftRegister.name,
+            //     &(Selected->d.shiftRegister.stages));
+            break;
 
-//         case ELEM_FORMATTED_STRING:
-//             ShowFormattedStringDialog(Selected->d.fmtdStr.var,
-//                 Selected->d.fmtdStr.string);
-//             break;
+        case ELEM_FORMATTED_STRING:
+            // ShowFormattedStringDialog(Selected->d.fmtdStr.var,
+            //     Selected->d.fmtdStr.string);
+            break;
 
-//         case ELEM_PIECEWISE_LINEAR:
-//             ShowPiecewiseLinearDialog(Selected);
-//             break;
+        case ELEM_PIECEWISE_LINEAR:
+            // ShowPiecewiseLinearDialog(Selected);
+            break;
 
-//         case ELEM_LOOK_UP_TABLE:
-//             ShowLookUpTableDialog(Selected);
-//             break;
-//     }
+        case ELEM_LOOK_UP_TABLE:
+            ShowLookUpTableDialog(Selected);
+            break;
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -509,31 +509,30 @@ void EditSelectedElement(void)
 //-----------------------------------------------------------------------------
 void EditElementMouseDoubleclick(int x, int y)
 {
-//     x += ScrollXOffset;
+    x += ScrollXOffset;
 
-//     y += FONT_HEIGHT/2;
+    y += FONT_HEIGHT/2;
 
-//     int gx = (x - X_PADDING)/(POS_WIDTH*FONT_WIDTH);
-//     int gy = (y - Y_PADDING)/(POS_HEIGHT*FONT_HEIGHT);
+    int gx = (x - X_PADDING)/(POS_WIDTH*FONT_WIDTH);
+    int gy = (y - Y_PADDING)/(POS_HEIGHT*FONT_HEIGHT);
 
-//     gy += ScrollYOffset;
+    gy += ScrollYOffset;
 
-//     if(InSimulationMode) {
-//         ElemLeaf *l = DisplayMatrix[gx][gy];
-//         if(l && DisplayMatrixWhich[gx][gy] == ELEM_CONTACTS) {
-//             char *name = l->d.contacts.name;
-//             if(name[0] == 'X') {
-//                 SimulationToggleContact(name);
-//             } 
-//         } else if(l && DisplayMatrixWhich[gx][gy] == ELEM_READ_ADC) {
-//             ShowAnalogSliderPopup(l->d.readAdc.name);
-//         }
-//     } else {
-//         if(DisplayMatrix[gx][gy] == Selected) {
-//             EditSelectedElement();
-//         }
-//     }
-    EditSelectedElement();
+    if(InSimulationMode) {
+        ElemLeaf *l = DisplayMatrix[gx][gy];
+        if(l && DisplayMatrixWhich[gx][gy] == ELEM_CONTACTS) {
+            char *name = l->d.contacts.name;
+            if(name[0] == 'X') {
+                SimulationToggleContact(name);
+            } 
+        } else if(l && DisplayMatrixWhich[gx][gy] == ELEM_READ_ADC) {
+            ShowAnalogSliderPopup(l->d.readAdc.name);
+        }
+    } else {
+        if(DisplayMatrix[gx][gy] == Selected) {
+            EditSelectedElement();
+        }
+    }
 }
 
 //-----------------------------------------------------------------------------

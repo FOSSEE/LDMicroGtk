@@ -732,17 +732,8 @@ gboolean LD_GTK_mouse_click_hook(GtkWidget *widget, GdkEvent *event, gpointer us
                 int x = event->button.x;
                 int y = event->button.y - 30 + gtk_adjustment_get_value(adjustment);
 
-                // if((y > (IoListTop - 9)) && (y < (IoListTop + 3))) {
-                //     // POINT pt;
-                //     // pt.x = x; pt.y = y;
-                //     // ClientToScreen(MainWindow, &pt);
-                //     MouseY = y; //pt.y;
-                //     // MouseHookHandle = SetWindowsHookEx(WH_MOUSE_LL,
-                //     //         (HOOKPROC)MouseHook, Instance, 0);
-                // }
                 if(!InSimulationMode) MoveCursorMouseClick(x, y);
 
-                // SetFocus(MainWindow);
                 gtk_widget_queue_draw(DrawWindow);
             }
             break;

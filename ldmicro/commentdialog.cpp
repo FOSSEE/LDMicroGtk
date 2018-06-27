@@ -27,71 +27,119 @@
 
 #include "ldmicro.h"
 
-static HWND CommentDialog;
+static HWID CommentDialog;
 
-static HWND CommentTextbox;
+static HWID CommentTextbox;
 
-// static void MakeControls(void)
-// {
-//     CommentTextbox = CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "",
-//         WS_CHILD | ES_AUTOHSCROLL | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE |
-//         ES_MULTILINE | ES_WANTRETURN,
-//         7, 10, 600, 38, CommentDialog, NULL, Instance, NULL);
-//     FixedFont(CommentTextbox);
+static HWID CommentGrid;
+static HWID CommentPackingBox;
+static HWID OkButton;
+static HWID CancelButton;
 
-//     OkButton = CreateWindowEx(0, WC_BUTTON, _("OK"),
-//         WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE | BS_DEFPUSHBUTTON,
-//         620,  6, 70, 23, CommentDialog, NULL, Instance, NULL); 
-//     NiceFont(OkButton);
+static void MakeControls(void)
+{
+    // CommentTextbox = CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "",
+    //     WS_CHILD | ES_AUTOHSCROLL | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE |
+    //     ES_MULTILINE | ES_WANTRETURN,
+    //     7, 10, 600, 38, CommentDialog, NULL, Instance, NULL);
+    // FixedFont(CommentTextbox);
 
-//     CancelButton = CreateWindowEx(0, WC_BUTTON, _("Cancel"),
-//         WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE,
-//         620, 36, 70, 23, CommentDialog, NULL, Instance, NULL); 
-//     NiceFont(CancelButton);
-// }
+    CommentTextbox = gtk_entry_new();
+    gtk_entry_set_max_length (GTK_ENTRY (CommentTextbox), 0);
 
-// void ShowCommentDialog(char *comment)
-// {
-//     CommentDialog = CreateWindowClient(0, "LDmicroDialog",
-//         _("Comment"), WS_OVERLAPPED | WS_SYSMENU,
-//         100, 100, 700, 65, NULL, NULL, Instance, NULL);
+    OkButton = gtk_button_new_with_label ("OK");
+    CancelButton = gtk_button_new_with_label ("Cancel");
 
-//     MakeControls();
-   
-//     SendMessage(CommentTextbox, WM_SETTEXT, 0, (LPARAM)comment);
+    gtk_grid_attach (GTK_GRID (CommentGrid), CommentTextbox, 1, 1, 4, 1);
+    gtk_grid_attach (GTK_GRID (CommentGrid), OkButton, 5, 1, 1, 1);
+    gtk_grid_attach (GTK_GRID (CommentGrid), CancelButton, 5, 2, 1, 1);
 
-//     EnableWindow(MainWindow, FALSE);
-//     ShowWindow(CommentDialog, TRUE);
-//     SetFocus(CommentTextbox);
-//     SendMessage(CommentTextbox, EM_SETSEL, 0, -1);
+    gtk_grid_set_column_spacing (GTK_GRID (CommentGrid), 1);
+    gtk_box_pack_start(GTK_BOX(CommentPackingBox), CommentGrid, TRUE, TRUE, 0);
+}
 
-//     MSG msg;
-//     DWORD ret;
-//     DialogDone = FALSE;
-//     DialogCancel = FALSE;
-//     while((ret = GetMessage(&msg, NULL, 0, 0)) && !DialogDone) {
-//         if(msg.message == WM_KEYDOWN) {
-//             if(msg.wParam == VK_TAB && GetFocus() == CommentTextbox) {
-//                 SetFocus(OkButton);
-//                 continue;
-//             } else if(msg.wParam == VK_ESCAPE) {
-//                 DialogDone = TRUE;
-//                 DialogCancel = TRUE;
-//                 break;
-//             }
-//         }
+void CommentDialogGetData (char* comment){
+    strncpy (comment, gtk_entry_get_text (GTK_ENTRY (CommentTextbox)),
+            MAX_COMMENT_LEN-1);
+    gtk_widget_set_sensitive (MainWindow, TRUE);
+    DestroyWindow (CommentDialog);
+}
 
-//         if(IsDialogMessage(CommentDialog, &msg)) continue;
-//         TranslateMessage(&msg);
-//         DispatchMessage(&msg);
-//     }
+// Mouse click callback
+void CommentDialogMouseClick (HWID widget, gpointer data){
+    CommentDialogGetData((char*)data);
+}
 
-//     if(!DialogCancel) {
-//         SendMessage(CommentTextbox, WM_GETTEXT, (WPARAM)(MAX_COMMENT_LEN-1),
-//             (LPARAM)comment);
-//     }
+// Checks for the required key press
+gboolean CommentDialogKeyPress (HWID widget, GdkEventKey* event, gpointer data){
+    if (event -> keyval == GDK_KEY_Return){
+        CommentDialogGetData((char*)data);
+    }
+    else if (event -> keyval == GDK_KEY_Escape){
+        DestroyWindow (CommentDialog);
+        gtk_widget_set_sensitive (MainWindow, TRUE);
+    }
+    return FALSE;
+}
 
-//     EnableWindow(MainWindow, TRUE);
-//     DestroyWindow(CommentDialog);
-//     return;
-// }
+void CommentCallDestroyWindow (HWID widget, gpointer data){
+    DestroyWindow (CommentDialog);
+    gtk_widget_set_sensitive (MainWindow, TRUE);
+}
+
+void ShowCommentDialog(char *comment)
+{    
+    CommentGrid = gtk_grid_new();
+    CommentPackingBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+
+    CommentDialog = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title(GTK_WINDOW(CommentDialog), "Comment");
+    gtk_window_set_default_size(GTK_WINDOW(CommentDialog), 100, 50);
+    gtk_window_set_resizable (GTK_WINDOW (CommentDialog), FALSE);
+    gtk_container_add(GTK_CONTAINER(CommentDialog), CommentPackingBox);
+    gtk_widget_add_events (CommentDialog, GDK_KEY_PRESS_MASK);
+    gtk_widget_add_events (CommentDialog, GDK_BUTTON_PRESS_MASK);
+
+    MakeControls();
+    gtk_entry_set_text (GTK_ENTRY (CommentTextbox), comment);
+
+    gtk_widget_set_sensitive (MainWindow, FALSE);
+    gtk_widget_show_all (CommentDialog);
+    gtk_widget_grab_focus (CommentTextbox);
+
+    g_signal_connect (G_OBJECT (CommentDialog), "key-press-event",
+                    G_CALLBACK(CommentDialogKeyPress), (gpointer)comment);
+    g_signal_connect (G_OBJECT (OkButton), "clicked",
+                    G_CALLBACK(CommentDialogMouseClick), (gpointer)comment);
+    g_signal_connect (G_OBJECT (CancelButton), "clicked",
+                    G_CALLBACK(CommentCallDestroyWindow), NULL);
+
+    // MSG msg;
+    // DWORD ret;
+    // DialogDone = FALSE;
+    // DialogCancel = FALSE;
+    // while((ret = GetMessage(&msg, NULL, 0, 0)) && !DialogDone) {
+    //     if(msg.message == WM_KEYDOWN) {
+    //         if(msg.wParam == VK_TAB && GetFocus() == CommentTextbox) {
+    //             SetFocus(OkButton);
+    //             continue;
+    //         } else if(msg.wParam == VK_ESCAPE) {
+    //             DialogDone = TRUE;
+    //             DialogCancel = TRUE;
+    //             break;
+    //         }
+    //     }
+
+    //     if(IsDialogMessage(CommentDialog, &msg)) continue;
+    //     TranslateMessage(&msg);
+    //     DispatchMessage(&msg);
+    // }
+
+    // if(!DialogCancel) {
+        
+    // }
+
+    // EnableWindow(MainWindow, TRUE);
+    // DestroyWindow(CommentDialog);
+    return;
+}

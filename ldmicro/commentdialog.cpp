@@ -38,21 +38,17 @@ static HWID CancelButton;
 
 static void MakeControls(void)
 {
-    // CommentTextbox = CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "",
-    //     WS_CHILD | ES_AUTOHSCROLL | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE |
-    //     ES_MULTILINE | ES_WANTRETURN,
-    //     7, 10, 600, 38, CommentDialog, NULL, Instance, NULL);
-    // FixedFont(CommentTextbox);
-
     CommentTextbox = gtk_entry_new();
     gtk_entry_set_max_length (GTK_ENTRY (CommentTextbox), 0);
+    gtk_widget_set_hexpand (CommentTextbox, TRUE);
+    gtk_widget_set_vexpand (CommentTextbox, TRUE);
 
     OkButton = gtk_button_new_with_label ("OK");
     CancelButton = gtk_button_new_with_label ("Cancel");
 
-    gtk_grid_attach (GTK_GRID (CommentGrid), CommentTextbox, 1, 1, 4, 1);
-    gtk_grid_attach (GTK_GRID (CommentGrid), OkButton, 5, 1, 1, 1);
-    gtk_grid_attach (GTK_GRID (CommentGrid), CancelButton, 5, 2, 1, 1);
+    gtk_grid_attach (GTK_GRID (CommentGrid), CommentTextbox, 1, 2, 1, 1);
+    gtk_grid_attach (GTK_GRID (CommentGrid), OkButton, 5, 2, 1, 1);
+    gtk_grid_attach (GTK_GRID (CommentGrid), CancelButton, 5, 3, 1, 1);
 
     gtk_grid_set_column_spacing (GTK_GRID (CommentGrid), 1);
     gtk_box_pack_start(GTK_BOX(CommentPackingBox), CommentGrid, TRUE, TRUE, 0);
@@ -94,15 +90,14 @@ void ShowCommentDialog(char *comment)
 
     CommentDialog = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW(CommentDialog), "Comment");
-    gtk_window_set_default_size(GTK_WINDOW(CommentDialog), 100, 50);
+    gtk_window_set_default_size(GTK_WINDOW(CommentDialog), 700, 50);
     gtk_window_set_resizable (GTK_WINDOW (CommentDialog), FALSE);
-    gtk_container_add(GTK_CONTAINER(CommentDialog), CommentPackingBox);
     gtk_widget_add_events (CommentDialog, GDK_KEY_PRESS_MASK);
     gtk_widget_add_events (CommentDialog, GDK_BUTTON_PRESS_MASK);
 
     MakeControls();
     gtk_entry_set_text (GTK_ENTRY (CommentTextbox), comment);
-
+    gtk_container_add(GTK_CONTAINER(CommentDialog), CommentPackingBox);
     gtk_widget_set_sensitive (MainWindow, FALSE);
     gtk_widget_show_all (CommentDialog);
     gtk_widget_grab_focus (CommentTextbox);
@@ -114,32 +109,5 @@ void ShowCommentDialog(char *comment)
     g_signal_connect (G_OBJECT (CancelButton), "clicked",
                     G_CALLBACK(CommentCallDestroyWindow), NULL);
 
-    // MSG msg;
-    // DWORD ret;
-    // DialogDone = FALSE;
-    // DialogCancel = FALSE;
-    // while((ret = GetMessage(&msg, NULL, 0, 0)) && !DialogDone) {
-    //     if(msg.message == WM_KEYDOWN) {
-    //         if(msg.wParam == VK_TAB && GetFocus() == CommentTextbox) {
-    //             SetFocus(OkButton);
-    //             continue;
-    //         } else if(msg.wParam == VK_ESCAPE) {
-    //             DialogDone = TRUE;
-    //             DialogCancel = TRUE;
-    //             break;
-    //         }
-    //     }
-
-    //     if(IsDialogMessage(CommentDialog, &msg)) continue;
-    //     TranslateMessage(&msg);
-    //     DispatchMessage(&msg);
-    // }
-
-    // if(!DialogCancel) {
-        
-    // }
-
-    // EnableWindow(MainWindow, TRUE);
-    // DestroyWindow(CommentDialog);
     return;
 }

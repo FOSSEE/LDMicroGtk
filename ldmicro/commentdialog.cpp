@@ -91,7 +91,6 @@ void ShowCommentDialog(char *comment)
     CommentDialog = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW(CommentDialog), "Comment");
     gtk_window_set_default_size(GTK_WINDOW(CommentDialog), 700, 50);
-    // gtk_window_resize (GTK_WINDOW(CommentDialog), 700, 50);
     gtk_window_set_resizable (GTK_WINDOW (CommentDialog), FALSE);
     gtk_widget_add_events (CommentDialog, GDK_KEY_PRESS_MASK);
     gtk_widget_add_events (CommentDialog, GDK_BUTTON_PRESS_MASK);

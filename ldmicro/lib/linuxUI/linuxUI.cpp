@@ -1,5 +1,9 @@
 #include "linuxUI.h"
 
+/// Global variables to hole mouse click positions
+int GLOBAL_mouse_last_clicked_x;
+int GLOBAL_mouse_last_clicked_y;
+
 /// Brushes
 const COLORREF BLACK_BR(0, 0, 0);
 const COLORREF WHITE_BR(255, 255, 255);
@@ -9,6 +13,9 @@ const COLORREF DKGRAY_BR(169, 169, 169);
 
 /// Variable to current text color
 COLORREF HdcCurrentTextColor;
+
+/// Variable to hold timers
+std::vector<TimerRecord> timerRecords;
 
 /// EnableMenuItem Variables
 const UINT MF_ENABLED = 0;
@@ -96,21 +103,26 @@ int MessageBox(HWID pWindow, char* message, char* title, UINT mFlags)
 BOOL GetSaveFileName(OPENFILENAME *ofn)
 {
     GtkWidget *dialog;
-    GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
+    GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_SAVE;
 
     dialog = gtk_file_chooser_dialog_new (ofn->lpstrTitle,
                                         GTK_WINDOW(ofn->parentWindow),
                                         action,
                                         "_Cancel",
                                         GTK_RESPONSE_CANCEL,
-                                        "_Open",
+                                        "_Save",
                                         GTK_RESPONSE_ACCEPT,
                                         NULL);
-    //g_print("filter created\n");
-    
-    if (ofn->Flags & OFN_OVERWRITEPROMPT == OFN_OVERWRITEPROMPT)
-        gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog), TRUE);
+    char filename[15] = "Untitled";
 
+    if (ofn->lpstrDefExt != NULL)
+        sprintf(filename, "Untitled.%s", ofn->lpstrDefExt);
+    
+    gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER(dialog), filename);
+
+    if (ofn->Flags & OFN_OVERWRITEPROMPT)
+        gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog), TRUE);
+    
     GtkFileFilter *filter = gtk_file_filter_new ();
     char* strFilter = new char[strlen(ofn->lpstrFilter)];
     DWORD strFilterLen = 0;
@@ -127,19 +139,76 @@ BOOL GetSaveFileName(OPENFILENAME *ofn)
                 gtk_file_chooser_add_filter (GTK_FILE_CHOOSER(dialog), filter);
                 filter = gtk_file_filter_new ();
                 strFilterLen = 0;
-                //g_print("filter pat: %s\n", strFilter);
-                //g_print("filter reset\n");
                 filterResetFlag = FALSE;
             }
             else
             {
                 gtk_file_filter_set_name (GTK_FILE_FILTER(filter), strFilter);
-                //g_print("filter name: %s\n", strFilter);
                 strFilterLen = 0;
                 filterResetFlag = TRUE;
             }
     }
-    //g_print("filter rules added\n");
+    
+    sprintf(strFilter, "*.%s", ofn->lpstrDefExt);
+    gtk_file_filter_add_pattern (GTK_FILE_FILTER(filter), strFilter);
+    gtk_file_chooser_set_filter (GTK_FILE_CHOOSER(dialog), filter);
+    
+    delete strFilter;
+
+    BOOL exitStatus = gtk_dialog_run (GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT;
+    if (exitStatus)
+    {
+        char* str;
+        str = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER(dialog));
+        
+        strcpy(ofn->lpstrFile, str);
+        g_free(str);
+    }
+    
+    gtk_widget_destroy (dialog);
+
+    return exitStatus;
+}
+
+BOOL GetOpenFileName(OPENFILENAME *ofn)
+{
+    GtkWidget *dialog;
+    GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
+
+    dialog = gtk_file_chooser_dialog_new (ofn->lpstrTitle,
+                                        GTK_WINDOW(ofn->parentWindow),
+                                        action,
+                                        "_Cancel",
+                                        GTK_RESPONSE_CANCEL,
+                                        "_Open",
+                                        GTK_RESPONSE_ACCEPT,
+                                        NULL);
+    
+    GtkFileFilter *filter = gtk_file_filter_new ();
+    char* strFilter = new char[strlen(ofn->lpstrFilter)];
+    DWORD strFilterLen = 0;
+    BOOL filterResetFlag = FALSE;
+    
+    for (int i = 0; !(ofn->lpstrFilter[i] == '\0' && ofn->lpstrFilter[i-1] == '\0'); ++i)   
+    {
+        memcpy (strFilter + strFilterLen, &ofn->lpstrFilter[i], 1 );
+        ++strFilterLen;
+        if (ofn->lpstrFilter[i] == '\0')
+            if (filterResetFlag)
+            {
+                gtk_file_filter_add_pattern (GTK_FILE_FILTER(filter), strFilter);
+                gtk_file_chooser_add_filter (GTK_FILE_CHOOSER(dialog), filter);
+                filter = gtk_file_filter_new ();
+                strFilterLen = 0;
+                filterResetFlag = FALSE;
+            }
+            else
+            {
+                gtk_file_filter_set_name (GTK_FILE_FILTER(filter), strFilter);
+                strFilterLen = 0;
+                filterResetFlag = TRUE;
+            }
+    }
     
     sprintf(strFilter, "*.%s", ofn->lpstrDefExt);
     gtk_file_filter_add_pattern (GTK_FILE_FILTER(filter), strFilter);
@@ -147,8 +216,6 @@ BOOL GetSaveFileName(OPENFILENAME *ofn)
     gtk_file_chooser_set_filter (GTK_FILE_CHOOSER(dialog), filter);
     
     delete strFilter;
-
-    //g_print("default filter set\n");
 
     BOOL exitStatus = gtk_dialog_run (GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT;
     if (exitStatus)
@@ -158,14 +225,12 @@ BOOL GetSaveFileName(OPENFILENAME *ofn)
         strcpy(ofn->lpstrFile, str);
         g_free(str);
     }
-    //g_print("file path saved: %s\n", ofn->lpstrFile);
     
     gtk_widget_destroy (dialog);
 
-    //g_print("exit\n");
-
     return exitStatus;
 }
+
 
 void EnableMenuItem(HMENU MenuName, HMENU MenuItem, UINT CheckEnabledItem) 
 {
@@ -217,6 +282,9 @@ HANDLE GetStockObject(int fnObject)
 
 void SelectObject(HCRDC hcr, HFONT hfont)
 {
+    if (hcr ==NULL)
+        return;
+    
     cairo_select_font_face(hcr, hfont->lpszFace,
         hfont->fdwItalic ? CAIRO_FONT_SLANT_ITALIC : CAIRO_FONT_SLANT_NORMAL,
         hfont->fnWeight == FW_BOLD ? CAIRO_FONT_WEIGHT_BOLD : CAIRO_FONT_WEIGHT_NORMAL);
@@ -231,8 +299,6 @@ void SelectObject(HCRDC hcr, HFONT hfont)
  
     // cairo_set_font_matrix (hcr, &matrix);
 
-    // g_print("wR = %f\nhR = %f\n", (double)hfont->nWidth / extents.width, (double)hfont->nHeight / extents.height);
-    // g_print("tW = %f tH = %f\n", extents.width, extents.width);
     cairo_set_font_size(hcr, 10);
 }
 
@@ -250,24 +316,28 @@ HBRUSH CreateBrushIndirect(PLOGBRUSH plb)
 HFONT CreateFont(int nHeight, int nWidth, int nOrientation, int fnWeight,
     DWORD fdwItalic, LPCTSTR lpszFace)
 {
-    HFONT font = new FONT;
+    HFONT font = (HFONT)malloc(strlen(lpszFace) + 1 + sizeof(FONT));
     font->nHeight = nHeight;
     font->nWidth = nWidth;
     font->nOrientation = nOrientation;
     font->fnWeight = fnWeight;
     font->fdwItalic = fdwItalic;
-    font->lpszFace = lpszFace;
-
+    font->lpszFace = (char*)malloc(strlen(lpszFace)+1);
+    strcpy(font->lpszFace, lpszFace);
+    
     return font;
 }
 
 void SetBkColor(HWID widget, HCRDC hcr, COLORREF bkCol)
 {
-    // gtk_widget_override_background_color(GTK_WIDGET(widget), 
-    //                     GTK_STATE_FLAG_NORMAL, &bkCol);
+    if (hcr == NULL)
+        return;
+    
+    gtk_widget_override_background_color(GTK_WIDGET(widget), 
+                        GTK_STATE_FLAG_NORMAL, &bkCol);
 
-    // gint width = gtk_widget_get_allocated_width (widget);
-    // gint height = gtk_widget_get_allocated_height (widget);
+    gint width = gtk_widget_get_allocated_width (widget);
+    gint height = gtk_widget_get_allocated_height (widget);
 
     // COLORREF col;
     // GtkStyleContext *context;
@@ -277,20 +347,27 @@ void SetBkColor(HWID widget, HCRDC hcr, COLORREF bkCol)
     // gtk_style_context_get_color (context,
     //                     gtk_style_context_get_state (context),
     //                     &col);
-    
-    // gdk_cairo_set_source_rgba (hcr, &col);
+    gdk_cairo_set_source_rgba (hcr, &bkCol);
+    // cairo_rectangle(hcr, 0, 0, width, height);
+    // cairo_stroke_preserve(hcr);
 
-    // cairo_fill (hcr);
+    cairo_fill (hcr);
 }
 
 void SetTextColor(HCRDC hcr, COLORREF color)
 {
+    if (hcr == NULL)
+        return;
+    
     HdcCurrentTextColor = color;
     gdk_cairo_set_source_rgba (hcr, &color);
 }
 
 void TextOut(HWID hWid, HCRDC hcr, int nXStart, int nYStart, LPCTSTR lpString, int cchString)
 {
+    if (hcr == NULL)
+        return;
+    
     nYStart += 30;
     
     cairo_text_extents_t extents;
@@ -298,32 +375,28 @@ void TextOut(HWID hWid, HCRDC hcr, int nXStart, int nYStart, LPCTSTR lpString, i
     int width = gtk_widget_get_allocated_width (hWid);
     int height= gtk_widget_get_allocated_height (hWid);
     BOOL resize_flag = FALSE;
-    // g_print("w = %f h = %f")
 
     if(nYStart+(extents.height/2.0) >= height)
     {
-        // g_print("Y extend\n");
         height += extents.height + 50;
         resize_flag = TRUE;
     }
     
     if (nXStart+(extents.width/2.0) >= width)
     {
-        // g_print("X extend\n");
         width += extents.width;
         resize_flag = TRUE;
     }
 
     if (resize_flag)
         gtk_widget_set_size_request(hWid, width, height);
+    
     char* text = (char*)malloc(cchString);
     strncpy(text, lpString, cchString);
     text[cchString] = '\0';
 
     cairo_move_to(hcr, nXStart, nYStart);
     cairo_show_text(hcr, text);
-
-    // g_print("%s", text);
 
     cairo_fill (hcr);
 }
@@ -341,10 +414,7 @@ COLORREF GetTextColor(HCRDC Hdc)
 BOOL InvalidateRect(HWID hWid, const RECT *lpRect, BOOL bErase)
 {
     if(!GDK_IS_WINDOW(hWid))
-    {
-        // g_print("not window\n");
         return FALSE;
-    }
 
     if (lpRect == NULL)
     {
@@ -362,6 +432,9 @@ BOOL InvalidateRect(HWID hWid, const RECT *lpRect, BOOL bErase)
 
 int FillRect(HCRDC hDC, const RECT *lprc, HBRUSH hbr)
 {
+    if (hDC == NULL)
+        return -1;
+    
     GDRECT gdrc;
     RECT_to_GDRECT(lprc, &gdrc);
 
@@ -375,6 +448,9 @@ int FillRect(HCRDC hDC, const RECT *lprc, HBRUSH hbr)
 
 BOOL PatBlt(HCRDC hdc, int nXLeft, int nYLeft, int nWidth, int nHeight, DWORD dwRop, HBRUSH hbr)
 {
+    if (hdc == NULL)
+        return FALSE;
+    
     cairo_set_source_rgb(hdc, hbr->red, hbr->green, hbr->blue);
     cairo_rectangle(hdc, nXLeft, nYLeft + 20, nWidth, nHeight);
     cairo_stroke_preserve(hdc);
@@ -420,4 +496,40 @@ BOOL GetWindowRect(HWID hWid, PRECT pRect)
     pRect->bottom = allocation.height;
 
     return TRUE;
+}
+
+
+UINT SetTimer(HWID hWid, UINT  nIDEvent, UINT uElapse, BOOL (*lpTimerFunc)(BOOL) )
+{
+    auto record_it = std::find_if(timerRecords.begin(), timerRecords.end(),  [&nIDEvent](TimerRecord &Record) { return Record.ufID == nIDEvent; });
+
+    if (record_it != timerRecords.end())
+        return 0;
+
+    TimerRecord tr;
+    tr.pfun = lpTimerFunc;
+    tr.ufID = nIDEvent;
+    tr.utID = g_timeout_add(uElapse, (GSourceFunc)lpTimerFunc, FALSE);
+
+    timerRecords.push_back(tr);
+    return tr.utID;
+}
+
+BOOL KillTimer(HWID hWid, UINT uIDEvent)
+{
+    auto record_it = std::find_if(timerRecords.begin(), timerRecords.end(),  [&uIDEvent](TimerRecord &Record) { return Record.ufID == uIDEvent; });
+
+    if (record_it == timerRecords.end())
+        return FALSE;
+    
+    record_it->pfun(TRUE);
+    g_source_remove (record_it->utID);
+    timerRecords.erase(record_it);
+
+    return TRUE;
+}
+
+void DestroyWindow (HWID widget)
+{
+    gtk_widget_destroy (widget);
 }

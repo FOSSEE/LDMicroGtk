@@ -589,7 +589,6 @@ void RefreshScrollbars(void);
 extern HINSTANCE Instance;
 extern HWID MainWindow;
 extern HWID DrawWindow;
-// extern HCRDC Hcr;
 extern PlcProgram Prog;
 extern char CurrentSaveFile[MAX_PATH];
 extern char CurrentCompileFile[MAX_PATH];
@@ -632,7 +631,7 @@ extern BOOL ThisHighlighted;
 
 // draw_outputdev.cpp
 extern void (*DrawChars)(HCRDC Hcr, int, int, const char *);
-gboolean BlinkCursor(GtkWidget * window);
+BOOL BlinkCursor(BOOL kill);
 void PaintWindow(HCRDC Hcr);
 void ExportDrawingAsText(char *file);
 void InitForDrawing(void);
@@ -781,23 +780,22 @@ void WriteIhex(FILE *f, BYTE b);
 void FinishIhex(FILE *f);
 char *IoTypeToString(int ioType);
 void PinNumberForIo(char *dest, PlcProgramSingleIo *io);
-HWND CreateWindowClient(DWORD exStyle, char *className, char *windowName,
-    DWORD style, int x, int y, int width, int height, HWND parent,
-    HMENU menu, HINSTANCE instance, void *param);
+HWID CreateWindowClient(GtkWindowType wType, GdkWindowTypeHint wthint, char *windowName,
+    int x, int y, int width, int height, HWND parent);
 
 void MakeComponentListClass(void);
 void MakeNamingListClass(void);
 void MakeDialogBoxClass(void);
-void NiceFont(HWND h);
-void FixedFont(HWND h);
+void NiceFont(HWID h);
+void FixedFont(HWID h);
 void CompileSuccessfulMessage(char *str);
 extern BOOL RunningInBatchMode;
 extern HFONT MyNiceFont;
 extern HFONT MyFixedFont;
-extern HWND OkButton;
-extern HWND CancelButton;
-extern BOOL DialogDone;
-extern BOOL DialogCancel;
+// extern HWID OkButton;
+// extern HWID CancelButton;
+// extern BOOL DialogDone;
+// extern BOOL DialogCancel;
 
 // lang.cpp
 char *_(char *in);
@@ -805,7 +803,7 @@ char *_(char *in);
 
 // simulate.cpp
 void SimulateOneCycle(BOOL forceRefresh);
-void CALLBACK PlcCycleTimer(HWND hwnd, UINT msg, UINT_PTR id, DWORD time);
+BOOL PlcCycleTimer(BOOL kill);
 void StartSimulationTimer(void);
 void ClearSimulationData(void);
 void DescribeForIoList(char *name, char *out);

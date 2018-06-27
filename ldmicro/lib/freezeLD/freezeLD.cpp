@@ -18,7 +18,6 @@
  */
 void FreezeWindowPosF(HWID hwid, char *subKey, char *name)
 {
-    //g_print("freezing");
     char* Ld_CWD = (char *)malloc(MAX_PATH);
     getcwd(Ld_CWD, MAX_PATH);
     
@@ -52,7 +51,7 @@ void FreezeWindowPosF(HWID hwid, char *subKey, char *name)
     Key newKey;
 
     int val;
-    //g_print("get width");
+
     sprintf(keyName, "%s_width", name);
     std::ofstream Register(keyName, std::ios::binary | std::ios::trunc);
     if (!Register.is_open())
@@ -67,7 +66,6 @@ void FreezeWindowPosF(HWID hwid, char *subKey, char *name)
     Register.write((char*) &newKey, sizeof(newKey));
     Register.close();
 
-    //g_print("get height");
     sprintf(keyName, "%s_height", name);
     Register.open(keyName, std::ios::binary | std::ios::trunc);
     if (!Register.is_open())
@@ -82,7 +80,6 @@ void FreezeWindowPosF(HWID hwid, char *subKey, char *name)
     Register.write((char*) &newKey, sizeof(newKey));
     Register.close();
 
-    //g_print("get posX");
     sprintf(keyName, "%s_posX", name);
     Register.open(keyName, std::ios::binary | std::ios::trunc);
     if (!Register.is_open())
@@ -97,7 +94,6 @@ void FreezeWindowPosF(HWID hwid, char *subKey, char *name)
     Register.write((char*) &newKey, sizeof(newKey));
     Register.close();
     
-    //g_print("get posY");
     sprintf(keyName, "%s_posY", name);
     Register.open(keyName, std::ios::binary | std::ios::trunc);
     if (!Register.is_open())
@@ -112,7 +108,6 @@ void FreezeWindowPosF(HWID hwid, char *subKey, char *name)
     Register.write((char*) &newKey, sizeof(newKey));
     Register.close();
 
-    //g_print("get max");
     sprintf(keyName, "%s_maximized", name);
     Register.open(keyName, std::ios::binary | std::ios::trunc);
     if (!Register.is_open())
@@ -129,7 +124,6 @@ void FreezeWindowPosF(HWID hwid, char *subKey, char *name)
     free(keyName);
     chdir(Ld_CWD);
     free(Ld_CWD);
-    //g_print("freezed");
 }
 
 static void Clamp(LONG *v, LONG min, LONG max)

@@ -24,8 +24,11 @@
 #include "linuxUI.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <iostream>
 
 #include "ldmicro.h"
+
+using namespace std;
 
 // Not all options all available e.g. can't delete the only relay coil in
 // a rung, can't insert two coils in series, etc. Keep track of what is
@@ -395,8 +398,12 @@ void MoveCursorKeyboard(int keyCode)
 // Edit the selected element. Pop up the appropriate modal dialog box to do
 // this.
 //-----------------------------------------------------------------------------
+
 void EditSelectedElement(void)
 {
+    ShowLookUpTableDialog(Selected);
+    // ShowContactsDialog(&(Selected->d.contacts.negated),Selected->d.contacts.name);
+
 //     if(!Selected || Selected->selectedState == SELECTED_NONE) return;
 
 //     switch(SelectedWhich) {
@@ -526,6 +533,7 @@ void EditElementMouseDoubleclick(int x, int y)
 //             EditSelectedElement();
 //         }
 //     }
+    EditSelectedElement();
 }
 
 //-----------------------------------------------------------------------------

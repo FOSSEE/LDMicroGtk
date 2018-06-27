@@ -34,7 +34,7 @@
 HMENU NewMenu;
 HMENU OpenMenu;
 HMENU SaveMenu;
-HMENU SaveAsMenu_AS;
+HMENU SaveAsMenu;
 HMENU ExportMenu;
 HMENU ExitMenu;
 
@@ -110,7 +110,7 @@ int                 ScrollHeight;
 BOOL                NeedHoriz;
 
 // status bar at the bottom of the screen, to display settings
-static HMENU        StatusBar;
+static HMENU        StatusBar[3];
 
 // have to get back to the menus to gray/ungray, check/uncheck things
 static HMENU        FileMenu;
@@ -131,8 +131,6 @@ static int          IoListSelectionPoint;
 static BOOL         IoListOutOfSync;
 int                 IoListHeight;
 int                 IoListTop;
-GtkTreeIter* iter = new GtkTreeIter;
-GtkTreeModel **IoListPtr = (GtkTreeModel**)GTK_TREE_MODEL (IoList);
 
 // whether the simulation is running in real time
 static BOOL         RealTimeSimulationRunning;
@@ -166,65 +164,65 @@ void AddMenuAccelerators (void){
     gtk_widget_add_accelerator (PushRungDownMenu, "activate", AccelGroup, GDK_KEY_downarrow,
                                 GDK_SHIFT_MASK, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (DeleteElementMenu, "activate", AccelGroup, GDK_KEY_Delete,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (DeleteRungMenu, "activate", AccelGroup, GDK_KEY_Delete,
                                 GDK_SHIFT_MASK, GTK_ACCEL_VISIBLE);
     
     // Creating keyboard shortcuts for Instructions menu
     gtk_widget_add_accelerator (InsertCommentMenu, "activate", AccelGroup, GDK_KEY_semicolon,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertContactsMenu, "activate", AccelGroup, GDK_KEY_C,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertOsrMenu, "activate", AccelGroup, GDK_KEY_backslash,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertOsfMenu, "activate", AccelGroup, GDK_KEY_slash,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertTonMenu, "activate", AccelGroup, GDK_KEY_O,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertTofMenu, "activate", AccelGroup, GDK_KEY_F,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertRtoMenu, "activate", AccelGroup, GDK_KEY_T,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertCtuMenu, "activate", AccelGroup, GDK_KEY_U,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertCtdMenu, "activate", AccelGroup, GDK_KEY_I,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertCtcMenu, "activate", AccelGroup, GDK_KEY_J,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertEquMenu, "activate", AccelGroup, GDK_KEY_equal,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertGrtMenu, "activate", AccelGroup, GDK_KEY_greater,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertGeqMenu, "activate", AccelGroup, GDK_KEY_Stop,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertLesMenu, "activate", AccelGroup, GDK_KEY_less,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertLeqMenu, "activate", AccelGroup, GDK_KEY_comma,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertCoilMenu, "activate", AccelGroup, GDK_KEY_L,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertResMenu, "activate", AccelGroup, GDK_KEY_E,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertMovMenu, "activate", AccelGroup, GDK_KEY_M,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertAddMenu, "activate", AccelGroup, GDK_KEY_plus,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertSubMenu, "activate", AccelGroup, GDK_KEY_minus,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertMulMenu, "activate", AccelGroup, GDK_KEY_multiply,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertDivMenu, "activate", AccelGroup, GDK_KEY_D,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (InsertReadAdcMenu, "activate", AccelGroup, GDK_KEY_P,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (MakeNormalMenu, "activate", AccelGroup, GDK_KEY_A,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (NegateMenu, "activate", AccelGroup, GDK_KEY_N,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (MakeSetOnlyMenu, "activate", AccelGroup, GDK_KEY_S,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (MakeResetOnlyMenu, "activate", AccelGroup, GDK_KEY_R,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     
     // Creating keyboard shortcuts for Simulation menu
     gtk_widget_add_accelerator (SimulationModeMenu, "activate", AccelGroup, GDK_KEY_M,
@@ -234,15 +232,15 @@ void AddMenuAccelerators (void){
     gtk_widget_add_accelerator (StopSimulationMenu, "activate", AccelGroup, GDK_KEY_H,
                                 GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
     gtk_widget_add_accelerator (SingleCycleMenu, "activate", AccelGroup, GDK_KEY_space,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     
     // Creating keyboard shortcuts for Compile menu
     gtk_widget_add_accelerator (CompileMenu, "activate", AccelGroup, GDK_KEY_F5,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     
     // Creating keyboard shortcuts for Help menu
     gtk_widget_add_accelerator (ManualMenu, "activate", AccelGroup, GDK_KEY_F1,
-                                GDK_RELEASE_MASK, GTK_ACCEL_VISIBLE);
+                                (GdkModifierType)0, GTK_ACCEL_VISIBLE);
     
     gtk_window_add_accel_group (GTK_WINDOW (MainWindow), AccelGroup);
 
@@ -298,7 +296,7 @@ HMENU MakeMainWindowMenus(void)
     NewMenu = gtk_menu_item_new_with_mnemonic("_New");
     OpenMenu = gtk_menu_item_new_with_mnemonic("_Open");
     SaveMenu = gtk_menu_item_new_with_mnemonic("_Save");
-    SaveAsMenu_AS = gtk_menu_item_new_with_mnemonic("_Save As");
+    SaveAsMenu = gtk_menu_item_new_with_mnemonic("_Save As");
     ExportMenu = gtk_menu_item_new_with_mnemonic("_Export As Text");
     ExitMenu = gtk_menu_item_new_with_mnemonic("_Exit");
 
@@ -306,7 +304,7 @@ HMENU MakeMainWindowMenus(void)
     gtk_menu_shell_append(GTK_MENU_SHELL (FileMenu), NewMenu);       // Appending menu items
     gtk_menu_shell_append(GTK_MENU_SHELL (FileMenu), OpenMenu);
     gtk_menu_shell_append(GTK_MENU_SHELL (FileMenu), SaveMenu);
-    gtk_menu_shell_append(GTK_MENU_SHELL (FileMenu), SaveAsMenu_AS);
+    gtk_menu_shell_append(GTK_MENU_SHELL (FileMenu), SaveAsMenu);
     FileMenuSeparator = gtk_separator_menu_item_new();
     gtk_menu_shell_append(GTK_MENU_SHELL (FileMenu), FileMenuSeparator);
     gtk_menu_shell_append(GTK_MENU_SHELL (FileMenu), ExportMenu);
@@ -347,12 +345,15 @@ HMENU MakeMainWindowMenus(void)
     gtk_menu_shell_append (GTK_MENU_SHELL (Settings), MicroControllerMenu);
 
     // Appending the microcontroller names to "Microcontroller" item
+    GSList* mcuList = NULL;
     for (i = 0; i < NUM_SUPPORTED_MCUS; i++){
-    ProcessorMenuItems[i] = gtk_check_menu_item_new_with_label (SupportedMcus[i].mcuName);
+    ProcessorMenuItems[i] = gtk_radio_menu_item_new_with_label (mcuList, SupportedMcus[i].mcuName);
+    mcuList = gtk_radio_menu_item_get_group (GTK_RADIO_MENU_ITEM (ProcessorMenuItems[i]));
     gtk_menu_shell_append (GTK_MENU_SHELL (ProcessorMenu), ProcessorMenuItems[i]);
     }
 
-    ProcessorMenuItems[NUM_SUPPORTED_MCUS] = gtk_check_menu_item_new_with_label ("(no microcontroller)");
+    ProcessorMenuItems[NUM_SUPPORTED_MCUS] = gtk_radio_menu_item_new_with_label (mcuList, "(no microcontroller)");
+    mcuList = gtk_radio_menu_item_get_group (GTK_RADIO_MENU_ITEM (ProcessorMenuItems[NUM_SUPPORTED_MCUS]));
     gtk_menu_shell_append (GTK_MENU_SHELL (ProcessorMenu), ProcessorMenuItems[NUM_SUPPORTED_MCUS]);
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(MicroControllerMenu), ProcessorMenu);
 
@@ -526,7 +527,7 @@ void MakeMainWindowControls(void)
     /// Pane to separate Scrolled Window and other widgets
     HWID pane = gtk_paned_new (GTK_ORIENTATION_VERTICAL);
 
-    IoList = gtk_list_store_new (5, 
+    IoList = (GtkTreeModel*)gtk_list_store_new (5, 
                                 G_TYPE_STRING,   
                                 G_TYPE_STRING,    
                                 G_TYPE_STRING,
@@ -592,22 +593,62 @@ void MakeMainWindowControls(void)
     gtk_container_add (GTK_CONTAINER(ViewPortMenu), DrawWindow);
     gtk_container_add (GTK_CONTAINER(ScrollWindow), ViewPortMenu);
     gtk_paned_pack1 (GTK_PANED (pane), ScrollWindow, TRUE, TRUE);
-    gtk_paned_set_position (GTK_PANED (pane), 0);    
+    gtk_paned_set_position (GTK_PANED (pane), 0);
+
+    /// Appending tree view to scrolled window 
+    HWID ViewScroll = gtk_scrolled_window_new (NULL, NULL);
+    gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (ViewScroll),
+				                          GTK_POLICY_AUTOMATIC, 
+				                          GTK_POLICY_ALWAYS);
+    gtk_widget_set_hexpand(GTK_WIDGET(ViewScroll), TRUE);  
+    gtk_widget_set_vexpand(GTK_WIDGET(ViewScroll), TRUE);
+
+    gtk_container_add (GTK_CONTAINER(ViewScroll), view);
 
     /// Appending tree view to pane and pane to grid
-    gtk_paned_pack2 (GTK_PANED(pane), view, FALSE, FALSE);
+    gtk_paned_pack2 (GTK_PANED(pane), ViewScroll, FALSE, FALSE);
     gtk_paned_set_position (GTK_PANED (pane), 400);
     gtk_grid_attach (GTK_GRID (grid), pane, 0, 0, 1, 1); 
+    
+    gtk_box_pack_start(GTK_BOX(PackBoxMenu), grid, FALSE, TRUE, 0);
 
-    /// Creating Status Bar and attaching to grid
-    StatusBar = gtk_statusbar_new();
-    gtk_statusbar_push (GTK_STATUSBAR (StatusBar),
-                        gtk_statusbar_get_context_id (GTK_STATUSBAR (StatusBar),
+    /// Grid for status bars
+    HWID StatusGrid = gtk_grid_new();
+
+    /// Creating Status Bar 1 and attaching to grid
+    StatusBar[0] = gtk_statusbar_new();
+   
+    gtk_statusbar_push (GTK_STATUSBAR (StatusBar[0]),
+                        gtk_statusbar_get_context_id (GTK_STATUSBAR (StatusBar[0]),
                         "Introduction"), "LDMicro Started");
 
-    /// Appneding Status Bar to box which is then added to Main Window
-    gtk_box_pack_start(GTK_BOX(PackBoxMenu), grid, FALSE, TRUE, 0);
-    gtk_box_pack_start(GTK_BOX(PackBoxMenu), StatusBar, FALSE, FALSE, 0);
+    /// Appneding Status Bar 1 to the status grid
+    gtk_grid_attach (GTK_GRID (StatusGrid), StatusBar[0], 0, 0, 1, 1);
+    
+    /// Creating Status Bar 2 and attaching to grid
+    StatusBar[1] = gtk_statusbar_new();
+   
+    gtk_statusbar_push (GTK_STATUSBAR (StatusBar[1]),
+                        gtk_statusbar_get_context_id (GTK_STATUSBAR (StatusBar[1]),
+                        "Introduction"), "LDMicro Started");
+
+    /// Appneding Status Bar 2 to the status box
+    gtk_grid_attach (GTK_GRID (StatusGrid), StatusBar[1], 1, 0, 1, 1);
+    
+    /// Creating Status Bar 3 and attaching to grid
+    StatusBar[2] = gtk_statusbar_new();
+   
+    gtk_statusbar_push (GTK_STATUSBAR (StatusBar[2]),
+                        gtk_statusbar_get_context_id (GTK_STATUSBAR (StatusBar[2]),
+                        "Introduction"), "LDMicro Started");
+
+    /// Appneding Status Bar 3 to the status box
+    gtk_grid_attach (GTK_GRID (StatusGrid), StatusBar[2], 2, 0, 1, 1);
+
+    /// Attach status grid to box
+    gtk_box_pack_start(GTK_BOX(PackBoxMenu), StatusGrid, FALSE, FALSE, 0);
+
+    /// Adding box to Main Window
     gtk_container_add(GTK_CONTAINER(MainWindow), PackBoxMenu);
 }
 
@@ -620,14 +661,6 @@ void RefreshScrollbars(void)
 {
     SCROLLINFO vert, horiz;
     SetUpScrollbars(&NeedHoriz, &horiz, &vert);
-
-    GtkAdjustment *adjustment = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(ScrollWindow));
-    // g_print("adj = %f\n", gtk_adjustment_get_value(adjustment));
-    // g_print("upper = %f\n", gtk_adjustment_get_upper(adjustment) - gtk_widget_get_allocated_height (ScrollWindow));
-    // g_print("lower = %f\n", gtk_adjustment_get_lower(adjustment));
-    // g_print("inc = %f\n", gtk_adjustment_get_step_increment(adjustment));
-    // g_print("w width = %i\n", gtk_widget_get_allocated_width (DrawWindow));
-    // g_print("w height = %i\n", gtk_widget_get_allocated_height (ScrollWindow));
 
     // SetScrollInfo(HorizScrollBar, SB_CTL, &horiz, TRUE);
     // SetScrollInfo(VertScrollBar, SB_CTL, &vert, TRUE);
@@ -867,7 +900,7 @@ void ToggleSimulationMode(void)
 
         EnableMenuItem(FileMenu, OpenMenu, MF_GRAYED);
         EnableMenuItem(FileMenu, SaveMenu, MF_GRAYED);
-        EnableMenuItem(FileMenu, SaveAsMenu_AS, MF_GRAYED);
+        EnableMenuItem(FileMenu, SaveAsMenu, MF_GRAYED);
         EnableMenuItem(FileMenu, NewMenu, MF_GRAYED);
         EnableMenuItem(FileMenu, ExportMenu, MF_GRAYED);
 
@@ -878,16 +911,16 @@ void ToggleSimulationMode(void)
     
         CheckMenuItem(SimulateMenu, SimulationModeMenu, MF_CHECKED);
 
-        // ClearSimulationData(); // simulation.cpp, ldmicro.h
+        ClearSimulationData(); // simulation.cpp, ldmicro.h
         // Recheck InSimulationMode, because there could have been a Compile
         // error, which would have kicked us out of simulation mode.
-        // if(UartFunctionUsed() && InSimulationMode) {
-        //     ShowUartSimulationWindow(); // simulate.cpp
-        // }
+        if(UartFunctionUsed() && InSimulationMode) {
+            ShowUartSimulationWindow(); // simulate.cpp
+        }
     }
     else {
         RealTimeSimulationRunning = FALSE;
-        // KillTimer(MainWindow, TIMER_SIMULATE);
+        KillTimer(MainWindow, TIMER_SIMULATE);
 
         EnableMenuItem(SimulateMenu, StartSimulationMenu, MF_GRAYED);
         EnableMenuItem(SimulateMenu, StopSimulationMenu, MF_GRAYED);
@@ -895,7 +928,7 @@ void ToggleSimulationMode(void)
 
         EnableMenuItem(FileMenu, OpenMenu, MF_ENABLED);
         EnableMenuItem(FileMenu, SaveMenu, MF_ENABLED);
-        EnableMenuItem(FileMenu, SaveAsMenu_AS, MF_ENABLED);
+        EnableMenuItem(FileMenu, SaveAsMenu, MF_ENABLED);
         EnableMenuItem(FileMenu, NewMenu, MF_ENABLED);
         EnableMenuItem(FileMenu, ExportMenu, MF_ENABLED);
 
@@ -906,9 +939,9 @@ void ToggleSimulationMode(void)
 
         CheckMenuItem(SimulateMenu, SimulationModeMenu, MF_UNCHECKED);
 
-        // if(UartFunctionUsed()) {
-        //     DestroyUartSimulationWindow();
-        // }
+        if(UartFunctionUsed()) {
+            DestroyUartSimulationWindow();
+        }
         }
 
     UpdateMainWindowTitleBar();
@@ -922,36 +955,88 @@ void ToggleSimulationMode(void)
 //-----------------------------------------------------------------------------
 void RefreshControlsToSettings(void)
 {   
-    int i;
-    gtk_tree_model_get_iter_first (GTK_TREE_MODEL(IoList), iter);
-    gtk_tree_selection_set_mode(gtk_tree_view_get_selection(GTK_TREE_VIEW(view)),
-                                    GTK_SELECTION_SINGLE);
+    GtkTreeIter iter;
+    BOOL path_not_empty = gtk_tree_model_get_iter_first (GTK_TREE_MODEL(IoList), &iter);
+    // g_print("path e = %i\n", path_not_empty);
+    
+    int * ip;
+    int i = 0;
+
+
     if(!IoListOutOfSync) {
         IoListSelectionPoint = -1;
-        for(i = 0; i < Prog.io.count; i++) {
-            gtk_tree_model_iter_next (GTK_TREE_MODEL(IoList), iter);
-            if(gtk_tree_selection_get_selected (gtk_tree_view_get_selection(GTK_TREE_VIEW(view)),
-                                        IoListPtr, iter)) {
-                IoListSelectionPoint = i;
-                break;
-            }
+
+        GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
+        gtk_tree_selection_set_mode(selection, GTK_SELECTION_SINGLE);
+        
+        GtkTreeModel *IoModelPtr; 
+        if(gtk_tree_selection_get_selected (selection, &IoModelPtr, &iter))
+        {
+            GtkTreePath *path = gtk_tree_model_get_path ( IoModelPtr, &iter ) ;
+            ip = gtk_tree_path_get_indices ( path ) ;
+            i = ip[0];
+            IoListSelectionPoint = i;
         }
     }
-    gtk_list_store_clear (IoList);
+
+    gtk_list_store_clear (GTK_LIST_STORE(IoList));
+
+    /// Fill IO List
+    NMHDR h;
+    h.code = LVN_GETDISPINFO;
+    h.hlistFrom = IoList;
+
+    gtk_tree_model_get_iter_first (GTK_TREE_MODEL(IoList), &iter);
+    for(i = 0; i < Prog.io.count; i++) {
+        gtk_list_store_append (GTK_LIST_STORE(IoList), &iter);
+        h.item.iItem = i;
+        h.hlistIter = &iter;
+        IoListProc(&h);
+    }
+
+    if(IoListSelectionPoint >= 0) {
+        GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
+        gtk_tree_selection_set_mode(selection, GTK_SELECTION_SINGLE);
+
+        gtk_tree_selection_unselect_all (selection);
+        GtkTreePath *path = gtk_tree_path_new_from_indices ( IoListSelectionPoint, -1);
+        gtk_tree_selection_select_path (selection, path);
+
+        // ListView_EnsureVisible(IoList, IoListSelectionPoint, FALSE);
+    }
+
     IoListOutOfSync = FALSE;
 
     if(Prog.mcu) {
-        gtk_statusbar_push (GTK_STATUSBAR (StatusBar),
-                        gtk_statusbar_get_context_id (GTK_STATUSBAR (StatusBar), "MCU Name"), 
+        gtk_statusbar_push (GTK_STATUSBAR (StatusBar[0]),
+                        gtk_statusbar_get_context_id (GTK_STATUSBAR (StatusBar[0]), "MCU Name"), 
                         (gchar*)Prog.mcu->mcuName);
-        // SendMessage(StatusBar, SB_SETTEXT, 0, (LPARAM)Prog.mcu->mcuName);
     } 
     else {
-        // SendMessage(StatusBar, SB_SETTEXT, 0, (LPARAM)_("no MCU selected"));
-        gtk_statusbar_push (GTK_STATUSBAR (StatusBar),
-                        gtk_statusbar_get_context_id (GTK_STATUSBAR (StatusBar), "MCU Name"), 
+        gtk_statusbar_push (GTK_STATUSBAR (StatusBar[0]),
+                        gtk_statusbar_get_context_id (GTK_STATUSBAR (StatusBar[0]), "MCU Name"), 
                         "no MCU selected");
     }
+    char buf[256];
+    sprintf(buf, _("cycle time %.2f ms"), (double)Prog.cycleTime/1000.0);
+
+    gtk_statusbar_push (GTK_STATUSBAR (StatusBar[1]),
+                        gtk_statusbar_get_context_id (GTK_STATUSBAR (StatusBar[1]), "Cycle time"), 
+                        buf);
+
+    if(Prog.mcu && (Prog.mcu->whichIsa == ISA_ANSIC ||
+        Prog.mcu->whichIsa == ISA_INTERPRETED))
+    {
+        strcpy(buf, "");
+    } else {
+        sprintf(buf, _("processor clock %.4f MHz"),
+            (double)Prog.mcuClock/1000000.0);
+    }
+    gtk_statusbar_push (GTK_STATUSBAR (StatusBar[2]),
+                        gtk_statusbar_get_context_id (GTK_STATUSBAR (StatusBar[2]), "Processor time"), 
+                        buf);
+
+
     for(i = 0; i < NUM_SUPPORTED_MCUS; i++) {
         if(&SupportedMcus[i] == Prog.mcu) {
             CheckMenuItem(ProcessorMenu, ProcessorMenuItems[i], MF_CHECKED);
@@ -975,24 +1060,41 @@ void RefreshControlsToSettings(void)
 //-----------------------------------------------------------------------------
 void GenerateIoListDontLoseSelection(void)
 {
-    int i;
-    gtk_tree_model_get_iter_first (GTK_TREE_MODEL(IoList), iter);
-    gtk_tree_selection_set_mode(gtk_tree_view_get_selection(GTK_TREE_VIEW(view)),
-                                    GTK_SELECTION_SINGLE);
+    GtkTreeIter iter;
+    BOOL path_not_empty = gtk_tree_model_get_iter_first (GTK_TREE_MODEL(IoList), &iter);
+    // g_print("path e = %i\n", path_not_empty);
+
+    int * i ;
     IoListSelectionPoint = -1;
-    for(i = 0; i < Prog.io.count; i++) {
-        gtk_tree_model_iter_next (GTK_TREE_MODEL (IoList), iter);
-        if(gtk_tree_selection_get_selected (gtk_tree_view_get_selection(GTK_TREE_VIEW(view)),
-                                        IoListPtr, iter)) {
-            IoListSelectionPoint = i;
-            break;
-        }
+    
+    // GtkTreeSelection * tsel = gtk_tree_view_get_selection (tv);
+    // GtkTreeModel * tm ;
+    GtkTreePath * path ;
+    GtkTreeModel *IoModelPtr;
+
+    GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
+    gtk_tree_selection_set_mode(selection, GTK_SELECTION_SINGLE);
+    if(gtk_tree_selection_get_selected (selection, &IoModelPtr, &iter))
+    {
+        path = gtk_tree_model_get_path ( IoModelPtr , &iter ) ;
+        i = gtk_tree_path_get_indices ( path ) ;
+        IoListSelectionPoint = i[0];
     }
-    // IoListSelectionPoint = GenerateIoList(IoListSelectionPoint);
+    // gtk_tree_model_iter_next (GTK_TREE_MODEL(IoList), iter);
+    //     BOOL iter_v = gtk_list_store_iter_is_valid(GTK_LIST_STORE(IoList), iter);
+    //     g_print("iter = %i\n", iter_v);
+
+    
+    // if ( gtk_tree_selection_get_selected ( tsel , &tm , &iter ) )
+    // {
+        
+    //     return i [ 0 ] ;
+    // }
+
+    IoListSelectionPoint = GenerateIoList(IoListSelectionPoint);
     
     // can't just update the listview index; if I/O has been added then the
     // new selection point might be out of range till we refill it
-    
     IoListOutOfSync = TRUE;
     RefreshControlsToSettings();
 }
@@ -1007,8 +1109,8 @@ void MainWindowResized(void)
     GetClientRect(DrawWindow, &main);
 
     RECT status;
-    GetWindowRect(StatusBar, &status);
-    int statusHeight = status.bottom - status.top;
+    // GetWindowRect(StatusBar, &status);
+    // int statusHeight = status.bottom - status.top;
 
     // MoveWindow(StatusBar, 0, main.bottom - statusHeight, main.right,
         // statusHeight, TRUE);
@@ -1022,8 +1124,8 @@ void MainWindowResized(void)
     // Make sure that we can't drag the top of the I/O list above the
     // bottom of the menu bar, because it then becomes inaccessible.
     if(IoListTop < 5) {
-        IoListHeight = main.bottom - statusHeight - 5;
-        IoListTop = main.bottom - IoListHeight - statusHeight;
+        IoListHeight = main.bottom - 5;//- statusHeight - 5;
+        IoListTop = main.bottom - IoListHeight;// - statusHeight;
     }
     // MoveWindow(IoList, 0, IoListTop, main.right, IoListHeight, TRUE);
 
@@ -1041,7 +1143,7 @@ void StartSimulation(void)
     RealTimeSimulationRunning = TRUE;
     EnableMenuItem(SimulateMenu, StartSimulationMenu, MF_GRAYED);
     EnableMenuItem(SimulateMenu, StopSimulationMenu, MF_ENABLED);
-    // StartSimulationTimer();
+    StartSimulationTimer();
     UpdateMainWindowTitleBar();
 }
 
@@ -1055,7 +1157,7 @@ void StopSimulation(void)
 
     EnableMenuItem(SimulateMenu, StartSimulationMenu, MF_ENABLED);
     EnableMenuItem(SimulateMenu, StopSimulationMenu, MF_GRAYED);
-    // KillTimer(MainWindow, TIMER_SIMULATE);
-
+    KillTimer(MainWindow, TIMER_SIMULATE);
+    
     UpdateMainWindowTitleBar();
 }

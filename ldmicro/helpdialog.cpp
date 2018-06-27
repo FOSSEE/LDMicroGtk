@@ -225,7 +225,7 @@ static void MakeControls(int a)
         }
     }
     gtk_widget_override_background_color (TextView, GTK_STATE_FLAG_NORMAL,
-                        ((HBRUSH)GetStockObject(BLACK_BRUSH))->getThis());
+                        ((HBRUSH)GetStockObject(BLACK_BRUSH)));
     gtk_container_add (GTK_CONTAINER(RichEdit[a]), TextView);
 
 }

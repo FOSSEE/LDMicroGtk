@@ -41,8 +41,8 @@ static HWID CancelButton;
 
 static LONG_PTR PrevNameProc;
 
-HWID CoilGrid;
-HWID CoilPackingBox;
+static HWID CoilGrid;
+static HWID CoilPackingBox;
 static bool* tmpnegated;
 static bool* tmpsetOnly ;
 static bool* tmpresetOnly;

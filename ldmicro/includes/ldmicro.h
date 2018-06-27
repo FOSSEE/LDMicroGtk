@@ -792,8 +792,8 @@ void CompileSuccessfulMessage(char *str);
 extern BOOL RunningInBatchMode;
 extern HFONT MyNiceFont;
 extern HFONT MyFixedFont;
-// extern HWND OkButton;
-// extern HWND CancelButton;
+// extern HWID OkButton;
+// extern HWID CancelButton;
 // extern BOOL DialogDone;
 // extern BOOL DialogCancel;
 

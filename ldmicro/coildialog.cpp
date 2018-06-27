@@ -27,108 +27,109 @@
 
 #include "ldmicro.h"
 
-static HWND CoilDialog;
+static HWID CoilDialog;
 
-static HWND SourceInternalRelayRadio;
-static HWND SourceMcuPinRadio;
-static HWND NegatedRadio;
-static HWND NormalRadio;
-static HWND SetOnlyRadio;
-static HWND ResetOnlyRadio;
-static HWND NameTextbox;
+static HWID SourceInternalRelayRadio;
+static HWID SourceMcuPinRadio;
+static HWID NegatedRadio;
+static HWID NormalRadio;
+static HWID SetOnlyRadio;
+static HWID ResetOnlyRadio;
+static HWID NameTextbox;
+static HWID OkButton;
+static HWID CancelButton;
 
 static LONG_PTR PrevNameProc;
 
-//-----------------------------------------------------------------------------
-// Don't allow any characters other than A-Za-z0-9_ in the name.
-//-----------------------------------------------------------------------------
-// static LRESULT CALLBACK MyNameProc(HWND hwnd, UINT msg, WPARAM wParam,
-//     LPARAM lParam)
-// {
-//     if(msg == WM_CHAR) {
-//         if(!(isalpha(wParam) || isdigit(wParam) || wParam == '_' ||
-//             wParam == '\b'))
-//         {
-//             return 0;
+HWID CoilGrid;
+HWID CoilPackingBox;
+
+// //-----------------------------------------------------------------------------
+// // Don't allow any characters other than A-Za-z0-9_ in the name.
+// //-----------------------------------------------------------------------------
+// // static LRESULT CALLBACK MyNameProc(HWND hwnd, UINT msg, WPARAM wParam,
+// //     LPARAM lParam)
+// // {
+// //     if(msg == WM_CHAR) {
+// //         if(!(isalpha(wParam) || isdigit(wParam) || wParam == '_' ||
+// //             wParam == '\b'))
+// //         {
+// //             return 0;
+// //         }
+// //     }
+
+// //     return CallWindowProc((WNDPROC)PrevNameProc, hwnd, msg, wParam, lParam);
+// // }
+
+// void CoilDialogMyNameProc (GtkEditable *editable, gchar *NewText, gint length, 
+//     gint *position, gpointer data){
+//     // gtk_widget_set_sensitive (MainWindow, TRUE);
+//     for (int i = 0; i < length; i++){
+//         if (!(isalpha (NewText[i]) || NewText[i] == '_' || isdigit (NewText[i])
+//                                      || NewText[i] == '\b' )){
+//             g_signal_stop_emission_by_name (G_OBJECT (editable), "insert-text");
+//             return;
 //         }
 //     }
-
-//     return CallWindowProc((WNDPROC)PrevNameProc, hwnd, msg, wParam, lParam);
 // }
+
 
 // static void MakeControls(void)
 // {
-//     HWND grouper = CreateWindowEx(0, WC_BUTTON, _("Type"),
-//         WS_CHILD | BS_GROUPBOX | WS_VISIBLE | WS_TABSTOP,
-//         7, 3, 120, 105, CoilDialog, NULL, Instance, NULL);
-//     NiceFont(grouper);
-
 //     NormalRadio = CreateWindowEx(0, WC_BUTTON, _("( ) Normal"),
 //         WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE | WS_GROUP,
 //         16, 21, 100, 20, CoilDialog, NULL, Instance, NULL);
 //     NiceFont(NormalRadio);
 
-//     NegatedRadio = CreateWindowEx(0, WC_BUTTON, _("(/) Negated"),
-//         WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE,
-//         16, 41, 100, 20, CoilDialog, NULL, Instance, NULL);
-//     NiceFont(NegatedRadio);
+//     NormalRadio = gtk_radio_button_new_with_label (NULL, "( ) Normal");
+//     NegatedRadio = gtk_radio_button_new_with_label_from_widget
+//                         (GTK_RADIO_BUTTON (NormalRadio), "(/) Negated");
+//     SetOnlyRadio = gtk_radio_button_new_with_label_from_widget
+//                         (GTK_RADIO_BUTTON (NormalRadio), "(S) Set-Only");
+//     ResetOnlyRadio = gtk_radio_button_new_with_label_from_widget
+//                         (GTK_RADIO_BUTTON (NormalRadio), "(R) Reset-Only");
+    
+//     SourceInternalRelayRadio = gtk_radio_button_new_with_label (NULL, "Internal Relay");
+//     SourceMcuPinRadio = gtk_radio_button_new_with_label_from_widget
+//                         (GTK_RADIO_BUTTON (SourceInternalRelayRadio), "Pin on MCU");
+    
+//     HWID textLabel = gtk_label_new ("Name:");
+    
+//     NameTextbox = gtk_entry_new();
+//     gtk_entry_set_max_length (GTK_ENTRY (NameTextbox), 0);
 
-//     SetOnlyRadio = CreateWindowEx(0, WC_BUTTON, _("(S) Set-Only"),
-//         WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE,
-//         16, 61, 100, 20, CoilDialog, NULL, Instance, NULL);
-//     NiceFont(SetOnlyRadio);
+//     OkButton = gtk_button_new_with_label ("OK");
+//     CancelButton = gtk_button_new_with_label ("Cancel");
 
-//     ResetOnlyRadio = CreateWindowEx(0, WC_BUTTON, _("(R) Reset-Only"),
-//         WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE,
-//         16, 81, 105, 20, CoilDialog, NULL, Instance, NULL);
-//     NiceFont(ResetOnlyRadio);
+//     gtk_grid_attach (GTK_GRID (CoilGrid), SourceInternalRelayRadio, 1, 2, 1, 1);
+//     gtk_grid_attach (GTK_GRID (CoilGrid), SourceInputPinRadio, 1, 3, 1, 1);
+//     gtk_grid_attach (GTK_GRID (CoilGrid), SourceOutputPinRadio, 1, 4, 1, 1);
+//     gtk_grid_attach (GTK_GRID (CoilGrid), textLabel, 2, 2, 1, 1);
+//     gtk_grid_attach (GTK_GRID (CoilGrid), NegatedCheckbox, 2, 3, 1, 1);
+//     gtk_grid_attach (GTK_GRID (CoilGrid), NameTextbox, 3, 2, 1, 1);
+//     gtk_grid_attach (GTK_GRID (CoilGrid), OkButton, 4, 2, 1, 1);
+//     gtk_grid_attach (GTK_GRID (CoilGrid), CancelButton, 4, 3, 1, 1);
 
-//     HWND grouper2 = CreateWindowEx(0, WC_BUTTON, _("Source"),
-//         WS_CHILD | BS_GROUPBOX | WS_VISIBLE,
-//         140, 3, 120, 65, CoilDialog, NULL, Instance, NULL);
-//     NiceFont(grouper2);
+//     gtk_grid_set_column_spacing (GTK_GRID (CoilGrid), 1);
+//     gtk_box_pack_start(GTK_BOX(CoilPackingBox), CoilGrid, TRUE, TRUE, 0);
 
-//     SourceInternalRelayRadio = CreateWindowEx(0, WC_BUTTON, _("Internal Relay"),
-//         WS_CHILD | BS_AUTORADIOBUTTON | WS_VISIBLE | WS_GROUP | WS_TABSTOP,
-//         149, 21, 100, 20, CoilDialog, NULL, Instance, NULL);
-//     NiceFont(SourceInternalRelayRadio);
 
-//     SourceMcuPinRadio = CreateWindowEx(0, WC_BUTTON, _("Pin on MCU"),
-//         WS_CHILD | BS_AUTORADIOBUTTON | WS_VISIBLE | WS_TABSTOP,
-//         149, 41, 100, 20, CoilDialog, NULL, Instance, NULL);
-//     NiceFont(SourceMcuPinRadio); 
-
-//     HWND textLabel = CreateWindowEx(0, WC_STATIC, _("Name:"),
-//         WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE | SS_RIGHT,
-//         135, 80, 50, 21, CoilDialog, NULL, Instance, NULL);
-//     NiceFont(textLabel);
-
-//     NameTextbox = CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "",
-//         WS_CHILD | ES_AUTOHSCROLL | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE,
-//         190, 80, 155, 21, CoilDialog, NULL, Instance, NULL);
-//     FixedFont(NameTextbox);
-
-//     OkButton = CreateWindowEx(0, WC_BUTTON, _("OK"),
-//         WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE | BS_DEFPUSHBUTTON,
-//         276, 10, 70, 23, CoilDialog, NULL, Instance, NULL); 
-//     NiceFont(OkButton);
-
-//     CancelButton = CreateWindowEx(0, WC_BUTTON, _("Cancel"),
-//         WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE,
-//         276, 40, 70, 23, CoilDialog, NULL, Instance, NULL); 
-//     NiceFont(CancelButton);
-
-//     PrevNameProc = SetWindowLongPtr(NameTextbox, GWLP_WNDPROC, 
-//         (LONG_PTR)MyNameProc);
+//     // PrevNameProc = SetWindowLongPtr(NameTextbox, GWLP_WNDPROC, 
+//     //     (LONG_PTR)MyNameProc);
 // }
 
 // void ShowCoilDialog(BOOL *negated, BOOL *setOnly, BOOL *resetOnly, char *name)
 // {
-//     CoilDialog = CreateWindowClient(0, "LDmicroDialog",
-//         _("Coil"), WS_OVERLAPPED | WS_SYSMENU,
-//         100, 100, 359, 115, NULL, NULL, Instance, NULL);
-//     RECT r;
-//     GetClientRect(CoilDialog, &r);
+//     CoilGrid = gtk_grid_new();
+//     CoilPackingBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+
+//     CoilDialog = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+//     gtk_window_set_title(GTK_WINDOW(CoilDialog), "Coil");
+//     gtk_window_set_default_size(GTK_WINDOW(CoilDialog), 100, 50);
+//     gtk_window_set_resizable (GTK_WINDOW (CoilDialog), FALSE);
+//     gtk_container_add(GTK_CONTAINER(CoilDialog), CoilPackingBox);
+//     gtk_widget_add_events (CoilDialog, GDK_KEY_PRESS_MASK);
+//     gtk_widget_add_events (CoilDialog, GDK_BUTTON_PRESS_MASK);
 
 //     MakeControls();
    

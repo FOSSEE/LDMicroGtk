@@ -498,6 +498,7 @@ BOOL GetWindowRect(HWID hWid, PRECT pRect)
     return TRUE;
 }
 
+
 UINT SetTimer(HWID hWid, UINT  nIDEvent, UINT uElapse, BOOL (*lpTimerFunc)(BOOL) )
 {
     auto record_it = std::find_if(timerRecords.begin(), timerRecords.end(),  [&nIDEvent](TimerRecord &Record) { return Record.ufID == nIDEvent; });

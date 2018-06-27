@@ -40,8 +40,8 @@ static int IhexChecksum;
 
 // Try to common a bit of stuff between the dialog boxes, since only one
 // can be open at any time.
-HWND OkButton;
-HWND CancelButton;
+HWID OkButton;
+HWID CancelButton;
 BOOL DialogDone;
 BOOL DialogCancel;
 

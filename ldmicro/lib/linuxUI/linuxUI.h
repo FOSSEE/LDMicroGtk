@@ -60,6 +60,36 @@
 /// PatBlt paint flags
 #define PATINVERT 0x00000100L
 
+/// Key masks
+#define VK_TAB GDK_KEY_Tab
+
+#define VK_DOWN  65364
+#define VK_UP    65362
+#define VK_LEFT  65361
+#define VK_RIGHT 65363
+
+#define VK_NP_DOWN  65433
+#define VK_NP_UP    65431
+#define VK_NP_LEFT  65430
+#define VK_NP_RIGHT 65432
+
+#define VK_RETURN  GDK_KEY_Return
+#define VK_ESCAPE  GDK_KEY_Escape
+#define VK_F5 GDK_KEY_F5
+#define VK_F1 GDK_KEY_F1
+
+#define VK_OEM_PLUS GDK_KEY_plus
+#define VK_OEM_MINUS GDK_KEY_minus
+#define VK_OEM_PERIOD GDK_KEY_period
+#define VK_OEM_COMMA GDK_KEY_comma
+
+#define VK_DELETE GDK_KEY_Delete 
+#define VK_NP_DELETE GDK_KEY_KP_Delete
+
+// #define VK_OEM_1 GDK_KEY_colon     // GDK_KEY_semicolon
+// #define VK_OEM_2 GDK_KEY_question  // GDK_KEY_slash
+// #define VK_OEM_5 GDK_KEY_backslash // GDK_KEY_bar
+
 /// Window brushes
 #define BS_SOLID       0x00000001L
 #define BS_HOLLOW      0x00000002L

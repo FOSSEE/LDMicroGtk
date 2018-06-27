@@ -595,52 +595,8 @@ cmp:
 }
 
 //-----------------------------------------------------------------------------
-// WndProc for MainWindow.
+// WndProc functions for MainWindow.
 //-----------------------------------------------------------------------------
-// LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
-// {
-//     // switch (msg) {
-//     //     case WM_ERASEBKGND:
-//     //         break;
-
-//     //     case WM_SETFOCUS:
-
-//     //     case WM_PAINT: {
-//     //     }
-
-//     //     case WM_KEYDOWN: {
-//     //     }
-
-//     //     case WM_LBUTTONDBLCLK: {
-//     //     }
-
-//     //     case WM_LBUTTONDOWN: {
-//     //     }
-//     //     case WM_MOUSEMOVE: {
-//     //     }
-//     //     case WM_MOUSEWHEEL: {
-//     //     }
-
-//     //     case WM_SIZE:
-
-//     //     case WM_NOTIFY: {
-
-//     //     case WM_VSCROLL:
-
-//     //     case WM_HSCROLL:
-
-//     //     case WM_COMMAND:
-
-//     //     case WM_CLOSE:
-//     //     case WM_DESTROY:
-
-//     //     default:
-//     //         return DefWindowProc(hwnd, msg, wParam, lParam);
-//     // }
-
-//     return 1;
-// }
-
 gboolean LD_WM_KeyDown_call(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
 {   
     /* Handles:
@@ -871,7 +827,15 @@ gboolean LD_WM_MouseMove_call(GtkWidget *widget, GdkEvent *event, gpointer user_
     //     SetCursor(LoadCursor(NULL, IDC_ARROW));
     // }
     
-    // break;
+    // int dy = MouseY - mhs->pt.y;
+    
+    // int dy = MouseY - mhs->pt.y;
+
+    // IoListHeight += dy;
+    // if(IoListHeight < 50) IoListHeight = 50;
+    // MouseY = mhs->pt.y;
+    // MainWindowResized();
+
     return FALSE;
 }
 

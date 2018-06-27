@@ -42,6 +42,7 @@ static HWID IndexTextbox;
 static HWID Labels[3];
 
 static HWID StringTextbox;
+static bool checkString;
 
 static BOOL WasAsString;
 static int WasCount;
@@ -58,7 +59,7 @@ static LONG_PTR PrevCountProc;
 static HWID OkButton;
 static HWID CancelButton;
 
-HWID LutGrid[2];
+HWID LutGrid;
 HWID LutPackingBox;
 
 struct ShowLookUpTableDialogBuffer{
@@ -70,27 +71,6 @@ struct ShowLookUpTableDialogBuffer{
 //-----------------------------------------------------------------------------
 // Don't allow any characters other than 0-9 and minus in the values.
 //-----------------------------------------------------------------------------
-// static LRESULT CALLBACK MyNumberProc(HWND hwnd, UINT msg, WPARAM wParam,
-//     LPARAM lParam)
-// {
-//     if(msg == WM_CHAR) {
-//         if(!(isdigit(wParam) || wParam == '\b' || wParam == '-')) {
-//             return 0;
-//         }
-//     }
-    // ******** DIDN'T UNDERSTAND *******//
-//     WNDPROC w;
-//     int i;
-//     for(i = 0; i < MAX_LOOK_UP_TABLE_LEN; i++) {
-//         if(hwnd == ValuesTextbox[i]) {
-//             w = (WNDPROC)PrevValuesProc[i];
-//             break;
-//         }
-//     }
-//     if(i == MAX_LOOK_UP_TABLE_LEN) oops();
-
-//     return CallWindowProc(w, hwnd, msg, wParam, lParam);
-// }
 
 void LutDialogMyNumberProc (GtkEditable *editable, gchar *NewText, gint length, 
     gint *position, gpointer data){
@@ -106,19 +86,8 @@ void LutDialogMyNumberProc (GtkEditable *editable, gchar *NewText, gint length,
 //-----------------------------------------------------------------------------
 // Don't allow any characters other than 0-9 in the count.
 //-----------------------------------------------------------------------------
-// static LRESULT CALLBACK MyDigitsProc(HWND hwnd, UINT msg, WPARAM wParam,
-//     LPARAM lParam)
-// {
-//     if(msg == WM_CHAR) {
-//         if(!(isdigit(wParam) || wParam == '\b')) {
-//             return 0;
-//         }
-//     }
 
-//     return CallWindowProc((WNDPROC)PrevCountProc, hwnd, msg, wParam, lParam);
-// }
-
-void MyDigitsProc (GtkEditable *editable, gchar *NewText, gint length, 
+void LutDialogMyDigitsProc (GtkEditable *editable, gchar *NewText, gint length, 
     gint *position, gpointer data){
     // gtk_widget_set_sensitive (MainWindow, TRUE);
     for (int i = 0; i < length; i++){
@@ -132,27 +101,8 @@ void MyDigitsProc (GtkEditable *editable, gchar *NewText, gint length,
 //-----------------------------------------------------------------------------
 // Don't allow any characters other than A-Za-z0-9_ in the name.
 //-----------------------------------------------------------------------------
-// static LRESULT CALLBACK MyNameProc(HWND hwnd, UINT msg, WPARAM wParam,
-//     LPARAM lParam)
-// {
-//     if(msg == WM_CHAR) {
-//         if(!(isalpha(wParam) || isdigit(wParam) || wParam == '_' ||
-//             wParam == '\b'))
-//         {
-//             return 0;
-//         }
-//     }
 
-//     WNDPROC w;
-//     if(hwnd == DestTextbox) {
-//         w = (WNDPROC)PrevDestProc;
-//     } else if(hwnd == IndexTextbox) {
-//         w = (WNDPROC)PrevIndexProc;
-//     }
-//     return CallWindowProc(w, hwnd, msg, wParam, lParam);
-// }
-
-void LutMyNameProc (GtkEditable *editable, gchar *NewText, gint length, 
+void LutDialogMyNameProc (GtkEditable *editable, gchar *NewText, gint length, 
     gint *position, gpointer data){
     // gtk_widget_set_sensitive (MainWindow, TRUE);
     for (int i = 0; i < length; i++){
@@ -172,7 +122,7 @@ void LutMyNameProc (GtkEditable *editable, gchar *NewText, gint length,
 //-----------------------------------------------------------------------------
 static void MakeFixedControls(BOOL forPwl)
 {
-    cout << "Inside MakeFixedControls ()" << "\n";
+    // cout << "Inside MakeFixedControls ()" << "\n";
     Labels[0] = gtk_label_new ("Destination");
     Labels[1] = gtk_label_new ("Index:");
     Labels[2] = forPwl ? gtk_label_new ("Points:") : gtk_label_new ("Count:");
@@ -184,42 +134,34 @@ static void MakeFixedControls(BOOL forPwl)
     CountTextbox = gtk_entry_new ();
     gtk_entry_set_max_length (GTK_ENTRY (CountTextbox), 0);
 
-    cout << "Created Labels, Dest, Index and Count text boxes" << "\n";
+    // cout << "Created Labels, Dest, Index and Count text boxes" << "\n";
 
     if(!forPwl) {
         AsStringCheckbox = gtk_check_button_new_with_label
                 ("Edit table of ASCII values like a string");
-        cout << "Created CheckButton" << "\n";
+        // cout << "Created CheckButton" << "\n";
     }
 
 
     OkButton = gtk_button_new_with_label ("OK");
     CancelButton = gtk_button_new_with_label ("Cancel");
 
-    gtk_grid_attach (GTK_GRID (LutGrid[0]), Labels[0], 1, 2, 1, 1);
-    gtk_grid_attach (GTK_GRID (LutGrid[0]), DestTextbox, 3, 2, 1, 1);
-    gtk_grid_attach (GTK_GRID (LutGrid[0]), OkButton, 5, 2, 1, 1);
-    gtk_grid_attach (GTK_GRID (LutGrid[0]), Labels[1], 1, 4, 1, 1);
-    gtk_grid_attach (GTK_GRID (LutGrid[0]), IndexTextbox, 3, 4, 1, 1);
-    gtk_grid_attach (GTK_GRID (LutGrid[0]), CancelButton, 5, 4, 1, 1);
-    gtk_grid_attach (GTK_GRID (LutGrid[0]), Labels[2], 1, 6, 1, 1);
-    gtk_grid_attach (GTK_GRID (LutGrid[0]), CountTextbox, 3, 6, 1, 1);
-    gtk_grid_attach (GTK_GRID (LutGrid[0]), AsStringCheckbox, 1, 8, 1, 1);
+    gtk_grid_attach (GTK_GRID (LutGrid), Labels[0], 0, 2, 1, 1);
+    gtk_grid_attach (GTK_GRID (LutGrid), DestTextbox, 1, 2, 1, 1);
+    gtk_grid_attach (GTK_GRID (LutGrid), OkButton, 3, 2, 1, 1);
+    gtk_grid_attach (GTK_GRID (LutGrid), Labels[1], 0, 4, 1, 1);
+    gtk_grid_attach (GTK_GRID (LutGrid), IndexTextbox, 1, 4, 1, 1);
+    gtk_grid_attach (GTK_GRID (LutGrid), CancelButton, 3, 4, 1, 1);
+    gtk_grid_attach (GTK_GRID (LutGrid), Labels[2], 0, 6, 1, 1);
+    gtk_grid_attach (GTK_GRID (LutGrid), CountTextbox, 1, 6, 1, 1);
+    gtk_grid_attach (GTK_GRID (LutGrid), AsStringCheckbox, 0, 8, 1, 1);
 
     g_signal_connect (G_OBJECT(DestTextbox), "insert-text",
-		     G_CALLBACK(LutMyNameProc), NULL);
+		     G_CALLBACK(LutDialogMyNameProc), NULL);
     g_signal_connect (G_OBJECT(IndexTextbox), "insert-text",
-		     G_CALLBACK(LutMyNameProc), NULL);
+		     G_CALLBACK(LutDialogMyNameProc), NULL);
     g_signal_connect (G_OBJECT(CountTextbox), "insert-text",
-		     G_CALLBACK(MyDigitsProc), NULL);
-    cout << "Exited MakeFixedControls ()" << "\n";
-
-//     PrevDestProc = SetWindowLongPtr(DestTextbox, GWLP_WNDPROC, 
-//         (LONG_PTR)MyNameProc);
-//     PrevIndexProc = SetWindowLongPtr(IndexTextbox, GWLP_WNDPROC, 
-//         (LONG_PTR)MyNameProc);
-//     PrevCountProc = SetWindowLongPtr(CountTextbox, GWLP_WNDPROC, 
-//         (LONG_PTR)MyDigitsProc);
+		     G_CALLBACK(LutDialogMyDigitsProc), NULL);
 }
 
 //-----------------------------------------------------------------------------
@@ -236,6 +178,7 @@ static void DestroyLutControls(void)
         // calculate the length.
     }
     else {
+        cout << "In DestroyLut WasCount : " << WasCount << "\n";
         int i;
         for(i = 0; i < WasCount; i++) {
             char buf[20];
@@ -245,11 +188,14 @@ static void DestroyLutControls(void)
         }
         cout << "Exiting else of WasAsString" << "\n";
     }
-
-    DestroyWindow(StringTextbox, NULL);
-
+    if (checkString){
+        DestroyWindow(StringTextbox, NULL);
+        cout << "Destroyed StringTextbox" << "\n";
+    }
     int i;
-    for(i = 0; i < MAX_LOOK_UP_TABLE_LEN; i++) {
+    // *** Changed from MAX_LOOK_UP_TABLE_LEN to count ***** //
+    for(i = 0; i < temp.tmpcount; i++) {
+        cout << "Destroy ValueTextbox i = " << i << "\n";
         DestroyWindow(ValuesTextbox[i], NULL);
         DestroyWindow(ValuesLabel[i], NULL);
         cout << "Called DestroyWindow() for ValuesTextbox and ValuesLabels" << "\n";
@@ -264,22 +210,21 @@ static void DestroyLutControls(void)
 //-----------------------------------------------------------------------------
 static void MakeLutControls(BOOL asString, int count, BOOL forPwl)
 {
-    cout << "Inside MakeLutControls ()" << "\n";
     // Remember these, so that we know from where to cache stuff if we have
     // to destroy these textboxes and make something new later.
     WasAsString = asString;
+    cout << "asString in MakeLutControls : " << asString <<"\n";
     WasCount = count;
-    cout << "line 269" << "\n";
+    cout << "Count in MakeLutControls : " << count << "\n";
     if(forPwl && asString) oops();
 
     if(asString) {
         char str[3*MAX_LOOK_UP_TABLE_LEN+1];
-        cout << "line 274" << "\n";
+        cout << "Inside if (asString) in MakeLutControls" << "\n";
         int i, j;
         j = 0;
         for(i = 0; i < count; i++) {
-            if (i < MAX_LOOK_UP_TABLE_LEN){
-                int c = ValuesCache[i];
+            int c = ValuesCache[i];
             if(c >= 32 && c <= 127 && c != '\\') {
                 str[j++] = c;
             } else if(c == '\\') {
@@ -301,16 +246,13 @@ static void MakeLutControls(BOOL asString, int count, BOOL forPwl)
                 str[j++] = 'X';
             }
         }
-        else {
-            break;
-        }
-    }
-        cout << "Cleared line 277 for" << "\n";
         str[j++] = '\0';
-        StringTextbox = gtk_entry_new ();
-        gtk_grid_attach (GTK_GRID (LutGrid[0]), StringTextbox, 1, 9, 1, 1);
-        gtk_editable_set_editable (GTK_EDITABLE (CountTextbox), FALSE);
-        // MoveWindow(LutDialog, 100, 30, 320, 185, TRUE);
+            StringTextbox = gtk_entry_new ();
+            gtk_grid_attach (GTK_GRID (LutGrid), StringTextbox, 1, 9, 1, 1);
+            checkString = TRUE;
+            gtk_widget_show_all (LutGrid);
+            gtk_editable_set_editable (GTK_EDITABLE (CountTextbox), FALSE);
+            // MoveWindow(StringTextbox, 100, 30, 320, 185, TRUE); // Changed LutDialog to StringTextbox
     }
     else {
         int i;
@@ -337,6 +279,7 @@ static void MakeLutControls(BOOL asString, int count, BOOL forPwl)
             sprintf(buf, "%d", ValuesCache[i]);
             ValuesTextbox[i] = gtk_entry_new ();
             gtk_entry_set_max_length (GTK_ENTRY (ValuesTextbox[i]), 0);
+            // cout << "Made ValuesTextbox" << "\n";
 
             if(forPwl) {
                 sprintf(buf, "%c%d:", (i & 1) ? 'y' : 'x', i/2);
@@ -344,24 +287,29 @@ static void MakeLutControls(BOOL asString, int count, BOOL forPwl)
             else {
                 sprintf(buf, "%2d:", i);
                 }
-            ValuesLabel[i] = gtk_label_new (buf);
 
-            g_signal_connect (G_OBJECT(ValuesTextbox[i]), "insert-text",
-		     G_CALLBACK(MyDigitsProc), NULL);
-            
-            gtk_grid_attach (GTK_GRID (LutGrid[1]), ValuesLabel[i], 1, i+10, 1, 1);
-            gtk_grid_attach (GTK_GRID (LutGrid[1]), ValuesTextbox[i], 3, i+10, 1, 1);
+            ValuesLabel[i] = gtk_label_new (buf);
+            if (i<10){
+                gtk_grid_attach (GTK_GRID (LutGrid), ValuesLabel[i], 0, i+12, 1, 1);
+                gtk_grid_attach (GTK_GRID (LutGrid), ValuesTextbox[i], 1, i+12, 1, 1);
+            }
+            else if ((i>=10) && (i<20)){
+                gtk_grid_attach (GTK_GRID (LutGrid), ValuesLabel[i], 2, i+2, 1, 1);
+                gtk_grid_attach (GTK_GRID (LutGrid), ValuesTextbox[i], 3, i+2, 1, 1);
+            }
+            else if ((i>=20) && (i<30)){
+                gtk_grid_attach (GTK_GRID (LutGrid), ValuesLabel[i], 4, i-8, 1, 1);
+                gtk_grid_attach (GTK_GRID (LutGrid), ValuesTextbox[i], 5, i-8, 1, 1);   
+            }
+            gtk_widget_show_all (LutDialog);
             g_signal_connect (G_OBJECT(ValuesTextbox[i]), "insert-text",
 		     G_CALLBACK(LutDialogMyNumberProc), NULL);
-//             PrevValuesProc[i] = SetWindowLongPtr(ValuesTextbox[i],
-//                 GWLP_WNDPROC, (LONG_PTR)MyNumberProc);
         }
         if(count > 16) count = 16;
         gtk_editable_set_editable (GTK_EDITABLE (CountTextbox), TRUE);
 
-        MoveWindow(LutDialog, 100, 30, 320, base + 30 + count*30, TRUE);
+        // MoveWindow(LutDialog, 100, 30, 320, base + 30 + count*30, TRUE);
     }
-    cout << "Exiting MakeLutControls ()" << "\n";
 }
 
 //-----------------------------------------------------------------------------
@@ -372,7 +320,7 @@ static void MakeLutControls(BOOL asString, int count, BOOL forPwl)
 //-----------------------------------------------------------------------------
 BOOL StringToValuesCache(char *str, int *c)
 {   
-    cout << "Inside StringToValuesCache" << "\n";
+    // cout << "Inside StringToValuesCache" << "\n";
     int count = 0;
     while(*str) {
         if(*str == '\\') {
@@ -399,19 +347,16 @@ BOOL StringToValuesCache(char *str, int *c)
     sprintf(buf, "%d", count);
     gtk_entry_set_text (GTK_ENTRY (CountTextbox), buf);
     *c = count;
-    cout << "Exiting StringToValuesCache ()" << "\n";
     return TRUE;
 }
 
 void LookUpTableGetData (HWID widget, gpointer data){
-    cout << "Inside LookUpTableGetData ()" << "\n";
     ElemLeaf *l = (ElemLeaf *) data;
     ElemLookUpTable *t = &(l->d.lookUpTable);
-    // ElemLookUpTable *t;
     strcpy (t->dest, gtk_entry_get_text (GTK_ENTRY (DestTextbox)));
     // t->index = const_cast <char*> (gtk_entry_get_text (GTK_ENTRY (IndexTextbox)));
     strcpy (t->index, gtk_entry_get_text (GTK_ENTRY (IndexTextbox)));
-    DestroyLutControls();
+    // DestroyLutControls();
 
     // The call to DestroyLutControls updated ValuesCache, so just read
     // them out of there (whichever mode we were in before).
@@ -422,12 +367,9 @@ void LookUpTableGetData (HWID widget, gpointer data){
     t->count = temp.tmpcount;
     t->editAsString = temp.tmpasString;
     gtk_widget_set_sensitive (MainWindow, TRUE);
-    cout << "Exiting LookUpTableGetData ()" << "\n";
 }
 
-
 void LookUpTableCheckMode (void){
-    cout << "Inside LookUpTableCheckMode ()" << "\n";
     int count = temp.tmpcount;
     bool asString = temp.tmpasString;
 
@@ -437,25 +379,20 @@ void LookUpTableCheckMode (void){
     // buf = const_cast <char*> (gtk_entry_get_text (GTK_ENTRY (CountTextbox)));
     strcpy (buf, gtk_entry_get_text (GTK_ENTRY (CountTextbox)));
     if(atoi(buf) != count && !asString) {
-        cout << "line 424" << "\n";
         count = atoi(buf);
         if(count < 0 || count > 32) {
-            cout << "line 427" << "\n";
             count = 0;
             gtk_entry_set_text (GTK_ENTRY (CountTextbox), "");
-            // SendMessage(CountTextbox, WM_SETTEXT, 0, (LPARAM)"");
         }
+        cout << "Count in LookUpTableCheckMode : " << count << "\n";
         DestroyLutControls();
         MakeLutControls(asString, count, FALSE);
-        cout << "line 434 -- exit of line 424" << "\n";
     }
 
     // Are we in string mode? In that case watch the string textbox,
     // and use that to update the (read-only) count field.
     if(asString) {
-        cout << "line 438" << "\n";
         char scratch[1024];
-        // char* scratch;
         // scratch = const_cast <char*> (gtk_entry_get_text 
         //                         (GTK_ENTRY (StringTextbox)));
         strcpy (scratch, gtk_entry_get_text (GTK_ENTRY (StringTextbox)));
@@ -469,24 +406,26 @@ void LookUpTableCheckMode (void){
                                     temp.PrevTableAsString);
             }
         }
-        cout << "line 456 -- exit of line 438" << "\n";
     }
-
     // Did we just change modes?
-    // BOOL x = SendMessage(AsStringCheckbox, BM_GETCHECK, 0, 0)==BST_CHECKED;
     BOOL x = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (AsStringCheckbox));
     if((x && !asString) || (!x && asString)) {
-        cout << "line 463" << "\n";
+        cout << "x is " << x << "\n";    
         asString = x;
-        DestroyLutControls();
-        MakeLutControls(asString, count, FALSE);
-        cout << "line 467" << "\n";
+        if (x == 1){
+            MakeLutControls(asString, count, FALSE);
+        }
+        else {
+            DestroyLutControls();
+        }
     }
+
+    temp.tmpcount = count;
+    temp.tmpasString = asString;
 }
 
 // Checks for the required key press
 gboolean LookUpTableKeyPress (HWID widget, GdkEventKey* event, gpointer data){
-    cout << "Inside LookUpTableKeyPress ()" << "\n";
     LookUpTableCheckMode ();
     if (event -> keyval == GDK_KEY_Return){
         LookUpTableGetData(NULL, (gpointer) data);
@@ -495,10 +434,16 @@ gboolean LookUpTableKeyPress (HWID widget, GdkEventKey* event, gpointer data){
         DestroyWindow (LutDialog, NULL);
         gtk_widget_set_sensitive (MainWindow, TRUE);
     }
-    cout << "Exiting LookUpTableKeyPress ()" << "\n";
     return FALSE;
 }
 
+// Mouse click callback
+void LutDialogMouseClick (HWID widget, gpointer data){
+    LookUpTableCheckMode ();
+    LookUpTableGetData(NULL, (gpointer) data);
+}
+
+// Calls DestroyWindow
 void LutCallDestroyWindow (HWID widget, gpointer data){
     DestroyWindow (LutDialog, NULL);
     gtk_widget_set_sensitive (MainWindow, TRUE);
@@ -512,62 +457,50 @@ void LutCallDestroyWindow (HWID widget, gpointer data){
 //-----------------------------------------------------------------------------
 void ShowLookUpTableDialog(ElemLeaf *l)
 {
-    cout << "Inside ShowLookUpTableDialog ()" << "\n";
     ElemLookUpTable *t = &(l->d.lookUpTable);
     GdkEventKey* event;
+
     // First copy over all the stuff from the leaf structure; in particular,
     // we need our own local copy of the table entries, because it would be
     // bad to update those in the leaf before the user clicks okay (as he
     // might cancel).
+
     int count = t->count;
-    cout << "Count is " << count << "\n";
-    cout << MAX_LOOK_UP_TABLE_LEN << "\n";
+    cout << "Initially count is " << count << "\n";
     BOOL asString = t->editAsString;
+    cout << "Initially asString is " << asString << "\n";
     memset(ValuesCache, 0, sizeof(ValuesCache));
-    cout << "Executed memset ()" << "\n";
     int i;
     for(i = 0; i < count; i++) {
-        if (i < MAX_LOOK_UP_TABLE_LEN){
             ValuesCache[i] = t->vals[i];
-        }
-        else {
-            break;
-        }
     }
+
     // Now create the dialog's fixed controls, plus the changing (depending
     // on show style/entry count) controls for the initial configuration.
 
-    LutGrid[0] = gtk_grid_new();
-    LutGrid[1] = gtk_grid_new();
-    // gtk_grid_set_column_spacing (GTK_GRID (LutGrid[0]), 1);
-    // gtk_grid_set_column_spacing (GTK_GRID (LutGrid[1]), 1);
+    LutGrid = gtk_grid_new();
+    // LutGrid[1] = gtk_grid_new();
+    // gtk_grid_set_column_spacing (GTK_GRID (LutGrid), 1);
     LutPackingBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
     LutDialog = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW(LutDialog), "Look-Up Table");
-    gtk_window_set_default_size(GTK_WINDOW(LutDialog), 100, 500);
+    gtk_window_set_default_size(GTK_WINDOW(LutDialog), 100, 200);
     gtk_window_set_resizable (GTK_WINDOW (LutDialog), FALSE);
-    gtk_box_pack_start(GTK_BOX(LutPackingBox), LutGrid[0], TRUE, TRUE, 0);
-    gtk_box_pack_start(GTK_BOX(LutPackingBox), LutGrid[1], TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(LutPackingBox), LutGrid, TRUE, TRUE, 0);
     gtk_container_add(GTK_CONTAINER(LutDialog), LutPackingBox);
     gtk_widget_add_events (LutDialog, GDK_KEY_PRESS_MASK);
     gtk_widget_add_events (LutDialog, GDK_BUTTON_PRESS_MASK);
-    // gtk_container_add (GTK_CONTAINER (gtk_dialog_get_content_area 
-    //                 (GTK_DIALOG (LutDialog))), AsStringCheckbox);
-    cout << "Created LutDialog" << "\n";
     MakeFixedControls(FALSE);
     MakeLutControls(asString, count, FALSE);
   
     // Set up the controls to reflect the initial configuration.
-    cout << "dest : " << t->dest << "\n";
-    cout << "index : " << t->index << "\n";
     gtk_entry_set_text (GTK_ENTRY (DestTextbox), t->dest);
     gtk_entry_set_text (GTK_ENTRY (IndexTextbox), t->index);
 
     char buf[30];
     sprintf(buf, "%d", t->count);
     gtk_entry_set_text (GTK_ENTRY (CountTextbox), buf);
-    cout << "Text set in CountTextbox from buf[30]" << "\n";
     if(asString) {
         gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (AsStringCheckbox), TRUE);
     }
@@ -577,18 +510,18 @@ void ShowLookUpTableDialog(ElemLeaf *l)
     gtk_widget_show_all (LutDialog);
     gtk_widget_grab_focus(DestTextbox);
     gtk_widget_grab_focus(OkButton);
-    // SendMessage(DestTextbox, EM_SETSEL, 0, -1);
 
     temp.tmpcount = count;
+    cout << "Count in ShowLookUp : " << count << "\n";
     temp.tmpasString = asString;
+    cout << "asString in ShowLookUp : " << asString << "\n";
 
     g_signal_connect (G_OBJECT (LutDialog), "key-press-event",
                     G_CALLBACK(LookUpTableKeyPress), (gpointer)l);
     g_signal_connect (G_OBJECT (OkButton), "clicked",
-                    G_CALLBACK(LookUpTableGetData), (gpointer)l);
+                    G_CALLBACK(LutDialogMouseClick), (gpointer)l);
     g_signal_connect (G_OBJECT (CancelButton), "clicked",
                     G_CALLBACK(LutCallDestroyWindow), NULL);
-    cout << "Exiting ShowLookUpTableDialog" << "\n";
 }
 
 //-----------------------------------------------------------------------------

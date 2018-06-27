@@ -401,9 +401,9 @@ void MoveCursorKeyboard(int keyCode)
 
 void EditSelectedElement(void)
 {
-    cout << "Inside EditSelectedElement" << "\n";
-    // ShowResetDialog(Selected->d.reset.name);
     ShowLookUpTableDialog(Selected);
+    // ShowContactsDialog(&(Selected->d.contacts.negated),Selected->d.contacts.name);
+
 //     if(!Selected || Selected->selectedState == SELECTED_NONE) return;
 
 //     switch(SelectedWhich) {
@@ -533,6 +533,7 @@ void EditElementMouseDoubleclick(int x, int y)
 //             EditSelectedElement();
 //         }
 //     }
+    EditSelectedElement();
 }
 
 //-----------------------------------------------------------------------------

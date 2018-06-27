@@ -595,51 +595,109 @@ cmp:
 }
 
 //-----------------------------------------------------------------------------
-// WndProc for MainWindow.
+// WndProc functions for MainWindow.
 //-----------------------------------------------------------------------------
-// LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
-// {
-//     // switch (msg) {
-//     //     case WM_ERASEBKGND:
-//     //         break;
+gboolean LD_WM_KeyDown_call(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
+{   
+    /* Handles:
+    * WM_KEYDOWN
+    */
 
-//     //     case WM_SETFOCUS:
+    UINT wParam = event->keyval;
 
-//     //     case WM_PAINT: {
-//     //     }
+    if(wParam == VK_TAB) {
+        // SetFocus(IoList);
+        gtk_window_set_focus (GTK_WINDOW(MainWindow), view);
+        // BlinkCursor(0, 0, 0, 0);
+        
+    }
 
-//     //     case WM_KEYDOWN: {
-//     //     }
+    if(InSimulationMode) 
+    {
+        switch(wParam) 
+        {
+            case VK_DOWN:
+                if(ScrollYOffset < ScrollYOffsetMax)
+                    ScrollYOffset++;
+                RefreshScrollbars();
+                gtk_widget_queue_draw(DrawWindow);
+                break;
 
-//     //     case WM_LBUTTONDBLCLK: {
-//     //     }
+            case VK_UP:
+                if(ScrollYOffset > 0)
+                    ScrollYOffset--;
+                RefreshScrollbars();
+                gtk_widget_queue_draw(DrawWindow);
+                break;
 
-//     //     case WM_LBUTTONDOWN: {
-//     //     }
-//     //     case WM_MOUSEMOVE: {
-//     //     }
-//     //     case WM_MOUSEWHEEL: {
-//     //     }
+            case VK_LEFT:
+                ScrollXOffset -= FONT_WIDTH;
+                if(ScrollXOffset < 0) 
+                    ScrollXOffset = 0;
+                RefreshScrollbars();
+                gtk_widget_queue_draw(DrawWindow);
+                break;
 
-//     //     case WM_SIZE:
+            case VK_RIGHT:
+                ScrollXOffset += FONT_WIDTH;
+                if(ScrollXOffset >= ScrollXOffsetMax)
+                    ScrollXOffset = ScrollXOffsetMax;
+                RefreshScrollbars();
+                gtk_widget_queue_draw(DrawWindow);
+                break;
 
-//     //     case WM_NOTIFY: {
+            case VK_RETURN:
+            case VK_ESCAPE:
+                ToggleSimulationMode();
+                break;
+        }
+    }
 
-//     //     case WM_VSCROLL:
+    switch(wParam) 
+    {
+        case VK_UP:
+            if(event->state & GDK_SHIFT_MASK)
+            {
+                CHANGING_PROGRAM(PushRungUp());
+            }
+            else
+            {
+                MoveCursorKeyboard(wParam);
+            }
 
-//     //     case WM_HSCROLL:
+            gtk_widget_queue_draw(DrawWindow);
+            break;
 
-//     //     case WM_COMMAND:
+        case VK_DOWN:
+            if(event->state & GDK_SHIFT_MASK)
+            {
+                CHANGING_PROGRAM(PushRungDown());
+            }
+            else
+            {
+                MoveCursorKeyboard(wParam);
+            }
 
-//     //     case WM_CLOSE:
-//     //     case WM_DESTROY:
+            gtk_widget_queue_draw(DrawWindow);
+            break;
 
-//     //     default:
-//     //         return DefWindowProc(hwnd, msg, wParam, lParam);
-//     // }
+        case VK_RIGHT:
+        case VK_LEFT:
+            MoveCursorKeyboard(wParam);
+            gtk_widget_queue_draw(DrawWindow);
+            break;
 
-//     return 1;
-// }
+        case VK_RETURN:
+            CHANGING_PROGRAM(EditSelectedElement());
+            gtk_widget_queue_draw(DrawWindow);
+            break;
+
+        default:
+            break;
+    }
+
+    return FALSE;
+}
 
 void LD_WM_Close_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)
 {
@@ -674,17 +732,8 @@ gboolean LD_GTK_mouse_click_hook(GtkWidget *widget, GdkEvent *event, gpointer us
                 int x = event->button.x;
                 int y = event->button.y - 30 + gtk_adjustment_get_value(adjustment);
 
-                // if((y > (IoListTop - 9)) && (y < (IoListTop + 3))) {
-                //     // POINT pt;
-                //     // pt.x = x; pt.y = y;
-                //     // ClientToScreen(MainWindow, &pt);
-                //     MouseY = y; //pt.y;
-                //     // MouseHookHandle = SetWindowsHookEx(WH_MOUSE_LL,
-                //     //         (HOOKPROC)MouseHook, Instance, 0);
-                // }
                 if(!InSimulationMode) MoveCursorMouseClick(x, y);
 
-                // SetFocus(MainWindow);
                 gtk_widget_queue_draw(DrawWindow);
             }
             break;
@@ -769,7 +818,15 @@ gboolean LD_WM_MouseMove_call(GtkWidget *widget, GdkEvent *event, gpointer user_
     //     SetCursor(LoadCursor(NULL, IDC_ARROW));
     // }
     
-    // break;
+    // int dy = MouseY - mhs->pt.y;
+    
+    // int dy = MouseY - mhs->pt.y;
+
+    // IoListHeight += dy;
+    // if(IoListHeight < 50) IoListHeight = 50;
+    // MouseY = mhs->pt.y;
+    // MainWindowResized();
+
     return FALSE;
 }
 
@@ -1188,6 +1245,7 @@ int main(int argc, char** argv)
 
     /// Keyboard and mouse hooks equivalent to MainWndProc
     g_signal_connect (MainWindow, "delete_event", G_CALLBACK (LD_WM_Close_call), NULL);
+    g_signal_connect (MainWindow, "key_press_event", G_CALLBACK (LD_WM_KeyDown_call), NULL);
     g_signal_connect (MainWindow, "button_press_event", G_CALLBACK (LD_GTK_mouse_click_hook), NULL);
     g_signal_connect (MainWindow, "scroll_event", G_CALLBACK (LD_GTK_mouse_scroll_hook), NULL);
     g_signal_connect (MainWindow, "motion_notify_event", G_CALLBACK (LD_WM_MouseMove_call), NULL);

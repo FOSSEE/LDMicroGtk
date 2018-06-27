@@ -290,108 +290,108 @@ BOOL MoveCursorTopLeft(void)
 //-----------------------------------------------------------------------------
 void MoveCursorKeyboard(int keyCode)
 {
-    // if(!Selected || Selected->selectedState == SELECTED_NONE) {
-    //     MoveCursorTopLeft();
-    //     return;
-    // }
+    if(!Selected || Selected->selectedState == SELECTED_NONE) {
+        MoveCursorTopLeft();
+        return;
+    }
 
-    // switch(keyCode) {
-    //     case VK_LEFT: {
-    //         if(!Selected || Selected->selectedState == SELECTED_NONE) {
-    //             break;
-    //         }
-    //         if(Selected->selectedState != SELECTED_LEFT) {
-    //             SelectElement(-1, -1, SELECTED_LEFT);
-    //             break;
-    //         }
-    //         if(SelectedWhich == ELEM_COMMENT) break;
-    //         int i, j;
-    //         if(FindSelected(&i, &j)) {
-    //             i--;
-    //             while(i >= 0 && (!VALID_LEAF(DisplayMatrix[i][j]) || 
-    //                 (DisplayMatrix[i][j] == Selected)))
-    //             {
-    //                 i--;
-    //             }
-    //             if(i >= 0) {
-    //                 SelectElement(i, j, SELECTED_RIGHT);
-    //             }
-    //         }
-    //         break;
-    //     }
-    //     case VK_RIGHT: {
-    //         if(!Selected || Selected->selectedState == SELECTED_NONE) {
-    //             break;
-    //         }
-    //         if(Selected->selectedState != SELECTED_RIGHT) {
-    //             SelectElement(-1, -1, SELECTED_RIGHT);
-    //             break;
-    //         }
-    //         if(SelectedWhich == ELEM_COMMENT) break;
-    //         int i, j;
-    //         if(FindSelected(&i, &j)) {
-    //             i++;
-    //             while(i < DISPLAY_MATRIX_X_SIZE && 
-    //                 !VALID_LEAF(DisplayMatrix[i][j]))
-    //             {
-    //                 i++;
-    //             }
-    //             if(i != DISPLAY_MATRIX_X_SIZE) {
-    //                 SelectElement(i, j, SELECTED_LEFT);
-    //             }
-    //         }
-    //         break;
-    //     }
-    //     case VK_UP: {
-    //         if(!Selected || Selected->selectedState == SELECTED_NONE) {
-    //             break;
-    //         }
-    //         if(Selected->selectedState != SELECTED_ABOVE &&
-    //             SelectedWhich != ELEM_PLACEHOLDER)
-    //         {
-    //             SelectElement(-1, -1, SELECTED_ABOVE);
-    //             break;
-    //         }
-    //         int i, j;
-    //         if(FindSelected(&i, &j)) {
-    //             j--;
-    //             while(j >= 0 && !VALID_LEAF(DisplayMatrix[i][j]))
-    //                 j--;
-    //             if(j >= 0) {
-    //                 SelectElement(i, j, SELECTED_BELOW);
-    //             }
-    //         }
-    //         break;
-    //     }
-    //     case VK_DOWN: {
-    //         if(!Selected || Selected->selectedState == SELECTED_NONE) {
-    //             break;
-    //         }
-    //         if(Selected->selectedState != SELECTED_BELOW &&
-    //             SelectedWhich != ELEM_PLACEHOLDER)
-    //         {
-    //             SelectElement(-1, -1, SELECTED_BELOW);
-    //             break;
-    //         }
-    //         int i, j;
-    //         if(FindSelected(&i, &j)) {
-    //             j++;
-    //             while(j < DISPLAY_MATRIX_Y_SIZE && 
-    //                 !VALID_LEAF(DisplayMatrix[i][j]))
-    //             {
-    //                 j++;
-    //             }
-    //             if(j != DISPLAY_MATRIX_Y_SIZE) {
-    //                 SelectElement(i, j, SELECTED_ABOVE);
-    //             } else if(ScrollYOffsetMax - ScrollYOffset < 3) {
-    //                 // special case: scroll the end marker into view
-    //                 ScrollYOffset = ScrollYOffsetMax;
-    //                 RefreshScrollbars();
-    //             }
-    //         }
-    //         break;
-    //     }
-    // }
+    switch(keyCode) {
+        case VK_LEFT: {
+            if(!Selected || Selected->selectedState == SELECTED_NONE) {
+                break;
+            }
+            if(Selected->selectedState != SELECTED_LEFT) {
+                SelectElement(-1, -1, SELECTED_LEFT);
+                break;
+            }
+            if(SelectedWhich == ELEM_COMMENT) break;
+            int i, j;
+            if(FindSelected(&i, &j)) {
+                i--;
+                while(i >= 0 && (!VALID_LEAF(DisplayMatrix[i][j]) || 
+                    (DisplayMatrix[i][j] == Selected)))
+                {
+                    i--;
+                }
+                if(i >= 0) {
+                    SelectElement(i, j, SELECTED_RIGHT);
+                }
+            }
+            break;
+        }
+        case VK_RIGHT: {
+            if(!Selected || Selected->selectedState == SELECTED_NONE) {
+                break;
+            }
+            if(Selected->selectedState != SELECTED_RIGHT) {
+                SelectElement(-1, -1, SELECTED_RIGHT);
+                break;
+            }
+            if(SelectedWhich == ELEM_COMMENT) break;
+            int i, j;
+            if(FindSelected(&i, &j)) {
+                i++;
+                while(i < DISPLAY_MATRIX_X_SIZE && 
+                    !VALID_LEAF(DisplayMatrix[i][j]))
+                {
+                    i++;
+                }
+                if(i != DISPLAY_MATRIX_X_SIZE) {
+                    SelectElement(i, j, SELECTED_LEFT);
+                }
+            }
+            break;
+        }
+        case VK_UP: {
+            if(!Selected || Selected->selectedState == SELECTED_NONE) {
+                break;
+            }
+            if(Selected->selectedState != SELECTED_ABOVE &&
+                SelectedWhich != ELEM_PLACEHOLDER)
+            {
+                SelectElement(-1, -1, SELECTED_ABOVE);
+                break;
+            }
+            int i, j;
+            if(FindSelected(&i, &j)) {
+                j--;
+                while(j >= 0 && !VALID_LEAF(DisplayMatrix[i][j]))
+                    j--;
+                if(j >= 0) {
+                    SelectElement(i, j, SELECTED_BELOW);
+                }
+            }
+            break;
+        }
+        case VK_DOWN: {
+            if(!Selected || Selected->selectedState == SELECTED_NONE) {
+                break;
+            }
+            if(Selected->selectedState != SELECTED_BELOW &&
+                SelectedWhich != ELEM_PLACEHOLDER)
+            {
+                SelectElement(-1, -1, SELECTED_BELOW);
+                break;
+            }
+            int i, j;
+            if(FindSelected(&i, &j)) {
+                j++;
+                while(j < DISPLAY_MATRIX_Y_SIZE && 
+                    !VALID_LEAF(DisplayMatrix[i][j]))
+                {
+                    j++;
+                }
+                if(j != DISPLAY_MATRIX_Y_SIZE) {
+                    SelectElement(i, j, SELECTED_ABOVE);
+                } else if(ScrollYOffsetMax - ScrollYOffset < 3) {
+                    // special case: scroll the end marker into view
+                    ScrollYOffset = ScrollYOffsetMax;
+                    RefreshScrollbars();
+                }
+            }
+            break;
+        }
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -400,104 +400,104 @@ void MoveCursorKeyboard(int keyCode)
 //-----------------------------------------------------------------------------
 
 void EditSelectedElement(void)
-{   
-    ShowLookUpTableDialog(Selected);
-    // ShowCommentDialog(Selected->d.comment.str);
+{
+    
+    ShowContactsDialog(&(Selected->d.contacts.negated),Selected->d.contacts.name);
 
-//     if(!Selected || Selected->selectedState == SELECTED_NONE) return;
+    if(!Selected || Selected->selectedState == SELECTED_NONE) return;
 
-//     switch(SelectedWhich) {
-//         case ELEM_COMMENT:
-//             ShowCommentDialog(Selected->d.comment.str);
-//             break;
+    switch(SelectedWhich) {
+        case ELEM_COMMENT:
+            // ShowCommentDialog(Selected->d.comment.str);
+            break;
 
-//         case ELEM_CONTACTS:
-//             ShowContactsDialog(&(Selected->d.contacts.negated),
-//                 Selected->d.contacts.name);
-//             break;
+        case ELEM_CONTACTS:
+            // ShowContactsDialog(&(Selected->d.contacts.negated),
+            //     Selected->d.contacts.name);
+            break;
 
-//         case ELEM_COIL:
-//             ShowCoilDialog(&(Selected->d.coil.negated),
-//                 &(Selected->d.coil.setOnly), &(Selected->d.coil.resetOnly),
-//                 Selected->d.coil.name);
-//             break;
+        case ELEM_COIL:
+            // ShowCoilDialog(&(Selected->d.coil.negated),
+            //     &(Selected->d.coil.setOnly), &(Selected->d.coil.resetOnly),
+            //     Selected->d.coil.name);
+            break;
 
-//         case ELEM_TON:
-//         case ELEM_TOF:
-//         case ELEM_RTO:
-//             ShowTimerDialog(SelectedWhich, &(Selected->d.timer.delay),
-//                 Selected->d.timer.name);
-//             break;
+        case ELEM_TON:
+        case ELEM_TOF:
+        case ELEM_RTO:
+            // ShowTimerDialog(SelectedWhich, &(Selected->d.timer.delay),
+            //     Selected->d.timer.name);
+            break;
 
-//         case ELEM_CTU:
-//         case ELEM_CTD:
-//         case ELEM_CTC:
-//             ShowCounterDialog(SelectedWhich, &(Selected->d.counter.max),
-//                 Selected->d.counter.name);
-//             break;
+        case ELEM_CTU:
+        case ELEM_CTD:
+        case ELEM_CTC:
+            // ShowCounterDialog(SelectedWhich, &(Selected->d.counter.max),
+            //     Selected->d.counter.name);
+            break;
 
-//         case ELEM_EQU:
-//         case ELEM_NEQ:
-//         case ELEM_GRT:
-//         case ELEM_GEQ:
-//         case ELEM_LES:
-//         case ELEM_LEQ:
-//             ShowCmpDialog(SelectedWhich, Selected->d.cmp.op1,
-//                 Selected->d.cmp.op2);
-//             break;
+        case ELEM_EQU:
+        case ELEM_NEQ:
+        case ELEM_GRT:
+        case ELEM_GEQ:
+        case ELEM_LES:
+        case ELEM_LEQ:
+            // ShowCmpDialog(SelectedWhich, Selected->d.cmp.op1,
+            //     Selected->d.cmp.op2);
+            break;
 
-//         case ELEM_ADD:
-//         case ELEM_SUB:
-//         case ELEM_MUL:
-//         case ELEM_DIV:
-//             ShowMathDialog(SelectedWhich, Selected->d.math.dest, 
-//                 Selected->d.math.op1, Selected->d.math.op2);
-//             break;
+        case ELEM_ADD:
+        case ELEM_SUB:
+        case ELEM_MUL:
+        case ELEM_DIV:
+            // ShowMathDialog(SelectedWhich, Selected->d.math.dest, 
+            //     Selected->d.math.op1, Selected->d.math.op2);
+            break;
 
-//         case ELEM_RES:
-//             ShowResetDialog(Selected->d.reset.name);
-//             break;
+        case ELEM_RES:
+            // ShowResetDialog(Selected->d.reset.name);
+            break;
 
-//         case ELEM_MOVE:
-//             ShowMoveDialog(Selected->d.move.dest, Selected->d.move.src);
-//             break;
+        case ELEM_MOVE:
+            // ShowMoveDialog(Selected->d.move.dest, Selected->d.move.src);
+            break;
 
-//         case ELEM_SET_PWM:
-//             ShowSetPwmDialog(Selected->d.setPwm.name,
-//                 &(Selected->d.setPwm.targetFreq));
-//             break;
+        case ELEM_SET_PWM:
+            // ShowSetPwmDialog(Selected->d.setPwm.name,
+            //     &(Selected->d.setPwm.targetFreq));
+            break;
 
-//         case ELEM_READ_ADC:
-//             ShowReadAdcDialog(Selected->d.readAdc.name+1);
-//             break;
+        case ELEM_READ_ADC:
+            // ShowReadAdcDialog(Selected->d.readAdc.name+1);
+            break;
 
-//         case ELEM_UART_RECV:
-//         case ELEM_UART_SEND:
-//             ShowUartDialog(SelectedWhich, Selected->d.uart.name);
-//             break;
+        case ELEM_UART_RECV:
+        case ELEM_UART_SEND:
+            // ShowUartDialog(SelectedWhich, Selected->d.uart.name);
+            break;
 
-//         case ELEM_PERSIST:
-//             ShowPersistDialog(Selected->d.persist.var);
-//             break;
+        case ELEM_PERSIST:
+            // ShowPersistDialog(Selected->d.persist.var);
+            break;
 
-//         case ELEM_SHIFT_REGISTER:
-//             ShowShiftRegisterDialog(Selected->d.shiftRegister.name,
-//                 &(Selected->d.shiftRegister.stages));
-//             break;
+        case ELEM_SHIFT_REGISTER:
+            // ShowShiftRegisterDialog(Selected->d.shiftRegister.name,
+            //     &(Selected->d.shiftRegister.stages));
+            break;
 
-//         case ELEM_FORMATTED_STRING:
-//             ShowFormattedStringDialog(Selected->d.fmtdStr.var,
-//                 Selected->d.fmtdStr.string);
-//             break;
+        case ELEM_FORMATTED_STRING:
+            // ShowFormattedStringDialog(Selected->d.fmtdStr.var,
+            //     Selected->d.fmtdStr.string);
+            break;
 
-//         case ELEM_PIECEWISE_LINEAR:
-//             ShowPiecewiseLinearDialog(Selected);
-//             break;
+        case ELEM_PIECEWISE_LINEAR:
+            // ShowPiecewiseLinearDialog(Selected);
+            break;
 
-//         case ELEM_LOOK_UP_TABLE:
-//             ShowLookUpTableDialog(Selected);
-//             break;
-//     }
+        case ELEM_LOOK_UP_TABLE:
+            ShowLookUpTableDialog(Selected);
+            break;
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -509,31 +509,30 @@ void EditSelectedElement(void)
 //-----------------------------------------------------------------------------
 void EditElementMouseDoubleclick(int x, int y)
 {
-//     x += ScrollXOffset;
+    x += ScrollXOffset;
 
-//     y += FONT_HEIGHT/2;
+    y += FONT_HEIGHT/2;
 
-//     int gx = (x - X_PADDING)/(POS_WIDTH*FONT_WIDTH);
-//     int gy = (y - Y_PADDING)/(POS_HEIGHT*FONT_HEIGHT);
+    int gx = (x - X_PADDING)/(POS_WIDTH*FONT_WIDTH);
+    int gy = (y - Y_PADDING)/(POS_HEIGHT*FONT_HEIGHT);
 
-//     gy += ScrollYOffset;
+    gy += ScrollYOffset;
 
-//     if(InSimulationMode) {
-//         ElemLeaf *l = DisplayMatrix[gx][gy];
-//         if(l && DisplayMatrixWhich[gx][gy] == ELEM_CONTACTS) {
-//             char *name = l->d.contacts.name;
-//             if(name[0] == 'X') {
-//                 SimulationToggleContact(name);
-//             } 
-//         } else if(l && DisplayMatrixWhich[gx][gy] == ELEM_READ_ADC) {
-//             ShowAnalogSliderPopup(l->d.readAdc.name);
-//         }
-//     } else {
-//         if(DisplayMatrix[gx][gy] == Selected) {
-//             EditSelectedElement();
-//         }
-//     }
-    EditSelectedElement();
+    if(InSimulationMode) {
+        ElemLeaf *l = DisplayMatrix[gx][gy];
+        if(l && DisplayMatrixWhich[gx][gy] == ELEM_CONTACTS) {
+            char *name = l->d.contacts.name;
+            if(name[0] == 'X') {
+                SimulationToggleContact(name);
+            } 
+        } else if(l && DisplayMatrixWhich[gx][gy] == ELEM_READ_ADC) {
+            ShowAnalogSliderPopup(l->d.readAdc.name);
+        }
+    } else {
+        if(DisplayMatrix[gx][gy] == Selected) {
+            EditSelectedElement();
+        }
+    }
 }
 
 //-----------------------------------------------------------------------------

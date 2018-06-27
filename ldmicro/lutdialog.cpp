@@ -189,15 +189,15 @@ static void DestroyLutControls(void)
         cout << "Exiting else of WasAsString" << "\n";
     }
     if (checkString){
-        DestroyWindow(StringTextbox, NULL);
+        DestroyWindow(StringTextbox);
         cout << "Destroyed StringTextbox" << "\n";
     }
     int i;
     // *** Changed from MAX_LOOK_UP_TABLE_LEN to count ***** //
     for(i = 0; i < temp.tmpcount; i++) {
         cout << "Destroy ValueTextbox i = " << i << "\n";
-        DestroyWindow(ValuesTextbox[i], NULL);
-        DestroyWindow(ValuesLabel[i], NULL);
+        DestroyWindow(ValuesTextbox[i]);
+        DestroyWindow(ValuesLabel[i]);
         cout << "Called DestroyWindow() for ValuesTextbox and ValuesLabels" << "\n";
     }
 }
@@ -431,7 +431,7 @@ gboolean LookUpTableKeyPress (HWID widget, GdkEventKey* event, gpointer data){
         LookUpTableGetData(NULL, (gpointer) data);
     }
     else if (event -> keyval == GDK_KEY_Escape){
-        DestroyWindow (LutDialog, NULL);
+        DestroyWindow (LutDialog);
         gtk_widget_set_sensitive (MainWindow, TRUE);
     }
     return FALSE;
@@ -445,7 +445,7 @@ void LutDialogMouseClick (HWID widget, gpointer data){
 
 // Calls DestroyWindow
 void LutCallDestroyWindow (HWID widget, gpointer data){
-    DestroyWindow (LutDialog, NULL);
+    DestroyWindow (LutDialog);
     gtk_widget_set_sensitive (MainWindow, TRUE);
 }
 

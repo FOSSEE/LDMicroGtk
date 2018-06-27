@@ -131,7 +131,6 @@ static int          IoListSelectionPoint;
 static BOOL         IoListOutOfSync;
 int                 IoListHeight;
 int                 IoListTop;
-GtkTreeModel **IoListPtr = (GtkTreeModel**)GTK_TREE_MODEL (IoList);
 
 // whether the simulation is running in real time
 static BOOL         RealTimeSimulationRunning;
@@ -940,9 +939,9 @@ void ToggleSimulationMode(void)
 
         CheckMenuItem(SimulateMenu, SimulationModeMenu, MF_UNCHECKED);
 
-        // if(UartFunctionUsed()) {
-        //     DestroyUartSimulationWindow();
-        // }
+        if(UartFunctionUsed()) {
+            DestroyUartSimulationWindow();
+        }
         }
 
     UpdateMainWindowTitleBar();
@@ -970,9 +969,10 @@ void RefreshControlsToSettings(void)
         GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
         gtk_tree_selection_set_mode(selection, GTK_SELECTION_SINGLE);
         
-        if(gtk_tree_selection_get_selected (selection, IoListPtr, &iter))
+        GtkTreeModel *IoModelPtr; 
+        if(gtk_tree_selection_get_selected (selection, &IoModelPtr, &iter))
         {
-            GtkTreePath *path = gtk_tree_model_get_path ( *IoListPtr , &iter ) ;
+            GtkTreePath *path = gtk_tree_model_get_path ( IoModelPtr, &iter ) ;
             ip = gtk_tree_path_get_indices ( path ) ;
             i = ip[0];
             IoListSelectionPoint = i;
@@ -986,6 +986,7 @@ void RefreshControlsToSettings(void)
     h.code = LVN_GETDISPINFO;
     h.hlistFrom = IoList;
 
+    gtk_tree_model_get_iter_first (GTK_TREE_MODEL(IoList), &iter);
     for(i = 0; i < Prog.io.count; i++) {
         gtk_list_store_append (GTK_LIST_STORE(IoList), &iter);
         h.item.iItem = i;
@@ -1065,21 +1066,20 @@ void GenerateIoListDontLoseSelection(void)
 
     int * i ;
     IoListSelectionPoint = -1;
-
+    
     // GtkTreeSelection * tsel = gtk_tree_view_get_selection (tv);
     // GtkTreeModel * tm ;
     GtkTreePath * path ;
+    GtkTreeModel *IoModelPtr;
 
     GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
     gtk_tree_selection_set_mode(selection, GTK_SELECTION_SINGLE);
-
-    if(gtk_tree_selection_get_selected (selection, IoListPtr, &iter))
+    if(gtk_tree_selection_get_selected (selection, &IoModelPtr, &iter))
     {
-        path = gtk_tree_model_get_path ( *IoListPtr , &iter ) ;
+        path = gtk_tree_model_get_path ( IoModelPtr , &iter ) ;
         i = gtk_tree_path_get_indices ( path ) ;
         IoListSelectionPoint = i[0];
     }
-
     // gtk_tree_model_iter_next (GTK_TREE_MODEL(IoList), iter);
     //     BOOL iter_v = gtk_list_store_iter_is_valid(GTK_LIST_STORE(IoList), iter);
     //     g_print("iter = %i\n", iter_v);
@@ -1095,7 +1095,6 @@ void GenerateIoListDontLoseSelection(void)
     
     // can't just update the listview index; if I/O has been added then the
     // new selection point might be out of range till we refill it
-    
     IoListOutOfSync = TRUE;
     RefreshControlsToSettings();
 }
@@ -1159,6 +1158,6 @@ void StopSimulation(void)
     EnableMenuItem(SimulateMenu, StartSimulationMenu, MF_ENABLED);
     EnableMenuItem(SimulateMenu, StopSimulationMenu, MF_GRAYED);
     KillTimer(MainWindow, TIMER_SIMULATE);
-
+    
     UpdateMainWindowTitleBar();
 }

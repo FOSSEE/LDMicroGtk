@@ -282,6 +282,9 @@ HANDLE GetStockObject(int fnObject)
 
 void SelectObject(HCRDC hcr, HFONT hfont)
 {
+    if (hcr ==NULL)
+        return;
+    
     cairo_select_font_face(hcr, hfont->lpszFace,
         hfont->fdwItalic ? CAIRO_FONT_SLANT_ITALIC : CAIRO_FONT_SLANT_NORMAL,
         hfont->fnWeight == FW_BOLD ? CAIRO_FONT_WEIGHT_BOLD : CAIRO_FONT_WEIGHT_NORMAL);
@@ -313,19 +316,23 @@ HBRUSH CreateBrushIndirect(PLOGBRUSH plb)
 HFONT CreateFont(int nHeight, int nWidth, int nOrientation, int fnWeight,
     DWORD fdwItalic, LPCTSTR lpszFace)
 {
-    HFONT font = new FONT;
+    HFONT font = (HFONT)malloc(strlen(lpszFace) + 1 + sizeof(FONT));
     font->nHeight = nHeight;
     font->nWidth = nWidth;
     font->nOrientation = nOrientation;
     font->fnWeight = fnWeight;
     font->fdwItalic = fdwItalic;
-    font->lpszFace = lpszFace;
-
+    font->lpszFace = (char*)malloc(strlen(lpszFace)+1);
+    strcpy(font->lpszFace, lpszFace);
+    
     return font;
 }
 
 void SetBkColor(HWID widget, HCRDC hcr, COLORREF bkCol)
 {
+    if (hcr == NULL)
+        return;
+    
     gtk_widget_override_background_color(GTK_WIDGET(widget), 
                         GTK_STATE_FLAG_NORMAL, &bkCol);
 
@@ -349,12 +356,18 @@ void SetBkColor(HWID widget, HCRDC hcr, COLORREF bkCol)
 
 void SetTextColor(HCRDC hcr, COLORREF color)
 {
+    if (hcr == NULL)
+        return;
+    
     HdcCurrentTextColor = color;
     gdk_cairo_set_source_rgba (hcr, &color);
 }
 
 void TextOut(HWID hWid, HCRDC hcr, int nXStart, int nYStart, LPCTSTR lpString, int cchString)
 {
+    if (hcr == NULL)
+        return;
+    
     nYStart += 30;
     
     cairo_text_extents_t extents;
@@ -419,6 +432,9 @@ BOOL InvalidateRect(HWID hWid, const RECT *lpRect, BOOL bErase)
 
 int FillRect(HCRDC hDC, const RECT *lprc, HBRUSH hbr)
 {
+    if (hDC == NULL)
+        return -1;
+    
     GDRECT gdrc;
     RECT_to_GDRECT(lprc, &gdrc);
 
@@ -432,6 +448,9 @@ int FillRect(HCRDC hDC, const RECT *lprc, HBRUSH hbr)
 
 BOOL PatBlt(HCRDC hdc, int nXLeft, int nYLeft, int nWidth, int nHeight, DWORD dwRop, HBRUSH hbr)
 {
+    if (hdc == NULL)
+        return FALSE;
+    
     cairo_set_source_rgb(hdc, hbr->red, hbr->green, hbr->blue);
     cairo_rectangle(hdc, nXLeft, nYLeft + 20, nWidth, nHeight);
     cairo_stroke_preserve(hdc);
@@ -479,9 +498,6 @@ BOOL GetWindowRect(HWID hWid, PRECT pRect)
     return TRUE;
 }
 
-void DestroyWindow (GtkWidget* widget, gpointer data){
-    gtk_widget_destroy (widget);
-}
 
 UINT SetTimer(HWID hWid, UINT  nIDEvent, UINT uElapse, BOOL (*lpTimerFunc)(BOOL) )
 {
@@ -511,4 +527,9 @@ BOOL KillTimer(HWID hWid, UINT uIDEvent)
     timerRecords.erase(record_it);
 
     return TRUE;
+}
+
+void DestroyWindow (HWID widget)
+{
+    gtk_widget_destroy (widget);
 }

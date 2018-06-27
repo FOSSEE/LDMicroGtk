@@ -182,7 +182,7 @@ typedef struct FontTag {
     int     nOrientation;
     int     fnWeight;
     DWORD   fdwItalic;
-    LPCTSTR lpszFace;
+    LPTSTR lpszFace;
 } *HFONT, FONT;
 
 typedef struct tagLOGBRUSH {

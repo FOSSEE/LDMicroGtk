@@ -169,8 +169,7 @@ void ConfDialogGetData (GtkWidget* widget, gpointer data){
 
     buf = const_cast <char*> (gtk_entry_get_text (GTK_ENTRY(BaudTextbox)));
     Prog.baudRate = atoi(buf);        
-    DestroyWindow (ConfDialog, NULL);
-    gtk_widget_set_sensitive (MainWindow, TRUE);
+    DestroyWindow (ConfDialog);
 }
 
 // Checks for the required key press
@@ -179,14 +178,14 @@ gboolean ConfDialogKeyPress (GtkWidget* widget, GdkEventKey* event, gpointer dat
         ConfDialogGetData(NULL, NULL);
     }
     else if (event -> keyval == GDK_KEY_Escape){
-        DestroyWindow (ConfDialog, NULL);
+        DestroyWindow (ConfDialog);
         gtk_widget_set_sensitive (MainWindow, TRUE);
     }
     return FALSE;
 }
 
 void ConfCallDestroyWindow (HWID widget, gpointer data){
-    DestroyWindow (ConfDialog, NULL);
+    DestroyWindow (ConfDialog);
     gtk_widget_set_sensitive (MainWindow, TRUE);
 }
 

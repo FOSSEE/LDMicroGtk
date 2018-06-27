@@ -201,9 +201,9 @@ void UndoUndo(void)
     } else {
         SetUndoEnabled(FALSE, TRUE);
     }
-   // RefreshControlsToSettings(); 
-   // RefreshScrollbars();
-   // InvalidateRect(MainWindow, NULL, FALSE);
+   RefreshControlsToSettings(); 
+   RefreshScrollbars();
+   InvalidateRect(MainWindow, NULL, FALSE);
 }
 
 //-----------------------------------------------------------------------------
@@ -224,9 +224,9 @@ void UndoRedo(void)
     } else {
         SetUndoEnabled(TRUE, FALSE);
     }
-    //RefreshControlsToSettings(); 
-    //RefreshScrollbars();
-    //InvalidateRect(MainWindow, NULL, FALSE);
+    RefreshControlsToSettings(); 
+    RefreshScrollbars();
+    InvalidateRect(MainWindow, NULL, FALSE);
 }
 
 //-----------------------------------------------------------------------------

@@ -102,7 +102,7 @@ BOOL BlinkCursor(BOOL kill = FALSE)
     // if(!GDK_IS_DRAWING_CONTEXT(Hdc))
         // return FALSE;
 
-    HCRDC Hcr = gdk_cairo_create(gtk_widget_get_window(DrawWindow));//gdk_drawing_context_get_cairo_context(Hdc);//
+    HCRDC Hcr = gdk_cairo_create(gtk_widget_get_window(DrawWindow));
 
     static int PREV_x = c.left;
     static int PREV_y = c.top;
@@ -429,7 +429,7 @@ void InitForDrawing(void)
 // DrawChars function, for drawing to the export buffer instead of to the
 // screen.
 //-----------------------------------------------------------------------------
-static void DrawCharsToExportBuffer(int cx, int cy, char *str)
+static void DrawCharsToExportBuffer(HCRDC Hcr, int cx, int cy, const char *str)
 {
     while(*str) {
         if(*str >= 10) {
@@ -445,105 +445,106 @@ static void DrawCharsToExportBuffer(int cx, int cy, char *str)
 //-----------------------------------------------------------------------------
 void ExportDrawingAsText(char *file)
 {
-    // int maxWidth = ProgCountWidestRow();
-    // ColsAvailable = maxWidth;
+    int maxWidth = ProgCountWidestRow();
+    ColsAvailable = maxWidth;
 
-    // int totalHeight = 0;
-    // int i;
-    // for(i = 0; i < Prog.numRungs; i++) {
-    //     totalHeight += CountHeightOfElement(ELEM_SERIES_SUBCKT, Prog.rungs[i]);
-    //     totalHeight += 1;
-    // }
-    // totalHeight *= POS_HEIGHT;
-    // totalHeight += 3;
+    int totalHeight = 0;
+    int i;
+    for(i = 0; i < Prog.numRungs; i++) {
+        totalHeight += CountHeightOfElement(ELEM_SERIES_SUBCKT, Prog.rungs[i]);
+        totalHeight += 1;
+    }
+    totalHeight *= POS_HEIGHT;
+    totalHeight += 3;
 
-    // ExportBuffer = (char **)CheckMalloc(totalHeight * sizeof(char *));
+    ExportBuffer = (char **)CheckMalloc(totalHeight * sizeof(char *));
    
-    // int l = maxWidth*POS_WIDTH + 8;
-    // for(i = 0; i < totalHeight; i++) {
-    //     ExportBuffer[i] = (char *)CheckMalloc(l);
-    //     memset(ExportBuffer[i], ' ', l-1);
-    //     ExportBuffer[i][4] = '|';
-    //     ExportBuffer[i][3] = '|';
-    //     ExportBuffer[i][l-3] = '|';
-    //     ExportBuffer[i][l-2] = '|';
-    //     ExportBuffer[i][l-1] = '\0';
-    // }
+    int l = maxWidth*POS_WIDTH + 8;
+    for(i = 0; i < totalHeight; i++) {
+        ExportBuffer[i] = (char *)CheckMalloc(l);
+        memset(ExportBuffer[i], ' ', l-1);
+        ExportBuffer[i][4] = '|';
+        ExportBuffer[i][3] = '|';
+        ExportBuffer[i][l-3] = '|';
+        ExportBuffer[i][l-2] = '|';
+        ExportBuffer[i][l-1] = '\0';
+    }
 
-    // DrawChars = DrawCharsToExportBuffer;
+    DrawChars = DrawCharsToExportBuffer;
 
-    // int cy = 1;
-    // for(i = 0; i < Prog.numRungs; i++) {
-    //     int cx = 5;
-    //     DrawElement(ELEM_SERIES_SUBCKT, Prog.rungs[i], &cx, &cy, 
-    //         Prog.rungPowered[i]);
+    int cy = 1;
 
-    //     if((i + 1) < 10) {
-    //         ExportBuffer[cy+1][1] = '0' + (i + 1);
-    //     } else {
-    //         ExportBuffer[cy+1][1] = '0' + ((i + 1) % 10);
-    //         ExportBuffer[cy+1][0] = '0' + ((i + 1) / 10);
-    //     }
+    for(i = 0; i < Prog.numRungs; i++) {
+        int cx = 5;
+        DrawElement(NULL, ELEM_SERIES_SUBCKT, Prog.rungs[i], &cx, &cy, 
+            Prog.rungPowered[i]);
 
-    //     cy += POS_HEIGHT*CountHeightOfElement(ELEM_SERIES_SUBCKT,
-    //         Prog.rungs[i]);
-    //     cy += POS_HEIGHT;
-    // }
-    // cy -= 2;
-    // DrawEndRung(5, cy);
+        if((i + 1) < 10) {
+            ExportBuffer[cy+1][1] = '0' + (i + 1);
+        } else {
+            ExportBuffer[cy+1][1] = '0' + ((i + 1) % 10);
+            ExportBuffer[cy+1][0] = '0' + ((i + 1) / 10);
+        }
 
-    // FILE *f = fopen(file, "w");
-    // if(!f) {
-    //     Error(_("Couldn't open '%s'\n"), f);
-    //     return;
-    // }
+        cy += POS_HEIGHT*CountHeightOfElement(ELEM_SERIES_SUBCKT,
+            Prog.rungs[i]);
+        cy += POS_HEIGHT;
+    }
+    cy -= 2;
+    DrawEndRung(NULL, 5, cy);
 
-    // fprintf(f, "LDmicro export text\n");
+    FILE *f = fopen(file, "w");
+    if(!f) {
+        Error(_("Couldn't open '%s'\n"), f);
+        return;
+    }
 
-    // if(Prog.mcu) {
-    //     fprintf(f, "for '%s', %.6f MHz crystal, %.1f ms cycle time\n\n",
-    //         Prog.mcu->mcuName, Prog.mcuClock/1e6, Prog.cycleTime/1e3);
-    // } else {
-    //     fprintf(f, "no MCU assigned, %.6f MHz crystal, %.1f ms cycle time\n\n",
-    //         Prog.mcuClock/1e6, Prog.cycleTime/1e3);
-    // }
+    fprintf(f, "LDmicro export text\n");
 
-    // fprintf(f, "\nLADDER DIAGRAM:\n\n");
+    if(Prog.mcu) {
+        fprintf(f, "for '%s', %.6f MHz crystal, %.1f ms cycle time\n\n",
+            Prog.mcu->mcuName, Prog.mcuClock/1e6, Prog.cycleTime/1e3);
+    } else {
+        fprintf(f, "no MCU assigned, %.6f MHz crystal, %.1f ms cycle time\n\n",
+            Prog.mcuClock/1e6, Prog.cycleTime/1e3);
+    }
 
-    // for(i = 0; i < totalHeight; i++) {
-    //     ExportBuffer[i][4] = '|';
-    //     fprintf(f, "%s\n", ExportBuffer[i]);
-    //     CheckFree(ExportBuffer[i]);
-    // }
-    // CheckFree(ExportBuffer);
-    // ExportBuffer = NULL;
+    fprintf(f, "\nLADDER DIAGRAM:\n\n");
 
-    // fprintf(f, _("\n\nI/O ASSIGNMENT:\n\n"));
+    for(i = 0; i < totalHeight; i++) {
+        ExportBuffer[i][4] = '|';
+        fprintf(f, "%s\n", ExportBuffer[i]);
+        CheckFree(ExportBuffer[i]);
+    }
+    CheckFree(ExportBuffer);
+    ExportBuffer = NULL;
+
+    fprintf(f, _("\n\nI/O ASSIGNMENT:\n\n"));
     
-    // fprintf(f, _("  Name                       | Type               | Pin\n"));
-    // fprintf(f,   " ----------------------------+--------------------+------\n");
-    // for(i = 0; i < Prog.io.count; i++) {
-    //     char b[1024];
-    //     memset(b, '\0', sizeof(b));
+    fprintf(f, _("  Name                       | Type               | Pin\n"));
+    fprintf(f,   " ----------------------------+--------------------+------\n");
+    for(i = 0; i < Prog.io.count; i++) {
+        char b[1024];
+        memset(b, '\0', sizeof(b));
 
-    //     PlcProgramSingleIo *io = &Prog.io.assignment[i];
-    //     char *type = IoTypeToString(io->type);
-    //     char pin[MAX_NAME_LEN];
+        PlcProgramSingleIo *io = &Prog.io.assignment[i];
+        char *type = IoTypeToString(io->type);
+        char pin[MAX_NAME_LEN];
 
-    //     PinNumberForIo(pin, io);
+        PinNumberForIo(pin, io);
 
-    //     sprintf(b, "                             |                    | %s\n",
-    //         pin);
+        sprintf(b, "                             |                    | %s\n",
+            pin);
 
-    //     memcpy(b+2, io->name, strlen(io->name));
-    //     memcpy(b+31, type, strlen(type));
-    //     fprintf(f, "%s", b);
-    // }
+        memcpy(b+2, io->name, strlen(io->name));
+        memcpy(b+31, type, strlen(type));
+        fprintf(f, "%s", b);
+    }
 
-    // fclose(f);
+    fclose(f);
 
-    // // we may have trashed the grid tables a bit; a repaint will fix that
-    // InvalidateRect(MainWindow, NULL, FALSE);
+    // we may have trashed the grid tables a bit; a repaint will fix that
+    InvalidateRect(MainWindow, NULL, FALSE);
 }
 
 //-----------------------------------------------------------------------------

@@ -126,9 +126,8 @@ void ContactsDialogGetData (BOOL* negated, char* name){
             name[0] = 'Y';
         }
         strcpy (name+1, gtk_entry_get_text (GTK_ENTRY (NameTextbox)));
-        // ******** Check this *******
-        // SendMessage(NameTextbox, WM_GETTEXT, (WPARAM)16, (LPARAM)(name+1));
-    DestroyWindow (ContactsDialog, NULL);
+
+    DestroyWindow (ContactsDialog);
     gtk_widget_set_sensitive (MainWindow, TRUE);
 }
 
@@ -143,14 +142,14 @@ gboolean ContactsDialogKeyPress (HWID widget, GdkEventKey* event, gpointer data)
         ContactsDialogGetData(tmpnegated, tmpname);
     }
     else if (event -> keyval == GDK_KEY_Escape){
-        DestroyWindow (ContactsDialog, NULL);
+        DestroyWindow (ContactsDialog);
         gtk_widget_set_sensitive (MainWindow, TRUE);
     }
     return FALSE;
 }
 
 void ContactsCallDestroyWindow (HWID widget, gpointer data){
-    DestroyWindow (ContactsDialog, NULL);
+    DestroyWindow (ContactsDialog);
     gtk_widget_set_sensitive (MainWindow, TRUE);
 }
 

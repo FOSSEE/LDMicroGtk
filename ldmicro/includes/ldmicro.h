@@ -780,15 +780,14 @@ void WriteIhex(FILE *f, BYTE b);
 void FinishIhex(FILE *f);
 char *IoTypeToString(int ioType);
 void PinNumberForIo(char *dest, PlcProgramSingleIo *io);
-HWND CreateWindowClient(DWORD exStyle, char *className, char *windowName,
-    DWORD style, int x, int y, int width, int height, HWND parent,
-    HMENU menu, HINSTANCE instance, void *param);
+HWID CreateWindowClient(GtkWindowType wType, GdkWindowTypeHint wthint, char *windowName,
+    int x, int y, int width, int height, HWND parent);
 
 void MakeComponentListClass(void);
 void MakeNamingListClass(void);
 void MakeDialogBoxClass(void);
-void NiceFont(HWND h);
-void FixedFont(HWND h);
+void NiceFont(HWID h);
+void FixedFont(HWID h);
 void CompileSuccessfulMessage(char *str);
 extern BOOL RunningInBatchMode;
 extern HFONT MyNiceFont;

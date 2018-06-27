@@ -204,10 +204,15 @@ void FinishIhex(FILE *f)
 //-----------------------------------------------------------------------------
 // Create a window with a given client area.
 //-----------------------------------------------------------------------------
-HWND CreateWindowClient(DWORD exStyle, char *className, char *windowName,
-    DWORD style, int x, int y, int width, int height, HWND parent,
-    HMENU menu, HINSTANCE instance, void *param)
+HWID CreateWindowClient(GtkWindowType wType, GdkWindowTypeHint wthint, char *windowName,
+    int x, int y, int width, int height, HWND parent)
 {
+    HWID h = gtk_window_new(wType);
+    gtk_window_set_title(GTK_WINDOW(h),  windowName);
+    gtk_window_resize (GTK_WINDOW(h), width, height);
+    gtk_window_move(GTK_WINDOW(h), x, y);
+    gtk_window_set_type_hint (GTK_WINDOW(h), wthint);
+
     // HWND h = CreateWindowEx(exStyle, className, windowName, style, x, y,
     //     width, height, parent, menu, instance, param);
 
@@ -218,16 +223,16 @@ HWND CreateWindowClient(DWORD exStyle, char *className, char *windowName,
     
     // SetWindowPos(h, HWND_TOP, x, y, width, height, 0);
 
-    return NULL;
+    return h;
 }
 
 //-----------------------------------------------------------------------------
 // Window proc for the dialog boxes. This Ok/Cancel stuff is common to a lot
 // of places, and there are no other callbacks from the children.
 //-----------------------------------------------------------------------------
-static LRESULT CALLBACK DialogProc(HWND hwnd, UINT msg, WPARAM wParam,
-    LPARAM lParam)
-{
+// static LRESULT CALLBACK DialogProc(HWND hwnd, UINT msg, WPARAM wParam,
+//     LPARAM lParam)
+// {
     // switch (msg) {
     //     case WM_NOTIFY:
     //         break;
@@ -253,8 +258,8 @@ static LRESULT CALLBACK DialogProc(HWND hwnd, UINT msg, WPARAM wParam,
     //         return DefWindowProc(hwnd, msg, wParam, lParam);
     // }
 
-    return 1;
-}
+//     return 1;
+// }
 
 
 
@@ -263,7 +268,19 @@ static LRESULT CALLBACK DialogProc(HWND hwnd, UINT msg, WPARAM wParam,
 //-----------------------------------------------------------------------------
 void NiceFont(HWID h)
 {
-    // gtk_widget_override_font(GTK_WIDGET(h), pango_font_description_from_string("Times New Roman"));
+    GtkCssProvider *provider = gtk_css_provider_new ();
+    
+    char *cssdata = new char[strlen(MyNiceFont->lpszFace) + 26];
+    int fontSize = 10;
+    sprintf(cssdata, "textview { font: %ipx %s; }", fontSize, MyNiceFont->lpszFace);
+    
+    gtk_css_provider_load_from_data (provider, cssdata, -1, NULL);
+    
+    delete cssdata;
+
+    gtk_style_context_add_provider (gtk_widget_get_style_context(h), 
+        GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+
 //    SendMessage(h, WM_SETFONT, (WPARAM)MyNiceFont, TRUE);
 }
 
@@ -271,8 +288,21 @@ void NiceFont(HWID h)
 // Set the font of a control to a pretty fixed-width font (typ. Lucida
 // Console).
 //-----------------------------------------------------------------------------
-void FixedFont(HWND h)
+void FixedFont(HWID h)
 {
+    GtkCssProvider *provider = gtk_css_provider_new ();
+    
+    char *cssdata = new char[strlen(MyFixedFont->lpszFace) + 26];
+    int fontSize = 10;
+    sprintf(cssdata, "textview { font: %ipx %s; }", fontSize, MyFixedFont->lpszFace);
+    
+    gtk_css_provider_load_from_data (provider, cssdata, -1, NULL);
+    
+    delete cssdata;
+
+    gtk_style_context_add_provider (gtk_widget_get_style_context(h), 
+        GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+
   //  SendMessage(h, WM_SETFONT, (WPARAM)MyFixedFont, TRUE);
 }
 
@@ -300,15 +330,13 @@ void MakeDialogBoxClass(void)
 
     // RegisterClassEx(&wc);
 
-    // MyNiceFont = CreateFont(16, 0, 0, 0, FW_REGULAR, FALSE, FALSE, FALSE,
-    //     ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
-    //     FF_DONTCARE, "Tahoma");
+    MyNiceFont = CreateFont(16, 0, 0, FW_REGULAR, FALSE, "Tahoma");
+
     // if(!MyNiceFont)
     //     MyNiceFont = (HFONT)GetStockObject(SYSTEM_FONT);
 
-    // MyFixedFont = CreateFont(14, 0, 0, 0, FW_REGULAR, FALSE, FALSE, FALSE,
-    //     ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
-    //     FF_DONTCARE, "Lucida Console");
+    MyFixedFont = CreateFont(14, 0, 0, FW_REGULAR, FALSE, "Lucida Console");
+
     // if(!MyFixedFont)
     //     MyFixedFont = (HFONT)GetStockObject(SYSTEM_FONT);
 }

@@ -38,8 +38,8 @@ static HWID OkButton;
 static HWID CancelButton;
 
 static LONG_PTR PrevNameProc;
-HWID ContactsGrid;
-HWID ContactsPackingBox;
+static HWID ContactsGrid;
+static HWID ContactsPackingBox;
 char* tmpname;
 BOOL* tmpnegated;
 //-----------------------------------------------------------------------------

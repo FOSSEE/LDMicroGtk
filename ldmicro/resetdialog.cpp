@@ -38,8 +38,8 @@ static HWID OkButton;
 static HWID CancelButton;
 
 static LONG_PTR PrevNameProc;
-HWID ResetGrid;
-HWID ResetPackingBox;
+static HWID ResetGrid;
+static HWID ResetPackingBox;
 
 //-----------------------------------------------------------------------------
 // Don't allow any characters other than A-Za-z0-9_ in the name.
@@ -82,8 +82,8 @@ static void MakeControls(void)
     gtk_grid_set_column_spacing (GTK_GRID (ResetGrid), 1);
     gtk_box_pack_start(GTK_BOX(ResetPackingBox), ResetGrid, TRUE, TRUE, 0);
 
-    // PrevNameProc = SetWindowLongPtr(NameTextbox, GWLP_WNDPROC, 
-    //     (LONG_PTR)MyNameProc);
+    g_signal_connect (G_OBJECT(NameTextbox), "insert-text",
+		     G_CALLBACK(ResetDialogMyNameProc), NULL);
 }
 
 void ResetDialogGetData (char* name){
@@ -147,8 +147,6 @@ void ShowResetDialog(char *name)
     gtk_widget_show_all (ResetDialog);
     gtk_widget_grab_focus (NameTextbox);
     
-    g_signal_connect (G_OBJECT(NameTextbox), "insert-text",
-		     G_CALLBACK(ResetDialogMyNameProc), NULL);
     g_signal_connect (G_OBJECT (ResetDialog), "key-press-event",
                     G_CALLBACK(ResetDialogKeyPress), (gpointer)name);
     g_signal_connect (G_OBJECT (OkButton), "clicked",

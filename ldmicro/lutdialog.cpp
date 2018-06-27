@@ -58,6 +58,7 @@ static LONG_PTR PrevIndexProc;
 static LONG_PTR PrevCountProc;
 static HWID OkButton;
 static HWID CancelButton;
+static UINT LUT_DIALOG_REFRESH_TIMER_ID = 0;
 
 HWID LutGrid;
 HWID LutPackingBox;
@@ -437,16 +438,32 @@ gboolean LookUpTableKeyPress (HWID widget, GdkEventKey* event, gpointer data){
     return FALSE;
 }
 
-// Mouse click callback
-void LutDialogMouseClick (HWID widget, gpointer data){
+/// Dialig refresh function
+BOOL LutDialogRefresh(gpointer data)
+{
     LookUpTableCheckMode ();
     LookUpTableGetData(NULL, (gpointer) data);
+    return TRUE;
 }
+// Ok button call
+void LutDialogOk (HWID widget, gpointer data)
+{
+    LookUpTableCheckMode ();
+    LookUpTableGetData(NULL, (gpointer) data);
 
-// Calls DestroyWindow
-void LutCallDestroyWindow (HWID widget, gpointer data){
     DestroyWindow (LutDialog);
     gtk_widget_set_sensitive (MainWindow, TRUE);
+    g_source_remove (LUT_DIALOG_REFRESH_TIMER_ID);
+    LUT_DIALOG_REFRESH_TIMER_ID = 0;
+}
+
+// Cancel button call
+void LutCallCancel (HWID widget, gpointer data)
+{
+    DestroyWindow (LutDialog);
+    gtk_widget_set_sensitive (MainWindow, TRUE);
+    g_source_remove (LUT_DIALOG_REFRESH_TIMER_ID);
+    LUT_DIALOG_REFRESH_TIMER_ID = 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -519,9 +536,12 @@ void ShowLookUpTableDialog(ElemLeaf *l)
     g_signal_connect (G_OBJECT (LutDialog), "key-press-event",
                     G_CALLBACK(LookUpTableKeyPress), (gpointer)l);
     g_signal_connect (G_OBJECT (OkButton), "clicked",
-                    G_CALLBACK(LutDialogMouseClick), (gpointer)l);
+                    G_CALLBACK(LutDialogOk), (gpointer)l);
     g_signal_connect (G_OBJECT (CancelButton), "clicked",
-                    G_CALLBACK(LutCallDestroyWindow), NULL);
+                    G_CALLBACK(LutCallCancel), NULL);
+
+    if (LUT_DIALOG_REFRESH_TIMER_ID == 0)
+       LUT_DIALOG_REFRESH_TIMER_ID = g_timeout_add(100, (GSourceFunc)LutDialogRefresh, (gpointer)l);
 }
 
 //-----------------------------------------------------------------------------

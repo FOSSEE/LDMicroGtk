@@ -18,21 +18,21 @@
  */
 void FreezeWindowPosF(HWID hwid, char *subKey, char *name)
 {
-    //g_print("freezing");
     char* Ld_CWD = (char *)malloc(MAX_PATH);
-    getcwd(Ld_CWD, sizeof(Ld_CWD));
-
+    getcwd(Ld_CWD, MAX_PATH);
+    
     if (!Ld_CWD)
         return;
-    char* moveToKeyLocatin = (char *)malloc(strlen(name) + 30);
+    char* moveToKeyLocatin = (char *)malloc(strlen(name) + MAX_PATH);
     if(!moveToKeyLocatin)
     {
         free(Ld_CWD);
         return;
     }
-    sprintf(moveToKeyLocatin, "mkdir -p %s/%s", FREEZE_REGISTER, subKey);
+
+    sprintf(moveToKeyLocatin, "mkdir -p %s/%s/%s", getenv("HOME"), FREEZE_REGISTER, subKey);
     system(moveToKeyLocatin);  
-    sprintf(moveToKeyLocatin, "%s/%s", FREEZE_REGISTER, subKey);
+    sprintf(moveToKeyLocatin, "%s/%s/%s", getenv("HOME"), FREEZE_REGISTER, subKey);
     if (-1 == chdir(moveToKeyLocatin))
     {
         free(Ld_CWD);
@@ -51,7 +51,7 @@ void FreezeWindowPosF(HWID hwid, char *subKey, char *name)
     Key newKey;
 
     int val;
-    //g_print("get width");
+
     sprintf(keyName, "%s_width", name);
     std::ofstream Register(keyName, std::ios::binary | std::ios::trunc);
     if (!Register.is_open())
@@ -66,7 +66,6 @@ void FreezeWindowPosF(HWID hwid, char *subKey, char *name)
     Register.write((char*) &newKey, sizeof(newKey));
     Register.close();
 
-    //g_print("get height");
     sprintf(keyName, "%s_height", name);
     Register.open(keyName, std::ios::binary | std::ios::trunc);
     if (!Register.is_open())
@@ -81,7 +80,6 @@ void FreezeWindowPosF(HWID hwid, char *subKey, char *name)
     Register.write((char*) &newKey, sizeof(newKey));
     Register.close();
 
-    //g_print("get posX");
     sprintf(keyName, "%s_posX", name);
     Register.open(keyName, std::ios::binary | std::ios::trunc);
     if (!Register.is_open())
@@ -96,7 +94,6 @@ void FreezeWindowPosF(HWID hwid, char *subKey, char *name)
     Register.write((char*) &newKey, sizeof(newKey));
     Register.close();
     
-    //g_print("get posY");
     sprintf(keyName, "%s_posY", name);
     Register.open(keyName, std::ios::binary | std::ios::trunc);
     if (!Register.is_open())
@@ -111,7 +108,6 @@ void FreezeWindowPosF(HWID hwid, char *subKey, char *name)
     Register.write((char*) &newKey, sizeof(newKey));
     Register.close();
 
-    //g_print("get max");
     sprintf(keyName, "%s_maximized", name);
     Register.open(keyName, std::ios::binary | std::ios::trunc);
     if (!Register.is_open())
@@ -128,7 +124,6 @@ void FreezeWindowPosF(HWID hwid, char *subKey, char *name)
     free(keyName);
     chdir(Ld_CWD);
     free(Ld_CWD);
-    //g_print("freezed");
 }
 
 static void Clamp(LONG *v, LONG min, LONG max)
@@ -143,18 +138,19 @@ static void Clamp(LONG *v, LONG min, LONG max)
 void ThawWindowPosF(HWID hwid, char *subKey, char *name)
 {
     char* Ld_CWD = (char *)malloc(MAX_PATH);
-    getcwd(Ld_CWD, sizeof(Ld_CWD));
-
+    getcwd(Ld_CWD, MAX_PATH);
+    
     if (!Ld_CWD)
         return;
     
-    char* moveToKeyLocatin = (char *)malloc(strlen(name) + 30);   
+    char* moveToKeyLocatin = (char *)malloc(strlen(name) + MAX_PATH);   
     if(!moveToKeyLocatin)
     {
         free(Ld_CWD);
         return;
     }
-    sprintf(moveToKeyLocatin, "%s/%s", FREEZE_REGISTER, subKey);
+
+    sprintf(moveToKeyLocatin, "%s/%s/%s", getenv("HOME"), FREEZE_REGISTER, subKey);
     if (-1 == chdir(moveToKeyLocatin))
     {
         free(Ld_CWD);
@@ -162,8 +158,8 @@ void ThawWindowPosF(HWID hwid, char *subKey, char *name)
         return;
     }
     free(moveToKeyLocatin);
-    
-    char *keyName = (char *)malloc(strlen(name) + 30);
+
+    char *keyName = (char *)malloc(strlen(name) + MAX_PATH);
     if(!keyName)
     {
         free(Ld_CWD);
@@ -252,20 +248,21 @@ void ThawWindowPosF(HWID hwid, char *subKey, char *name)
 void FreezeDWORDF(DWORD val, char *subKey, char *name)
 {
     char* Ld_CWD = (char *)malloc(MAX_PATH);
-    getcwd(Ld_CWD, sizeof(Ld_CWD));
+    getcwd(Ld_CWD, MAX_PATH);
 
     if (!Ld_CWD)
         return;
 
-    char* moveToKeyLocatin = (char *)malloc(strlen(name) + 30);   
+    char* moveToKeyLocatin = (char *)malloc(strlen(name) + MAX_PATH);   
     if(!moveToKeyLocatin)
     {
         free(Ld_CWD);
         return;
     }
-    sprintf(moveToKeyLocatin, "mkdir -p %s/%s", FREEZE_REGISTER, subKey);
+
+    sprintf(moveToKeyLocatin, "mkdir -p %s/%s/%s", getenv("HOME"), FREEZE_REGISTER, subKey);
     system(moveToKeyLocatin);  
-    sprintf(moveToKeyLocatin, "%s/%s", FREEZE_REGISTER, subKey);
+    sprintf(moveToKeyLocatin, "%s/%s/%s", getenv("HOME"), FREEZE_REGISTER, subKey);
     if (-1 == chdir(moveToKeyLocatin))
     {
         free(Ld_CWD);
@@ -291,18 +288,19 @@ void FreezeDWORDF(DWORD val, char *subKey, char *name)
 DWORD ThawDWORDF(DWORD val, char *subKey, char *name)
 {
     char* Ld_CWD = (char *)malloc(MAX_PATH);
-    getcwd(Ld_CWD, sizeof(Ld_CWD));
+    getcwd(Ld_CWD, MAX_PATH);
 
     if (!Ld_CWD)
         return val;
     
-    char* moveToKeyLocatin = (char *)malloc(strlen(name) + 30);   
+    char* moveToKeyLocatin = (char *)malloc(strlen(name) + MAX_PATH);   
     if(!moveToKeyLocatin)
     {
         free(Ld_CWD);
         return val;
     }
-    sprintf(moveToKeyLocatin, "%s/%s", FREEZE_REGISTER, subKey);
+
+    sprintf(moveToKeyLocatin, "%s/%s/%s", getenv("HOME"), FREEZE_REGISTER, subKey);
     if (-1 == chdir(moveToKeyLocatin))
     {
         free(Ld_CWD);
@@ -335,20 +333,21 @@ DWORD ThawDWORDF(DWORD val, char *subKey, char *name)
 void FreezeStringF(char *val, char *subKey, char *name)
 {
     char* Ld_CWD = (char *)malloc(MAX_PATH);
-    getcwd(Ld_CWD, sizeof(Ld_CWD));
+    getcwd(Ld_CWD, MAX_PATH);
 
     if (!Ld_CWD)
         return;
 
-    char* moveToKeyLocatin = (char *)malloc(strlen(name) + 30);   
+    char* moveToKeyLocatin = (char *)malloc(strlen(name) + MAX_PATH);   
     if(!moveToKeyLocatin)
     {
         free(Ld_CWD);
         return;
     }
-    sprintf(moveToKeyLocatin, "mkdir -p %s/%s", FREEZE_REGISTER, subKey);
+
+    sprintf(moveToKeyLocatin, "mkdir -p %s/%s/%s", getenv("HOME"), FREEZE_REGISTER, subKey);
     system(moveToKeyLocatin);  
-    sprintf(moveToKeyLocatin, "%s/%s", FREEZE_REGISTER, subKey);
+    sprintf(moveToKeyLocatin, "%s/%s/%s", getenv("HOME"), FREEZE_REGISTER, subKey);
     if (-1 == chdir(moveToKeyLocatin))
     {
         free(Ld_CWD);
@@ -356,7 +355,7 @@ void FreezeStringF(char *val, char *subKey, char *name)
         return;
     }
     free(moveToKeyLocatin);
-    
+
     std::ofstream Register(name, std::ios::trunc);
     Register << strlen(val)+1 << "\n";
     Register << val;
@@ -372,18 +371,19 @@ void FreezeStringF(char *val, char *subKey, char *name)
 void ThawStringF(char *val, int max, char *subKey, char *name)
 {
     char* Ld_CWD = (char *)malloc(MAX_PATH);
-    getcwd(Ld_CWD, sizeof(Ld_CWD));
+    getcwd(Ld_CWD, MAX_PATH);
 
     if (!Ld_CWD)
         return;
     
-    char* moveToKeyLocatin = (char *)malloc(strlen(name) + 30);
+    char* moveToKeyLocatin = (char *)malloc(strlen(name) + MAX_PATH);
     if(!moveToKeyLocatin)
     {
         free(Ld_CWD);
         return;
     }
-    sprintf(moveToKeyLocatin, "%s/%s", FREEZE_REGISTER, subKey);
+
+    sprintf(moveToKeyLocatin, "%s/%s/%s", getenv("HOME"), FREEZE_REGISTER, subKey);
     if (-1 == chdir(moveToKeyLocatin))
     {
         free(Ld_CWD);

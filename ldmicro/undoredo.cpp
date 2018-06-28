@@ -25,8 +25,11 @@
 #include "linuxUI.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <iostream>
 
 #include "ldmicro.h"
+
+using namespace std;
 
 // Store a `deep copy' of the entire program before every change, in a
 // circular buffer so that the first one scrolls out as soon as the buffer
@@ -198,9 +201,9 @@ void UndoUndo(void)
     } else {
         SetUndoEnabled(FALSE, TRUE);
     }
-   // RefreshControlsToSettings(); 
-   // RefreshScrollbars();
-   // InvalidateRect(MainWindow, NULL, FALSE);
+   RefreshControlsToSettings(); 
+   RefreshScrollbars();
+   InvalidateRect(MainWindow, NULL, FALSE);
 }
 
 //-----------------------------------------------------------------------------
@@ -221,9 +224,9 @@ void UndoRedo(void)
     } else {
         SetUndoEnabled(TRUE, FALSE);
     }
-    //RefreshControlsToSettings(); 
-    //RefreshScrollbars();
-    //InvalidateRect(MainWindow, NULL, FALSE);
+    RefreshControlsToSettings(); 
+    RefreshScrollbars();
+    InvalidateRect(MainWindow, NULL, FALSE);
 }
 
 //-----------------------------------------------------------------------------

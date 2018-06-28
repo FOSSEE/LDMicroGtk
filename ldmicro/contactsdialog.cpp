@@ -27,16 +27,21 @@
 
 #include "ldmicro.h"
 
-static HWND ContactsDialog;
+static HWID ContactsDialog;
 
-static HWND NegatedCheckbox;
-static HWND SourceInternalRelayRadio;
-static HWND SourceInputPinRadio;
-static HWND SourceOutputPinRadio;
-static HWND NameTextbox;
+static HWID NegatedCheckbox;
+static HWID SourceInternalRelayRadio;
+static HWID SourceInputPinRadio;
+static HWID SourceOutputPinRadio;
+static HWID NameTextbox;
+static HWID OkButton;
+static HWID CancelButton;
 
 static LONG_PTR PrevNameProc;
-
+static HWID ContactsGrid;
+static HWID ContactsPackingBox;
+char* tmpname;
+BOOL* tmpnegated;
 //-----------------------------------------------------------------------------
 // Don't allow any characters other than A-Za-z0-9_ in the name.
 //-----------------------------------------------------------------------------
@@ -54,124 +59,142 @@ static LONG_PTR PrevNameProc;
 //     return CallWindowProc((WNDPROC)PrevNameProc, hwnd, msg, wParam, lParam);
 // }
 
-// static void MakeControls(void)
-// {
-//     HWND grouper = CreateWindowEx(0, WC_BUTTON, _("Source"),
-//         WS_CHILD | BS_GROUPBOX | WS_VISIBLE,
-//         7, 3, 120, 85, ContactsDialog, NULL, Instance, NULL);
-//     NiceFont(grouper);
+void ContactsDialogMyNameProc (GtkEditable *editable, gchar *NewText, gint length, 
+    gint *position, gpointer data){
+    // gtk_widget_set_sensitive (MainWindow, TRUE);
+    for (int i = 0; i < length; i++){
+        if (!(isalpha (NewText[i]) || NewText[i] == '_' || isdigit (NewText[i])
+                                     || NewText[i] == '\b' )){
+            g_signal_stop_emission_by_name (G_OBJECT (editable), "insert-text");
+            return;
+        }
+    }
+}
 
-//     SourceInternalRelayRadio = CreateWindowEx(0, WC_BUTTON, _("Internal Relay"),
-//         WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE,
-//         16, 21, 100, 20, ContactsDialog, NULL, Instance, NULL);
-//     NiceFont(SourceInternalRelayRadio);
+static void MakeControls(void)
+{
+    SourceInternalRelayRadio = gtk_radio_button_new_with_label (NULL, "Internal Relay");
 
-//     SourceInputPinRadio = CreateWindowEx(0, WC_BUTTON, _("Input pin"),
-//         WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE,
-//         16, 41, 100, 20, ContactsDialog, NULL, Instance, NULL);
-//     NiceFont(SourceInputPinRadio);
+    SourceInputPinRadio = gtk_radio_button_new_with_label_from_widget
+                        (GTK_RADIO_BUTTON (SourceInternalRelayRadio), "Input pin");
+    
+    SourceOutputPinRadio = gtk_radio_button_new_with_label_from_widget
+                        (GTK_RADIO_BUTTON (SourceInternalRelayRadio), "Output pin");
+    
+    HWID textLabel = gtk_label_new ("Name:");
+    
+    NameTextbox = gtk_entry_new();
+    gtk_entry_set_max_length (GTK_ENTRY (NameTextbox), 0);
+    
+    NegatedCheckbox = gtk_check_button_new_with_label ("|/| Negated");
 
-//     SourceOutputPinRadio = CreateWindowEx(0, WC_BUTTON, _("Output pin"),
-//         WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE,
-//         16, 61, 100, 20, ContactsDialog, NULL, Instance, NULL);
-//     NiceFont(SourceOutputPinRadio);
+    OkButton = gtk_button_new_with_label ("OK");
+    CancelButton = gtk_button_new_with_label ("Cancel");
 
-//     HWND textLabel = CreateWindowEx(0, WC_STATIC, _("Name:"),
-//         WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE | SS_RIGHT,
-//         135, 16, 50, 21, ContactsDialog, NULL, Instance, NULL);
-//     NiceFont(textLabel);
+    gtk_grid_attach (GTK_GRID (ContactsGrid), SourceInternalRelayRadio, 1, 2, 1, 1);
+    gtk_grid_attach (GTK_GRID (ContactsGrid), SourceInputPinRadio, 1, 3, 1, 1);
+    gtk_grid_attach (GTK_GRID (ContactsGrid), SourceOutputPinRadio, 1, 4, 1, 1);
+    gtk_grid_attach (GTK_GRID (ContactsGrid), textLabel, 2, 2, 1, 1);
+    gtk_grid_attach (GTK_GRID (ContactsGrid), NegatedCheckbox, 2, 3, 1, 1);
+    gtk_grid_attach (GTK_GRID (ContactsGrid), NameTextbox, 3, 2, 1, 1);
+    gtk_grid_attach (GTK_GRID (ContactsGrid), OkButton, 4, 2, 1, 1);
+    gtk_grid_attach (GTK_GRID (ContactsGrid), CancelButton, 4, 3, 1, 1);
 
-//     NameTextbox = CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "",
-//         WS_CHILD | ES_AUTOHSCROLL | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE,
-//         190, 16, 115, 21, ContactsDialog, NULL, Instance, NULL);
-//     FixedFont(NameTextbox);
-
-//     NegatedCheckbox = CreateWindowEx(0, WC_BUTTON, _("|/| Negated"),
-//         WS_CHILD | BS_AUTOCHECKBOX | WS_TABSTOP | WS_VISIBLE,
-//         146, 44, 160, 20, ContactsDialog, NULL, Instance, NULL);
-//     NiceFont(NegatedCheckbox);
-
-//     OkButton = CreateWindowEx(0, WC_BUTTON, _("OK"),
-//         WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE | BS_DEFPUSHBUTTON,
-//         321, 10, 70, 23, ContactsDialog, NULL, Instance, NULL); 
-//     NiceFont(OkButton);
-
-//     CancelButton = CreateWindowEx(0, WC_BUTTON, _("Cancel"),
-//         WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE,
-//         321, 40, 70, 23, ContactsDialog, NULL, Instance, NULL); 
-//     NiceFont(CancelButton);
+    gtk_grid_set_column_spacing (GTK_GRID (ContactsGrid), 1);
+    gtk_box_pack_start(GTK_BOX(ContactsPackingBox), ContactsGrid, TRUE, TRUE, 0);
 
 //     PrevNameProc = SetWindowLongPtr(NameTextbox, GWLP_WNDPROC, 
 //         (LONG_PTR)MyNameProc);
-// }
+}
 
-// void ShowContactsDialog(BOOL *negated, char *name)
-// {
-//     ContactsDialog = CreateWindowClient(0, "LDmicroDialog",
-//         _("Contacts"), WS_OVERLAPPED | WS_SYSMENU,
-//         100, 100, 404, 95, NULL, NULL, Instance, NULL);
+void ContactsDialogGetData (BOOL* negated, char* name){
+    if(gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (NegatedCheckbox))) {
+            *negated = TRUE;
+        }
+        else {
+            *negated = FALSE;
+        }
+        if(gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON
+                (SourceInternalRelayRadio))) {
+            name[0] = 'R';
+        }
+        else if(gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON
+                (SourceInputPinRadio))) {
+            name[0] = 'X';
+        }
+        else {
+            name[0] = 'Y';
+        }
+        strcpy (name+1, gtk_entry_get_text (GTK_ENTRY (NameTextbox)));
 
-//     MakeControls();
+    DestroyWindow (ContactsDialog);
+    gtk_widget_set_sensitive (MainWindow, TRUE);
+}
+
+// Mouse click callback
+void ContactsDialogMouseClick(HWID widget, gpointer data){
+    ContactsDialogGetData(tmpnegated, tmpname);
+}
+
+// Checks for the required key press
+gboolean ContactsDialogKeyPress (HWID widget, GdkEventKey* event, gpointer data){
+    if (event -> keyval == GDK_KEY_Return){
+        ContactsDialogGetData(tmpnegated, tmpname);
+    }
+    else if (event -> keyval == GDK_KEY_Escape){
+        DestroyWindow (ContactsDialog);
+        gtk_widget_set_sensitive (MainWindow, TRUE);
+    }
+    return FALSE;
+}
+
+void ContactsCallDestroyWindow (HWID widget, gpointer data){
+    DestroyWindow (ContactsDialog);
+    gtk_widget_set_sensitive (MainWindow, TRUE);
+}
+
+void ShowContactsDialog(BOOL *negated, char *name)
+{
+    ContactsGrid = gtk_grid_new();
+    ContactsPackingBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+
+    ContactsDialog = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title(GTK_WINDOW(ContactsDialog), "Contacts");
+    gtk_window_set_default_size(GTK_WINDOW(ContactsDialog), 100, 50);
+    gtk_window_set_resizable (GTK_WINDOW (ContactsDialog), FALSE);
+    gtk_container_add(GTK_CONTAINER(ContactsDialog), ContactsPackingBox);
+    gtk_widget_add_events (ContactsDialog, GDK_KEY_PRESS_MASK);
+    gtk_widget_add_events (ContactsDialog, GDK_BUTTON_PRESS_MASK);
+
+    MakeControls();
    
-//     if(name[0] == 'R') {
-//         SendMessage(SourceInternalRelayRadio, BM_SETCHECK, BST_CHECKED, 0);
-//     } else if(name[0] == 'Y') {
-//         SendMessage(SourceOutputPinRadio, BM_SETCHECK, BST_CHECKED, 0);
-//     } else {
-//         SendMessage(SourceInputPinRadio, BM_SETCHECK, BST_CHECKED, 0);
-//     }
-//     if(*negated) {
-//         SendMessage(NegatedCheckbox, BM_SETCHECK, BST_CHECKED, 0);
-//     }
-//     SendMessage(NameTextbox, WM_SETTEXT, 0, (LPARAM)(name + 1));
+    if(name[0] == 'R') {
+        gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (SourceInternalRelayRadio), TRUE);
+    }
+    else if(name[0] == 'Y') {
+        gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (SourceOutputPinRadio), TRUE);
+    }
+    else {
+        gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (SourceInputPinRadio), TRUE);
+    }
+    if(*negated) {
+        gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (NegatedCheckbox), TRUE);
+    }
+    gtk_entry_set_text (GTK_ENTRY (NameTextbox), name + 1);
 
-//     EnableWindow(MainWindow, FALSE);
-//     ShowWindow(ContactsDialog, TRUE);
-//     SetFocus(NameTextbox);
-//     SendMessage(NameTextbox, EM_SETSEL, 0, -1);
+    gtk_widget_set_sensitive (MainWindow, FALSE);
+    gtk_widget_show_all (ContactsDialog);
+    gtk_widget_grab_focus (NameTextbox);
+    tmpname = name;
+    tmpnegated = negated;
 
-//     MSG msg;
-//     DWORD ret;
-//     DialogDone = FALSE;
-//     DialogCancel = FALSE;
-//     while((ret = GetMessage(&msg, NULL, 0, 0)) && !DialogDone) {
-//         if(msg.message == WM_KEYDOWN) {
-//             if(msg.wParam == VK_RETURN) {
-//                 DialogDone = TRUE;
-//                 break;
-//             } else if(msg.wParam == VK_ESCAPE) {
-//                 DialogDone = TRUE;
-//                 DialogCancel = TRUE;
-//                 break;
-//             }
-//         }
+    g_signal_connect (G_OBJECT(NameTextbox), "insert-text",
+		     G_CALLBACK(ContactsDialogMyNameProc), NULL);
+    g_signal_connect (G_OBJECT (ContactsDialog), "key-press-event",
+                    G_CALLBACK(ContactsDialogKeyPress), NULL);
+    g_signal_connect (G_OBJECT (OkButton), "clicked",
+                    G_CALLBACK(ContactsDialogMouseClick), NULL);
+    g_signal_connect (G_OBJECT (CancelButton), "clicked",
+                    G_CALLBACK(ContactsCallDestroyWindow), NULL);
 
-//         if(IsDialogMessage(ContactsDialog, &msg)) continue;
-//         TranslateMessage(&msg);
-//         DispatchMessage(&msg);
-//     }
-
-//     if(!DialogCancel) {
-//         if(SendMessage(NegatedCheckbox, BM_GETSTATE, 0, 0) & BST_CHECKED) {
-//             *negated = TRUE;
-//         } else {
-//             *negated = FALSE;
-//         }
-//         if(SendMessage(SourceInternalRelayRadio, BM_GETSTATE, 0, 0)
-//             & BST_CHECKED)
-//         {
-//             name[0] = 'R';
-//         } else if(SendMessage(SourceInputPinRadio, BM_GETSTATE, 0, 0)
-//             & BST_CHECKED)
-//         {
-//             name[0] = 'X';
-//         } else {
-//             name[0] = 'Y';
-//         }
-//         SendMessage(NameTextbox, WM_GETTEXT, (WPARAM)16, (LPARAM)(name+1));
-//     }
-
-//     EnableWindow(MainWindow, TRUE);
-//     DestroyWindow(ContactsDialog);
-//     return;
-// }
+}

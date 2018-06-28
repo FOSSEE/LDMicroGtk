@@ -51,79 +51,151 @@ typedef signed long SDWORD;
 #define NUM_SUPPORTED_MCUS 16
 
 // Menu IDs
-extern HMENU MNU_NEW;
-extern HMENU MNU_OPEN;
-extern HMENU MNU_SAVE;
-extern HMENU MNU_SAVE_AS;
-extern HMENU MNU_EXPORT;
-extern HMENU MNU_EXIT;
+#define MNU_NEW                 0x01
+#define MNU_OPEN                0x02
+#define MNU_SAVE                0x03
+#define MNU_SAVE_AS             0x04
+#define MNU_EXPORT              0x05
+#define MNU_EXIT                0x06
 
-extern HMENU MNU_UNDO;
-extern HMENU MNU_REDO;
-extern HMENU MNU_PUSH_RUNG_UP;
-extern HMENU MNU_PUSH_RUNG_DOWN;
-extern HMENU MNU_INSERT_RUNG_BEFORE;
-extern HMENU MNU_INSERT_RUNG_AFTER;
-extern HMENU MNU_DELETE_ELEMENT;
-extern HMENU MNU_DELETE_RUNG;
+#define MNU_UNDO                0x10
+#define MNU_REDO                0x11
+#define MNU_PUSH_RUNG_UP        0x12
+#define MNU_PUSH_RUNG_DOWN      0x13
+#define MNU_INSERT_RUNG_BEFORE  0x14
+#define MNU_INSERT_RUNG_AFTER   0x15
+#define MNU_DELETE_ELEMENT      0x16
+#define MNU_DELETE_RUNG         0x17
 
-extern HMENU MNU_INSERT_COMMENT;
-extern HMENU MNU_INSERT_CONTACTS;
-extern HMENU MNU_INSERT_COIL;
-extern HMENU MNU_INSERT_TON;
-extern HMENU MNU_INSERT_TOF;
-extern HMENU MNU_INSERT_RTO;
-extern HMENU MNU_INSERT_RES;
-extern HMENU MNU_INSERT_OSR;
-extern HMENU MNU_INSERT_OSF;
-extern HMENU MNU_INSERT_CTU;
-extern HMENU MNU_INSERT_CTD;
-extern HMENU MNU_INSERT_CTC;
-extern HMENU MNU_INSERT_ADD;
-extern HMENU MNU_INSERT_SUB;
-extern HMENU MNU_INSERT_MUL;
-extern HMENU MNU_INSERT_DIV;
-extern HMENU MNU_INSERT_MOV;
-extern HMENU MNU_INSERT_READ_ADC;
-extern HMENU MNU_INSERT_SET_PWM;
-extern HMENU MNU_INSERT_UART_SEND;
-extern HMENU MNU_INSERT_UART_RECV;
-extern HMENU MNU_INSERT_EQU;
-extern HMENU MNU_INSERT_NEQ;
-extern HMENU MNU_INSERT_GRT;
-extern HMENU MNU_INSERT_GEQ;
-extern HMENU MNU_INSERT_LES;
-extern HMENU MNU_INSERT_LEQ;
-extern HMENU MNU_INSERT_OPEN;
-extern HMENU MNU_INSERT_SHORT;
-extern HMENU MNU_INSERT_MASTER_RLY;
-extern HMENU MNU_INSERT_SHIFT_REG;
-extern HMENU MNU_INSERT_LUT;
-extern HMENU MNU_INSERT_FMTD_STR;
-extern HMENU MNU_INSERT_PERSIST;
-extern HMENU MNU_MAKE_NORMAL;
-extern HMENU MNU_NEGATE;
-extern HMENU MNU_MAKE_SET_ONLY;
-extern HMENU MNU_MAKE_RESET_ONLY;
-extern HMENU MNU_INSERT_PWL;
+#define MNU_INSERT_COMMENT      0x20
+#define MNU_INSERT_CONTACTS     0x21
+#define MNU_INSERT_COIL         0x22
+#define MNU_INSERT_TON          0x23
+#define MNU_INSERT_TOF          0x24
+#define MNU_INSERT_RTO          0x25
+#define MNU_INSERT_RES          0x26
+#define MNU_INSERT_OSR          0x27
+#define MNU_INSERT_OSF          0x28
+#define MNU_INSERT_CTU          0x29
+#define MNU_INSERT_CTD          0x2a
+#define MNU_INSERT_CTC          0x2b
+#define MNU_INSERT_ADD          0x2c
+#define MNU_INSERT_SUB          0x2d
+#define MNU_INSERT_MUL          0x2e
+#define MNU_INSERT_DIV          0x2f
+#define MNU_INSERT_MOV          0x30
+#define MNU_INSERT_READ_ADC     0x31
+#define MNU_INSERT_SET_PWM      0x32
+#define MNU_INSERT_UART_SEND    0x33
+#define MNU_INSERT_UART_RECV    0x34
+#define MNU_INSERT_EQU          0x35
+#define MNU_INSERT_NEQ          0x36
+#define MNU_INSERT_GRT          0x37
+#define MNU_INSERT_GEQ          0x38
+#define MNU_INSERT_LES          0x39
+#define MNU_INSERT_LEQ          0x3a
+#define MNU_INSERT_OPEN         0x3b
+#define MNU_INSERT_SHORT        0x3c
+#define MNU_INSERT_MASTER_RLY   0x3d
+#define MNU_INSERT_SHIFT_REG    0x3e
+#define MNU_INSERT_LUT          0x3f
+#define MNU_INSERT_FMTD_STR     0x40
+#define MNU_INSERT_PERSIST      0x41
+#define MNU_MAKE_NORMAL         0x42
+#define MNU_NEGATE              0x43
+#define MNU_MAKE_SET_ONLY       0x44
+#define MNU_MAKE_RESET_ONLY     0x45
+#define MNU_INSERT_PWL          0x46
 
-extern HMENU MNU_MCU_SETTINGS;
-extern HMENU MNU_PROCESSOR[NUM_SUPPORTED_MCUS+1];
-extern HMENU MNU_MICRO_CONTROLLER;
+#define MNU_MCU_SETTINGS        0x50
+#define MNU_PROCESSOR_0         0xa0
 
-extern HMENU MNU_SIMULATION_MODE;
-extern HMENU MNU_START_SIMULATION;
-extern HMENU MNU_STOP_SIMULATION;
-extern HMENU MNU_SINGLE_CYCLE;
+#define MNU_SIMULATION_MODE     0x60
+#define MNU_START_SIMULATION    0x61
+#define MNU_STOP_SIMULATION     0x62
+#define MNU_SINGLE_CYCLE        0x63
 
-extern HMENU MNU_COMPILE;
-extern HMENU MNU_COMPILE_AS;
+#define MNU_COMPILE             0x70
+#define MNU_COMPILE_AS          0x71
 
-extern HMENU MNU_MANUAL;
-extern HMENU MNU_ABOUT;
+#define MNU_MANUAL              0x80
+#define MNU_ABOUT               0x81
 
-extern HMENU MNU_ADV_SIMULATION;
+// #define MNU_ADV_SIMULATION
 
+// New menu items here
+extern HMENU NewMenu;
+extern HMENU OpenMenu;
+extern HMENU SaveMenu;
+extern HMENU SaveAsMenu;
+extern HMENU ExportMenu;
+extern HMENU ExitMenu;
+
+extern HMENU UndoMenu;
+extern HMENU RedoMenu;
+extern HMENU PushRungUpMenu;
+extern HMENU PushRungDownMenu;
+extern HMENU InsertRungBeforeMenu;
+extern HMENU InsertRungAfterMenu;
+extern HMENU DeleteElementMenu;
+extern HMENU DeleteRungMenu;
+
+extern HMENU InsertCommentMenu;
+extern HMENU InsertContactsMenu;
+extern HMENU InsertCoilMenu;
+extern HMENU InsertTonMenu;
+extern HMENU InsertTofMenu;
+extern HMENU InsertRtoMenu;
+extern HMENU InsertResMenu;
+extern HMENU InsertOsrMenu;
+extern HMENU InsertOsfMenu;
+extern HMENU InsertCtuMenu;
+extern HMENU InsertCtdMenu;
+extern HMENU InsertCtcMenu;
+extern HMENU InsertAddMenu;
+extern HMENU InsertSubMenu;
+extern HMENU InsertMulMenu;
+extern HMENU InsertDivMenu;
+extern HMENU InsertMovMenu;
+extern HMENU InsertReadAdcMenu;
+extern HMENU InsertSetPwmMenu;
+extern HMENU InsertUartSendMenu;
+extern HMENU InsertUartRecvMenu;
+extern HMENU InsertEquMenu;
+extern HMENU InsertNeqMenu;
+extern HMENU InsertGrtMenu;
+extern HMENU InsertGeqMenu;
+extern HMENU InsertLesMenu;
+extern HMENU InsertLeqMenu;
+extern HMENU InsertOpenMenu;
+extern HMENU InsertShortMenu;
+extern HMENU InsertMasterRlyMenu;
+extern HMENU InsertShiftRegMenu;
+extern HMENU InsertLutMenu;
+extern HMENU InsertFmtdStrMenu;
+extern HMENU InsertPersistMenu;
+extern HMENU MakeNormalMenu;
+extern HMENU NegateMenu;
+extern HMENU MakeSetOnlyMenu;
+extern HMENU MakeResetOnlyMenu;
+extern HMENU InsertPwlMenu;
+
+extern HMENU McuSettingsMenu;
+extern HMENU ProcessorMenuItems[NUM_SUPPORTED_MCUS+1];
+extern HMENU MicroControllerMenu;
+
+extern HMENU SimulationModeMenu;
+extern HMENU StartSimulationMenu;
+extern HMENU StopSimulationMenu;
+extern HMENU SingleCycleMenu;
+
+extern HMENU CompileMenu;
+extern HMENU CompileAsMenu;
+
+extern HMENU ManualMenu;
+extern HMENU AboutMenu;
+
+// extern HMENU MNU_ADV_SIMULATION;
 
 // Columns within the I/O etc. listview.
 #define LV_IO_NAME              0x00
@@ -517,7 +589,6 @@ void RefreshScrollbars(void);
 extern HINSTANCE Instance;
 extern HWID MainWindow;
 extern HWID DrawWindow;
-extern HCRDC Hdc;
 extern PlcProgram Prog;
 extern char CurrentSaveFile[MAX_PATH];
 extern char CurrentCompileFile[MAX_PATH];
@@ -532,8 +603,8 @@ void CheckHeap(char *file, int line);
 // maincontrols.cpp
 void MakeMainWindowControls(void);
 HMENU MakeMainWindowMenus(void);
-void VscrollProc(WPARAM wParam);
-void HscrollProc(WPARAM wParam);
+void VscrollProc(int wParam);
+void HscrollProc(int wParam);
 void GenerateIoListDontLoseSelection(void);
 void RefreshControlsToSettings(void);
 void MainWindowResized(void);
@@ -547,20 +618,21 @@ extern BOOL NeedHoriz;
 extern HLIST IoList;
 extern int IoListTop;
 extern int IoListHeight;
+extern HMENU ScrollWindow;
 
 // draw.cpp
 int ProgCountWidestRow(void);
 int CountHeightOfElement(int which, void *elem);
-BOOL DrawElement(int which, void *elem, int *cx, int *cy, BOOL poweredBefore);
-void DrawEndRung(int cx, int cy);
+BOOL DrawElement(HCRDC Hcr, int which, void *elem, int *cx, int *cy, BOOL poweredBefore);
+void DrawEndRung(HCRDC Hcr, int cx, int cy);
 extern int ColsAvailable;
 extern BOOL SelectionActive;
 extern BOOL ThisHighlighted;
 
 // draw_outputdev.cpp
-extern void (*DrawChars)(int, int, const char *);
-void CALLBACK BlinkCursor(HWND hwnd, UINT msg, UINT_PTR id, DWORD time);
-void PaintWindow();
+extern void (*DrawChars)(HCRDC Hcr, int, int, const char *);
+BOOL BlinkCursor(BOOL kill);
+void PaintWindow(HCRDC Hcr);
 void ExportDrawingAsText(char *file);
 void InitForDrawing(void);
 void SetUpScrollbars(BOOL *horizShown, SCROLLINFO *horiz, SCROLLINFO *vert);
@@ -708,23 +780,22 @@ void WriteIhex(FILE *f, BYTE b);
 void FinishIhex(FILE *f);
 char *IoTypeToString(int ioType);
 void PinNumberForIo(char *dest, PlcProgramSingleIo *io);
-HWND CreateWindowClient(DWORD exStyle, char *className, char *windowName,
-    DWORD style, int x, int y, int width, int height, HWND parent,
-    HMENU menu, HINSTANCE instance, void *param);
+HWID CreateWindowClient(GtkWindowType wType, GdkWindowTypeHint wthint, char *windowName,
+    int x, int y, int width, int height, HWND parent);
 
 void MakeComponentListClass(void);
 void MakeNamingListClass(void);
 void MakeDialogBoxClass(void);
-void NiceFont(HWND h);
-void FixedFont(HWND h);
+void NiceFont(HWID h);
+void FixedFont(HWID h);
 void CompileSuccessfulMessage(char *str);
 extern BOOL RunningInBatchMode;
 extern HFONT MyNiceFont;
 extern HFONT MyFixedFont;
-extern HWND OkButton;
-extern HWND CancelButton;
-extern BOOL DialogDone;
-extern BOOL DialogCancel;
+// extern HWID OkButton;
+// extern HWID CancelButton;
+// extern BOOL DialogDone;
+// extern BOOL DialogCancel;
 
 // lang.cpp
 char *_(char *in);
@@ -732,7 +803,7 @@ char *_(char *in);
 
 // simulate.cpp
 void SimulateOneCycle(BOOL forceRefresh);
-void CALLBACK PlcCycleTimer(HWND hwnd, UINT msg, UINT_PTR id, DWORD time);
+BOOL PlcCycleTimer(BOOL kill);
 void StartSimulationTimer(void);
 void ClearSimulationData(void);
 void DescribeForIoList(char *name, char *out);

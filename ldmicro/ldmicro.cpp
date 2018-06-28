@@ -31,12 +31,15 @@
 #include "ldmicro.h"
 #include "freezeLD.h"
 #include "mcutable.h"
+#include <iomanip>
+#include <iostream>
+
+using namespace std;
 
 
 HINSTANCE   Instance;
 HWID        MainWindow;
 HWID        DrawWindow;
-HCRDC         Hdc;
 
 // parameters used to capture the mouse when implementing our totally non-
 // general splitter control
@@ -62,79 +65,83 @@ char CurrentCompileFile[MAX_PATH];
 // project file.
 PlcProgram Prog;
 
+/// Function to safely quit program gtk main loop
+void LD_WM_Close_call(GtkWidget *widget, GdkEvent *event, gpointer user_data);
+
 //-----------------------------------------------------------------------------
 // Get a filename with a common dialog box and then save the program to that
 // file and then set our default filename to that.
 //-----------------------------------------------------------------------------
-// static BOOL SaveAsDialog(void)
-// {
-//     OPENFILENAME ofn;
+static BOOL SaveAsDialog(void)
+{
+    OPENFILENAME ofn;
 
-//     memset(&ofn, 0, sizeof(ofn));
-//     ofn.lStructSize = sizeof(ofn);
-//     ofn.hInstance = Instance;
-//     ofn.lpstrFilter = LDMICRO_PATTERN;
-//     ofn.lpstrDefExt = "ld";
-//     ofn.lpstrFile = CurrentSaveFile;
-//     ofn.nMaxFile = sizeof(CurrentSaveFile);
-//     ofn.Flags = OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
+    memset(&ofn, 0, sizeof(ofn));
+    ofn.lStructSize = sizeof(ofn);
+    ofn.parentWindow = MainWindow;
+    ofn.lpstrFilter = LDMICRO_PATTERN;
+    ofn.lpstrDefExt = "ld";
+    ofn.lpstrFile = CurrentSaveFile;
+    ofn.nMaxFile = sizeof(CurrentSaveFile);
+    ofn.Flags = OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
 
-//     if(!GetSaveFileName(&ofn))
-//         return FALSE;
+    if(!GetSaveFileName(&ofn))
+        return FALSE;
 
-//     if(!SaveProjectToFile(CurrentSaveFile)) {
-//         Error(_("Couldn't write to '%s'."), CurrentSaveFile);
-//         return FALSE;
-//     } else {
-//         ProgramChangedNotSaved = FALSE;
-//         return TRUE;
-//     }
-// }
+    if(!SaveProjectToFile(CurrentSaveFile)) {
+        Error(_("Couldn't write to '%s'."), CurrentSaveFile);
+        return FALSE;
+    } else {
+        ProgramChangedNotSaved = FALSE;
+        return TRUE;
+    }
+}
 
 //-----------------------------------------------------------------------------
 // Get a filename with a common dialog box and then export the program as
 // an ASCII art drawing.
 //-----------------------------------------------------------------------------
-// static void ExportDialog(void)
-// {
-//     char exportFile[MAX_PATH];
-//     OPENFILENAME ofn;
+static void ExportDialog(void)
+{
+    char exportFile[MAX_PATH];
+    OPENFILENAME ofn;
 
-//     exportFile[0] = '\0';
+    exportFile[0] = '\0';
 
-//     memset(&ofn, 0, sizeof(ofn));
-//     ofn.lStructSize = sizeof(ofn);
-//     ofn.hInstance = Instance;
-//     ofn.lpstrFilter = TXT_PATTERN;
-//     ofn.lpstrFile = exportFile;
-//     ofn.lpstrTitle = _("Export As Text");
-//     ofn.nMaxFile = sizeof(exportFile);
-//     ofn.Flags = OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
+    memset(&ofn, 0, sizeof(ofn));
+    ofn.lStructSize = sizeof(ofn);
+    ofn.parentWindow = MainWindow;
+    ofn.lpstrFilter = TXT_PATTERN;
+    ofn.lpstrFile = exportFile;
+    ofn.lpstrDefExt = "txt";
+    ofn.lpstrTitle = _("Export As Text");
+    ofn.nMaxFile = sizeof(exportFile);
+    ofn.Flags = OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
 
-//     if(!GetSaveFileName(&ofn))
-//         return;
+    if(!GetSaveFileName(&ofn))
+        return;
 
-//     ExportDrawingAsText(exportFile);
-// }
+    ExportDrawingAsText(exportFile);
+}
 
 //-----------------------------------------------------------------------------
 // If we already have a filename, save the program to that. Otherwise same
 // as Save As. Returns TRUE if it worked, else returns FALSE.
 //-----------------------------------------------------------------------------
-// static BOOL SaveProgram(void)
-// {
-//     if(strlen(CurrentSaveFile)) {
-//         if(!SaveProjectToFile(CurrentSaveFile)) {
-//             Error(_("Couldn't write to '%s'."), CurrentSaveFile);
-//             return FALSE;
-//         } else {
-//             ProgramChangedNotSaved = FALSE;
-//             return TRUE;
-//         }
-//     } else {
-//         return SaveAsDialog();
-//     }
-// }
+static BOOL SaveProgram(void)
+{
+    if(strlen(CurrentSaveFile)) {
+        if(!SaveProjectToFile(CurrentSaveFile)) {
+            Error(_("Couldn't write to '%s'."), CurrentSaveFile);
+            return FALSE;
+        } else {
+            ProgramChangedNotSaved = FALSE;
+            return TRUE;
+        }
+    } else {
+        return SaveAsDialog();
+    }
+}
 
 //-----------------------------------------------------------------------------
 // Compile the program to a hex file for the target micro. Get the output
@@ -147,7 +154,7 @@ static void CompileProgram(BOOL compileAs)
 
         memset(&ofn, 0, sizeof(ofn));
         ofn.lStructSize = sizeof(ofn);
-        ofn.parentWindow = NULL;
+        ofn.parentWindow = MainWindow;
         ofn.lpstrTitle = _("Compile To");
         if(Prog.mcu && Prog.mcu->whichIsa == ISA_ANSIC) {
             ofn.lpstrFilter = C_PATTERN;
@@ -171,12 +178,12 @@ static void CompileProgram(BOOL compileAs)
     }
 
     if(!GenerateIntermediateCode()) return;
-
+ 
     if(Prog.mcu == NULL) {
         Error(_("Must choose a target microcontroller before compiling."));
         return;
     } 
-
+    
     if(UartFunctionUsed() && Prog.mcu->uartNeeds.rxPin == 0) {
         Error(_("UART function used but not supported for this micro."));
         return;
@@ -186,7 +193,7 @@ static void CompileProgram(BOOL compileAs)
         Error(_("PWM function used but not supported for this micro."));
         return;
     }
-  
+    
     switch(Prog.mcu->whichIsa) {
         case ISA_AVR:           CompileAvr(CurrentCompileFile); break;
         case ISA_PIC16:         CompilePic16(CurrentCompileFile); break;
@@ -196,7 +203,8 @@ static void CompileProgram(BOOL compileAs)
 
         default: oops();
     }
-   IntDumpListing("t.pl");
+    
+    IntDumpListing("t.pl");
 }
 
 //-----------------------------------------------------------------------------
@@ -204,87 +212,88 @@ static void CompileProgram(BOOL compileAs)
 // or to cancel the operation they are performing. Return TRUE if they want
 // to cancel.
 //-----------------------------------------------------------------------------
-// BOOL CheckSaveUserCancels(void)
-// {
-//     if(!ProgramChangedNotSaved) {
-//         // no problem
-//         return FALSE;
-//     }
+BOOL CheckSaveUserCancels(void)
+{
+    if(!ProgramChangedNotSaved) {
+        // no problem
+        return FALSE;
+    }
 
-//     int r = MessageBox(MainWindow, 
-//         _("The program has changed since it was last saved.\r\n\r\n"
-//         "Do you want to save the changes?"), "LDmicro",
-//         MB_YESNOCANCEL | MB_ICONWARNING);
-//     switch(r) {
-//         case IDYES:
-//             if(SaveProgram())
-//                 return FALSE;
-//             else
-//                 return TRUE;
+    int r = MessageBox(MainWindow, 
+        _("The program has changed since it was last saved.\r\n\r\n"
+        "Do you want to save the changes?"), "LDmicro",
+        MB_YESNOCANCEL | MB_ICONWARNING);
+    switch(r) {
+        case IDYES:
+            if(SaveProgram())
+                return FALSE;
+            else
+                return TRUE;
 
-//         case IDNO:
-//             return FALSE;
+        case IDNO:
+            return FALSE;
 
-//         case IDCANCEL:
-//             return TRUE;
+        case IDCANCEL:
+            return TRUE;
 
-//         default:
-//             oops();
-//     }
-// }
+        default:
+            oops();
+    }
+    
+}
 
 //-----------------------------------------------------------------------------
 // Load a new program from a file. If it succeeds then set our default filename
 // to that, else we end up with an empty file then.
 //-----------------------------------------------------------------------------
-// static void OpenDialog(void)
-// {
-//     OPENFILENAME ofn;
+static void OpenDialog(void)
+{
+    OPENFILENAME ofn;
 
-//     char tempSaveFile[MAX_PATH] = "";
+    char tempSaveFile[MAX_PATH] = "";
 
-//     memset(&ofn, 0, sizeof(ofn));
-//     ofn.lStructSize = sizeof(ofn);
-//     ofn.hInstance = Instance;
-//     ofn.lpstrFilter = LDMICRO_PATTERN;
-//     ofn.lpstrDefExt = "ld";
-//     ofn.lpstrFile = tempSaveFile;
-//     ofn.nMaxFile = sizeof(tempSaveFile);
-//     ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
+    memset(&ofn, 0, sizeof(ofn));
+    ofn.lStructSize = sizeof(ofn);
+    ofn.parentWindow = MainWindow;
+    ofn.lpstrFilter = LDMICRO_PATTERN;
+    ofn.lpstrDefExt = "ld";
+    ofn.lpstrFile = tempSaveFile;
+    ofn.nMaxFile = sizeof(tempSaveFile);
+    ofn.Flags = OFN_PATHMUSTEXIST | OFN_HIDEREADONLY;
 
-//     if(!GetOpenFileName(&ofn))
-//         return;
+    if(!GetOpenFileName(&ofn))
+        return;
 
-//     if(!LoadProjectFromFile(tempSaveFile)) {
-//         Error(_("Couldn't open '%s'."), tempSaveFile);
-//         CurrentSaveFile[0] = '\0';
-//     } else {
-//         ProgramChangedNotSaved = FALSE;
-//         strcpy(CurrentSaveFile, tempSaveFile);
-//         UndoFlush();
-//     }
+    if(!LoadProjectFromFile(tempSaveFile)) {
+        Error(_("Couldn't open '%s'."), tempSaveFile);
+        CurrentSaveFile[0] = '\0';
+    } else {
+        ProgramChangedNotSaved = FALSE;
+        strcpy(CurrentSaveFile, tempSaveFile);
+        UndoFlush();
+    }
 
-//     GenerateIoListDontLoseSelection();
-//     RefreshScrollbars();
-//     UpdateMainWindowTitleBar();
-// }
+    GenerateIoListDontLoseSelection();
+    RefreshScrollbars();
+    UpdateMainWindowTitleBar();
+}
 
 //-----------------------------------------------------------------------------
 // Housekeeping required when the program changes: mark the program as
 // changed so that we ask if user wants to save before exiting, and update
 // the I/O list.
 //-----------------------------------------------------------------------------
-// void ProgramChanged(void)
-// {
-//     ProgramChangedNotSaved = TRUE;
-//     GenerateIoListDontLoseSelection();
-//     RefreshScrollbars();
-// }
-// #define CHANGING_PROGRAM(x) { \
-//         UndoRemember(); \
-//         x; \
-//         ProgramChanged(); \
-//     }
+void ProgramChanged(void)
+{
+    ProgramChangedNotSaved = TRUE;
+    GenerateIoListDontLoseSelection();
+    RefreshScrollbars();
+}
+#define CHANGING_PROGRAM(x) { \
+        UndoRemember(); \
+        x; \
+        ProgramChanged();\
+    }
 
 //-----------------------------------------------------------------------------
 // Hook that we install when the user starts dragging the `splitter,' in case
@@ -323,634 +332,385 @@ static void CompileProgram(BOOL compileAs)
 //-----------------------------------------------------------------------------
 // Handle a selection from the menu bar of the main window.
 //-----------------------------------------------------------------------------
-// static void ProcessMenu(int code)
-// {
-//     if(code >= MNU_PROCESSOR_0 && code < MNU_PROCESSOR_0+NUM_SUPPORTED_MCUS) {
-//         strcpy(CurrentCompileFile, "");
-//         Prog.mcu = &SupportedMcus[code - MNU_PROCESSOR_0];
-//         RefreshControlsToSettings();
-//         return;
-//     }
-//     if(code == MNU_PROCESSOR_0+NUM_SUPPORTED_MCUS) {
-//         Prog.mcu = NULL;
-//         strcpy(CurrentCompileFile, "");
-//         RefreshControlsToSettings();
-//         return;
-//     }
-
-//     switch(code) {
-//         case MNU_NEW:
-//             if(CheckSaveUserCancels()) break;
-//             NewProgram();
-//             strcpy(CurrentSaveFile, "");
-//             strcpy(CurrentCompileFile, "");
-//             GenerateIoListDontLoseSelection();
-//             RefreshScrollbars();
-//             UpdateMainWindowTitleBar();
-//             break;
-
-//         case MNU_OPEN:
-//             if(CheckSaveUserCancels()) break;
-//             OpenDialog();
-//             break;
-
-//         case MNU_SAVE:
-//             SaveProgram();
-//             UpdateMainWindowTitleBar();
-//             break;
-
-//         case MNU_SAVE_AS:
-//             SaveAsDialog();
-//             UpdateMainWindowTitleBar();
-//             break;
-
-//         case MNU_EXPORT:
-//             ExportDialog();
-//             break;
-
-//         case MNU_EXIT:
-//             if(CheckSaveUserCancels()) break;
-//             PostQuitMessage(0);
-//             break;
-
-//         case MNU_INSERT_COMMENT:
-//             CHANGING_PROGRAM(AddComment(_("--add comment here--")));
-//             break;
-
-//         case MNU_INSERT_CONTACTS:
-//             CHANGING_PROGRAM(AddContact());
-//             break;
-
-//         case MNU_INSERT_COIL:
-//             CHANGING_PROGRAM(AddCoil());
-//             break;
-
-//         case MNU_INSERT_TON:
-//             CHANGING_PROGRAM(AddTimer(ELEM_TON));
-//             break;
-
-//         case MNU_INSERT_TOF:
-//             CHANGING_PROGRAM(AddTimer(ELEM_TOF));
-//             break;
-
-//         case MNU_INSERT_RTO:
-//             CHANGING_PROGRAM(AddTimer(ELEM_RTO));
-//             break;
-
-//         case MNU_INSERT_CTU:
-//             CHANGING_PROGRAM(AddCounter(ELEM_CTU));
-//             break;
-
-//         case MNU_INSERT_CTD:
-//             CHANGING_PROGRAM(AddCounter(ELEM_CTD));
-//             break;
-
-//         case MNU_INSERT_CTC:
-//             CHANGING_PROGRAM(AddCounter(ELEM_CTC));
-//             break;
-
-//         case MNU_INSERT_RES:
-//             CHANGING_PROGRAM(AddReset());
-//             break;
-
-//         case MNU_INSERT_OPEN:
-//             CHANGING_PROGRAM(AddEmpty(ELEM_OPEN));
-//             break;
-
-//         case MNU_INSERT_SHORT:
-//             CHANGING_PROGRAM(AddEmpty(ELEM_SHORT));
-//             break;
-
-//         case MNU_INSERT_MASTER_RLY:
-//             CHANGING_PROGRAM(AddMasterRelay());
-//             break;
-
-//         case MNU_INSERT_SHIFT_REG:
-//             CHANGING_PROGRAM(AddShiftRegister());
-//             break;
-
-//         case MNU_INSERT_LUT:
-//             CHANGING_PROGRAM(AddLookUpTable());
-//             break;
-        
-//         case MNU_INSERT_PWL:
-//             CHANGING_PROGRAM(AddPiecewiseLinear());
-//             break;
-        
-//         case MNU_INSERT_FMTD_STR:
-//             CHANGING_PROGRAM(AddFormattedString());
-//             break;
-
-//         case MNU_INSERT_OSR:
-//             CHANGING_PROGRAM(AddEmpty(ELEM_ONE_SHOT_RISING));
-//             break;
-
-//         case MNU_INSERT_OSF:
-//             CHANGING_PROGRAM(AddEmpty(ELEM_ONE_SHOT_FALLING));
-//             break;
-
-//         case MNU_INSERT_MOV:
-//             CHANGING_PROGRAM(AddMove());
-//             break;
-
-//         case MNU_INSERT_SET_PWM:
-//             CHANGING_PROGRAM(AddSetPwm());
-//             break;
-
-//         case MNU_INSERT_READ_ADC:
-//             CHANGING_PROGRAM(AddReadAdc());
-//             break;
-
-//         case MNU_INSERT_UART_SEND:
-//             CHANGING_PROGRAM(AddUart(ELEM_UART_SEND));
-//             break;
-
-//         case MNU_INSERT_UART_RECV:
-//             CHANGING_PROGRAM(AddUart(ELEM_UART_RECV));
-//             break;
-
-//         case MNU_INSERT_PERSIST:
-//             CHANGING_PROGRAM(AddPersist());
-//             break;
-
-//         {
-//             int elem;
-//             case MNU_INSERT_ADD: elem = ELEM_ADD; goto math;
-//             case MNU_INSERT_SUB: elem = ELEM_SUB; goto math;
-//             case MNU_INSERT_MUL: elem = ELEM_MUL; goto math;
-//             case MNU_INSERT_DIV: elem = ELEM_DIV; goto math;
-// math:
-//                 CHANGING_PROGRAM(AddMath(elem));
-//                 break;
-//         }
-
-//         {
-//             int elem;
-//             case MNU_INSERT_EQU: elem = ELEM_EQU; goto cmp;
-//             case MNU_INSERT_NEQ: elem = ELEM_NEQ; goto cmp;
-//             case MNU_INSERT_GRT: elem = ELEM_GRT; goto cmp;
-//             case MNU_INSERT_GEQ: elem = ELEM_GEQ; goto cmp;
-//             case MNU_INSERT_LES: elem = ELEM_LES; goto cmp;
-//             case MNU_INSERT_LEQ: elem = ELEM_LEQ; goto cmp;
-// cmp:    
-//                 CHANGING_PROGRAM(AddCmp(elem));
-//                 break;
-//         } 
-
-//         case MNU_MAKE_NORMAL:
-//             CHANGING_PROGRAM(MakeNormalSelected());
-//             break;
-
-//         case MNU_NEGATE:
-//             CHANGING_PROGRAM(NegateSelected());
-//             break;
-
-//         case MNU_MAKE_SET_ONLY:
-//             CHANGING_PROGRAM(MakeSetOnlySelected());
-//             break;
-
-//         case MNU_MAKE_RESET_ONLY:
-//             CHANGING_PROGRAM(MakeResetOnlySelected());
-//             break;
-
-//         case MNU_UNDO:
-//             UndoUndo();
-//             break;
-
-//         case MNU_REDO:
-//             UndoRedo();
-//             break;
-
-//         case MNU_INSERT_RUNG_BEFORE:
-//             CHANGING_PROGRAM(InsertRung(FALSE));
-//             break;
-
-//         case MNU_INSERT_RUNG_AFTER:
-//             CHANGING_PROGRAM(InsertRung(TRUE));
-//             break;
-
-//         case MNU_DELETE_RUNG:
-//             CHANGING_PROGRAM(DeleteSelectedRung());
-//             break;
-
-//         case MNU_PUSH_RUNG_UP:
-//             CHANGING_PROGRAM(PushRungUp());
-//             break;
-
-//         case MNU_PUSH_RUNG_DOWN:
-//             CHANGING_PROGRAM(PushRungDown());
-//             break;
-
-//         case MNU_DELETE_ELEMENT:
-//             CHANGING_PROGRAM(DeleteSelectedFromProgram());
-//             break;
-
-//         case MNU_MCU_SETTINGS:
-//             CHANGING_PROGRAM(ShowConfDialog());
-//             break;
-
-//         case MNU_SIMULATION_MODE:
-//             ToggleSimulationMode();
-//             break;
-
-//         case MNU_START_SIMULATION:
-//             StartSimulation();
-//             break;
-
-//         case MNU_STOP_SIMULATION:
-//             StopSimulation();
-//             break;
-
-//         case MNU_SINGLE_CYCLE:
-//             SimulateOneCycle(TRUE);
-//             break;
-
-//         case MNU_COMPILE:
-//             CompileProgram(FALSE);
-//             break;
-
-//         case MNU_COMPILE_AS:
-//             CompileProgram(TRUE);
-//             break;
-
-//         case MNU_MANUAL:
-//             ShowHelpDialog(FALSE);
-//             break;
-
-//         case MNU_ABOUT:
-//             ShowHelpDialog(TRUE);
-//             break;
-//     }
-// }
-
-//-----------------------------------------------------------------------------
-// WndProc for MainWindow.
-//-----------------------------------------------------------------------------
-LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+static void ProcessMenu(int code)
 {
-    // switch (msg) {
-    //     case WM_ERASEBKGND:
-    //         break;
+    if(code >= MNU_PROCESSOR_0 && code < MNU_PROCESSOR_0+NUM_SUPPORTED_MCUS) {
+        strcpy(CurrentCompileFile, "");
+        Prog.mcu = &SupportedMcus[code - MNU_PROCESSOR_0];
+        RefreshControlsToSettings();
+        return;
+    }
+    if(code == MNU_PROCESSOR_0+NUM_SUPPORTED_MCUS) {
+        Prog.mcu = NULL;
+        strcpy(CurrentCompileFile, "");
+        RefreshControlsToSettings();
+        return;
+    }
 
-    //     case WM_SETFOCUS:
+    switch(code) {
+        case MNU_NEW:
+            if(CheckSaveUserCancels()) break;
+            NewProgram();
+            strcpy(CurrentSaveFile, "");
+            strcpy(CurrentCompileFile, "");
+            GenerateIoListDontLoseSelection();
+            RefreshScrollbars();
+            UpdateMainWindowTitleBar();
+            break;
 
-    //     case WM_PAINT: {
-    //     }
+        case MNU_OPEN:
+            if(CheckSaveUserCancels()) break;
+            OpenDialog();
+            break;
 
-    //     case WM_KEYDOWN: {
-    //     }
+        case MNU_SAVE:
+            SaveProgram();
+            UpdateMainWindowTitleBar();
+            break;
 
-    //     case WM_LBUTTONDBLCLK: {
-    //     }
+        case MNU_SAVE_AS:
+            SaveAsDialog();
+            UpdateMainWindowTitleBar();
+            break;
 
-    //     case WM_LBUTTONDOWN: {
-    //     }
-    //     case WM_MOUSEMOVE: {
-    //     }
-    //     case WM_MOUSEWHEEL: {
-    //     }
+        case MNU_EXPORT:
+            ExportDialog();
+            break;
 
-    //     case WM_SIZE:
+        case MNU_EXIT:
+            if(CheckSaveUserCancels()) break;
+            LD_WM_Close_call(NULL, NULL, NULL);
+            // PostQuitMessage(0);
+            break;
 
-    //     case WM_NOTIFY: {
-    //         NMHDR *h = (NMHDR *)lParam;
-    //         if(h->hwndFrom == IoList) {
-    //             IoListProc(h);
-    //         }
-    //         return 0;
-    //     }
-    //     case WM_VSCROLL:
+        case MNU_INSERT_COMMENT:
+            CHANGING_PROGRAM(AddComment(_("--add comment here--")));
+            break;
 
-    //     case WM_HSCROLL:
+        case MNU_INSERT_CONTACTS:
+            CHANGING_PROGRAM(AddContact());
+            break;
 
-    //     case WM_COMMAND:
-    //         ProcessMenu(LOWORD(wParam));
-    //         InvalidateRect(MainWindow, NULL, FALSE);
-    //         break;
+        case MNU_INSERT_COIL:
+            CHANGING_PROGRAM(AddCoil());
+            break;
 
-    //     case WM_CLOSE:
-    //     case WM_DESTROY:
+        case MNU_INSERT_TON:
+            CHANGING_PROGRAM(AddTimer(ELEM_TON));
+            break;
 
-    //     default:
-    //         return DefWindowProc(hwnd, msg, wParam, lParam);
-    // }
+        case MNU_INSERT_TOF:
+            CHANGING_PROGRAM(AddTimer(ELEM_TOF));
+            break;
 
-    return 1;
+        case MNU_INSERT_RTO:
+            CHANGING_PROGRAM(AddTimer(ELEM_RTO));
+            break;
+
+        case MNU_INSERT_CTU:
+            CHANGING_PROGRAM(AddCounter(ELEM_CTU));
+            break;
+
+        case MNU_INSERT_CTD:
+            CHANGING_PROGRAM(AddCounter(ELEM_CTD));
+            break;
+
+        case MNU_INSERT_CTC:
+            CHANGING_PROGRAM(AddCounter(ELEM_CTC));
+            break;
+
+        case MNU_INSERT_RES:
+            CHANGING_PROGRAM(AddReset());
+            break;
+
+        case MNU_INSERT_OPEN:
+            CHANGING_PROGRAM(AddEmpty(ELEM_OPEN));
+            break;
+
+        case MNU_INSERT_SHORT:
+            CHANGING_PROGRAM(AddEmpty(ELEM_SHORT));
+            break;
+
+        case MNU_INSERT_MASTER_RLY:
+            CHANGING_PROGRAM(AddMasterRelay());
+            break;
+
+        case MNU_INSERT_SHIFT_REG:
+            CHANGING_PROGRAM(AddShiftRegister());
+            break;
+
+        case MNU_INSERT_LUT:
+            CHANGING_PROGRAM(AddLookUpTable());
+            break;
+        
+        case MNU_INSERT_PWL:
+            CHANGING_PROGRAM(AddPiecewiseLinear());
+            break;
+        
+        case MNU_INSERT_FMTD_STR:
+            CHANGING_PROGRAM(AddFormattedString());
+            break;
+
+        case MNU_INSERT_OSR:
+            CHANGING_PROGRAM(AddEmpty(ELEM_ONE_SHOT_RISING));
+            break;
+
+        case MNU_INSERT_OSF:
+            CHANGING_PROGRAM(AddEmpty(ELEM_ONE_SHOT_FALLING));
+            break;
+
+        case MNU_INSERT_MOV:
+            CHANGING_PROGRAM(AddMove());
+            break;
+
+        case MNU_INSERT_SET_PWM:
+            CHANGING_PROGRAM(AddSetPwm());
+            break;
+
+        case MNU_INSERT_READ_ADC:
+            CHANGING_PROGRAM(AddReadAdc());
+            break;
+
+        case MNU_INSERT_UART_SEND:
+            CHANGING_PROGRAM(AddUart(ELEM_UART_SEND));
+            break;
+
+        case MNU_INSERT_UART_RECV:
+            CHANGING_PROGRAM(AddUart(ELEM_UART_RECV));
+            break;
+
+        case MNU_INSERT_PERSIST:
+            CHANGING_PROGRAM(AddPersist());
+            break;
+
+        {
+            int elem;
+            case MNU_INSERT_ADD: elem = ELEM_ADD; goto math;
+            case MNU_INSERT_SUB: elem = ELEM_SUB; goto math;
+            case MNU_INSERT_MUL: elem = ELEM_MUL; goto math;
+            case MNU_INSERT_DIV: elem = ELEM_DIV; goto math;
+math:
+                CHANGING_PROGRAM(AddMath(elem));
+                break;
+        }
+
+        {
+            int elem;
+            case MNU_INSERT_EQU: elem = ELEM_EQU; goto cmp;
+            case MNU_INSERT_NEQ: elem = ELEM_NEQ; goto cmp;
+            case MNU_INSERT_GRT: elem = ELEM_GRT; goto cmp;
+            case MNU_INSERT_GEQ: elem = ELEM_GEQ; goto cmp;
+            case MNU_INSERT_LES: elem = ELEM_LES; goto cmp;
+            case MNU_INSERT_LEQ: elem = ELEM_LEQ; goto cmp;
+cmp:    
+                CHANGING_PROGRAM(AddCmp(elem));
+                break;
+        } 
+
+        case MNU_MAKE_NORMAL:
+            CHANGING_PROGRAM(MakeNormalSelected());
+            break;
+
+        case MNU_NEGATE:
+            CHANGING_PROGRAM(NegateSelected());
+            break;
+
+        case MNU_MAKE_SET_ONLY:
+            CHANGING_PROGRAM(MakeSetOnlySelected());
+            break;
+
+        case MNU_MAKE_RESET_ONLY:
+            CHANGING_PROGRAM(MakeResetOnlySelected());
+            break;
+
+        case MNU_UNDO:
+            UndoUndo();
+            break;
+
+        case MNU_REDO:
+            UndoRedo();
+            break;
+
+        case MNU_INSERT_RUNG_BEFORE:
+            CHANGING_PROGRAM(InsertRung(FALSE));
+            break;
+
+        case MNU_INSERT_RUNG_AFTER:
+            CHANGING_PROGRAM(InsertRung(TRUE));
+            break;
+
+        case MNU_DELETE_RUNG:
+            CHANGING_PROGRAM(DeleteSelectedRung());
+            break;
+
+        case MNU_PUSH_RUNG_UP:
+            CHANGING_PROGRAM(PushRungUp());
+            break;
+
+        case MNU_PUSH_RUNG_DOWN:
+            CHANGING_PROGRAM(PushRungDown());
+            break;
+
+        case MNU_DELETE_ELEMENT:
+            CHANGING_PROGRAM(DeleteSelectedFromProgram());
+            break;
+
+        case MNU_MCU_SETTINGS:
+            CHANGING_PROGRAM(ShowConfDialog());
+            break;
+
+        case MNU_SIMULATION_MODE:
+            ToggleSimulationMode();
+            break;
+
+        case MNU_START_SIMULATION:
+            StartSimulation();
+            break;
+
+        case MNU_STOP_SIMULATION:
+            StopSimulation();
+            break;
+
+        case MNU_SINGLE_CYCLE:
+            SimulateOneCycle(TRUE);
+            break;
+
+        case MNU_COMPILE:
+            CompileProgram(FALSE);
+            break;
+
+        case MNU_COMPILE_AS:
+            CompileProgram(TRUE);
+            break;
+
+        case MNU_MANUAL:
+            ShowHelpDialog(FALSE);
+            break;
+
+        case MNU_ABOUT:
+            ShowHelpDialog(TRUE);
+            break;
+    }
+    gtk_widget_queue_draw(DrawWindow);
 }
 
-void LD_WM_Close_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)//(HWND window)
-{
-    /* Handles:
-    * WM_CLOSE
-    */
-
-    FreezeWindowPos(MainWindow);
-    FreezeDWORD(IoListHeight);
-
-    gtk_main_quit();
-}
-
-gboolean LD_WM_KeyDown_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+//-----------------------------------------------------------------------------
+// WndProc functions for MainWindow.
+//-----------------------------------------------------------------------------
+gboolean LD_WM_KeyDown_call(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
 {   
     /* Handles:
     * WM_KEYDOWN
     */
 
-    switch(event->key.state)
+    UINT wParam = event->keyval;
+
+    if(wParam == VK_TAB) {
+        // SetFocus(IoList);
+        gtk_window_set_focus (GTK_WINDOW(MainWindow), view);
+        // BlinkCursor(0, 0, 0, 0);
+        
+    }
+
+    if(InSimulationMode) 
     {
-        case GDK_SHIFT_MASK:
-            g_print("SHIFT+");
+        switch(wParam) 
+        {
+            case VK_DOWN:
+                if(ScrollYOffset < ScrollYOffsetMax)
+                    ScrollYOffset++;
+                RefreshScrollbars();
+                gtk_widget_queue_draw(DrawWindow);
+                break;
+
+            case VK_UP:
+                if(ScrollYOffset > 0)
+                    ScrollYOffset--;
+                RefreshScrollbars();
+                gtk_widget_queue_draw(DrawWindow);
+                break;
+
+            case VK_LEFT:
+                ScrollXOffset -= FONT_WIDTH;
+                if(ScrollXOffset < 0) 
+                    ScrollXOffset = 0;
+                RefreshScrollbars();
+                gtk_widget_queue_draw(DrawWindow);
+                break;
+
+            case VK_RIGHT:
+                ScrollXOffset += FONT_WIDTH;
+                if(ScrollXOffset >= ScrollXOffsetMax)
+                    ScrollXOffset = ScrollXOffsetMax;
+                RefreshScrollbars();
+                gtk_widget_queue_draw(DrawWindow);
+                break;
+
+            case VK_RETURN:
+            case VK_ESCAPE:
+                ToggleSimulationMode();
+                break;
+        }
+    }
+
+    switch(wParam) 
+    {
+        case VK_UP:
+            if(event->state & GDK_SHIFT_MASK)
+            {
+                CHANGING_PROGRAM(PushRungUp());
+            }
+            else
+            {
+                MoveCursorKeyboard(wParam);
+            }
+
+            gtk_widget_queue_draw(DrawWindow);
             break;
-        case GDK_CONTROL_MASK:
-            g_print("CONTROL+");
+
+        case VK_DOWN:
+            if(event->state & GDK_SHIFT_MASK)
+            {
+                CHANGING_PROGRAM(PushRungDown());
+            }
+            else
+            {
+                MoveCursorKeyboard(wParam);
+            }
+
+            gtk_widget_queue_draw(DrawWindow);
+            break;
+
+        case VK_RIGHT:
+        case VK_LEFT:
+            MoveCursorKeyboard(wParam);
+            gtk_widget_queue_draw(DrawWindow);
+            break;
+
+        case VK_RETURN:
+            CHANGING_PROGRAM(EditSelectedElement());
+            gtk_widget_queue_draw(DrawWindow);
+            break;
+
+        default:
             break;
     }
-  
-    g_print("%c\n", (char)gdk_keyval_to_unicode(event->key.keyval));
 
-    // if(wParam == 'M') {
-    //         if(GetAsyncKeyState(VK_CONTROL) & 0x8000) {
-    //             ToggleSimulationMode();
-    //             break;
-    //         }
-    //     } else if(wParam == VK_TAB) {
-    //         SetFocus(IoList);
-    //         BlinkCursor(0, 0, 0, 0);
-    //         break;
-    //     } else if(wParam == VK_F1) {
-    //         ShowHelpDialog(FALSE);
-    //         break;
-    //     }
-
-    //     if(InSimulationMode) {
-    //         switch(wParam) {
-    //             case ' ':
-    //                 SimulateOneCycle(TRUE);
-    //                 break;
-
-    //             case 'R':
-    //                 if(GetAsyncKeyState(VK_CONTROL) & 0x8000)
-    //                     StartSimulation();
-    //                 break;
-
-    //             case 'H':
-    //                 if(GetAsyncKeyState(VK_CONTROL) & 0x8000)
-    //                     StopSimulation();
-    //                 break;
-
-    //             case VK_DOWN:
-    //                 if(ScrollYOffset < ScrollYOffsetMax)
-    //                     ScrollYOffset++;
-    //                 RefreshScrollbars();
-    //                 InvalidateRect(MainWindow, NULL, FALSE);
-    //                 break;
-
-    //             case VK_UP:
-    //                 if(ScrollYOffset > 0)
-    //                     ScrollYOffset--;
-    //                 RefreshScrollbars();
-    //                 InvalidateRect(MainWindow, NULL, FALSE);
-    //                 break;
-
-    //             case VK_LEFT:
-    //                 ScrollXOffset -= FONT_WIDTH;
-    //                 if(ScrollXOffset < 0) ScrollXOffset = 0;
-    //                 RefreshScrollbars();
-    //                 InvalidateRect(MainWindow, NULL, FALSE);
-    //                 break;
-
-    //             case VK_RIGHT:
-    //                 ScrollXOffset += FONT_WIDTH;
-    //                 if(ScrollXOffset >= ScrollXOffsetMax)
-    //                     ScrollXOffset = ScrollXOffsetMax;
-    //                 RefreshScrollbars();
-    //                 InvalidateRect(MainWindow, NULL, FALSE);
-    //                 break;
-
-    //             case VK_RETURN:
-    //             case VK_ESCAPE:
-    //                 ToggleSimulationMode();
-    //                 break;
-    //         }
-    //         break;
-    //     }
-
-
-    //     switch(wParam) {
-    //         case VK_F5:
-    //             CompileProgram(FALSE);
-    //             break;
-
-    //         case VK_UP:
-    //             if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
-    //                 CHANGING_PROGRAM(PushRungUp());
-    //             } else {
-    //                 MoveCursorKeyboard(wParam);
-    //             }
-    //             break;
-
-    //         case VK_DOWN:
-    //             if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
-    //                 CHANGING_PROGRAM(PushRungDown());
-    //             } else {
-    //                 MoveCursorKeyboard(wParam);
-    //             }
-    //             break;
-
-    //         case VK_RIGHT:
-    //         case VK_LEFT:
-    //             MoveCursorKeyboard(wParam);
-    //             break;
-
-    //         case VK_RETURN:
-    //             CHANGING_PROGRAM(EditSelectedElement());
-    //             break;
-
-    //         case VK_DELETE:
-    //             if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
-    //                 CHANGING_PROGRAM(DeleteSelectedRung());
-    //             } else {
-    //                 CHANGING_PROGRAM(DeleteSelectedFromProgram());
-    //             }
-    //             break;
-
-    //         case VK_OEM_1:
-    //             CHANGING_PROGRAM(AddComment(_("--add comment here--")));
-    //             break;
-
-    //         case 'C':
-    //             CHANGING_PROGRAM(AddContact());
-    //             break;
-
-    //         // TODO: rather country-specific here
-    //         case VK_OEM_2:
-    //             CHANGING_PROGRAM(AddEmpty(ELEM_ONE_SHOT_RISING));
-    //             break;
-
-    //         case VK_OEM_5:
-    //             CHANGING_PROGRAM(AddEmpty(ELEM_ONE_SHOT_FALLING));
-    //             break;
-
-    //         case 'L':
-    //             CHANGING_PROGRAM(AddCoil());
-    //             break;
-
-    //         case 'R':
-    //             CHANGING_PROGRAM(MakeResetOnlySelected());
-    //             break;
-
-    //         case 'E':
-    //             if(GetAsyncKeyState(VK_CONTROL) & 0x8000) {
-    //                 ExportDialog();
-    //             } else {
-    //                 CHANGING_PROGRAM(AddReset());
-    //             }
-    //             break;
-
-    //         case 'S':
-    //             if(GetAsyncKeyState(VK_CONTROL) & 0x8000) {
-    //                 SaveProgram();
-    //                 UpdateMainWindowTitleBar();
-    //             } else {
-    //                 CHANGING_PROGRAM(MakeSetOnlySelected());
-    //             }
-    //             break;
-
-    //         case 'N':
-    //             if(GetAsyncKeyState(VK_CONTROL) & 0x8000) {
-    //                 if(CheckSaveUserCancels()) break;
-    //                 if(!ProgramChangedNotSaved) {
-    //                     int r = MessageBox(MainWindow, 
-    //                         _("Start new program?"),
-    //                         "LDmicro", MB_YESNO | MB_DEFBUTTON2 |
-    //                         MB_ICONQUESTION);
-    //                     if(r == IDNO) break;
-    //                 }
-    //                 NewProgram();
-    //                 strcpy(CurrentSaveFile, "");
-    //                 strcpy(CurrentCompileFile, "");
-    //                 GenerateIoListDontLoseSelection();
-    //                 RefreshScrollbars();
-    //                 UpdateMainWindowTitleBar();
-    //             } else {
-    //                 CHANGING_PROGRAM(NegateSelected());
-    //             }
-    //             break;
-
-    //         case 'A':
-    //             CHANGING_PROGRAM(MakeNormalSelected());
-    //             break;
-
-    //         case 'T':
-    //             CHANGING_PROGRAM(AddTimer(ELEM_RTO));
-    //             break;
-
-    //         case 'O':
-    //             if(GetAsyncKeyState(VK_CONTROL) & 0x8000) {
-    //                 if(CheckSaveUserCancels()) break;
-    //                 OpenDialog();
-    //             } else {
-    //                 CHANGING_PROGRAM(AddTimer(ELEM_TON));
-    //             }
-    //             break;
-
-    //         case 'F':
-    //             CHANGING_PROGRAM(AddTimer(ELEM_TOF));
-    //             break;
-
-    //         case 'U':
-    //             CHANGING_PROGRAM(AddCounter(ELEM_CTU));
-    //             break;
-
-    //         case 'I':
-    //             CHANGING_PROGRAM(AddCounter(ELEM_CTD));
-    //             break;
-
-    //         case 'J':
-    //             CHANGING_PROGRAM(AddCounter(ELEM_CTC));
-    //             break;
-
-    //         case 'M':
-    //             CHANGING_PROGRAM(AddMove());
-    //             break;
-
-    //         case 'P':
-    //             CHANGING_PROGRAM(AddReadAdc());
-    //             break;
-
-    //         case VK_OEM_PLUS:
-    //             if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
-    //                 CHANGING_PROGRAM(AddMath(ELEM_ADD));
-    //             } else {
-    //                 CHANGING_PROGRAM(AddCmp(ELEM_EQU));
-    //             }
-    //             break;
-
-    //         case VK_OEM_MINUS:
-    //             if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
-    //             } else {
-    //                 CHANGING_PROGRAM(AddMath(ELEM_SUB));
-    //             }
-    //             break;
-
-    //         case '8':
-    //             if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
-    //                 CHANGING_PROGRAM(AddMath(ELEM_MUL));
-    //             }
-    //             break;
-
-    //         case 'D':
-    //             CHANGING_PROGRAM(AddMath(ELEM_DIV));
-    //             break;
-
-    //         case VK_OEM_PERIOD:
-    //             if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
-    //                 CHANGING_PROGRAM(AddCmp(ELEM_GRT));
-    //             } else {
-    //                 CHANGING_PROGRAM(AddCmp(ELEM_GEQ));
-    //             }
-    //             break;
-
-    //         case VK_OEM_COMMA:
-    //             if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
-    //                 CHANGING_PROGRAM(AddCmp(ELEM_LES));
-    //             } else {
-    //                 CHANGING_PROGRAM(AddCmp(ELEM_LEQ));
-    //             }
-    //             break;
-
-    //         case 'V':
-    //             if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
-    //                 CHANGING_PROGRAM(InsertRung(TRUE));
-    //             }
-    //             break;
-
-    //         case '6':
-    //             if(GetAsyncKeyState(VK_SHIFT) & 0x8000) {
-    //                 CHANGING_PROGRAM(InsertRung(FALSE));
-    //             }
-    //             break;
-
-    //         case 'Z':
-    //             if(GetAsyncKeyState(VK_CONTROL) & 0x8000) {
-    //                 UndoUndo();
-    //             }
-    //             break;
-
-    //         case 'Y':
-    //             if(GetAsyncKeyState(VK_CONTROL) & 0x8000) {
-    //                 UndoRedo();
-    //             }
-    //             break;
-
-    //         default:
-    //             break;
-    //     }
-    //     if(wParam != VK_SHIFT && wParam != VK_CONTROL) {
-    //         InvalidateRect(MainWindow, NULL, FALSE);
-    //     }
-    //     break;
     return FALSE;
+}
+
+void LD_WM_Close_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+{
+    /* Handles:
+    * WM_CLOSE
+    */
+    
+    CheckSaveUserCancels();
+
+    FreezeWindowPos(MainWindow);
+    FreezeDWORD(IoListHeight);
+
+    gtk_main_quit();
 }
 
 gboolean LD_GTK_mouse_click_hook(GtkWidget *widget, GdkEvent *event, gpointer user_data)
@@ -959,35 +719,40 @@ gboolean LD_GTK_mouse_click_hook(GtkWidget *widget, GdkEvent *event, gpointer us
     * WM_LBUTTONDBLCLK, WM_LBUTTONDOWN
     */
 
-    g_print("x = %f\n", event->button.x_root);
-    g_print("y = %f\n", event->button.y_root);
+    GtkAdjustment *adjustment = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(ScrollWindow));
+
     switch(event->button.type)
     {
-        case GDK_BUTTON_PRESS:// To Do: run only for left click
-            // int x = LOWORD(lParam);
-            // int y = HIWORD(lParam);
-            // if((y > (IoListTop - 9)) && (y < (IoListTop + 3))) {
-            //     POINT pt;
-            //     pt.x = x; pt.y = y;
-            //     ClientToScreen(MainWindow, &pt);
-            //     MouseY = pt.y;
-            //     MouseHookHandle = SetWindowsHookEx(WH_MOUSE_LL,
-            //             (HOOKPROC)MouseHook, Instance, 0);
-            // }
-            // if(!InSimulationMode) MoveCursorMouseClick(x, y);
+        case GDK_BUTTON_PRESS:
+            if (event->button.button == 1) /// left click
+            {
+                GLOBAL_mouse_last_clicked_x = event->button.x_root;
+                GLOBAL_mouse_last_clicked_y = event->button.y_root;
 
-            // SetFocus(MainWindow);
-            // InvalidateRect(MainWindow, NULL, FALSE);
+                int x = event->button.x;
+                int y = event->button.y - 30 + gtk_adjustment_get_value(adjustment);
+
+                if(!InSimulationMode) MoveCursorMouseClick(x, y);
+
+                gtk_widget_queue_draw(DrawWindow);
+            }
             break;
         case GDK_2BUTTON_PRESS:
-            // int x = LOWORD(lParam);
-            // int y = HIWORD(lParam);
-            // if(InSimulationMode) {
-            //     EditElementMouseDoubleclick(x, y);
-            // } else {
-            //     CHANGING_PROGRAM(EditElementMouseDoubleclick(x, y));
-            // }
-            // InvalidateRect(MainWindow, NULL, FALSE);
+            if (event->button.button == 1) /// left click
+            {
+                GLOBAL_mouse_last_clicked_x = event->button.x_root;
+                GLOBAL_mouse_last_clicked_y = event->button.y_root;
+                
+                int x = event->button.x;
+                int y = event->button.y - 30 + gtk_adjustment_get_value(adjustment);
+
+                if(InSimulationMode) {
+                    EditElementMouseDoubleclick(x, y);
+                } else {
+                    CHANGING_PROGRAM(EditElementMouseDoubleclick(x, y));
+                }
+                gtk_widget_queue_draw(DrawWindow);
+            }
             break;
 
     }
@@ -1000,26 +765,41 @@ gboolean LD_GTK_mouse_scroll_hook(GtkWidget *widget, GdkEvent *event, gpointer u
     * WM_VSCROLL, WM_HSCROLL, WM_MOUSEWHEEL
     */
 
+    GtkAdjustment *adjustment = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(ScrollWindow));
+    
     switch(event->scroll.direction)
     {
         case GDK_SCROLL_UP:
+            if (gtk_adjustment_get_value(adjustment) == gtk_adjustment_get_lower(adjustment))
+                VscrollProc(SB_TOP);
+            else
+                VscrollProc(SB_LINEUP);
+            break;
         case GDK_SCROLL_DOWN:
-            // VscrollProc(wParam);
+            if (gtk_adjustment_get_value(adjustment) == gtk_adjustment_get_upper(adjustment) - gtk_widget_get_allocated_height (ScrollWindow))
+                VscrollProc(SB_BOTTOM);
+            else
+                VscrollProc(SB_LINEDOWN);
             break;
         case GDK_SCROLL_LEFT:
+            HscrollProc(SB_LINEUP);
+            break;
         case GDK_SCROLL_RIGHT:
-            // HscrollProc(wParam);
+            HscrollProc(SB_LINEDOWN);
             break;
         case GDK_SCROLL_SMOOTH:
-            // if((GET_WHEEL_DELTA_WPARAM(wParam)) > 0) {
-            //     VscrollProc(SB_LINEUP);
-            // } else {
-            //     VscrollProc(SB_LINEDOWN);
-            // }
-            // gdk_event_get_scroll_deltas (const GdkEvent *event, gdouble *delta_x, gdouble *delta_y);
+            double d_x, d_y;
+            gdk_event_get_scroll_deltas (event, &d_x, &d_y);
+            if(d_y > 0) {
+                VscrollProc(SB_LINEUP);
+            } else {
+                VscrollProc(SB_LINEDOWN);
+            }
             break;
 
     }
+
+    gtk_widget_queue_draw(DrawWindow);
     return FALSE;
 }
 
@@ -1028,9 +808,6 @@ gboolean LD_WM_MouseMove_call(GtkWidget *widget, GdkEvent *event, gpointer user_
     /* Handles:
     * WM_MOUSEMOVE
     */
-
-    // g_print("x = %f\n", event->button.x_root);
-    // g_print("y = %f\n", event->button.y_root);
 
     // int x = LOWORD(lParam);
     // int y = HIWORD(lParam);
@@ -1041,7 +818,15 @@ gboolean LD_WM_MouseMove_call(GtkWidget *widget, GdkEvent *event, gpointer user_
     //     SetCursor(LoadCursor(NULL, IDC_ARROW));
     // }
     
-    // break;
+    // int dy = MouseY - mhs->pt.y;
+    
+    // int dy = MouseY - mhs->pt.y;
+
+    // IoListHeight += dy;
+    // if(IoListHeight < 50) IoListHeight = 50;
+    // MouseY = mhs->pt.y;
+    // MainWindowResized();
+
     return FALSE;
 }
 
@@ -1051,103 +836,47 @@ gboolean LD_WM_Paint_call(HWID widget, HCRDC cr, gpointer data)
     * WM_PAINT
     */
 
-    g_print("draw called\n");
+    static BOOL Paint_call_first = TRUE;
 
-    // guint width, height;
-    // GdkRGBA color;
-    // GtkStyleContext *context;
+    if (Paint_call_first)
+    {        
+        gtk_widget_override_background_color(GTK_WIDGET(widget), 
+                    GTK_STATE_FLAG_NORMAL, (HBRUSH)GetStockObject(BLACK_BRUSH));
 
-    // context = gtk_widget_get_style_context (widget);
+        gint width = gtk_widget_get_allocated_width (widget);
+        gint height = gtk_widget_get_allocated_height (widget);
 
-    // width = gtk_widget_get_allocated_width (widget);
-    // height = gtk_widget_get_allocated_height (widget);
+        gtk_widget_set_size_request(widget, width, height+1);
 
-    // gtk_render_background (context, cr, 0, 0, width, height);
+        gdk_cairo_set_source_rgba (cr, (HBRUSH)GetStockObject(BLACK_BRUSH));
 
-    // cairo_arc (cr,
-    //             width / 2.0, height / 2.0,
-    //             MIN (width, height) / 3.0,
-    //             0, 2 * G_PI);
+        cairo_rectangle(cr, 0, 0, width, height);
+        cairo_stroke_preserve(cr);
 
-    // gtk_style_context_get_color (context,
-    //                             gtk_style_context_get_state (context),
-    //                             &color);
-    // gdk_cairo_set_source_rgba (cr, &color);
+        cairo_fill (cr);
 
-    // cairo_fill (cr);
-    // static double Cairo_R = 0.0, Cairo_G = 0.0, Cairo_B = 0.0;
-    // cairo_set_source_rgb(cr, Cairo_R, Cairo_G, Cairo_G); 
-    // Cairo_R = (Cairo_R+0.2 > 0.4) ? 0 : Cairo_R+0.2;
-    // Cairo_G = (Cairo_G+0.4 > 1.0) ? 0.4 : Cairo_G+0.4;
-    // Cairo_B = (Cairo_B+0.1 > 0.5) ? 0 : Cairo_B+0.1;
-    
-    // cairo_select_font_face(cr, "Purisa",
-    //     CAIRO_FONT_SLANT_NORMAL,
-    //     CAIRO_FONT_WEIGHT_BOLD);
-
-    // cairo_set_font_size(cr, 20);
-
-    // cairo_move_to(cr, 20, height / 2.0);
-    // cairo_show_text(cr, "-----------THIS IS A TEST DRAW----------");  
-
-    // cairo_fill (cr);
-
-    
-    // PAINTSTRUCT ps;
-    Hdc = cr;//BeginPaint(hwnd, &ps);
+        Paint_call_first = FALSE;
+    }
 
     /// This draws the schematic.
-    PaintWindow();
-
-    // cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
-    // cairo_set_line_width(cr, 1);
-
-    // cairo_rectangle(cr, 20, 20, 120, 80);
-    // cairo_rectangle(cr, 180, 20, 80, 80);
-    // cairo_stroke_preserve(cr);
-    // cairo_fill(cr);
-
-    RECT r;
-    // Fill around the scroll bars
-    // if(NeedHoriz) {
-        ScrollHeight = 10;
-        r.top = IoListTop - ScrollHeight - 2;
-        r.bottom = IoListTop - 2;
-        r.right = 5;
-        FillRect(Hdc, &r, (HBRUSH)GetStockObject(LTGRAY_BRUSH));
-    // }
-    GetClientRect(DrawWindow, &r);
-    ScrollWidth = 10;
-    r.left = r.right - ScrollWidth - 2;
-    FillRect(Hdc, &r, (HBRUSH)GetStockObject(LTGRAY_BRUSH));
-    // Draw the splitter thing to grab to resize the I/O listview.
-    GetClientRect(DrawWindow, &r);
-    r.top = IoListTop - 2;
-    r.bottom = IoListTop;
-    FillRect(Hdc, &r, (HBRUSH)GetStockObject(LTGRAY_BRUSH));
-    r.top = IoListTop - 2;
-    r.bottom = IoListTop - 1;
-    FillRect(Hdc, &r, (HBRUSH)GetStockObject(WHITE_BRUSH));
-    r.top = IoListTop;
-    r.bottom = IoListTop + 1;
-    FillRect(Hdc, &r, (HBRUSH)GetStockObject(DKGRAY_BRUSH));
-    // EndPaint(hwnd, &ps);
+    MainWindowResized();
+    PaintWindow(cr);
 
     return FALSE;
 }
 
-gboolean LD_WM_Destroy_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+void LD_WM_Destroy_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)
 {
     /* Handles:
     * WM_DESTROY
     */
 
-    // if(CheckSaveUserCancels()) break;
+    CheckSaveUserCancels();
 
-    // PostQuitMessage(0);
-    // return 1;
+    FreezeWindowPos(MainWindow);
+    FreezeDWORD(IoListHeight);
 
-    return FALSE;
+    gtk_main_quit();
 }
 
 gboolean LD_WM_Size_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)
@@ -1155,9 +884,14 @@ gboolean LD_WM_Size_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)
     /* Handles:
     * WM_SIZE
     */
+    MainWindowResized();
+    return FALSE;
+}
 
-    // MainWindowResized();
-    // break;
+gboolean LD_WM_Command_call(GtkMenuItem* men, gpointer gpcode)
+{
+    int tempcode = GPOINTER_TO_INT(gpcode);
+    ProcessMenu (tempcode);
 
     return FALSE;
 }
@@ -1168,10 +902,248 @@ gboolean LD_WM_SetFocus_call(GtkWidget *widget, GdkEvent *event, gpointer user_d
     * WM_SETFOCUS
     */
 
-    // InvalidateRect(MainWindow, NULL, FALSE);
-    // break;
+    InvalidateRect(DrawWindow, NULL, FALSE);
 
     return FALSE;
+}
+
+void LD_WM_Notify_Row_Activate_call(GtkTreeView *tree_view, GtkTreePath *path, GtkTreeViewColumn *column, gpointer user_data)
+{
+    /* Handles:
+    * WM_NOTIFY
+    */
+
+    // g_print("Row activated!\n");
+
+    int *ip = gtk_tree_path_get_indices ( path );
+
+    NMHDR h;
+    h.code = LVN_ITEMACTIVATE;
+    h.item.iItem = ip[0];
+    h.hlistFrom = IoList;
+
+    IoListProc(&h);
+}
+
+void LD_WM_Notify_Cursor_Change_call(GtkTreeView *tree_view, gpointer user_data)
+{
+    /* Handles:
+    * WM_NOTIFY
+    */
+    
+    ITLIST iter;
+
+    // BOOL empty = !gtk_tree_model_get_iter_first (IoList, &iter);
+    // g_print("empty = %i\n", (empty == TRUE) );
+
+    HLIST pTreeModel;
+    int *ip;
+    GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
+    gtk_tree_selection_set_mode(selection, GTK_SELECTION_SINGLE);
+    if(gtk_tree_selection_get_selected (selection, &pTreeModel, &iter))
+    {
+        GtkTreePath *path = gtk_tree_model_get_path ( pTreeModel , &iter ) ;
+        ip = gtk_tree_path_get_indices ( path );
+    }
+    else
+        if(!gtk_tree_model_get_iter_first (IoList, &iter))
+            return;
+
+    NMHDR h;
+    h.code = LVN_GETDISPINFO;
+    h.item.iItem = (ip == NULL) ? 0 : ip[0];
+    h.hlistFrom = IoList;
+    h.hlistIter = &iter;
+    IoListProc(&h);
+}
+
+inline void MenuHandler ()
+{
+    g_signal_connect(G_OBJECT(NewMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_NEW));
+
+    g_signal_connect(G_OBJECT(OpenMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_OPEN));
+
+    g_signal_connect(G_OBJECT(SaveMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_SAVE));
+
+    g_signal_connect(G_OBJECT(SaveAsMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_SAVE_AS));
+
+    g_signal_connect(G_OBJECT(ExportMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_EXPORT));
+
+    g_signal_connect(G_OBJECT(ExitMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_EXIT));
+
+    g_signal_connect(G_OBJECT(InsertCommentMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_COMMENT));
+
+    g_signal_connect(G_OBJECT(InsertContactsMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_CONTACTS));
+
+    g_signal_connect(G_OBJECT(InsertCoilMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_COIL));
+
+    g_signal_connect(G_OBJECT(InsertTonMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_TON));
+
+    g_signal_connect(G_OBJECT(InsertTofMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_TOF));
+
+    g_signal_connect(G_OBJECT(InsertRtoMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_RTO));
+
+    g_signal_connect(G_OBJECT(InsertCtuMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_CTU));
+
+    g_signal_connect(G_OBJECT(InsertCtdMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_CTD));
+
+    g_signal_connect(G_OBJECT(InsertCtcMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_CTC));
+
+    g_signal_connect(G_OBJECT(InsertResMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_RES));
+
+    g_signal_connect(G_OBJECT(InsertOpenMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_OPEN));
+
+    g_signal_connect(G_OBJECT(InsertShortMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_SHORT));    
+
+    g_signal_connect(G_OBJECT(InsertMasterRlyMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_MASTER_RLY));
+
+    g_signal_connect(G_OBJECT(InsertShiftRegMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_SHIFT_REG));
+
+    g_signal_connect(G_OBJECT(InsertLutMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_LUT));
+
+    g_signal_connect(G_OBJECT(InsertPwlMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_PWL));
+
+    g_signal_connect(G_OBJECT(InsertFmtdStrMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_FMTD_STR));
+
+    g_signal_connect(G_OBJECT(InsertOsrMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_OSR));
+
+    g_signal_connect(G_OBJECT(InsertOsfMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_OSF));
+
+    g_signal_connect(G_OBJECT(InsertMovMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_MOV));
+
+    g_signal_connect(G_OBJECT(InsertSetPwmMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_SET_PWM));
+
+    g_signal_connect(G_OBJECT(InsertReadAdcMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_READ_ADC));
+
+    g_signal_connect(G_OBJECT(InsertUartSendMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_UART_SEND));
+
+    g_signal_connect(G_OBJECT(InsertUartRecvMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_UART_RECV)); 
+
+    g_signal_connect(G_OBJECT(InsertPersistMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_PERSIST)); 
+
+    g_signal_connect(G_OBJECT(InsertAddMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_ADD)); 
+
+    g_signal_connect(G_OBJECT(InsertSubMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_SUB)); 
+
+    g_signal_connect(G_OBJECT(InsertMulMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_MUL)); 
+
+    g_signal_connect(G_OBJECT(InsertDivMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_DIV)); 
+
+    g_signal_connect(G_OBJECT(InsertEquMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_EQU)); 
+
+    g_signal_connect(G_OBJECT(InsertNeqMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_NEQ)); 
+
+    g_signal_connect(G_OBJECT(InsertGrtMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_GRT)); 
+
+    g_signal_connect(G_OBJECT(InsertGeqMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_GEQ)); 
+
+    g_signal_connect(G_OBJECT(InsertLesMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_LES)); 
+
+    g_signal_connect(G_OBJECT(InsertLeqMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_LEQ)); 
+
+    g_signal_connect(G_OBJECT(MakeNormalMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_MAKE_NORMAL)); 
+
+    g_signal_connect(G_OBJECT(NegateMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_NEGATE)); 
+
+    g_signal_connect(G_OBJECT(MakeSetOnlyMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_MAKE_SET_ONLY)); 
+
+    g_signal_connect(G_OBJECT(MakeResetOnlyMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_MAKE_RESET_ONLY)); 
+
+    g_signal_connect(G_OBJECT(UndoMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_UNDO)); 
+
+    g_signal_connect(G_OBJECT(RedoMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_REDO)); 
+
+    g_signal_connect(G_OBJECT(InsertRungBeforeMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_RUNG_BEFORE)); 
+
+    g_signal_connect(G_OBJECT(InsertRungAfterMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_INSERT_RUNG_AFTER)); 
+
+    g_signal_connect(G_OBJECT(DeleteRungMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_DELETE_RUNG)); 
+
+    g_signal_connect(G_OBJECT(PushRungUpMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_PUSH_RUNG_UP)); 
+
+    g_signal_connect(G_OBJECT(PushRungDownMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_PUSH_RUNG_DOWN)); 
+
+    g_signal_connect(G_OBJECT(DeleteElementMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_DELETE_ELEMENT)); 
+
+    g_signal_connect(G_OBJECT(McuSettingsMenu), "activate", 
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_MCU_SETTINGS));
+
+    g_signal_connect(G_OBJECT(SimulationModeMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_SIMULATION_MODE)); 
+
+    g_signal_connect(G_OBJECT(StartSimulationMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_START_SIMULATION)); 
+
+    g_signal_connect(G_OBJECT(StopSimulationMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_STOP_SIMULATION)); 
+
+    g_signal_connect(G_OBJECT(SingleCycleMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_SINGLE_CYCLE)); 
+
+    g_signal_connect(G_OBJECT(CompileMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_COMPILE)); 
+
+    g_signal_connect(G_OBJECT(CompileAsMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_COMPILE_AS)); 
+
+    g_signal_connect(G_OBJECT(ManualMenu), "activate",  
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_MANUAL));
+ 
+    g_signal_connect(G_OBJECT(AboutMenu), "activate",
+        G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_ABOUT));
 }
 
 //-----------------------------------------------------------------------------
@@ -1187,12 +1159,6 @@ int main(int argc, char** argv)
 
         char *err =
             "Bad command line arguments: run 'ldmicro /c src.ld dest.hex'";
-
-        // if (argc < 4)
-        // {
-        //     Error(err); 
-        //     exit(-1);
-        // }
 
         char *source = (char*)malloc(strlen(argv[2]) + strlen(argv[3]) + 2);
         sprintf(source, "%s %s", argv[2], argv[3]);
@@ -1240,43 +1206,16 @@ int main(int argc, char** argv)
         exit(0);
     }
     
+    //we need to initialize all these functions so that gtk knows
+    //to be thread-aware
+    if (!g_thread_supported ()){ g_thread_init(NULL); }
+    gdk_threads_init();
+    gdk_threads_enter();
+
     gtk_init(&argc, &argv);
     Instance = NULL;
-    /* TEST
-    MainWindow=gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title(GTK_WINDOW(MainWindow), "LDMicro");
-    g_signal_connect (MainWindow, "delete_event", G_CALLBACK (LDMicro_close), NULL);
-    gtk_window_set_default_size (GTK_WINDOW (MainWindow), 600, 400);
-    gtk_window_resize (GTK_WINDOW (MainWindow), 600, 400);
-    
-    ThawWindowPos(MainWindow);
-    ThawDWORD(IoListHeight);
-    
-    
-    // Title bar
-    UpdateMainWindowTitleBar();
-
-    // Splitting the window
-    MakeMainWindowControls();
-
-    // Calling the Simulation functions
-    
-    // StartSimulation(); // test
-    // SetMenusEnabled(true, true, false,
-    // true, false, false, false,
-    // true, true, true);  // test
-    // ToggleSimulationMode(); //test
-    // GenerateIoListDontLoseSelection();
-    StopSimulation(); //Test
-    */
     
     MainHeap = HeapCreate(0, 1024*64, 0);
-
-    // MakeDialogBoxClass();
-    // MakeComponentListClass();
-    // MakeSmplDialogClass();
-    // MakeNamingListClass();
-    HMENU top = MakeMainWindowMenus();
 
     /// Make main window
     MainWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -1285,12 +1224,15 @@ int main(int argc, char** argv)
     gtk_window_resize (GTK_WINDOW(MainWindow), 800, 600);
     gtk_window_move(GTK_WINDOW(MainWindow), 10, 10);
     gtk_widget_override_background_color(GTK_WIDGET(MainWindow), 
-                            GTK_STATE_FLAG_NORMAL, ((HBRUSH)GetStockObject(GRAY_BRUSH))->getThis());
+                            GTK_STATE_FLAG_NORMAL, ((HBRUSH)GetStockObject(DKGRAY_BRUSH)));
     gtk_window_set_default_icon(LoadImage(Instance, LDMICRO_ICON,
                             IMAGE_ICON, 32, 32, 0));
     gtk_window_set_icon(GTK_WINDOW(MainWindow), LoadImage(Instance, LDMICRO_ICON,
                             IMAGE_ICON, 32, 32, 0));
     /// Make main window - end
+
+    MakeMainWindowMenus();
+    MakeDialogBoxClass();
 
     InitForDrawing();
 
@@ -1311,20 +1253,25 @@ int main(int argc, char** argv)
     g_signal_connect (MainWindow, "destroy_event", G_CALLBACK (LD_WM_Destroy_call), NULL);
     g_signal_connect (MainWindow, "configure_event", G_CALLBACK (LD_WM_Size_call), NULL);
     g_signal_connect (MainWindow, "focus_in_event", G_CALLBACK (LD_WM_SetFocus_call), NULL);
+    g_signal_connect (view, "row_activated", G_CALLBACK (LD_WM_Notify_Row_Activate_call), NULL);
+    g_signal_connect (view, "cursor_changed", G_CALLBACK (LD_WM_Notify_Cursor_Change_call), NULL);
+    MenuHandler();
     /// Keyboard and mouse hooks equivalent to MainWndProc - end
 
     NewProgram();
     strcpy(CurrentSaveFile, "");
 
-    // We are running interactively, or we would already have exited. We
-    // can therefore show the window now, and otherwise set up the GUI.
+    /// We are running interactively, or we would already have exited. We
+    /// can therefore show the window now, and otherwise set up the GUI.
 
-    // Displaying the window
+    /// Displaying the window
     gtk_widget_show_all(MainWindow);
+
+    /// Blink cursor
+    SetTimer(DrawWindow, TIMER_BLINK_CURSOR, 200, BlinkCursor);
     // SetTimer(MainWindow, TIMER_BLINK_CURSOR, 800, BlinkCursor);
     
     if(argc >= 2) {
-        // g_print("load prog: %s\n", argv[1]);
         char line[MAX_PATH];
         if(*argv[1] == '"') { 
             strcpy(line, argv[1]+1);
@@ -1334,7 +1281,6 @@ int main(int argc, char** argv)
         if(strchr(line, '"')) *strchr(line, '"') = '\0';
         
         realpath(line, CurrentSaveFile);
-        // g_print("resolved path: %s\n", CurrentSaveFile);
         if(!LoadProjectFromFile(CurrentSaveFile)) {
             NewProgram();
             Error(_("Couldn't open '%s'."), CurrentSaveFile);
@@ -1343,9 +1289,9 @@ int main(int argc, char** argv)
         UndoFlush();
     }
 
-    GenerateIoListDontLoseSelection(); //~
-    // RefreshScrollbars();
-    UpdateMainWindowTitleBar(); //~
+    GenerateIoListDontLoseSelection(); 
+    RefreshScrollbars();
+    UpdateMainWindowTitleBar();
 
     // MSG msg;
     // DWORD ret;
@@ -1370,5 +1316,6 @@ int main(int argc, char** argv)
     // }
     
     gtk_main();
+    gdk_threads_leave();
     return EXIT_SUCCESS;
 }

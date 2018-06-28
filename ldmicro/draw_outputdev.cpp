@@ -31,7 +31,7 @@
 
 #include "ldmicro.h"
 
-void (*DrawChars)(int, int, const char *);
+void (*DrawChars)(HCRDC Hcr, int, int, const char *);
 
 // After an undo all the memory addresses change but make an effort to put
 // the cursor roughly where it should be.
@@ -81,35 +81,63 @@ SyntaxHighlightingColours HighlightColours;
 // bottom, left, right) but we don't care; just go from the coordinates
 // computed when we drew the schematic in the paint procedure.
 //-----------------------------------------------------------------------------
-void CALLBACK BlinkCursor(HWND hwnd, UINT msg, UINT_PTR id, DWORD time)
+BOOL BlinkCursor(BOOL kill = FALSE)
 {
-    // if(!isFocus(MainWindow) && !CursorDrawn) return;
-    // if(Cursor.left == 0) return;
+    // if(GetFocus(MainWindow) != !CursorDrawn) return TRUE;
+    
+    if(Cursor.left == 0) return TRUE;
 
-    // PlcCursor c;
-    // memcpy(&c, &Cursor, sizeof(c));
+    PlcCursor c;
+    memcpy(&c, &Cursor, sizeof(c));
 
-    // c.top -= ScrollYOffset*POS_HEIGHT*FONT_HEIGHT;
-    // c.left -= ScrollXOffset;
+    c.top -= ScrollYOffset*POS_HEIGHT*FONT_HEIGHT;
+    c.left -= ScrollXOffset;
 
-    // if(c.top >= IoListTop) return;
+    if(c.top >= IoListTop) return TRUE;
 
-    // if(c.top + c.height >= IoListTop) {
-    //     c.height = IoListTop - c.top - 3;
-    // }
+    if(c.top + c.height >= IoListTop) {
+        c.height = IoListTop - c.top - 3;
+    }
 
-    // Hdc = GetDC(MainWindow);
-    // SelectObject(Hdc, GetStockObject(WHITE_BRUSH));
-    // PatBlt(Hdc, c.left, c.top, c.width, c.height, PATINVERT);
-    // CursorDrawn = !CursorDrawn;
-    // ReleaseDC(MainWindow, Hdc);
+    // if(!GDK_IS_DRAWING_CONTEXT(Hdc))
+        // return FALSE;
+
+    HCRDC Hcr = gdk_cairo_create(gtk_widget_get_window(DrawWindow));
+
+    static int PREV_x = c.left;
+    static int PREV_y = c.top;
+    static int PREV_w = c.width;
+    static int PREV_h = c.height;
+
+    if (PREV_x != c.left || PREV_y != c.top || PREV_w != c.width || PREV_h != c.height)
+    {
+        PatBlt(Hcr, PREV_x, PREV_y, PREV_w, PREV_h, PATINVERT, (HBRUSH)GetStockObject(BLACK_BRUSH));
+        PREV_x = c.left;
+        PREV_y = c.top;
+        PREV_w = c.width;
+        PREV_h = c.height;
+
+        // MainWindowResized();
+        // PaintWindow(Hcr);
+        gtk_widget_queue_draw(DrawWindow);
+    }
+
+    if (CursorDrawn)
+        PatBlt(Hcr, c.left, c.top, c.width, c.height, PATINVERT, (HBRUSH)GetStockObject(WHITE_BRUSH));
+    else
+        PatBlt(Hcr, c.left, c.top, c.width, c.height, PATINVERT, (HBRUSH)GetStockObject(BLACK_BRUSH));
+    InvalidateRect(DrawWindow, NULL, FALSE);
+    cairo_destroy(Hcr);
+    CursorDrawn = !CursorDrawn;
+
+    return !kill;
 }
 
 //-----------------------------------------------------------------------------
 // Output a string to the screen at a particular location, in character-
 // sized units.
 //-----------------------------------------------------------------------------
-static void DrawCharsToScreen(int cx, int cy, const char *str)
+static void DrawCharsToScreen(HCRDC Hcr, int cx, int cy, const char *str)
 {
     cy -= ScrollYOffset*POS_HEIGHT;
     if(cy < -2) return;
@@ -129,12 +157,12 @@ static void DrawCharsToScreen(int cx, int cy, const char *str)
         if(strchr("{}[]", *str) && hiOk && !inComment)  {
             if(*str == '{' || *str == '[') inBrace++;
             if(inBrace == 1) {
-                prev = GetTextColor(Hdc);
-                SetTextColor(Hdc, HighlightColours.punct);
-                TextOut(Hdc, x, y, str, 1);
-                SetTextColor(Hdc, prev);
+                prev = GetTextColor(Hcr);
+                SetTextColor(Hcr, HighlightColours.punct);
+                TextOut(DrawWindow, Hcr, x, y, str, 1);
+                SetTextColor(Hcr, prev);
             } else {
-                TextOut(Hdc, x, y, str, 1);
+                TextOut(DrawWindow, Hcr, x, y, str, 1);
             }
             if(*str == ']' || *str == '}') inBrace--;
         } else if((
@@ -142,42 +170,42 @@ static void DrawCharsToScreen(int cx, int cy, const char *str)
                 || str[-1] == ':' || str[-1] == '[')) ||
             (*str == '-' && isdigit(str[1]))) && hiOk && !inComment)
         {
-            prev = GetTextColor(Hdc);
-            SetTextColor(Hdc, HighlightColours.lit);
-            TextOut(Hdc, x, y, str, 1);
-            SetTextColor(Hdc, prev);
+            prev = GetTextColor(Hcr);
+            SetTextColor(Hcr, HighlightColours.lit);
+            TextOut(DrawWindow, Hcr, x, y, str, 1);
+            SetTextColor(Hcr, prev);
             inNumber = TRUE;
         } else if(*str == '\x01') {
             cx--;
             if(hiOk) {
-                prev = GetTextColor(Hdc);
-                SetTextColor(Hdc, HighlightColours.op);
+                prev = GetTextColor(Hcr);
+                SetTextColor(Hcr, HighlightColours.op);
             }
         } else if(*str == '\x02') {
             cx--;
             if(hiOk) {
-                SetTextColor(Hdc, prev);
+                SetTextColor(Hcr, prev);
                 inComment = FALSE;
             }
         } else if(*str == '\x03') {
             cx--;
             if(hiOk) {
-                prev = GetTextColor(Hdc);
-                SetTextColor(Hdc, HighlightColours.comment);
+                prev = GetTextColor(Hcr);
+                SetTextColor(Hcr, HighlightColours.comment);
                 inComment = TRUE;
             }
         } else if(inNumber) {
             if(isdigit(*str) || *str == '.') {
-                prev = GetTextColor(Hdc);
-                SetTextColor(Hdc, HighlightColours.lit);
-                TextOut(Hdc, x, y, str, 1);
-                SetTextColor(Hdc, prev);
+                prev = GetTextColor(Hcr);
+                SetTextColor(Hcr, HighlightColours.lit);
+                TextOut(DrawWindow, Hcr, x, y, str, 1);
+                SetTextColor(Hcr, prev);
             } else {
-                TextOut(Hdc, x, y, str, 1);
+                TextOut(DrawWindow, Hcr, x, y, str, 1);
                 inNumber = FALSE;
             }
         } else {
-            TextOut(Hdc, x, y, str, 1);
+            TextOut(DrawWindow, Hcr, x, y, str, 1);
         }
 
         firstTime = FALSE;
@@ -218,63 +246,12 @@ int ScreenRowsAvailable(void)
 // cursor should go and fill in coordinates for BlinkCursor. Not allowed to
 // draw deeper than IoListTop, as we would run in to the I/O listbox.
 //-----------------------------------------------------------------------------
-void PaintWindow()
+void PaintWindow(HCRDC Hcr)
 {
-    /*
-    cairo_set_source_rgb(cr, Cairo_R, Cairo_G, Cairo_G); 
-    
-    cairo_select_font_face(cr, "Purisa",
-        CAIRO_FONT_SLANT_NORMAL,
-        CAIRO_FONT_WEIGHT_BOLD);
-
-    cairo_set_font_size(cr, 20);
-
-    cairo_move_to(cr, 20, height / 2.0);
-    cairo_show_text(cr, "-----------THIS IS A TEST DRAW----------");  
-
-    cairo_fill (cr);
-    */
-    
-    // SetBkColor(DrawWindow, hcr, InSimulationMode ? HighlightColours.simBg :
-    //     HighlightColours.bg);
-    
-    // SetTextColor(hcr, InSimulationMode ? HighlightColours.simRungNum :
-    //     HighlightColours.rungNum);
-    
-    // SelectObject(hcr, FixedWidthFont);
-    
-    // TextOut(hcr, 5, 100, "-------] [-------------------------------------------------------------------------------------------------------------------------------------------------{RES}-------", 14);
-
-    // static HBITMAP BackBitmap;
-    // static HDC BackDc;
-    // static int BitmapWidth;
-
     ok();
-
-    // RECT r;
-    // GetClientRect(MainWindow, &r);
-    
+   
     int bw =  gtk_widget_get_allocated_width (DrawWindow);// = r.right;
     int bh = IoListTop;
-
-    // HDC paintDc;
-    // if(!BackDc) {
-    //     HWND desktop = GetDesktopWindow();
-    //     RECT dk;
-    //     GetClientRect(desktop, &dk);
-
-    //     BitmapWidth = max(2000, dk.right + 300);
-    //     BackBitmap = CreateCompatibleBitmap(Hdc, BitmapWidth, dk.bottom + 300);
-    //     BackDc = CreateCompatibleDC(Hdc);
-    //     SelectObject(BackDc, BackBitmap);
-    // }
-    // paintDc = Hdc;
-    // Hdc = BackDc;
-
-    // RECT fi;
-    // fi.left = 0; fi.top = 0;
-    // fi.right = BitmapWidth; fi.bottom = bh;
-    // FillRect(Hdc, &fi, InSimulationMode ? SimBgBrush : BgBrush);
     
     /// now figure out how we should draw the ladder logic
     ColsAvailable = ProgCountWidestRow();
@@ -301,26 +278,26 @@ void PaintWindow()
         if(((cy + thisHeight) >= (ScrollYOffset - 8)*POS_HEIGHT) &&
             (cy < (ScrollYOffset + rowsAvailable + 8)*POS_HEIGHT))
         {
-            SetBkColor(DrawWindow, Hdc, InSimulationMode ? HighlightColours.simBg :
+            SetBkColor(DrawWindow, Hcr, InSimulationMode ? HighlightColours.simBg :
                 HighlightColours.bg);
-            SetTextColor(Hdc, InSimulationMode ? HighlightColours.simRungNum :
+            SetTextColor(Hcr, InSimulationMode ? HighlightColours.simRungNum :
                 HighlightColours.rungNum);
-            SelectObject(Hdc, FixedWidthFont);
+            SelectObject(Hcr, FixedWidthFont);
             int rung = i + 1;
             int y = Y_PADDING + FONT_HEIGHT*cy;
             int yp = y + FONT_HEIGHT*(POS_HEIGHT/2) - 
                 POS_HEIGHT*FONT_HEIGHT*ScrollYOffset;
-
+            
             if(rung < 10) {
                 char r[1] = { rung + '0' };
-                TextOut(Hdc, 8 + FONT_WIDTH, yp, r, 1);
+                TextOut(DrawWindow, Hcr, 8 + FONT_WIDTH, yp, r, 1);
             } else {
                 char r[2] = { (rung / 10) + '0', (rung % 10) + '0' };
-                TextOut(Hdc, 8, yp, r, 2);
+                TextOut(DrawWindow, Hcr, 8, yp, r, 2);
             }
 
             int cx = 0;
-            DrawElement(ELEM_SERIES_SUBCKT, Prog.rungs[i], &cx, &cy, 
+            DrawElement(Hcr, ELEM_SERIES_SUBCKT, Prog.rungs[i], &cx, &cy, 
                 Prog.rungPowered[i]); 
         }
 
@@ -328,7 +305,8 @@ void PaintWindow()
         cy += POS_HEIGHT;
     }
     cy -= 2;
-    DrawEndRung(0, cy);
+    DrawEndRung(Hcr, 0, cy);
+    
     if(SelectedGxAfterNextPaint >= 0) {
         MoveCursorNear(SelectedGxAfterNextPaint, SelectedGyAfterNextPaint);
         InvalidateRect(DrawWindow, NULL, FALSE);
@@ -354,24 +332,22 @@ void PaintWindow()
     r.top = 0;
     r.right = r.left + 4;
     r.bottom = IoListTop;
-    FillRect(Hdc, &r, InSimulationMode ? BusLeftBrush : BusBrush);
+    FillRect(Hcr, &r, InSimulationMode ? BusLeftBrush : BusBrush);
     r.left += POS_WIDTH*FONT_WIDTH*ColsAvailable + 2;
     r.right += POS_WIDTH*FONT_WIDTH*ColsAvailable + 2;
-    FillRect(Hdc, &r, InSimulationMode ? BusRightBus : BusBrush);
+    FillRect(Hcr, &r, InSimulationMode ? BusRightBus : BusBrush);
+    InvalidateRect(DrawWindow, NULL, FALSE);
  
     CursorDrawn = FALSE;
 
     // BitBlt(paintDc, 0, 0, bw, bh, BackDc, ScrollXOffset, 0, SRCCOPY);
 
-    // if(InSimulationMode) {
-    //     KillTimer(MainWindow, TIMER_BLINK_CURSOR);
-    // } else {
-    //     KillTimer(MainWindow, TIMER_BLINK_CURSOR);
-    //     BlinkCursor(NULL, 0, NULL, 0);
-    //     SetTimer(MainWindow, TIMER_BLINK_CURSOR, 800, BlinkCursor);
-    // }
+    if(InSimulationMode) {
+        KillTimer(DrawWindow, TIMER_BLINK_CURSOR);
+    } else {
+        SetTimer(DrawWindow, TIMER_BLINK_CURSOR, 200, BlinkCursor);
+    }
 
-    // Hdc = paintDc;
     ok();
 }
 
@@ -453,7 +429,7 @@ void InitForDrawing(void)
 // DrawChars function, for drawing to the export buffer instead of to the
 // screen.
 //-----------------------------------------------------------------------------
-static void DrawCharsToExportBuffer(int cx, int cy, char *str)
+static void DrawCharsToExportBuffer(HCRDC Hcr, int cx, int cy, const char *str)
 {
     while(*str) {
         if(*str >= 10) {
@@ -469,105 +445,106 @@ static void DrawCharsToExportBuffer(int cx, int cy, char *str)
 //-----------------------------------------------------------------------------
 void ExportDrawingAsText(char *file)
 {
-    // int maxWidth = ProgCountWidestRow();
-    // ColsAvailable = maxWidth;
+    int maxWidth = ProgCountWidestRow();
+    ColsAvailable = maxWidth;
 
-    // int totalHeight = 0;
-    // int i;
-    // for(i = 0; i < Prog.numRungs; i++) {
-    //     totalHeight += CountHeightOfElement(ELEM_SERIES_SUBCKT, Prog.rungs[i]);
-    //     totalHeight += 1;
-    // }
-    // totalHeight *= POS_HEIGHT;
-    // totalHeight += 3;
+    int totalHeight = 0;
+    int i;
+    for(i = 0; i < Prog.numRungs; i++) {
+        totalHeight += CountHeightOfElement(ELEM_SERIES_SUBCKT, Prog.rungs[i]);
+        totalHeight += 1;
+    }
+    totalHeight *= POS_HEIGHT;
+    totalHeight += 3;
 
-    // ExportBuffer = (char **)CheckMalloc(totalHeight * sizeof(char *));
+    ExportBuffer = (char **)CheckMalloc(totalHeight * sizeof(char *));
    
-    // int l = maxWidth*POS_WIDTH + 8;
-    // for(i = 0; i < totalHeight; i++) {
-    //     ExportBuffer[i] = (char *)CheckMalloc(l);
-    //     memset(ExportBuffer[i], ' ', l-1);
-    //     ExportBuffer[i][4] = '|';
-    //     ExportBuffer[i][3] = '|';
-    //     ExportBuffer[i][l-3] = '|';
-    //     ExportBuffer[i][l-2] = '|';
-    //     ExportBuffer[i][l-1] = '\0';
-    // }
+    int l = maxWidth*POS_WIDTH + 8;
+    for(i = 0; i < totalHeight; i++) {
+        ExportBuffer[i] = (char *)CheckMalloc(l);
+        memset(ExportBuffer[i], ' ', l-1);
+        ExportBuffer[i][4] = '|';
+        ExportBuffer[i][3] = '|';
+        ExportBuffer[i][l-3] = '|';
+        ExportBuffer[i][l-2] = '|';
+        ExportBuffer[i][l-1] = '\0';
+    }
 
-    // DrawChars = DrawCharsToExportBuffer;
+    DrawChars = DrawCharsToExportBuffer;
 
-    // int cy = 1;
-    // for(i = 0; i < Prog.numRungs; i++) {
-    //     int cx = 5;
-    //     DrawElement(ELEM_SERIES_SUBCKT, Prog.rungs[i], &cx, &cy, 
-    //         Prog.rungPowered[i]);
+    int cy = 1;
 
-    //     if((i + 1) < 10) {
-    //         ExportBuffer[cy+1][1] = '0' + (i + 1);
-    //     } else {
-    //         ExportBuffer[cy+1][1] = '0' + ((i + 1) % 10);
-    //         ExportBuffer[cy+1][0] = '0' + ((i + 1) / 10);
-    //     }
+    for(i = 0; i < Prog.numRungs; i++) {
+        int cx = 5;
+        DrawElement(NULL, ELEM_SERIES_SUBCKT, Prog.rungs[i], &cx, &cy, 
+            Prog.rungPowered[i]);
 
-    //     cy += POS_HEIGHT*CountHeightOfElement(ELEM_SERIES_SUBCKT,
-    //         Prog.rungs[i]);
-    //     cy += POS_HEIGHT;
-    // }
-    // cy -= 2;
-    // DrawEndRung(5, cy);
+        if((i + 1) < 10) {
+            ExportBuffer[cy+1][1] = '0' + (i + 1);
+        } else {
+            ExportBuffer[cy+1][1] = '0' + ((i + 1) % 10);
+            ExportBuffer[cy+1][0] = '0' + ((i + 1) / 10);
+        }
 
-    // FILE *f = fopen(file, "w");
-    // if(!f) {
-    //     Error(_("Couldn't open '%s'\n"), f);
-    //     return;
-    // }
+        cy += POS_HEIGHT*CountHeightOfElement(ELEM_SERIES_SUBCKT,
+            Prog.rungs[i]);
+        cy += POS_HEIGHT;
+    }
+    cy -= 2;
+    DrawEndRung(NULL, 5, cy);
 
-    // fprintf(f, "LDmicro export text\n");
+    FILE *f = fopen(file, "w");
+    if(!f) {
+        Error(_("Couldn't open '%s'\n"), f);
+        return;
+    }
 
-    // if(Prog.mcu) {
-    //     fprintf(f, "for '%s', %.6f MHz crystal, %.1f ms cycle time\n\n",
-    //         Prog.mcu->mcuName, Prog.mcuClock/1e6, Prog.cycleTime/1e3);
-    // } else {
-    //     fprintf(f, "no MCU assigned, %.6f MHz crystal, %.1f ms cycle time\n\n",
-    //         Prog.mcuClock/1e6, Prog.cycleTime/1e3);
-    // }
+    fprintf(f, "LDmicro export text\n");
 
-    // fprintf(f, "\nLADDER DIAGRAM:\n\n");
+    if(Prog.mcu) {
+        fprintf(f, "for '%s', %.6f MHz crystal, %.1f ms cycle time\n\n",
+            Prog.mcu->mcuName, Prog.mcuClock/1e6, Prog.cycleTime/1e3);
+    } else {
+        fprintf(f, "no MCU assigned, %.6f MHz crystal, %.1f ms cycle time\n\n",
+            Prog.mcuClock/1e6, Prog.cycleTime/1e3);
+    }
 
-    // for(i = 0; i < totalHeight; i++) {
-    //     ExportBuffer[i][4] = '|';
-    //     fprintf(f, "%s\n", ExportBuffer[i]);
-    //     CheckFree(ExportBuffer[i]);
-    // }
-    // CheckFree(ExportBuffer);
-    // ExportBuffer = NULL;
+    fprintf(f, "\nLADDER DIAGRAM:\n\n");
 
-    // fprintf(f, _("\n\nI/O ASSIGNMENT:\n\n"));
+    for(i = 0; i < totalHeight; i++) {
+        ExportBuffer[i][4] = '|';
+        fprintf(f, "%s\n", ExportBuffer[i]);
+        CheckFree(ExportBuffer[i]);
+    }
+    CheckFree(ExportBuffer);
+    ExportBuffer = NULL;
+
+    fprintf(f, _("\n\nI/O ASSIGNMENT:\n\n"));
     
-    // fprintf(f, _("  Name                       | Type               | Pin\n"));
-    // fprintf(f,   " ----------------------------+--------------------+------\n");
-    // for(i = 0; i < Prog.io.count; i++) {
-    //     char b[1024];
-    //     memset(b, '\0', sizeof(b));
+    fprintf(f, _("  Name                       | Type               | Pin\n"));
+    fprintf(f,   " ----------------------------+--------------------+------\n");
+    for(i = 0; i < Prog.io.count; i++) {
+        char b[1024];
+        memset(b, '\0', sizeof(b));
 
-    //     PlcProgramSingleIo *io = &Prog.io.assignment[i];
-    //     char *type = IoTypeToString(io->type);
-    //     char pin[MAX_NAME_LEN];
+        PlcProgramSingleIo *io = &Prog.io.assignment[i];
+        char *type = IoTypeToString(io->type);
+        char pin[MAX_NAME_LEN];
 
-    //     PinNumberForIo(pin, io);
+        PinNumberForIo(pin, io);
 
-    //     sprintf(b, "                             |                    | %s\n",
-    //         pin);
+        sprintf(b, "                             |                    | %s\n",
+            pin);
 
-    //     memcpy(b+2, io->name, strlen(io->name));
-    //     memcpy(b+31, type, strlen(type));
-    //     fprintf(f, "%s", b);
-    // }
+        memcpy(b+2, io->name, strlen(io->name));
+        memcpy(b+31, type, strlen(type));
+        fprintf(f, "%s", b);
+    }
 
-    // fclose(f);
+    fclose(f);
 
-    // // we may have trashed the grid tables a bit; a repaint will fix that
-    // InvalidateRect(MainWindow, NULL, FALSE);
+    // we may have trashed the grid tables a bit; a repaint will fix that
+    InvalidateRect(MainWindow, NULL, FALSE);
 }
 
 //-----------------------------------------------------------------------------
@@ -576,46 +553,46 @@ void ExportDrawingAsText(char *file)
 //-----------------------------------------------------------------------------
 void SetUpScrollbars(BOOL *horizShown, SCROLLINFO *horiz, SCROLLINFO *vert)
 {
-    // int totalHeight = 0;
-    // int i;
-    // for(i = 0; i < Prog.numRungs; i++) {
-    //     totalHeight += CountHeightOfElement(ELEM_SERIES_SUBCKT, Prog.rungs[i]);
-    //     totalHeight++;
-    // }
-    // totalHeight += 1; // for the end rung
+    int totalHeight = 0;
+    int i;
+    for(i = 0; i < Prog.numRungs; i++) {
+        totalHeight += CountHeightOfElement(ELEM_SERIES_SUBCKT, Prog.rungs[i]);
+        totalHeight++;
+    }
+    totalHeight += 1; // for the end rung
 
-    // int totalWidth = ProgCountWidestRow();
+    int totalWidth = ProgCountWidestRow();
 
-    // if(totalWidth <= ScreenColsAvailable()) {
-    //     *horizShown = FALSE;
-    //     ScrollXOffset = 0;
-    //     ScrollXOffsetMax = 0;
-    // } else {
-    //     *horizShown = TRUE;
-    //     memset(horiz, 0, sizeof(*horiz));
-    //     horiz->cbSize = sizeof(*horiz);
-    //     horiz->fMask = SIF_DISABLENOSCROLL | SIF_ALL;
-    //     horiz->nMin = 0;
-    //     horiz->nMax = X_PADDING + totalWidth*POS_WIDTH*FONT_WIDTH;
-    //     RECT r;
-    //     GetClientRect(MainWindow, &r);
-    //     horiz->nPage = r.right - X_PADDING;
-    //     horiz->nPos = ScrollXOffset;
+    if(totalWidth <= ScreenColsAvailable()) {
+        *horizShown = FALSE;
+        ScrollXOffset = 0;
+        ScrollXOffsetMax = 0;
+    } else {
+        *horizShown = TRUE;
+        memset(horiz, 0, sizeof(*horiz));
+        horiz->cbSize = sizeof(*horiz);
+        // horiz->fMask = SIF_DISABLENOSCROLL | SIF_ALL;
+        horiz->nMin = 0;
+        horiz->nMax = X_PADDING + totalWidth*POS_WIDTH*FONT_WIDTH;
+        RECT r;
+        GetClientRect(DrawWindow, &r);
+        horiz->nPage = r.right - X_PADDING;
+        horiz->nPos = ScrollXOffset;
 
-    //     ScrollXOffsetMax = horiz->nMax - horiz->nPage + 1;
-    //     if(ScrollXOffset > ScrollXOffsetMax) ScrollXOffset = ScrollXOffsetMax;
-    //     if(ScrollXOffset < 0) ScrollXOffset = 0;
-    // }
+        ScrollXOffsetMax = horiz->nMax - horiz->nPage + 1;
+        if(ScrollXOffset > ScrollXOffsetMax) ScrollXOffset = ScrollXOffsetMax;
+        if(ScrollXOffset < 0) ScrollXOffset = 0;
+    }
 
-    // vert->cbSize = sizeof(*vert);
+    vert->cbSize = sizeof(*vert);
     // vert->fMask = SIF_DISABLENOSCROLL | SIF_ALL;
-    // vert->nMin = 0;
-    // vert->nMax = totalHeight - 1;
-    // vert->nPos = ScrollYOffset;
-    // vert->nPage = ScreenRowsAvailable();
+    vert->nMin = 0;
+    vert->nMax = totalHeight - 1;
+    vert->nPos = ScrollYOffset;
+    vert->nPage = ScreenRowsAvailable();
 
-    // ScrollYOffsetMax = vert->nMax - vert->nPage + 1;
+    ScrollYOffsetMax = vert->nMax - vert->nPage + 1;
 
-    // if(ScrollYOffset > ScrollYOffsetMax) ScrollYOffset = ScrollYOffsetMax;
-    // if(ScrollYOffset < 0) ScrollYOffset = 0;
+    if(ScrollYOffset > ScrollYOffsetMax) ScrollYOffset = ScrollYOffsetMax;
+    if(ScrollYOffset < 0) ScrollYOffset = 0;
 }

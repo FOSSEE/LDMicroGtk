@@ -26,10 +26,13 @@
 #include "linuxUI.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <iostream>
 //#include <commctrl.h>
 //#include <richedit.h>
 
 #include "ldmicro.h"
+
+using namespace std;
 
 extern char *HelpText[];
 extern char *HelpTextDe[];
@@ -90,24 +93,29 @@ static char **Text[] = {
     AboutText
 };
 
-static HWND HelpDialog[2];
-static HWND RichEdit[2];
+static HWID HelpDialog[2];
+static HWID RichEdit[2];
 
 static BOOL HelpWindowOpen[2];
 
 static int TitleHeight;
 
+HWID PackBoxHelp;
+HWID TextView;
+GtkTextBuffer* TextBuffer;
+GtkTextIter* TextIter = new GtkTextIter;
+
 #define RICH_EDIT_HEIGHT(h)  \
     ((((h) - 3 + (FONT_HEIGHT/2)) / FONT_HEIGHT) * FONT_HEIGHT)
 
-// static void SizeRichEdit(int a)
-// {
-//     RECT r;
-//     GetClientRect(HelpDialog[a], &r);
-
-//     SetWindowPos(RichEdit[a], HWND_TOP, 6, 3, r.right - 6, 
-//         RICH_EDIT_HEIGHT(r.bottom), 0);
-// }
+static void SizeRichEdit(int a)
+{
+    gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (RichEdit[a]),
+				                          GTK_POLICY_AUTOMATIC, 
+				                          GTK_POLICY_ALWAYS);
+    gtk_widget_set_hexpand(GTK_WIDGET(RichEdit[a]), TRUE);  
+    gtk_widget_set_vexpand(GTK_WIDGET(RichEdit[a]), TRUE);
+}
 
 // static BOOL Resizing(RECT *r, int wParam)
 // {
@@ -142,80 +150,85 @@ static int TitleHeight;
 //     return !touched;
 // }
 
-// static void MakeControls(int a)
-// {
-//     HMODULE re = LoadLibrary("RichEd20.dll");
-//     if(!re) oops();
+static void MakeControls(int a)
+{
+    // HMODULE re = LoadLibrary("RichEd20.dll");
+    // if(!re) oops();
 
-//     RichEdit[a] = CreateWindowEx(0, RICHEDIT_CLASS,
-//         "", WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE | ES_READONLY |
-//         ES_MULTILINE | WS_VSCROLL,
-//         0, 0, 100, 100, HelpDialog[a], NULL, Instance, NULL);
+    RichEdit[a] = gtk_scrolled_window_new (NULL, NULL);
+    TextView = gtk_text_view_new ();
+    TextBuffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (TextView));
+    gtk_text_view_set_editable (GTK_TEXT_VIEW (TextView), FALSE);
+    SizeRichEdit(a);
+    gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (TextView), GTK_WRAP_WORD);
+    gtk_text_buffer_get_start_iter (TextBuffer, TextIter);
+    // COLORREF color;
+    // gtk_text_buffer_create_tag (TextBuffer, "ForegroundColor1",
+    //                         "foreground", "blue");
 
-//     SendMessage(RichEdit[a], WM_SETFONT, (WPARAM)FixedWidthFont, TRUE);
-//     SendMessage(RichEdit[a], EM_SETBKGNDCOLOR, (WPARAM)0, RGB(0, 0, 0));
+    int i;
+    BOOL nextSubHead = FALSE;
+    for(i = 0; Text[a][i]; i++) {
+        char *s = Text[a][i];
+        gtk_text_buffer_get_iter_at_offset (TextBuffer, TextIter, -1);
 
-//     SizeRichEdit(a);
-
-//     int i;
-//     BOOL nextSubHead = FALSE;
-//     for(i = 0; Text[a][i]; i++) {
-//         char *s = Text[a][i];
-
-//         CHARFORMAT cf;
-//         cf.cbSize = sizeof(cf);
-//         cf.dwMask = CFM_BOLD | CFM_COLOR;
-//         cf.dwEffects = 0;
-//         if((s[0] == '=') ||
-//            (Text[a][i+1] && Text[a][i+1][0] == '='))
-//         {
-//             cf.crTextColor = RGB(255, 255, 110);
-//         } else if(s[3] == '|' && s[4] == '|') {
-//             cf.crTextColor = RGB(255, 110, 255);
-//         } else if(s[0] == '>' || nextSubHead) {
-//             // Need to make a copy because the strings we are passed aren't
-//             // mutable.
-//             char copy[1024];
-//             if(strlen(s) >= sizeof(copy)) oops();
-//             strcpy(copy, s);
-
-//             int j;
-//             for(j = 1; copy[j]; j++) {
-//                 if(copy[j] == ' ' && copy[j-1] == ' ')
-//                     break;
-//             }
-//             BOOL justHeading = (copy[j] == '\0');
-//             copy[j] = '\0';
-//             cf.crTextColor = RGB(110, 255, 110);
-//             SendMessage(RichEdit[a], EM_SETCHARFORMAT, SCF_SELECTION,
-//                 (LPARAM)&cf);
-//             SendMessage(RichEdit[a], EM_REPLACESEL, (WPARAM)FALSE,
-//                 (LPARAM)copy);
-//             SendMessage(RichEdit[a], EM_SETSEL, (WPARAM)-1, (LPARAM)-1);
+        if((s[0] == '=') ||
+           (Text[a][i+1] && Text[a][i+1][0] == '='))
+        {
+            COLORREF color = RGB(255, 255, 110);
+            // gtk_widget_override_color (TextView, GTK_STATE_FLAG_NORMAL, &color);
             
-//             // Special case if there's nothing except title on the line
-//             if(!justHeading) {
-//                 copy[j] = ' ';
-//             }
-//             s += j;
-//             cf.crTextColor = RGB(255, 110, 255);
-//             nextSubHead = !nextSubHead;
-//         } else {
-//             cf.crTextColor = RGB(255, 255, 255);
-//         }
+        }
+        else if(s[3] == '|' && s[4] == '|') {
+            // COLORREF color = RGB(255, 110, 255);
+            // gtk_widget_override_color (TextView, GTK_STATE_FLAG_NORMAL, &color);
+        }
+        else if(s[0] == '>' || nextSubHead) {
+            // Need to make a copy because the strings we are passed aren't
+            // mutable.
+            char copy[1024];
+            if(strlen(s) >= sizeof(copy)) oops();
+            strcpy(copy, s);
 
-//         SendMessage(RichEdit[a], EM_SETCHARFORMAT, SCF_SELECTION, (LPARAM)&cf);
-//         SendMessage(RichEdit[a], EM_REPLACESEL, (WPARAM)FALSE, (LPARAM)s);
-//         SendMessage(RichEdit[a], EM_SETSEL, (WPARAM)-1, (LPARAM)-1);
+            int j;
+            for(j = 1; copy[j]; j++) {
+                if(copy[j] == ' ' && copy[j-1] == ' ')
+                    break;
+            }
+            BOOL justHeading = (copy[j] == '\0');
+            copy[j] = '\0';
+            COLORREF color = RGB(110, 255, 110);
+            // gtk_widget_override_color (TextView, GTK_STATE_FLAG_NORMAL, &color);
+            gtk_text_buffer_insert (TextBuffer, TextIter, copy, -1);
+            gtk_text_buffer_get_iter_at_offset (TextBuffer, TextIter, -1);
+            
+            // Special case if there's nothing except title on the line
+            if(!justHeading) {
+                copy[j] = ' ';
+            }
+            s += j;
+            // color = RGB(255, 110, 255);
+            // gtk_widget_override_color (TextView, GTK_STATE_FLAG_NORMAL, &color);
+            nextSubHead = !nextSubHead;
+        }
+        else {
+            COLORREF color = RGB(255, 255, 255);
+            gtk_widget_override_color (TextView, GTK_STATE_FLAG_NORMAL, &color);
+        }
 
-//         if(Text[a][i+1]) {
-//             SendMessage(RichEdit[a], EM_REPLACESEL, FALSE, (LPARAM)"\r\n");
-//             SendMessage(RichEdit[a], EM_SETSEL, (WPARAM)-1, (LPARAM)-1);
-//         }
-//     }
+    // gtk_text_buffer_insert_with_tags_by_name (TextBuffer, TextIter,
+    //                             s, -1, "ForegroundColor1", NULL);
+    gtk_text_buffer_insert (TextBuffer, TextIter, s, -1);
 
-//     SendMessage(RichEdit[a], EM_SETSEL, (WPARAM)0, (LPARAM)0);
-// }
+        if(Text[a][i+1]) {
+            gtk_text_buffer_insert (TextBuffer, TextIter, "\n", -1);
+        }
+    }
+    gtk_widget_override_background_color (TextView, GTK_STATE_FLAG_NORMAL,
+                        ((HBRUSH)GetStockObject(BLACK_BRUSH)));
+    gtk_container_add (GTK_CONTAINER(RichEdit[a]), TextView);
+
+}
 
 //-----------------------------------------------------------------------------
 // Window proc for the help dialog.
@@ -253,8 +266,8 @@ static int TitleHeight;
 //-----------------------------------------------------------------------------
 // Create the class for the help window.
 //-----------------------------------------------------------------------------
-// static void MakeClass(void)
-// {
+static void MakeClass(void)
+{
 //     WNDCLASSEX wc;
 //     memset(&wc, 0, sizeof(wc));
 //     wc.cbSize = sizeof(wc);
@@ -263,7 +276,6 @@ static int TitleHeight;
 //                           CS_DBLCLKS;
 //     wc.lpfnWndProc      = (WNDPROC)HelpProc;
 //     wc.hInstance        = Instance;
-//     wc.hbrBackground    = (HBRUSH)GetStockObject(BLACK_BRUSH);
 //     wc.lpszClassName    = "LDmicroHelp";
 //     wc.lpszMenuName     = NULL;
 //     wc.hCursor          = LoadCursor(NULL, IDC_ARROW);
@@ -272,37 +284,34 @@ static int TitleHeight;
 //     wc.hIconSm          = (HICON)LoadImage(Instance, MAKEINTRESOURCE(4000),
 //                             IMAGE_ICON, 16, 16, 0);
 
+
 //     RegisterClassEx(&wc);
-// }
+}
 
-// void ShowHelpDialog(BOOL about)
-// {
-//     int a = about ? 1 : 0;
-//     if(HelpWindowOpen[a]) {
-//         SetForegroundWindow(HelpDialog[a]);
-//         return;
-//     }
+void ShowHelpDialog(BOOL about)
+{
+    int a = about ? 1 : 0;
+    
+    MakeClass();
 
-//     MakeClass();
+    const char *s = about ? "About LDmicro" : "LDmicro Help";
 
-//     char *s = about ? "About LDmicro" : "LDmicro Help";
-//     HelpDialog[a] = CreateWindowEx(0, "LDmicroHelp", s,
-//         WS_OVERLAPPED | WS_SYSMENU | WS_THICKFRAME | WS_MINIMIZEBOX |
-//         WS_SIZEBOX,
-//         100, 100, 650, 300+10*FONT_HEIGHT, NULL, NULL, Instance, NULL);
-//     MakeControls(a);
+    MakeControls(a);
+
+    PackBoxHelp = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_box_pack_start(GTK_BOX(PackBoxHelp), RichEdit[a], FALSE, TRUE, 0);
+
+    HelpDialog[a] = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_default_size(GTK_WINDOW(HelpDialog[a]), 650, 300+10*FONT_HEIGHT);
+    gtk_window_set_title(GTK_WINDOW(HelpDialog[a]), s);
+    gtk_container_add(GTK_CONTAINER(HelpDialog[a]), PackBoxHelp);
    
-//     ShowWindow(HelpDialog[a], TRUE);
-//     SetFocus(RichEdit[a]);
+    gtk_widget_show_all (HelpDialog[a]);
+    gtk_widget_grab_focus (RichEdit[a]);
 
-//     HelpWindowOpen[a] = TRUE;
-
-//     RECT r;
-//     GetClientRect(HelpDialog[a], &r);
-//     TitleHeight = 300 - r.bottom;
-
-//     GetWindowRect(HelpDialog[a], &r);
-//     Resizing(&r, WMSZ_TOP);
-//     SetWindowPos(HelpDialog[a], HWND_TOP, r.left, r.top, r.right - r.left, 
-//         r.bottom - r.top, 0);
-// }
+    if(HelpWindowOpen[a]) {
+        gtk_widget_grab_focus (HelpDialog[a]);
+        return;
+    }
+    HelpWindowOpen[a] = TRUE;
+}

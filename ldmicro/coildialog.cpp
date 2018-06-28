@@ -27,184 +27,197 @@
 
 #include "ldmicro.h"
 
-static HWND CoilDialog;
+static HWID CoilDialog;
 
-static HWND SourceInternalRelayRadio;
-static HWND SourceMcuPinRadio;
-static HWND NegatedRadio;
-static HWND NormalRadio;
-static HWND SetOnlyRadio;
-static HWND ResetOnlyRadio;
-static HWND NameTextbox;
+static HWID SourceInternalRelayRadio;
+static HWID SourceMcuPinRadio;
+static HWID NegatedRadio;
+static HWID NormalRadio;
+static HWID SetOnlyRadio;
+static HWID ResetOnlyRadio;
+static HWID NameTextbox;
+static HWID OkButton;
+static HWID CancelButton;
 
 static LONG_PTR PrevNameProc;
+
+static HWID CoilGrid;
+static HWID CoilPackingBox;
+static bool* tmpnegated;
+static bool* tmpsetOnly ;
+static bool* tmpresetOnly;
 
 //-----------------------------------------------------------------------------
 // Don't allow any characters other than A-Za-z0-9_ in the name.
 //-----------------------------------------------------------------------------
-// static LRESULT CALLBACK MyNameProc(HWND hwnd, UINT msg, WPARAM wParam,
-//     LPARAM lParam)
-// {
-//     if(msg == WM_CHAR) {
-//         if(!(isalpha(wParam) || isdigit(wParam) || wParam == '_' ||
-//             wParam == '\b'))
-//         {
-//             return 0;
-//         }
-//     }
 
-//     return CallWindowProc((WNDPROC)PrevNameProc, hwnd, msg, wParam, lParam);
-// }
+void CoilDialogMyNameProc (GtkEditable *editable, gchar *NewText, gint length, 
+    gint *position, gpointer data){
+    for (int i = 0; i < length; i++){
+        if (!(isalpha (NewText[i]) || NewText[i] == '_' || isdigit (NewText[i])
+                                     || NewText[i] == '\b' )){
+            g_signal_stop_emission_by_name (G_OBJECT (editable), "insert-text");
+            return;
+        }
+    }
+}
 
-// static void MakeControls(void)
-// {
-//     HWND grouper = CreateWindowEx(0, WC_BUTTON, _("Type"),
-//         WS_CHILD | BS_GROUPBOX | WS_VISIBLE | WS_TABSTOP,
-//         7, 3, 120, 105, CoilDialog, NULL, Instance, NULL);
-//     NiceFont(grouper);
+static void MakeControls(void)
+{
+    NormalRadio = gtk_radio_button_new_with_label (NULL, "( ) Normal");
+    NegatedRadio = gtk_radio_button_new_with_label_from_widget
+                        (GTK_RADIO_BUTTON (NormalRadio), "(/) Negated");
+    SetOnlyRadio = gtk_radio_button_new_with_label_from_widget
+                        (GTK_RADIO_BUTTON (NormalRadio), "(S) Set-Only");
+    ResetOnlyRadio = gtk_radio_button_new_with_label_from_widget
+                        (GTK_RADIO_BUTTON (NormalRadio), "(R) Reset-Only");
+    
+    SourceInternalRelayRadio = gtk_radio_button_new_with_label (NULL, "Internal Relay");
+    SourceMcuPinRadio = gtk_radio_button_new_with_label_from_widget
+                        (GTK_RADIO_BUTTON (SourceInternalRelayRadio), "Pin on MCU");
+    
+    HWID textLabel = gtk_label_new ("Name:");
+    
+    NameTextbox = gtk_entry_new();
+    gtk_entry_set_max_length (GTK_ENTRY (NameTextbox), 0);
 
-//     NormalRadio = CreateWindowEx(0, WC_BUTTON, _("( ) Normal"),
-//         WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE | WS_GROUP,
-//         16, 21, 100, 20, CoilDialog, NULL, Instance, NULL);
-//     NiceFont(NormalRadio);
+    OkButton = gtk_button_new_with_label ("OK");
+    CancelButton = gtk_button_new_with_label ("Cancel");
 
-//     NegatedRadio = CreateWindowEx(0, WC_BUTTON, _("(/) Negated"),
-//         WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE,
-//         16, 41, 100, 20, CoilDialog, NULL, Instance, NULL);
-//     NiceFont(NegatedRadio);
+    gtk_grid_attach (GTK_GRID (CoilGrid), NormalRadio, 0, 1, 1, 1);
+    gtk_grid_attach (GTK_GRID (CoilGrid), NegatedRadio, 0, 2, 1, 1);
+    gtk_grid_attach (GTK_GRID (CoilGrid), SetOnlyRadio, 0, 3, 1, 1);
+    gtk_grid_attach (GTK_GRID (CoilGrid), ResetOnlyRadio, 0, 4, 1, 1);
+    gtk_grid_attach (GTK_GRID (CoilGrid), SourceInternalRelayRadio, 1, 1, 1, 1);
+    gtk_grid_attach (GTK_GRID (CoilGrid), SourceMcuPinRadio, 1, 2, 1, 1);
+    gtk_grid_attach (GTK_GRID (CoilGrid), textLabel, 1, 4, 1, 1);
+    gtk_grid_attach (GTK_GRID (CoilGrid), NameTextbox, 2, 4, 1, 1);
+    gtk_grid_attach (GTK_GRID (CoilGrid), OkButton, 4, 2, 1, 1);
+    gtk_grid_attach (GTK_GRID (CoilGrid), CancelButton, 4, 3, 1, 1);
 
-//     SetOnlyRadio = CreateWindowEx(0, WC_BUTTON, _("(S) Set-Only"),
-//         WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE,
-//         16, 61, 100, 20, CoilDialog, NULL, Instance, NULL);
-//     NiceFont(SetOnlyRadio);
+    gtk_grid_set_column_spacing (GTK_GRID (CoilGrid), 1);
+    gtk_box_pack_start(GTK_BOX(CoilPackingBox), CoilGrid, TRUE, TRUE, 0);
 
-//     ResetOnlyRadio = CreateWindowEx(0, WC_BUTTON, _("(R) Reset-Only"),
-//         WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE,
-//         16, 81, 105, 20, CoilDialog, NULL, Instance, NULL);
-//     NiceFont(ResetOnlyRadio);
+    g_signal_connect (G_OBJECT (NameTextbox), "insert-text",
+                    G_CALLBACK (CoilDialogMyNameProc), NULL);
+}
 
-//     HWND grouper2 = CreateWindowEx(0, WC_BUTTON, _("Source"),
-//         WS_CHILD | BS_GROUPBOX | WS_VISIBLE,
-//         140, 3, 120, 65, CoilDialog, NULL, Instance, NULL);
-//     NiceFont(grouper2);
+void CoilDialogGetData (char* name){
 
-//     SourceInternalRelayRadio = CreateWindowEx(0, WC_BUTTON, _("Internal Relay"),
-//         WS_CHILD | BS_AUTORADIOBUTTON | WS_VISIBLE | WS_GROUP | WS_TABSTOP,
-//         149, 21, 100, 20, CoilDialog, NULL, Instance, NULL);
-//     NiceFont(SourceInternalRelayRadio);
+    bool* negated = tmpnegated;
+    bool* resetOnly = tmpresetOnly;
+    bool* setOnly = tmpsetOnly;
 
-//     SourceMcuPinRadio = CreateWindowEx(0, WC_BUTTON, _("Pin on MCU"),
-//         WS_CHILD | BS_AUTORADIOBUTTON | WS_VISIBLE | WS_TABSTOP,
-//         149, 41, 100, 20, CoilDialog, NULL, Instance, NULL);
-//     NiceFont(SourceMcuPinRadio); 
+    if(gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON
+    (SourceInternalRelayRadio))) {
+            name[0] = 'R';
+        }
+        else {
+            name[0] = 'Y';
+        }
+        strcpy (name+1, gtk_entry_get_text (GTK_ENTRY (NameTextbox)));
 
-//     HWND textLabel = CreateWindowEx(0, WC_STATIC, _("Name:"),
-//         WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE | SS_RIGHT,
-//         135, 80, 50, 21, CoilDialog, NULL, Instance, NULL);
-//     NiceFont(textLabel);
+        if(gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON
+        (NormalRadio))) {
+            *negated = FALSE;
+            *setOnly = FALSE;
+            *resetOnly = FALSE;
+        }
+        else if(gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON
+        (NegatedRadio))) {
+            *negated = TRUE;
+            *setOnly = FALSE;
+            *resetOnly = FALSE;
+        }
+        else if(gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON
+        (SetOnlyRadio))) {
+            *negated = FALSE;
+            *setOnly = TRUE;
+            *resetOnly = FALSE;
+        }
+        else if(gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON
+        (ResetOnlyRadio))){
+            *negated = FALSE;
+            *setOnly = FALSE;
+            *resetOnly = TRUE;
+        }
 
-//     NameTextbox = CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "",
-//         WS_CHILD | ES_AUTOHSCROLL | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE,
-//         190, 80, 155, 21, CoilDialog, NULL, Instance, NULL);
-//     FixedFont(NameTextbox);
+    gtk_widget_set_sensitive (MainWindow, TRUE);
+    DestroyWindow (CoilDialog);
+}
 
-//     OkButton = CreateWindowEx(0, WC_BUTTON, _("OK"),
-//         WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE | BS_DEFPUSHBUTTON,
-//         276, 10, 70, 23, CoilDialog, NULL, Instance, NULL); 
-//     NiceFont(OkButton);
+// Mouse click callback
+void CoilDialogMouseClick (HWID widget, gpointer data){
+    CoilDialogGetData((char*)data);
+}
 
-//     CancelButton = CreateWindowEx(0, WC_BUTTON, _("Cancel"),
-//         WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE,
-//         276, 40, 70, 23, CoilDialog, NULL, Instance, NULL); 
-//     NiceFont(CancelButton);
+// Checks for the required key press
+gboolean CoilDialogKeyPress (HWID widget, GdkEventKey* event, gpointer data){
+    if (event -> keyval == GDK_KEY_Return){
+        CoilDialogGetData((char*)data);
+    }
+    else if (event -> keyval == GDK_KEY_Escape){
+        DestroyWindow (CoilDialog);
+        gtk_widget_set_sensitive (MainWindow, TRUE);
+    }
+    return FALSE;
+}
 
-//     PrevNameProc = SetWindowLongPtr(NameTextbox, GWLP_WNDPROC, 
-//         (LONG_PTR)MyNameProc);
-// }
+// Calls DestroyWindow
+void CoilCallDestroyWindow (HWID widget, gpointer data){
+    DestroyWindow (CoilDialog);
+    gtk_widget_set_sensitive (MainWindow, TRUE);
+}
 
-// void ShowCoilDialog(BOOL *negated, BOOL *setOnly, BOOL *resetOnly, char *name)
-// {
-//     CoilDialog = CreateWindowClient(0, "LDmicroDialog",
-//         _("Coil"), WS_OVERLAPPED | WS_SYSMENU,
-//         100, 100, 359, 115, NULL, NULL, Instance, NULL);
-//     RECT r;
-//     GetClientRect(CoilDialog, &r);
+void ShowCoilDialog(BOOL *negated, BOOL *setOnly, BOOL *resetOnly, char *name)
+{
+    CoilGrid = gtk_grid_new();
+    CoilPackingBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
-//     MakeControls();
+    CoilDialog = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title(GTK_WINDOW(CoilDialog), "Coil");
+    gtk_window_set_default_size(GTK_WINDOW(CoilDialog), 100, 50);
+    gtk_window_set_resizable (GTK_WINDOW (CoilDialog), FALSE);
+    gtk_container_add(GTK_CONTAINER(CoilDialog), CoilPackingBox);
+    gtk_widget_add_events (CoilDialog, GDK_KEY_PRESS_MASK);
+    gtk_widget_add_events (CoilDialog, GDK_BUTTON_PRESS_MASK);
+
+    MakeControls();
    
-//     if(name[0] == 'R') {
-//         SendMessage(SourceInternalRelayRadio, BM_SETCHECK, BST_CHECKED, 0);
-//     } else {
-//         SendMessage(SourceMcuPinRadio, BM_SETCHECK, BST_CHECKED, 0);
-//     }
-//     SendMessage(NameTextbox, WM_SETTEXT, 0, (LPARAM)(name + 1));
-//     if(*negated) {
-//         SendMessage(NegatedRadio, BM_SETCHECK, BST_CHECKED, 0);
-//     } else if(*setOnly) {
-//         SendMessage(SetOnlyRadio, BM_SETCHECK, BST_CHECKED, 0);
-//     } else if(*resetOnly) {
-//         SendMessage(ResetOnlyRadio, BM_SETCHECK, BST_CHECKED, 0);
-//     } else {
-//         SendMessage(NormalRadio, BM_SETCHECK, BST_CHECKED, 0);
-//     }
+    if(name[0] == 'R') {
+        gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (SourceInternalRelayRadio), TRUE);
+    }
+    else {
+        gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (SourceMcuPinRadio), TRUE);
+    }
+    gtk_entry_set_text (GTK_ENTRY (NameTextbox), name+1);
+    if(*negated) {
+        gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (NegatedRadio), TRUE);
+    }
+    else if(*setOnly) {
+        gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (SetOnlyRadio), TRUE);
+    }
+    else if(*resetOnly) {
+        gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (ResetOnlyRadio), TRUE);
+    }
+    else {
+        gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (NormalRadio), TRUE);
+    }
 
-//     EnableWindow(MainWindow, FALSE);
-//     ShowWindow(CoilDialog, TRUE);
-//     SetFocus(NameTextbox);
-//     SendMessage(NameTextbox, EM_SETSEL, 0, -1);
+    gtk_widget_set_sensitive (MainWindow, FALSE);
+    gtk_widget_show_all (CoilDialog);
+    gtk_widget_grab_focus (NameTextbox);
 
-//     MSG msg;
-//     DWORD ret;
-//     DialogDone = FALSE;
-//     DialogCancel = FALSE;
-//     while((ret = GetMessage(&msg, NULL, 0, 0)) && !DialogDone) {
-//         if(msg.message == WM_KEYDOWN) {
-//             if(msg.wParam == VK_RETURN) {
-//                 DialogDone = TRUE;
-//                 break;
-//             } else if(msg.wParam == VK_ESCAPE) {
-//                 DialogDone = TRUE;
-//                 DialogCancel = TRUE;
-//                 break;
-//             }
-//         }
+    tmpnegated = negated;
+    tmpresetOnly = resetOnly;
+    tmpsetOnly = setOnly;
 
-//         if(IsDialogMessage(CoilDialog, &msg)) continue;
-//         TranslateMessage(&msg);
-//         DispatchMessage(&msg);
-//     }
+    g_signal_connect (G_OBJECT (CoilDialog), "key-press-event",
+                    G_CALLBACK(CoilDialogKeyPress), (gpointer)name);
+    g_signal_connect (G_OBJECT (OkButton), "clicked",
+                    G_CALLBACK(CoilDialogMouseClick), (gpointer)name);
+    g_signal_connect (G_OBJECT (CancelButton), "clicked",
+                    G_CALLBACK(CoilCallDestroyWindow), NULL);
 
-//     if(!DialogCancel) {
-//         if(SendMessage(SourceInternalRelayRadio, BM_GETSTATE, 0, 0)
-//             & BST_CHECKED)
-//         {
-//             name[0] = 'R';
-//         } else {
-//             name[0] = 'Y';
-//         }
-//         SendMessage(NameTextbox, WM_GETTEXT, (WPARAM)16, (LPARAM)(name+1));
-
-//         if(SendMessage(NormalRadio, BM_GETSTATE, 0, 0) & BST_CHECKED) {
-//             *negated = FALSE;
-//             *setOnly = FALSE;
-//             *resetOnly = FALSE;
-//         } else if(SendMessage(NegatedRadio, BM_GETSTATE, 0, 0) & BST_CHECKED) {
-//             *negated = TRUE;
-//             *setOnly = FALSE;
-//             *resetOnly = FALSE;
-//         } else if(SendMessage(SetOnlyRadio, BM_GETSTATE, 0, 0) & BST_CHECKED) {
-//             *negated = FALSE;
-//             *setOnly = TRUE;
-//             *resetOnly = FALSE;
-//         } else if(SendMessage(ResetOnlyRadio, BM_GETSTATE, 0, 0) & BST_CHECKED)
-//         {
-//             *negated = FALSE;
-//             *setOnly = FALSE;
-//             *resetOnly = TRUE;
-//         }
-//     }
-
-//     EnableWindow(MainWindow, TRUE);
-//     DestroyWindow(CoilDialog);
-//     return;
-// }
+    return;
+}

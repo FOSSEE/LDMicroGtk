@@ -25,150 +25,108 @@
 #include <linuxUI.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <iostream>
 //#include <commctrl.h>
-
 #include "ldmicro.h"
 
-// static HWND ConfDialog;
+using namespace std;
 
-// static HWND CrystalTextbox;
-// static HWND CycleTextbox;
-// static HWND BaudTextbox;
+static HWID ConfDialog;
+
+static HWID CrystalTextbox;
+static HWID CycleTextbox;
+static HWID BaudTextbox;
+static HWID OkButton;
+static HWID CancelButton;
 
 static LONG_PTR PrevCrystalProc;
 static LONG_PTR PrevCycleProc;
 static LONG_PTR PrevBaudProc;
 
-//-----------------------------------------------------------------------------
-// Don't allow any characters other than 0-9. in the text boxes.
-//-----------------------------------------------------------------------------
-// static LRESULT CALLBACK MyNumberProc(HWND hwnd, UINT msg, WPARAM wParam,
-//     LPARAM lParam)
-// {
-//     if(msg == WM_CHAR) {
-//         if(!(isdigit(wParam) || wParam == '.' || wParam == '\b')) {
-//             return 0;
-//         }
-//     }
-
-//     LONG_PTR t;
-//     if(hwnd == CrystalTextbox)
-//         t = PrevCrystalProc;
-//     else if(hwnd == CycleTextbox)
-//         t = PrevCycleProc;
-//     else if(hwnd == BaudTextbox)
-//         t = PrevBaudProc;
-//     else
-//         oops();
-
-//     return CallWindowProc((WNDPROC)t, hwnd, msg, wParam, lParam);
-// }
+HWID ConfGrid;
+HWID ConfPackingBox;
 
 static void MakeControls(void)
-{
-//     HWND textLabel = CreateWindowEx(0, WC_STATIC, _("Cycle Time (ms):"),
-//         WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE | SS_RIGHT,
-//         5, 13, 145, 21, ConfDialog, NULL, Instance, NULL);
-//     NiceFont(textLabel);
+{      
+    // Creating text labels
+    HWID textLabel = gtk_label_new ("Cycle Time (ms):");
+    HWID textLabel2 = gtk_label_new ("Crystal Frequency (MHz):");
+    HWID textLabel3 = gtk_label_new ("UART Baud Rate (bps):");
 
-//     CycleTextbox = CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "",
-//         WS_CHILD | ES_AUTOHSCROLL | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE,
-//         155, 12, 85, 21, ConfDialog, NULL, Instance, NULL);
-//     NiceFont(CycleTextbox);
+    // Creating text boxes 
+    CycleTextbox = gtk_entry_new ();
+    gtk_entry_set_max_length (GTK_ENTRY (CycleTextbox), 0);
+    // gtk_entry_set_input_purpose (GTK_ENTRY (CycleTextbox), GTK_INPUT_PURPOSE_DIGITS);
+    CrystalTextbox = gtk_entry_new ();
+    gtk_entry_set_max_length (GTK_ENTRY (CrystalTextbox), 0);
+    BaudTextbox = gtk_entry_new ();
+    gtk_entry_set_max_length (GTK_ENTRY (BaudTextbox), 0);
 
-//     HWND textLabel2 = CreateWindowEx(0, WC_STATIC,
-//         _("Crystal Frequency (MHz):"),
-//         WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE | SS_RIGHT,
-//         0, 43, 150, 21, ConfDialog, NULL, Instance, NULL);
-//     NiceFont(textLabel2);
+    if(!UartFunctionUsed()) {   
+        gtk_widget_set_sensitive (BaudTextbox, FALSE);
+        gtk_widget_set_sensitive (textLabel3, FALSE);
+    }
 
-//     CrystalTextbox = CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "",
-//         WS_CHILD | ES_AUTOHSCROLL | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE,
-//         155, 42, 85, 21, ConfDialog, NULL, Instance, NULL);
-//     NiceFont(CrystalTextbox);
+    if(Prog.mcu && (Prog.mcu->whichIsa == ISA_ANSIC ||
+        Prog.mcu->whichIsa == ISA_INTERPRETED)) 
+    {
+        gtk_widget_set_sensitive (CrystalTextbox, FALSE);
+        gtk_widget_set_sensitive (textLabel2, FALSE);
+    }
 
-//     HWND textLabel3 = CreateWindowEx(0, WC_STATIC, _("UART Baud Rate (bps):"),
-//         WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE | SS_RIGHT,
-//         5, 73, 145, 21, ConfDialog, NULL, Instance, NULL);
-//     NiceFont(textLabel3);
+    OkButton = gtk_button_new_with_label ("OK");
+    CancelButton = gtk_button_new_with_label ("Cancel");
 
-//     BaudTextbox = CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "",
-//         WS_CHILD | ES_AUTOHSCROLL | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE,
-//         155, 72, 85, 21, ConfDialog, NULL, Instance, NULL);
-//     NiceFont(BaudTextbox);
+    char explanation[1024] = "";
 
-//     if(!UartFunctionUsed()) {   
-//         EnableWindow(BaudTextbox, FALSE);
-//         EnableWindow(textLabel3, FALSE);
-//     }
+    if(UartFunctionUsed()) {
+        if(Prog.mcu && Prog.mcu->uartNeeds.rxPin != 0) {
+            sprintf(explanation,
+               _("Serial (UART) will use pins %d and %d.\r\n\r\n"),
+            Prog.mcu->uartNeeds.rxPin, Prog.mcu->uartNeeds.txPin);
+        }
+        else {
+            strcpy(explanation,
+                _("Please select a micro with a UART.\r\n\r\n"));
+        }
+    }
+    else {
+        strcpy(explanation, _("\n No serial instructions (UART Send/UART Receive) \n"
+            "are in use; add one to program before \n"
+            "setting baud rate.\r\n\r\n") );
+    }
 
-//     if(Prog.mcu && (Prog.mcu->whichIsa == ISA_ANSIC ||
-//         Prog.mcu->whichIsa == ISA_INTERPRETED)) 
-//     {
-//         EnableWindow(CrystalTextbox, FALSE);
-//         EnableWindow(textLabel2, FALSE);
-//     }
+    strcat(explanation,
+        _("The cycle time for the 'PLC' runtime generated by \n" "LDmicro is user-"
+        "configurable. Very short cycle \n" "times may not be achievable due "
+        "to processor \n" "speed constraints, and very long cycle times may \n"
+        "not be achievable due to hardware overflows. Cycle \n" "times between 10 ms \n"
+        "and 100 ms will usually be practical.\r\n\r\n"
+        "The compiler must know what speed crystal you \n" "are using with the "
+        "micro to convert between timing \n" "in clock cycles and timing in"
+        "seconds. A 4 MHz to \n" "20 MHz crystal is typical; check the speed "
+        "grade of \n" "the part you are using to determine the maximum \n" "allowable"
+        "clock speed before choosing a crystal.\n"));
 
-//     OkButton = CreateWindowEx(0, WC_BUTTON, _("OK"),
-//         WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE | BS_DEFPUSHBUTTON,
-//         258, 11, 70, 23, ConfDialog, NULL, Instance, NULL); 
-//     NiceFont(OkButton);
+    HWID textLabel4 = gtk_label_new (explanation);
 
-//     CancelButton = CreateWindowEx(0, WC_BUTTON, _("Cancel"),
-//         WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE,
-//         258, 41, 70, 23, ConfDialog, NULL, Instance, NULL); 
-//     NiceFont(CancelButton);
+    // Creating required containers for packing
+    ConfGrid = gtk_grid_new();
+    ConfPackingBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
-//     char explanation[1024] = "";
+    gtk_grid_attach (GTK_GRID (ConfGrid), textLabel, 1, 2, 1, 1);
+    gtk_grid_attach (GTK_GRID (ConfGrid), CycleTextbox, 3, 2, 1, 1);
+    gtk_grid_attach (GTK_GRID (ConfGrid), OkButton, 6, 2, 2, 1);
+    gtk_grid_attach (GTK_GRID (ConfGrid), textLabel2, 1, 4, 1, 1);
+    gtk_grid_attach (GTK_GRID (ConfGrid), CrystalTextbox, 3, 4, 1, 1);
+    gtk_grid_attach (GTK_GRID (ConfGrid), CancelButton, 6, 4, 2, 1);
+    gtk_grid_attach (GTK_GRID (ConfGrid), textLabel3, 1, 6, 1, 1);
+    gtk_grid_attach (GTK_GRID (ConfGrid), BaudTextbox, 3, 6, 1, 1);
+    
+    gtk_grid_set_column_spacing (GTK_GRID (ConfGrid), 2);
 
-//     if(UartFunctionUsed()) {
-//         if(Prog.mcu && Prog.mcu->uartNeeds.rxPin != 0) {
-//             sprintf(explanation,
-//                 _("Serial (UART) will use pins %d and %d.\r\n\r\n"),
-//                 Prog.mcu->uartNeeds.rxPin, Prog.mcu->uartNeeds.txPin);
-//         } else {
-//             strcpy(explanation,
-//                 _("Please select a micro with a UART.\r\n\r\n"));
-//         }
-//     } else {
-//         strcpy(explanation, _("No serial instructions (UART Send/UART Receive) "
-//             "are in use; add one to program before setting baud rate.\r\n\r\n") 
-//         );
-//     }
-
-//     strcat(explanation,
-//         _("The cycle time for the 'PLC' runtime generated by LDmicro is user-"
-//         "configurable. Very short cycle times may not be achievable due "
-//         "to processor speed constraints, and very long cycle times may not "
-//         "be achievable due to hardware overflows. Cycle times between 10 ms "
-//         "and 100 ms will usually be practical.\r\n\r\n"
-//         "The compiler must know what speed crystal you are using with the "
-//         "micro to convert between timing in clock cycles and timing in "
-//         "seconds. A 4 MHz to 20 MHz crystal is typical; check the speed "
-//         "grade of the part you are using to determine the maximum allowable "
-//         "clock speed before choosing a crystal."));
-
-//     HWND textLabel4 = CreateWindowEx(0, WC_STATIC, explanation,
-//         WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE,
-//         11, 104, 310, 400, ConfDialog, NULL, Instance, NULL);
-//     NiceFont(textLabel4);
-
-//     // Measure the explanation string, so that we know how to size our window
-//     RECT tr, cr;
-//     HDC hdc = CreateCompatibleDC(NULL);
-//     SelectObject(hdc, MyNiceFont);
-//     SetRect(&tr, 0, 0, 310, 400);
-//     DrawText(hdc, explanation, -1, &tr, DT_CALCRECT |
-//                                         DT_LEFT | DT_TOP | DT_WORDBREAK);
-//     DeleteDC(hdc);
-//     int h = 104 + tr.bottom + 10;
-//     SetWindowPos(ConfDialog, NULL, 0, 0, 344, h, SWP_NOMOVE);
-//     // h is the desired client height, but SetWindowPos includes title bar;
-//     // so fix it up by hand
-//     GetClientRect(ConfDialog, &cr);
-//     int nh = h + (h - (cr.bottom - cr.top));
-//     SetWindowPos(ConfDialog, NULL, 0, 0, 344, nh, SWP_NOMOVE);
-
+    gtk_box_pack_start(GTK_BOX(ConfPackingBox), ConfGrid, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(ConfPackingBox), textLabel4, TRUE, TRUE, 0);
 
 //     PrevCycleProc = SetWindowLongPtr(CycleTextbox, GWLP_WNDPROC, 
 //         (LONG_PTR)MyNumberProc);
@@ -180,70 +138,104 @@ static void MakeControls(void)
 //         (LONG_PTR)MyNumberProc);
 }
 
+//-----------------------------------------------------------------------------
+// Don't allow any characters other than 0-9. in the text boxes.
+//-----------------------------------------------------------------------------
+
+void ConfDialogMyNumberProc (GtkEditable *editable, gchar *NewText, gint length, 
+    gint *position, gpointer data){
+    gtk_widget_set_sensitive (MainWindow, TRUE);
+    for (int i = 0; i < length; i++){
+        if (!(isdigit (NewText[i]) || NewText[i] == '.' || NewText[i] == '\b')){
+            g_signal_stop_emission_by_name (G_OBJECT (editable), "insert-text");
+            return;
+        }
+    }
+}
+
+// Gets data from the text boxes
+void ConfDialogGetData (GtkWidget* widget, gpointer data){
+    char* buf;
+        
+    buf = const_cast <char*> (gtk_entry_get_text (GTK_ENTRY (CycleTextbox)));
+    Prog.cycleTime = (int)(1000*atof(buf) + 0.5);
+    if(Prog.cycleTime == 0) {
+        Error(_("Zero cycle time not valid; resetting to 10 ms."));
+        Prog.cycleTime = 10000;
+    }
+
+    buf = const_cast <char*> (gtk_entry_get_text (GTK_ENTRY(CrystalTextbox)));
+    Prog.mcuClock = (int)(1e6*atof(buf) + 0.5);
+
+    buf = const_cast <char*> (gtk_entry_get_text (GTK_ENTRY(BaudTextbox)));
+    Prog.baudRate = atoi(buf);        
+    DestroyWindow (ConfDialog);
+}
+
+// Checks for the required key press
+gboolean ConfDialogKeyPress (GtkWidget* widget, GdkEventKey* event, gpointer data){
+    if (event -> keyval == GDK_KEY_Return){
+        ConfDialogGetData(NULL, NULL);
+    }
+    else if (event -> keyval == GDK_KEY_Escape){
+        DestroyWindow (ConfDialog);
+        gtk_widget_set_sensitive (MainWindow, TRUE);
+    }
+    return FALSE;
+}
+
+void ConfCallDestroyWindow (HWID widget, gpointer data){
+    DestroyWindow (ConfDialog);
+    gtk_widget_set_sensitive (MainWindow, TRUE);
+}
+
+// Consists of all the signal calls
+void ConfDialogSignalCall () {
+    g_signal_connect (G_OBJECT(CycleTextbox), "insert-text",
+		     G_CALLBACK(ConfDialogMyNumberProc), NULL);
+    g_signal_connect (G_OBJECT(CrystalTextbox), "insert-text",
+		     G_CALLBACK(ConfDialogMyNumberProc), NULL);
+    g_signal_connect (G_OBJECT(BaudTextbox), "insert-text",
+		     G_CALLBACK(ConfDialogMyNumberProc), NULL);
+    g_signal_connect (G_OBJECT (ConfDialog), "key-press-event",
+                    G_CALLBACK(ConfDialogKeyPress), NULL);
+    g_signal_connect (G_OBJECT (OkButton), "clicked",
+                    G_CALLBACK(ConfDialogGetData), NULL);
+    g_signal_connect (G_OBJECT (CancelButton), "clicked",
+                    G_CALLBACK(ConfCallDestroyWindow), NULL);
+}
+
 void ShowConfDialog(void)
 {
-//     // The window's height will be resized later, to fit the explanation text.
-//     ConfDialog = CreateWindowClient(0, "LDmicroDialog", _("PLC Configuration"),
-//         WS_OVERLAPPED | WS_SYSMENU,
-//         100, 100, 0, 0, NULL, NULL, Instance, NULL);
+    // The window's height will be resized later, to fit the explanation text.
+    MakeControls();
+    GdkEventKey* event;
 
-//     MakeControls();
-   
-//     char buf[16];
-//     sprintf(buf, "%.1f", (Prog.cycleTime / 1000.0));
-//     SendMessage(CycleTextbox, WM_SETTEXT, 0, (LPARAM)buf);
+    ConfDialog = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title(GTK_WINDOW(ConfDialog), "PLC Configuration");
+    gtk_window_set_default_size(GTK_WINDOW(ConfDialog), 200, 250);
+    gtk_window_set_resizable (GTK_WINDOW (ConfDialog), FALSE);
+    gtk_container_add(GTK_CONTAINER(ConfDialog), ConfPackingBox);
+    gtk_widget_add_events (ConfDialog, GDK_KEY_PRESS_MASK);
+    gtk_widget_add_events (ConfDialog, GDK_BUTTON_PRESS_MASK);
 
-//     sprintf(buf, "%.6f", Prog.mcuClock / 1e6);
-//     SendMessage(CrystalTextbox, WM_SETTEXT, 0, (LPARAM)buf);
+    char buf[16];
+    sprintf(buf, "%.1f", (Prog.cycleTime / 1000.0));
+    gtk_entry_set_text (GTK_ENTRY (CycleTextbox), buf);
 
-//     sprintf(buf, "%d", Prog.baudRate);
-//     SendMessage(BaudTextbox, WM_SETTEXT, 0, (LPARAM)buf);
+    sprintf(buf, "%.6f", Prog.mcuClock / 1e6);
+    gtk_entry_set_text (GTK_ENTRY (CrystalTextbox), buf);
 
-//     EnableWindow(MainWindow, FALSE);
-//     ShowWindow(ConfDialog, TRUE);
-//     SetFocus(CycleTextbox);
+    sprintf(buf, "%d", Prog.baudRate);
+    gtk_entry_set_text (GTK_ENTRY (BaudTextbox), buf);
 
-//     MSG msg;
-//     DWORD ret;
-//     DialogDone = FALSE;
-//     DialogCancel = FALSE;
-//     while((ret = GetMessage(&msg, NULL, 0, 0)) && !DialogDone) {
-//         if(msg.message == WM_KEYDOWN) {
-//             if(msg.wParam == VK_RETURN) {
-//                 DialogDone = TRUE;
-//                 break;
-//             } else if(msg.wParam == VK_ESCAPE) {
-//                 DialogDone = TRUE;
-//                 DialogCancel = TRUE;
-//                 break;
-//             }
-//         }
+    gtk_widget_set_sensitive (MainWindow, FALSE);
+    gtk_widget_grab_focus (OkButton);
+    gtk_widget_set_state_flags (CycleTextbox, GTK_STATE_FLAG_FOCUSED, TRUE);
+    gtk_widget_grab_focus (CycleTextbox);
+    gtk_widget_show_all (ConfDialog);
 
-//         if(IsDialogMessage(ConfDialog, &msg)) continue;
-//         TranslateMessage(&msg);
-//         DispatchMessage(&msg);
-//     }
+    ConfDialogSignalCall();
 
-//     if(!DialogCancel) {
-//         char buf[16];
-//         SendMessage(CycleTextbox, WM_GETTEXT, (WPARAM)sizeof(buf),
-//             (LPARAM)(buf));
-//         Prog.cycleTime = (int)(1000*atof(buf) + 0.5);
-//         if(Prog.cycleTime == 0) {
-//             Error(_("Zero cycle time not valid; resetting to 10 ms."));
-//             Prog.cycleTime = 10000;
-//         }
-
-//         SendMessage(CrystalTextbox, WM_GETTEXT, (WPARAM)sizeof(buf),
-//             (LPARAM)(buf));
-//         Prog.mcuClock = (int)(1e6*atof(buf) + 0.5);
-
-//         SendMessage(BaudTextbox, WM_GETTEXT, (WPARAM)sizeof(buf),
-//             (LPARAM)(buf));
-//         Prog.baudRate = atoi(buf);
-//     }
-
-//     EnableWindow(MainWindow, TRUE);
-//     DestroyWindow(ConfDialog);
-//     return;
+    return;
 }

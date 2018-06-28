@@ -33,12 +33,64 @@
 #define MB_ICONWARNING      0x00000040L
 #define MB_ICONINFORMATION  0x00000080L
 
-/// open/save file
-#define OFN_PATHMUSTEXIST     0x00000100L
-#define OFN_HIDEREADONLY      0x00000200L
-#define OFN_OVERWRITEPROMPT   0x00000400L
+/// Scroll
+#define SB_LINEUP        0x00000001
+#define SB_PAGEUP        0x00000002
+#define SB_LINEDOWN      0x00000004
+#define SB_PAGEDOWN      0x00000008
+#define SB_TOP           0x00000010
+#define SB_BOTTOM        0x00000020
+#define SB_THUMBTRACK    0x00000040 
+#define SB_THUMBPOSITION 0x00000080 
 
-/// window brushes
+/// UART terminal flags
+#define WM_GETTEXT     0x00000001
+#define WM_SETTEXT     0x00000002
+#define WM_SETTEXT_END 0x00000004
+
+/// List view flags
+#define LVN_ITEMACTIVATE 0x00000001
+#define LVN_GETDISPINFO  0x00000002
+
+/// Open/save file
+#define OFN_PATHMUSTEXIST     0x00000001L
+#define OFN_HIDEREADONLY      0x00000002L
+#define OFN_OVERWRITEPROMPT   0x00000004L
+
+/// PatBlt paint flags
+#define PATINVERT 0x00000100L
+
+/// Key masks
+#define VK_TAB GDK_KEY_Tab
+
+#define VK_DOWN  65364
+#define VK_UP    65362
+#define VK_LEFT  65361
+#define VK_RIGHT 65363
+
+#define VK_NP_DOWN  65433
+#define VK_NP_UP    65431
+#define VK_NP_LEFT  65430
+#define VK_NP_RIGHT 65432
+
+#define VK_RETURN  GDK_KEY_Return
+#define VK_ESCAPE  GDK_KEY_Escape
+#define VK_F5 GDK_KEY_F5
+#define VK_F1 GDK_KEY_F1
+
+#define VK_OEM_PLUS GDK_KEY_plus
+#define VK_OEM_MINUS GDK_KEY_minus
+#define VK_OEM_PERIOD GDK_KEY_period
+#define VK_OEM_COMMA GDK_KEY_comma
+
+#define VK_DELETE GDK_KEY_Delete 
+#define VK_NP_DELETE GDK_KEY_KP_Delete
+
+// #define VK_OEM_1 GDK_KEY_colon     // GDK_KEY_semicolon
+// #define VK_OEM_2 GDK_KEY_question  // GDK_KEY_slash
+// #define VK_OEM_5 GDK_KEY_backslash // GDK_KEY_bar
+
+/// Window brushes
 #define BS_SOLID       0x00000001L
 #define BS_HOLLOW      0x00000002L
 #define BLACK_BRUSH    0x00000004L
@@ -63,9 +115,13 @@ extern const UINT MF_GRAYED;
 extern const UINT MF_CHECKED;
 extern const UINT MF_UNCHECKED;
 
+/// Accelerators (keyboard shortcuts)
+extern GtkAccelGroup* AccelGroup;
+extern GClosure* closure;
+
 /// ListStore
-extern GtkWidget *view;
-extern GtkTreeViewColumn *column;
+extern HWID view;
+extern HTVC column;
 
 /// Structures
 typedef struct OpenFileInfoData {
@@ -79,57 +135,77 @@ typedef struct OpenFileInfoData {
     LPCTSTR       lpstrDefExt;
 } OPENFILENAME;
 
+typedef struct TimerRecordTag {
+    BOOL (*pfun)(BOOL);
+    UINT  ufID;
+    UINT  utID;
+} TimerRecord;
+
 /// Variables
 extern COLORREF HdcCurrentTextColor;
-
+extern std::vector<TimerRecord> timerRecords;
+extern int GLOBAL_mouse_last_clicked_x;
+extern int GLOBAL_mouse_last_clicked_y;
 /// functions
-BOOL isFocus(HWID window);
+BOOL GetFocus(HWID window);
 
-COLORREF RGB(int red, 
-        int green, 
-        int blue);
+COLORREF RGB(
+    int red, 
+    int green, 
+    int blue);
 
-int MessageBox(HWID pWindow, 
+int MessageBox(
+    HWID  pWindow, 
     char* message, 
     char* title, 
     UINT  mFlags);
 
 BOOL GetSaveFileName(OPENFILENAME *ofn);
 
-void EnableMenuItem(HMENU MenuName, 
+BOOL GetOpenFileName(OPENFILENAME *ofn);
+
+void EnableMenuItem(
+    HMENU MenuName, 
     HMENU MenuItem, 
     UINT  CheckEnabledItem);
 
-void CheckMenuItem(HMENU MenuName, 
+void CheckMenuItem(
+    HMENU MenuName, 
     HMENU MenuItem, 
     UINT  Check);
 
 HANDLE GetStockObject(int fnObject);
 
-void SelectObject(HCRDC hcr, 
+void SelectObject(
+    HCRDC hcr, 
     HFONT hfont);
 
 HBRUSH CreateBrushIndirect(PLOGBRUSH plb);
 
-HFONT CreateFont(int nHeight,
+HFONT CreateFont(
+    int     nHeight,
     int     nWidth,
     int     nOrientation,
     int     fnWeight,
     DWORD   fdwItalic,
     LPCTSTR lpszFace);
 
-void SetBkColor(HWID widget, 
+void SetBkColor(
+    HWID     widget, 
     HCRDC    hcr,
     COLORREF bkCol);
 
-void SetTextColor(HCRDC hcr, 
+void SetTextColor(
+    HCRDC    hcr, 
     COLORREF color);
 
-void TextOut(HCRDC hcr,
-   int     nXStart,
-   int     nYStart,
-   LPCTSTR lpString,
-   int     cchString);
+void TextOut(
+    HWID    hWid,
+    HCRDC   hcr,
+    int     nXStart,
+    int     nYStart,
+    LPCTSTR lpString,
+    int     cchString);
 
 COLORREF GetTextColor(HCRDC Hdc);
 
@@ -143,8 +219,41 @@ int FillRect(
     const RECT   *lprc,
     HBRUSH       hbr);
 
+BOOL PatBlt(
+    HCRDC  hdc,
+    int    nXLeft,
+    int    nYLeft,
+    int    nWidth,
+    int    nHeight,
+    DWORD  dwRop,
+    HBRUSH hbr);
+
 BOOL GetClientRect(
     HWID   hWid,
     PRECT lpRect);
+
+BOOL MoveWindow(
+    HWID hWid,
+    int  X,
+    int  Y,
+    int  nWidth,
+    int  nHeight,
+    BOOL bRepaint);
+
+BOOL GetWindowRect(
+    HWID   hWid,
+    PRECT  pRect);
+
+UINT SetTimer(
+    HWID  hWid,
+    UINT  nIDEvent,
+    UINT  uElapse,
+    BOOL (*lpTimerFunc)(BOOL));
+
+BOOL KillTimer(
+    HWID hWid,
+    UINT uIDEvent);
+
+void DestroyWindow (HWID widget);
 
 #endif

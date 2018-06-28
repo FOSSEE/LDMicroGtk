@@ -250,54 +250,54 @@ int ProgCountWidestRow(void)
 // Draw a vertical wire one leaf element unit high up from (cx, cy), where cx
 // and cy are in charcter units.
 //-----------------------------------------------------------------------------
-static void VerticalWire(int cx, int cy)
+static void VerticalWire(HCRDC Hcr, int cx, int cy)
 {
     int j;
     for(j = 1; j < POS_HEIGHT; j++) {
-        DrawChars(cx, cy + (POS_HEIGHT/2 - j), "|");
+        DrawChars(Hcr, cx, cy + (POS_HEIGHT/2 - j), "|");
     }
-    DrawChars(cx, cy + (POS_HEIGHT/2), "+");
-    DrawChars(cx, cy + (POS_HEIGHT/2 - POS_HEIGHT), "+");
+    DrawChars(Hcr, cx, cy + (POS_HEIGHT/2), "+");
+    DrawChars(Hcr, cx, cy + (POS_HEIGHT/2 - POS_HEIGHT), "+");
 }
 
 //-----------------------------------------------------------------------------
 // Convenience functions for making the text colors pretty, for DrawElement.
 //-----------------------------------------------------------------------------
-static void NormText(void)
+static void NormText(HCRDC Hcr)
 {
-    SetTextColor(Hdc, InSimulationMode ? HighlightColours.simOff :
+    SetTextColor(Hcr, InSimulationMode ? HighlightColours.simOff :
         HighlightColours.def);
-    SelectObject(Hdc, FixedWidthFont);
+    SelectObject(Hcr, FixedWidthFont);
 }
 
-static void EmphText(void)
+static void EmphText(HCRDC Hcr)
 {
-    SetTextColor(Hdc, InSimulationMode ? HighlightColours.simOn :
+    SetTextColor(Hcr, InSimulationMode ? HighlightColours.simOn :
         HighlightColours.selected);
-    SelectObject(Hdc, FixedWidthFontBold);
+    SelectObject(Hcr, FixedWidthFontBold);
 }
 
-static void NameText(void)
+static void NameText(HCRDC Hcr)
 {
     if(!InSimulationMode && !ThisHighlighted) {
-        SetTextColor(Hdc, HighlightColours.name);
+        SetTextColor(Hcr, HighlightColours.name);
     }
 }
 
-static void BodyText(void)
+static void BodyText(HCRDC Hcr)
 {
     if(!InSimulationMode && !ThisHighlighted) {
-        SetTextColor(Hdc, HighlightColours.def);
+        SetTextColor(Hcr, HighlightColours.def);
     }
 }
 
-static void PoweredText(BOOL powered)
+static void PoweredText(HCRDC Hcr, BOOL powered)
 {
     if(InSimulationMode) {
         if(powered)
-            EmphText();
+            EmphText(Hcr);
         else
-            NormText();
+            NormText(Hcr);
     }
 }
 
@@ -322,36 +322,36 @@ static int FormattedStrlen(const char *str)
 // Draw a string, centred in the space of a single position, with spaces on
 // the left and right. Draws on the upper line of the position.
 //-----------------------------------------------------------------------------
-static void CenterWithSpaces(int cx, int cy, char *str, BOOL powered,
+static void CenterWithSpaces(HCRDC Hcr, int cx, int cy, char *str, BOOL powered,
     BOOL isName)
 {
     int extra = POS_WIDTH - FormattedStrlen(str);
-    PoweredText(powered);
-    if(isName) NameText();
-    DrawChars(cx + (extra/2), cy + (POS_HEIGHT/2) - 1, str);
-    if(isName) BodyText();
+    PoweredText(Hcr, powered);
+    if(isName) NameText(Hcr);
+    DrawChars(Hcr, cx + (extra/2), cy + (POS_HEIGHT/2) - 1, str);
+    if(isName) BodyText(Hcr);
 }
 
 //-----------------------------------------------------------------------------
 // Like CenterWithWires, but for an arbitrary width position (e.g. for ADD
 // and SUB, which are double-width).
 //-----------------------------------------------------------------------------
-static void CenterWithWiresWidth(int cx, int cy,const char *str, BOOL before,
+static void CenterWithWiresWidth(HCRDC Hcr, int cx, int cy,const char *str, BOOL before,
     BOOL after, int totalWidth)
 {
     int extra = totalWidth - FormattedStrlen(str);
 
-    PoweredText(after);
-    DrawChars(cx + (extra/2), cy + (POS_HEIGHT/2), str);
+    PoweredText(Hcr, after);
+    DrawChars(Hcr, cx + (extra/2), cy + (POS_HEIGHT/2), str);
 
-    PoweredText(before);
+    PoweredText(Hcr, before);
     int i;
     for(i = 0; i < (extra/2); i++) {
-        DrawChars(cx + i, cy + (POS_HEIGHT/2), "-");
+        DrawChars(Hcr, cx + i, cy + (POS_HEIGHT/2), "-");
     }
-    PoweredText(after);
+    PoweredText(Hcr, after);
     for(i = FormattedStrlen(str)+(extra/2); i < totalWidth; i++) {
-        DrawChars(cx + i, cy + (POS_HEIGHT/2), "-");
+        DrawChars(Hcr, cx + i, cy + (POS_HEIGHT/2), "-");
     }
 }
 
@@ -360,16 +360,16 @@ static void CenterWithWiresWidth(int cx, int cy,const char *str, BOOL before,
 // the left and right coloured according to the powered state. Draws on the
 // middle line.
 //-----------------------------------------------------------------------------
-static void CenterWithWires(int cx, int cy, const char *str, BOOL before, BOOL after)
+static void CenterWithWires(HCRDC Hcr, int cx, int cy, const char *str, BOOL before, BOOL after)
 {
-    CenterWithWiresWidth(cx, cy, str, before, after, POS_WIDTH);
+    CenterWithWiresWidth(Hcr, cx, cy, str, before, after, POS_WIDTH);
 }
 
 //-----------------------------------------------------------------------------
 // Draw an end of line element (coil, RES, MOV, etc.). Special things about
 // an end of line element: we must right-justify it.
 //-----------------------------------------------------------------------------
-static BOOL DrawEndOfLine(int which, ElemLeaf *leaf, int *cx, int *cy,
+static BOOL DrawEndOfLine(HCRDC Hcr, int which, ElemLeaf *leaf, int *cx, int *cy,
     BOOL poweredBefore)
 {
     int cx0 = *cx, cy0 = *cy;
@@ -390,8 +390,8 @@ static BOOL DrawEndOfLine(int which, ElemLeaf *leaf, int *cx, int *cy,
             break;
     }
 
-    NormText();
-    PoweredText(poweredBefore);
+    NormText(Hcr);
+    PoweredText(Hcr, poweredBefore);
     while(*cx < (ColsAvailable-thisWidth)*POS_WIDTH) {
         int gx = *cx/POS_WIDTH;
         int gy = *cy/POS_HEIGHT;
@@ -405,14 +405,14 @@ static BOOL DrawEndOfLine(int which, ElemLeaf *leaf, int *cx, int *cy,
 
         int i;
         for(i = 0; i < POS_WIDTH; i++) {
-            DrawChars(*cx + i, *cy + (POS_HEIGHT/2), "-");
+            DrawChars(Hcr, *cx + i, *cy + (POS_HEIGHT/2), "-");
         }
         *cx += POS_WIDTH;
         cx0 += POS_WIDTH;
     }
 
     if(leaf == Selected && !InSimulationMode) {
-        EmphText();
+        EmphText(Hcr);
         ThisHighlighted = TRUE;
     } else {
         ThisHighlighted = FALSE;
@@ -424,26 +424,26 @@ static BOOL DrawEndOfLine(int which, ElemLeaf *leaf, int *cx, int *cy,
             ElemCounter *c = &leaf->d.counter;
             sprintf(buf, "{\x01""CTC\x02 0:%d}", c->max);
 
-            CenterWithSpaces(*cx, *cy, c->name, poweredAfter, TRUE);
-            CenterWithWires(*cx, *cy, buf, poweredBefore, poweredAfter);
+            CenterWithSpaces(Hcr, *cx, *cy, c->name, poweredAfter, TRUE);
+            CenterWithWires(Hcr, *cx, *cy, buf, poweredBefore, poweredAfter);
             break;
         }
         case ELEM_RES: {
             ElemReset *r = &leaf->d.reset;
-            CenterWithSpaces(*cx, *cy, r->name, poweredAfter, TRUE);
-            CenterWithWires(*cx, *cy, "{RES}", poweredBefore, poweredAfter);
+            CenterWithSpaces(Hcr, *cx, *cy, r->name, poweredAfter, TRUE);
+            CenterWithWires(Hcr, *cx, *cy, "{RES}", poweredBefore, poweredAfter);
             break;
         }
         case ELEM_READ_ADC: {
             ElemReadAdc *r = &leaf->d.readAdc;
-            CenterWithSpaces(*cx, *cy, r->name, poweredAfter, TRUE);
-            CenterWithWires(*cx, *cy, "{READ ADC}", poweredBefore,
+            CenterWithSpaces(Hcr, *cx, *cy, r->name, poweredAfter, TRUE);
+            CenterWithWires(Hcr, *cx, *cy, "{READ ADC}", poweredBefore,
                 poweredAfter);
             break;
         }
         case ELEM_SET_PWM: {
             ElemSetPwm *s = &leaf->d.setPwm;
-            CenterWithSpaces(*cx, *cy, s->name, poweredAfter, TRUE);
+            CenterWithSpaces(Hcr, *cx, *cy, s->name, poweredAfter, TRUE);
             char l[50];
             if(s->targetFreq >= 100000) {
                 sprintf(l, "{PWM %d kHz}", (s->targetFreq+500)/1000);
@@ -454,13 +454,13 @@ static BOOL DrawEndOfLine(int which, ElemLeaf *leaf, int *cx, int *cy,
             } else {
                 sprintf(l, "{PWM %d Hz}", s->targetFreq);
             }
-            CenterWithWires(*cx, *cy, l, poweredBefore,
+            CenterWithWires(Hcr, *cx, *cy, l, poweredBefore,
                 poweredAfter);
             break;
         }
         case ELEM_PERSIST:
-            CenterWithSpaces(*cx, *cy, leaf->d.persist.var, poweredAfter, TRUE);
-            CenterWithWires(*cx, *cy, "{PERSIST}", poweredBefore, poweredAfter);
+            CenterWithSpaces(Hcr, *cx, *cy, leaf->d.persist.var, poweredAfter, TRUE);
+            CenterWithWires(Hcr, *cx, *cy, "{PERSIST}", poweredBefore, poweredAfter);
             break;
 
         case ELEM_MOVE: {
@@ -471,7 +471,7 @@ static BOOL DrawEndOfLine(int which, ElemLeaf *leaf, int *cx, int *cy,
             if((strlen(m->dest) > (POS_WIDTH - 9)) ||
                (strlen(m->src) > (POS_WIDTH - 9)))
             {
-                CenterWithWires(*cx, *cy, TOO_LONG, poweredBefore,
+                CenterWithWires(Hcr, *cx, *cy, TOO_LONG, poweredBefore,
                     poweredAfter);
                 break;
             }
@@ -484,12 +484,12 @@ static BOOL DrawEndOfLine(int which, ElemLeaf *leaf, int *cx, int *cy,
             strcpy(bot, "{         \x01MOV\x02}");
             memcpy(bot+2, m->src, strlen(m->src));
 
-            CenterWithSpaces(*cx, *cy, top, poweredAfter, FALSE);
-            CenterWithWires(*cx, *cy, bot, poweredBefore, poweredAfter);
+            CenterWithSpaces(Hcr, *cx, *cy, top, poweredAfter, FALSE);
+            CenterWithWires(Hcr, *cx, *cy, bot, poweredBefore, poweredAfter);
             break;
         }
         case ELEM_MASTER_RELAY:
-            CenterWithWires(*cx, *cy, "{MASTER RLY}", poweredBefore,
+            CenterWithWires(Hcr, *cx, *cy, "{MASTER RLY}", poweredBefore,
                 poweredAfter);
             break;
 
@@ -502,9 +502,9 @@ static BOOL DrawEndOfLine(int which, ElemLeaf *leaf, int *cx, int *cy,
             bot[strlen(bot)] = ' ';
             bot[13] = '}';
             bot[14] = '\0';
-            CenterWithSpaces(*cx, *cy, "{\x01SHIFT REG\x02   }",
+            CenterWithSpaces(Hcr, *cx, *cy, "{\x01SHIFT REG\x02   }",
                 poweredAfter, FALSE);
-            CenterWithWires(*cx, *cy, bot, poweredBefore, poweredAfter);
+            CenterWithWires(Hcr, *cx, *cy, bot, poweredBefore, poweredAfter);
             break;
         }
         case ELEM_PIECEWISE_LINEAR:
@@ -526,14 +526,14 @@ static BOOL DrawEndOfLine(int which, ElemLeaf *leaf, int *cx, int *cy,
             top[strlen(top)] = ' ';
             top[13] = '}';
             top[14] = '\0';
-            CenterWithSpaces(*cx, *cy, top, poweredAfter, FALSE);
+            CenterWithSpaces(Hcr, *cx, *cy, top, poweredAfter, FALSE);
             memset(bot, ' ', sizeof(bot));
             bot[0] = '{';
             sprintf(bot+2, " %s[%s]", str, index);
             bot[strlen(bot)] = ' ';
             bot[13] = '}';
             bot[14] = '\0';
-            CenterWithWires(*cx, *cy, bot, poweredBefore, poweredAfter);
+            CenterWithWires(Hcr, *cx, *cy, bot, poweredBefore, poweredAfter);
             break;
         }
         case ELEM_COIL: {
@@ -553,8 +553,8 @@ static BOOL DrawEndOfLine(int which, ElemLeaf *leaf, int *cx, int *cy,
             buf[2] = ')';
             buf[3] = '\0';
 
-            CenterWithSpaces(*cx, *cy, c->name, poweredAfter, TRUE);
-            CenterWithWires(*cx, *cy, buf, poweredBefore, poweredAfter);
+            CenterWithSpaces(Hcr, *cx, *cy, c->name, poweredAfter, TRUE);
+            CenterWithWires(Hcr, *cx, *cy, buf, poweredBefore, poweredAfter);
             break;
         }
         case ELEM_DIV:
@@ -608,9 +608,9 @@ static BOOL DrawEndOfLine(int which, ElemLeaf *leaf, int *cx, int *cy,
             bot[l] = '}'; bot[l+1] = '\0';
 
             int extra = 2*POS_WIDTH - FormattedStrlen(top);
-            PoweredText(poweredAfter);
-            DrawChars(*cx + (extra/2), *cy + (POS_HEIGHT/2) - 1, top);
-            CenterWithWiresWidth(*cx, *cy, bot, poweredBefore, poweredAfter,
+            PoweredText(Hcr, poweredAfter);
+            DrawChars(Hcr, *cx + (extra/2), *cy + (POS_HEIGHT/2) - 1, top);
+            CenterWithWiresWidth(Hcr, *cx, *cy, bot, poweredBefore, poweredAfter,
                 2*POS_WIDTH);
 
             *cx += POS_WIDTH;
@@ -631,7 +631,7 @@ static BOOL DrawEndOfLine(int which, ElemLeaf *leaf, int *cx, int *cy,
 // Draw a leaf element. Special things about a leaf: no need to recurse
 // further, and we must put it into the display matrix.
 //-----------------------------------------------------------------------------
-static BOOL DrawLeaf(int which, ElemLeaf *leaf, int *cx, int *cy,
+static BOOL DrawLeaf(HCRDC Hcr, int which, ElemLeaf *leaf, int *cx, int *cy,
     BOOL poweredBefore)
 {
     int cx0 = *cx, cy0 = *cy;
@@ -649,20 +649,20 @@ static BOOL DrawLeaf(int which, ElemLeaf *leaf, int *cx, int *cy,
                 if(b[-1] == '\r') b[-1] = '\0';
                 *b = '\0';
                 sprintf(tlbuf, "\x03 ; %s\x02", tbuf);
-                DrawChars(*cx, *cy + (POS_HEIGHT/2) - 1, tlbuf);
+                DrawChars(Hcr, *cx, *cy + (POS_HEIGHT/2) - 1, tlbuf);
                 sprintf(tlbuf, "\x03 ; %s\x02", b+1);
-                DrawChars(*cx, *cy + (POS_HEIGHT/2), tlbuf);
+                DrawChars(Hcr, *cx, *cy + (POS_HEIGHT/2), tlbuf);
             } else {
                 sprintf(tlbuf, "\x03 ; %s\x02", tbuf);
-                DrawChars(*cx, *cy + (POS_HEIGHT/2) - 1, tlbuf);
+                DrawChars(Hcr, *cx, *cy + (POS_HEIGHT/2) - 1, tlbuf);
             }
 
             *cx += ColsAvailable*POS_WIDTH;
             break;
         }
         case ELEM_PLACEHOLDER: {
-            NormText();
-            CenterWithWiresWidth(*cx, *cy, "--", FALSE, FALSE, 2);
+            NormText(Hcr);
+            CenterWithWiresWidth(Hcr, *cx, *cy, "--", FALSE, FALSE, 2);
             *cx += POS_WIDTH;
             break;
         }
@@ -675,8 +675,8 @@ static BOOL DrawLeaf(int which, ElemLeaf *leaf, int *cx, int *cy,
             buf[2] = '[';
             buf[3] = '\0';
 
-            CenterWithSpaces(*cx, *cy, c->name, poweredAfter, TRUE);
-            CenterWithWires(*cx, *cy, buf, poweredBefore, poweredAfter);
+            CenterWithSpaces(Hcr, *cx, *cy, c->name, poweredAfter, TRUE);
+            CenterWithWires(Hcr, *cx, *cy, buf, poweredBefore, poweredAfter);
 
             *cx += POS_WIDTH;
             break;
@@ -717,19 +717,19 @@ cmp:
                     strcpy(s2, TOO_LONG);
                 }
 
-                CenterWithSpaces(*cx, *cy, s1, poweredAfter, FALSE);
-                CenterWithWires(*cx, *cy, s2, poweredBefore, poweredAfter);
+                CenterWithSpaces(Hcr, *cx, *cy, s1, poweredAfter, FALSE);
+                CenterWithWires(Hcr, *cx, *cy, s2, poweredBefore, poweredAfter);
 
                 *cx += POS_WIDTH;
                 break;
         }
         case ELEM_OPEN:
-            CenterWithWires(*cx, *cy, "+      +", poweredBefore, poweredAfter);
+            CenterWithWires(Hcr, *cx, *cy, "+      +", poweredBefore, poweredAfter);
             *cx += POS_WIDTH;
             break;
 
         case ELEM_SHORT:
-            CenterWithWires(*cx, *cy, "+------+", poweredBefore, poweredAfter);
+            CenterWithWires(Hcr, *cx, *cy, "+------+", poweredBefore, poweredAfter);
             *cx += POS_WIDTH;
             break;
 
@@ -744,8 +744,8 @@ cmp:
                 s2 = "[\x01OSF\x02 \\_]";
             } else oops();
 
-            CenterWithSpaces(*cx, *cy, s1, poweredAfter, FALSE);
-            CenterWithWires(*cx, *cy, s2, poweredBefore, poweredAfter);
+            CenterWithSpaces(Hcr, *cx, *cy, s1, poweredAfter, FALSE);
+            CenterWithWires(Hcr, *cx, *cy, s2, poweredBefore, poweredAfter);
 
             *cx += POS_WIDTH;
             break;
@@ -763,8 +763,8 @@ cmp:
             ElemCounter *c = &leaf->d.counter;
             sprintf(buf, "[%s >=%d]", s, c->max);
 
-            CenterWithSpaces(*cx, *cy, c->name, poweredAfter, TRUE);
-            CenterWithWires(*cx, *cy, buf, poweredBefore, poweredAfter);
+            CenterWithSpaces(Hcr, *cx, *cy, c->name, poweredAfter, TRUE);
+            CenterWithWires(Hcr, *cx, *cy, buf, poweredBefore, poweredAfter);
 
             *cx += POS_WIDTH;
             break;
@@ -791,8 +791,8 @@ cmp:
                 sprintf(buf, "[%s %.2f ms]", s, t->delay/1000.0);
             }
 
-            CenterWithSpaces(*cx, *cy, t->name, poweredAfter, TRUE);
-            CenterWithWires(*cx, *cy, buf, poweredBefore, poweredAfter);
+            CenterWithSpaces(Hcr, *cx, *cy, t->name, poweredAfter, TRUE);
+            CenterWithWires(Hcr, *cx, *cy, buf, poweredBefore, poweredAfter);
 
             *cx += POS_WIDTH;
             break;
@@ -808,28 +808,28 @@ cmp:
             sprintf(bot, "{\"%s\"}", str);
 
             int extra = 2*POS_WIDTH - strlen(leaf->d.fmtdStr.var);
-            PoweredText(poweredAfter);
-            NameText();
-            DrawChars(*cx + (extra/2), *cy + (POS_HEIGHT/2) - 1,
+            PoweredText(Hcr, poweredAfter);
+            NameText(Hcr);
+            DrawChars(Hcr, *cx + (extra/2), *cy + (POS_HEIGHT/2) - 1,
                 leaf->d.fmtdStr.var);
-            BodyText();
+            BodyText(Hcr);
 
-            CenterWithWiresWidth(*cx, *cy, bot, poweredBefore, poweredAfter,
+            CenterWithWiresWidth(Hcr, *cx, *cy, bot, poweredBefore, poweredAfter,
                 2*POS_WIDTH);
             *cx += 2*POS_WIDTH;
             break;
         }
         case ELEM_UART_RECV:
         case ELEM_UART_SEND:
-            CenterWithWires(*cx, *cy,
+            CenterWithWires(Hcr, *cx, *cy,
                 (which == ELEM_UART_RECV) ? "{UART RECV}" : "{UART SEND}",
                 poweredBefore, poweredAfter);
-            CenterWithSpaces(*cx, *cy, leaf->d.uart.name, poweredAfter, TRUE);
+            CenterWithSpaces(Hcr, *cx, *cy, leaf->d.uart.name, poweredAfter, TRUE);
             *cx += POS_WIDTH;
             break;
 
         default:
-            poweredAfter = DrawEndOfLine(which, leaf, cx, cy, poweredBefore);
+            poweredAfter = DrawEndOfLine(Hcr, which, leaf, cx, cy, poweredBefore);
             break;
     }
 
@@ -926,19 +926,18 @@ cmp:
 // element, else FALSE. This is needed to colour all the wires correctly,
 // since the colouring indicates whether a wire is energized.
 //-----------------------------------------------------------------------------
-BOOL DrawElement(int which, void *elem, int *cx, int *cy, BOOL poweredBefore)
+BOOL DrawElement(HCRDC Hcr, int which, void *elem, int *cx, int *cy, BOOL poweredBefore)
 {
     BOOL poweredAfter;
 
     int cx0 = *cx, cy0 = *cy;
     ElemLeaf *leaf = (ElemLeaf *)elem;
-
-    SetBkColor(DrawWindow,Hdc, InSimulationMode ? HighlightColours.simBg :
+    SetBkColor(DrawWindow,Hcr, InSimulationMode ? HighlightColours.simBg :
         HighlightColours.bg);
-    NormText();
+    NormText(Hcr);
 
     if(elem == Selected && !InSimulationMode) {
-        EmphText();
+        EmphText(Hcr);
         ThisHighlighted = TRUE;
     } else {
         ThisHighlighted = FALSE;
@@ -950,7 +949,7 @@ BOOL DrawElement(int which, void *elem, int *cx, int *cy, BOOL poweredBefore)
             ElemSubcktSeries *s = (ElemSubcktSeries *)elem;
             poweredAfter = poweredBefore;
             for(i = 0; i < s->count; i++) {
-                poweredAfter = DrawElement(s->contents[i].which,
+                poweredAfter = DrawElement(Hcr, s->contents[i].which,
                     s->contents[i].d.any, cx, cy, poweredAfter);
             }
             break;
@@ -968,12 +967,12 @@ BOOL DrawElement(int which, void *elem, int *cx, int *cy, BOOL poweredBefore)
             for(i = 0; i < p->count; i++) {
                 BOOL poweredThis;
 
-                poweredThis = DrawElement(p->contents[i].which,
+                poweredThis = DrawElement(Hcr, p->contents[i].which,
                     p->contents[i].d.any, cx, cy, poweredBefore);
 
                 if(InSimulationMode) {
                     if(poweredThis) poweredAfter = TRUE;
-                    PoweredText(poweredThis);
+                    PoweredText(Hcr, poweredThis);
                 }
 
                 while((*cx - cx0) < widthMax*POS_WIDTH) {
@@ -992,7 +991,7 @@ BOOL DrawElement(int which, void *elem, int *cx, int *cy, BOOL poweredBefore)
                         buf[j] = '-';
                     }
                     buf[j] = '\0';
-                    DrawChars(*cx, *cy + (POS_HEIGHT/2), buf);
+                    DrawChars(Hcr, *cx, *cy + (POS_HEIGHT/2), buf);
                     *cx += POS_WIDTH;
                 }
 
@@ -1015,37 +1014,37 @@ BOOL DrawElement(int which, void *elem, int *cx, int *cy, BOOL poweredBefore)
             if(*cx/POS_WIDTH != ColsAvailable) {
                 needWire = FALSE;
                 for(j = heightMax - 1; j >= 1; j--) {
-                    if(j <= lowestPowered) PoweredText(poweredAfter);
+                    if(j <= lowestPowered) PoweredText(Hcr, poweredAfter);
                     if(DisplayMatrix[*cx/POS_WIDTH - 1][*cy/POS_HEIGHT + j]) {
                         needWire = TRUE;
                     }
-                    if(needWire) VerticalWire(*cx - 1, *cy + j*POS_HEIGHT);
+                    if(needWire) VerticalWire(Hcr, *cx - 1, *cy + j*POS_HEIGHT);
                 }
                 // stupid special case
                 if(lowestPowered == 0 && InSimulationMode) {
-                    EmphText();
-                    DrawChars(*cx - 1, *cy + (POS_HEIGHT/2), "+");
+                    EmphText(Hcr);
+                    DrawChars(Hcr, *cx - 1, *cy + (POS_HEIGHT/2), "+");
                 }
             }
 
-            PoweredText(poweredBefore);
+            PoweredText(Hcr, poweredBefore);
             needWire = FALSE;
             for(j = heightMax - 1; j >= 1; j--) {
                 if(DisplayMatrix[cx0/POS_WIDTH][*cy/POS_HEIGHT + j]) {
                     needWire = TRUE;
                 }
-                if(needWire) VerticalWire(cx0 - 1, *cy + j*POS_HEIGHT);
+                if(needWire) VerticalWire(Hcr, cx0 - 1, *cy + j*POS_HEIGHT);
             }
 
             break;
         }
         default:
-            poweredAfter = DrawLeaf(which, leaf, cx, cy, poweredBefore);
+            poweredAfter = DrawLeaf(Hcr, which, leaf, cx, cy, poweredBefore);
             break;
     }
 
 
-    NormText();
+    NormText(Hcr);
     return poweredAfter;
 }
 
@@ -1053,18 +1052,18 @@ BOOL DrawElement(int which, void *elem, int *cx, int *cy, BOOL poweredBefore)
 // Draw the rung that signals the end of the program. Kind of useless but
 // do it anyways, for convention.
 //-----------------------------------------------------------------------------
-void DrawEndRung(int cx, int cy)
+void DrawEndRung(HCRDC Hcr, int cx, int cy)
 {
     int i;
     char *str = "[END]";
     int lead = (POS_WIDTH - strlen(str))/2;
     ThisHighlighted = TRUE;
     for(i = 0; i < lead; i++) {
-        DrawChars(cx + i, cy + (POS_HEIGHT/2), "-");
+        DrawChars(Hcr, cx + i, cy + (POS_HEIGHT/2), "-");
     }
-    DrawChars(cx + i, cy + (POS_HEIGHT/2), str);
+    DrawChars(Hcr, cx + i, cy + (POS_HEIGHT/2), str);
     i += strlen(str);
     for(; i < ColsAvailable*POS_WIDTH; i++) {
-        DrawChars(cx + i, cy + (POS_HEIGHT/2), "-");
+        DrawChars(Hcr, cx + i, cy + (POS_HEIGHT/2), "-");
     }
 }

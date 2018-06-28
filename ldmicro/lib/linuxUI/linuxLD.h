@@ -16,6 +16,7 @@
 #define CALLBACK
 #define CONST const
 
+/// Meamory flags
 #define HEAP_ZERO_MEMORY 0x00000008
 
 /// Image loading flags
@@ -24,7 +25,6 @@
 
 /// Macro functions
 #define max(_A, _B) std::max(_A, _B)
-// #define min(_A, _B) std::min(_A, _B)
 
 /// Typedefs
 //typedef int64_t __int64;
@@ -68,14 +68,16 @@ typedef HANDLE HGDIOBJ;
 
 typedef cairo_t *HCRDC;
 typedef GtkWidget *HWID;
-typedef GtkWidget *HMENU;
 typedef GtkWindow *HWND;
-typedef GtkListStore *HLIST;
+typedef GtkTreeModel *HLIST;
+typedef GtkTreeIter ITLIST;
 typedef GtkApplication *HAPP;
 typedef GtkTreeViewColumn *HTVC;
 typedef GdkPixbuf *HICON;
 typedef GdkRectangle GDRECT;
-typedef GdkRectangle *PGDRECT;
+typedef GDRECT *PGDRECT;
+typedef HWID HMENU;
+typedef ITLIST *HITLIST;
 
 /// Check if system is x64 or x86
 #if defined(__UNIX64)
@@ -114,10 +116,14 @@ typedef class tagColorReferance: public GdkRGBA{
         this->alpha = 1.0;
     }
 
-    GdkRGBA* getThis()
+    bool operator== (tagColorReferance& arg1)
     {
-        return this;
+        if( ((int)arg1.red == (int)this->red) && ((int)arg1.green == (int)this->green) && ((int)arg1.blue == (int)this->blue) )
+            return true;
+        else
+            return false;
     }
+
 } COLORREF, *HBRUSH;
 
 /// Structures
@@ -136,19 +142,38 @@ typedef struct HeapRecordTag{
 } HEAPRECORD;
 
 typedef struct tagSCROLLINFO {
-  UINT cbSize;
-  UINT fMask;
-  int  nMin;
-  int  nMax;
-  UINT nPage;
-  int  nPos;
-  int  nTrackPos;
+    UINT cbSize;
+    UINT fMask;
+    int  nMin;
+    int  nMax;
+    UINT nPage;
+    int  nPos;
+    int  nTrackPos;
 } SCROLLINFO, *LPCSCROLLINFO;
 
+typedef struct {
+  UINT   mask;
+  int    iItem;
+  int    iSubItem;
+//   UINT   state;
+//   UINT   stateMask;
+  LPTSTR pszText;
+//   int    cchTextMax;
+//   int    iImage;
+//   LPARAM lParam;
+//   int    iIndent;
+//   int    iGroupId;
+//   UINT   cColumns;
+//   PUINT  puColumns;
+//   int    *piColFmt;
+//   int    iGroup;
+} LVITEM, *LPLVITEM;
+
 typedef struct tagNMHDR {
-  HWND     hwndFrom;
-  UINT_PTR idFrom;
-  UINT     code;
+    HLIST    hlistFrom;
+    HITLIST  hlistIter;   
+    UINT     code;
+    LVITEM item;
 } NMHDR;
 
 typedef struct FontTag {
@@ -157,7 +182,7 @@ typedef struct FontTag {
     int     nOrientation;
     int     fnWeight;
     DWORD   fdwItalic;
-    LPCTSTR lpszFace;
+    LPTSTR lpszFace;
 } *HFONT, FONT;
 
 typedef struct tagLOGBRUSH {
@@ -172,6 +197,17 @@ typedef struct _RECT {
   LONG right;
   LONG bottom;
 } RECT, *PRECT;
+
+typedef struct SimpleDialogDataTag {
+    UINT uflag;
+    int boxes;
+    char **dests;
+    char *str1;
+    char *str2;
+    char *str3;
+    int *num1;
+    int *num2;
+} SimpleDialogData;
 
 /// Variables
 extern std::vector<HEAPRECORD> HeapRecord;

@@ -401,32 +401,29 @@ void MoveCursorKeyboard(int keyCode)
 
 void EditSelectedElement(void)
 {
-    
-    ShowContactsDialog(&(Selected->d.contacts.negated),Selected->d.contacts.name);
-
     if(!Selected || Selected->selectedState == SELECTED_NONE) return;
 
     switch(SelectedWhich) {
         case ELEM_COMMENT:
-            // ShowCommentDialog(Selected->d.comment.str);
+            ShowCommentDialog(Selected->d.comment.str);
             break;
 
         case ELEM_CONTACTS:
-            // ShowContactsDialog(&(Selected->d.contacts.negated),
-            //     Selected->d.contacts.name);
+            ShowContactsDialog(&(Selected->d.contacts.negated),
+                Selected->d.contacts.name);
             break;
 
         case ELEM_COIL:
-            // ShowCoilDialog(&(Selected->d.coil.negated),
-            //     &(Selected->d.coil.setOnly), &(Selected->d.coil.resetOnly),
-            //     Selected->d.coil.name);
+            ShowCoilDialog(&(Selected->d.coil.negated),
+                &(Selected->d.coil.setOnly), &(Selected->d.coil.resetOnly),
+                Selected->d.coil.name);
             break;
 
         case ELEM_TON:
         case ELEM_TOF:
         case ELEM_RTO:
             // ShowTimerDialog(SelectedWhich, &(Selected->d.timer.delay),
-            //     Selected->d.timer.name);
+            //     Selected->d.timer.name); 
             break;
 
         case ELEM_CTU:
@@ -451,11 +448,11 @@ void EditSelectedElement(void)
         case ELEM_MUL:
         case ELEM_DIV:
             // ShowMathDialog(SelectedWhich, Selected->d.math.dest, 
-            //     Selected->d.math.op1, Selected->d.math.op2);
+            //     Selected->d.math.op1, Selected->d.math.op2); 
             break;
 
         case ELEM_RES:
-            // ShowResetDialog(Selected->d.reset.name);
+            ShowResetDialog(Selected->d.reset.name);
             break;
 
         case ELEM_MOVE:
@@ -491,7 +488,7 @@ void EditSelectedElement(void)
             break;
 
         case ELEM_PIECEWISE_LINEAR:
-            // ShowPiecewiseLinearDialog(Selected);
+            ShowPiecewiseLinearDialog(Selected);
             break;
 
         case ELEM_LOOK_UP_TABLE:

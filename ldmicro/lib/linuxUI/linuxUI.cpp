@@ -531,5 +531,8 @@ BOOL KillTimer(HWID hWid, UINT uIDEvent)
 
 void DestroyWindow (HWID widget)
 {
-    gtk_widget_destroy (widget);
+    if (GTK_IS_WIDGET(widget))
+    {
+        gtk_widget_destroy (widget);
+    }
 }

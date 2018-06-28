@@ -58,21 +58,19 @@ static LONG_PTR PrevIndexProc;
 static LONG_PTR PrevCountProc;
 static HWID OkButton;
 static HWID CancelButton;
-<<<<<<< HEAD
-static int GLOBAL_LUT_DIALOG_TIMER;
-static bool destroyCheck;
-=======
-static UINT LUT_DIALOG_REFRESH_TIMER_ID = 0;
->>>>>>> akshay-c-GUI_port
+static UINT LUT_DIALOG_REFRESH_TIMER_ID_1 = 0;
+static UINT LUT_DIALOG_REFRESH_TIMER_ID_2 = 0;
 
 HWID LutGrid;
 HWID LutPackingBox;
 
-struct ShowLookUpTableDialogBuffer{
+struct LookUpTableDialogBuffer{
     int tmpcount;
     bool tmpasString;
     char PrevTableAsString[1024] = "";
 } temp;
+
+static int piecewiseTmpCount;
 
 //-----------------------------------------------------------------------------
 // Don't allow any characters other than 0-9 and minus in the values.
@@ -125,6 +123,7 @@ void LutDialogMyNameProc (GtkEditable *editable, gchar *NewText, gint length,
 //-----------------------------------------------------------------------------
 static void MakeFixedControls(BOOL forPwl)
 {
+    bool madeCheckbox = FALSE;
     Labels[0] = gtk_label_new ("Destination");
     Labels[1] = gtk_label_new ("Index:");
     Labels[2] = forPwl ? gtk_label_new ("Points:") : gtk_label_new ("Count:");
@@ -139,6 +138,7 @@ static void MakeFixedControls(BOOL forPwl)
     if(!forPwl) {
         AsStringCheckbox = gtk_check_button_new_with_label
                 ("Edit table of ASCII values like a string");
+        madeCheckbox = TRUE;
     }
 
     OkButton = gtk_button_new_with_label ("OK");
@@ -152,7 +152,9 @@ static void MakeFixedControls(BOOL forPwl)
     gtk_grid_attach (GTK_GRID (LutGrid), CancelButton, 3, 4, 1, 1);
     gtk_grid_attach (GTK_GRID (LutGrid), Labels[2], 0, 6, 1, 1);
     gtk_grid_attach (GTK_GRID (LutGrid), CountTextbox, 1, 6, 1, 1);
-    gtk_grid_attach (GTK_GRID (LutGrid), AsStringCheckbox, 0, 8, 1, 1);
+    if (madeCheckbox){
+        gtk_grid_attach (GTK_GRID (LutGrid), AsStringCheckbox, 0, 8, 1, 1);
+    }
 
     g_signal_connect (G_OBJECT(DestTextbox), "insert-text",
 		     G_CALLBACK(LutDialogMyNameProc), NULL);
@@ -167,35 +169,59 @@ static void MakeFixedControls(BOOL forPwl)
 // because if the size of the LUT changes, or if the user switches from 
 // table entry to string entry, we must completely reconfigure the dialog.
 //-----------------------------------------------------------------------------
-static void DestroyLutControls(void)
+static void DestroyLutControls(BOOL destroyFlag = TRUE)
 {
-    cout << "Inside DestroyLutControls ()" << "\n";
     if(WasAsString) {
         // Nothing to do; we constantly update the cache from the user-
         // specified string, because we might as well do that when we
         // calculate the length.
     }
     else {
-        cout << "In DestroyLut WasCount : " << WasCount << "\n";
         int i;
         for(i = 0; i < WasCount; i++) {
             char buf[20];
-            strcpy (buf, gtk_entry_get_text (GTK_ENTRY (ValuesTextbox[i])));
+            char *tmpB = (char*)gtk_entry_get_text (GTK_ENTRY (ValuesTextbox[i]));
+            strcpy (buf, tmpB);
             ValuesCache[i] = atoi(buf);
         }
-        cout << "Exiting else of WasAsString" << "\n";
     }
-    if (checkString){
-        DestroyWindow(StringTextbox);
-        cout << "Destroyed StringTextbox" << "\n";
+    
+    if (destroyFlag){
+        for(int i = 0; i < temp.tmpcount; i++) 
+        {
+            if (GTK_IS_ENTRY(ValuesTextbox[i]))
+            {
+                DestroyWindow(ValuesTextbox[i]);
+                DestroyWindow(ValuesLabel[i]);
+            }
+        }
     }
-    int i;
-    // *** Changed from MAX_LOOK_UP_TABLE_LEN to count ***** //
-    for(i = 0; i < temp.tmpcount; i++) {
-        cout << "Destroy ValueTextbox i = " << i << "\n";
-        DestroyWindow(ValuesTextbox[i]);
-        DestroyWindow(ValuesLabel[i]);
-        cout << "Called DestroyWindow() for ValuesTextbox and ValuesLabels" << "\n";
+}
+
+static void DestroyLutControlsPiecewise(BOOL destroyFlag = TRUE)
+{
+    if(WasAsString) {
+        // Nothing to do; we constantly update the cache from the user-
+        // specified string, because we might as well do that when we
+        // calculate the length.
+    }
+    else {
+        int i;
+        for(i = 0; i < WasCount; i++) {
+            char buf[20];
+            char *tmpB = (char*)gtk_entry_get_text (GTK_ENTRY (ValuesTextbox[i]));
+            strcpy (buf, tmpB);
+            ValuesCache[i] = atoi(buf);
+        }
+    }
+
+    if (destroyFlag)
+    {
+        int i;
+        for(i = 0; i < WasCount; i++) {
+                DestroyWindow(ValuesTextbox[i]);
+                DestroyWindow(ValuesLabel[i]);
+        }
     }
 }
 
@@ -210,14 +236,11 @@ static void MakeLutControls(BOOL asString, int count, BOOL forPwl)
     // Remember these, so that we know from where to cache stuff if we have
     // to destroy these textboxes and make something new later.
     WasAsString = asString;
-    cout << "asString in MakeLutControls : " << asString <<"\n";
     WasCount = count;
-    cout << "Count in MakeLutControls : " << count << "\n";
     if(forPwl && asString) oops();
 
     if(asString) {
         char str[3*MAX_LOOK_UP_TABLE_LEN+1];
-        cout << "Inside if (asString) in MakeLutControls" << "\n";
         int i, j;
         j = 0;
         for(i = 0; i < count; i++) {
@@ -249,7 +272,6 @@ static void MakeLutControls(BOOL asString, int count, BOOL forPwl)
             checkString = TRUE;
             gtk_widget_show_all (LutGrid);
             gtk_editable_set_editable (GTK_EDITABLE (CountTextbox), FALSE);
-            // MoveWindow(StringTextbox, 100, 30, 320, 185, TRUE); // Changed LutDialog to StringTextbox
     }
     else {
         int i;
@@ -276,6 +298,7 @@ static void MakeLutControls(BOOL asString, int count, BOOL forPwl)
             sprintf(buf, "%d", ValuesCache[i]);
             ValuesTextbox[i] = gtk_entry_new ();
             gtk_entry_set_max_length (GTK_ENTRY (ValuesTextbox[i]), 0);
+            gtk_entry_set_text (GTK_ENTRY (ValuesTextbox[i]), buf);
 
             if(forPwl) {
                 sprintf(buf, "%c%d:", (i & 1) ? 'y' : 'x', i/2);
@@ -303,8 +326,6 @@ static void MakeLutControls(BOOL asString, int count, BOOL forPwl)
         }
         if(count > 16) count = 16;
         gtk_editable_set_editable (GTK_EDITABLE (CountTextbox), TRUE);
-
-        // MoveWindow(LutDialog, 100, 30, 320, base + 30 + count*30, TRUE);
     }
 }
 
@@ -316,7 +337,6 @@ static void MakeLutControls(BOOL asString, int count, BOOL forPwl)
 //-----------------------------------------------------------------------------
 BOOL StringToValuesCache(char *str, int *c)
 {   
-    // cout << "Inside StringToValuesCache" << "\n";
     int count = 0;
     while(*str) {
         if(*str == '\\') {
@@ -350,9 +370,8 @@ void LookUpTableGetData (gpointer data){
     ElemLeaf *l = (ElemLeaf *) data;
     ElemLookUpTable *t = &(l->d.lookUpTable);
     strcpy (t->dest, gtk_entry_get_text (GTK_ENTRY (DestTextbox)));
-    // t->index = const_cast <char*> (gtk_entry_get_text (GTK_ENTRY (IndexTextbox)));
     strcpy (t->index, gtk_entry_get_text (GTK_ENTRY (IndexTextbox)));
-    // DestroyLutControls();
+    DestroyLutControls(FALSE);
 
     // The call to DestroyLutControls updated ValuesCache, so just read
     // them out of there (whichever mode we were in before).
@@ -363,10 +382,6 @@ void LookUpTableGetData (gpointer data){
     t->count = temp.tmpcount;
     t->editAsString = temp.tmpasString;
     gtk_widget_set_sensitive (MainWindow, TRUE);
-    if (destroyCheck){
-        // g_source_remove (GLOBAL_LUT_DIALOG_TIMER);
-        DestroyWindow (LutDialog);
-    }
 }
 
 void LookUpTableCheckMode (void){
@@ -378,14 +393,12 @@ void LookUpTableCheckMode (void){
     char buf[20];
     // buf = const_cast <char*> (gtk_entry_get_text (GTK_ENTRY (CountTextbox)));
     strcpy (buf, gtk_entry_get_text (GTK_ENTRY (CountTextbox)));
-    g_print("%s\n", buf);
     if(atoi(buf) != count && !asString) {
         count = atoi(buf);
         if(count < 0 || count > 32) {
             count = 0;
             gtk_entry_set_text (GTK_ENTRY (CountTextbox), "");
         }
-        cout << "Count in LookUpTableCheckMode : " << count << "\n";
         DestroyLutControls();
         MakeLutControls(asString, count, FALSE);
     }
@@ -394,8 +407,6 @@ void LookUpTableCheckMode (void){
     // and use that to update the (read-only) count field.
     if(asString) {
         char scratch[1024];
-        // scratch = const_cast <char*> (gtk_entry_get_text 
-        //                         (GTK_ENTRY (StringTextbox)));
         strcpy (scratch, gtk_entry_get_text (GTK_ENTRY (StringTextbox)));
         if(strcmp(scratch, temp.PrevTableAsString)!=0) {
             if(StringToValuesCache(scratch, &count)) {
@@ -410,14 +421,27 @@ void LookUpTableCheckMode (void){
     }
     // Did we just change modes?
     BOOL x = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (AsStringCheckbox));
+    checkString = x;
     if((x && !asString) || (!x && asString)) {
-        cout << "x is " << x << "\n";    
         asString = x;
         if (x == 1){
             MakeLutControls(asString, count, FALSE);
+            
+            for(int i = 0; i < temp.tmpcount; i++) {
+                if (GTK_IS_ENTRY(ValuesTextbox[i]))
+                {
+                    DestroyWindow(ValuesTextbox[i]);
+                    DestroyWindow(ValuesLabel[i]);
+                }
+            }
         }
         else {
             DestroyLutControls();
+            if (!x && GTK_IS_ENTRY(StringTextbox))
+            {
+                DestroyWindow(StringTextbox);
+                gtk_editable_set_editable (GTK_EDITABLE (CountTextbox), TRUE);
+            }   
         }
     }
 
@@ -427,15 +451,20 @@ void LookUpTableCheckMode (void){
 
 // Checks for the required key press
 gboolean LookUpTableKeyPress (HWID widget, GdkEventKey* event, gpointer data){
-    LookUpTableCheckMode ();
+
     if (event -> keyval == GDK_KEY_Return){
-        // destroyCheck = TRUE;
+        LookUpTableCheckMode ();
         LookUpTableGetData((gpointer) data);
-    }
-    else if (event -> keyval == GDK_KEY_Escape){
-        // g_source_remove (GLOBAL_LUT_DIALOG_TIMER);
         DestroyWindow (LutDialog);
         gtk_widget_set_sensitive (MainWindow, TRUE);
+        g_source_remove (LUT_DIALOG_REFRESH_TIMER_ID_1);
+        LUT_DIALOG_REFRESH_TIMER_ID_1 = 0;
+    }
+    else if (event -> keyval == GDK_KEY_Escape){
+        DestroyWindow (LutDialog);
+        gtk_widget_set_sensitive (MainWindow, TRUE);
+        g_source_remove (LUT_DIALOG_REFRESH_TIMER_ID_1);
+        LUT_DIALOG_REFRESH_TIMER_ID_1 = 0;
     }
     return FALSE;
 }
@@ -444,19 +473,19 @@ gboolean LookUpTableKeyPress (HWID widget, GdkEventKey* event, gpointer data){
 BOOL LutDialogRefresh(gpointer data)
 {
     LookUpTableCheckMode ();
-    LookUpTableGetData(NULL, (gpointer) data);
+    LookUpTableGetData((gpointer) data);
     return TRUE;
 }
 // Ok button call
 void LutDialogOk (HWID widget, gpointer data)
 {
     LookUpTableCheckMode ();
-    LookUpTableGetData(NULL, (gpointer) data);
+    LookUpTableGetData((gpointer) data);
 
     DestroyWindow (LutDialog);
     gtk_widget_set_sensitive (MainWindow, TRUE);
-    g_source_remove (LUT_DIALOG_REFRESH_TIMER_ID);
-    LUT_DIALOG_REFRESH_TIMER_ID = 0;
+    g_source_remove (LUT_DIALOG_REFRESH_TIMER_ID_1);
+    LUT_DIALOG_REFRESH_TIMER_ID_1 = 0;
 }
 
 // Cancel button call
@@ -464,8 +493,8 @@ void LutCallCancel (HWID widget, gpointer data)
 {
     DestroyWindow (LutDialog);
     gtk_widget_set_sensitive (MainWindow, TRUE);
-    g_source_remove (LUT_DIALOG_REFRESH_TIMER_ID);
-    LUT_DIALOG_REFRESH_TIMER_ID = 0;
+    g_source_remove (LUT_DIALOG_REFRESH_TIMER_ID_1);
+    LUT_DIALOG_REFRESH_TIMER_ID_1 = 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -477,7 +506,6 @@ void LutCallCancel (HWID widget, gpointer data)
 void ShowLookUpTableDialog(ElemLeaf *l)
 {
     ElemLookUpTable *t = &(l->d.lookUpTable);
-    GdkEventKey* event;
 
     // First copy over all the stuff from the leaf structure; in particular,
     // we need our own local copy of the table entries, because it would be
@@ -485,9 +513,7 @@ void ShowLookUpTableDialog(ElemLeaf *l)
     // might cancel).
 
     int count = t->count;
-    cout << "Initially count is " << count << "\n";
     BOOL asString = t->editAsString;
-    cout << "Initially asString is " << asString << "\n";
     memset(ValuesCache, 0, sizeof(ValuesCache));
     int i;
     for(i = 0; i < count; i++) {
@@ -529,9 +555,7 @@ void ShowLookUpTableDialog(ElemLeaf *l)
     gtk_widget_grab_focus(OkButton);
 
     temp.tmpcount = count;
-    cout << "Count in ShowLookUp : " << count << "\n";
     temp.tmpasString = asString;
-    cout << "asString in ShowLookUp : " << asString << "\n";
 
     g_signal_connect (G_OBJECT (LutDialog), "key-press-event",
                     G_CALLBACK(LookUpTableKeyPress), (gpointer)l);
@@ -540,8 +564,95 @@ void ShowLookUpTableDialog(ElemLeaf *l)
     g_signal_connect (G_OBJECT (CancelButton), "clicked",
                     G_CALLBACK(LutCallCancel), NULL);
 
-    if (LUT_DIALOG_REFRESH_TIMER_ID == 0)
-       LUT_DIALOG_REFRESH_TIMER_ID = g_timeout_add(100, (GSourceFunc)LutDialogRefresh, (gpointer)l);
+    if (LUT_DIALOG_REFRESH_TIMER_ID_1 == 0)
+       LUT_DIALOG_REFRESH_TIMER_ID_1 = g_timeout_add(100, (GSourceFunc)LutDialogRefresh, (gpointer)l);
+}
+
+// Piecewise Dialog
+
+void PiecewiseDialogGetData(gpointer data){
+
+    ElemLeaf *l = (ElemLeaf *) data;
+    ElemPiecewiseLinear *t = &(l->d.piecewiseLinear);
+    int count = piecewiseTmpCount;
+    strcpy (t->dest, gtk_entry_get_text (GTK_ENTRY (DestTextbox)));
+    strcpy (t->index, gtk_entry_get_text (GTK_ENTRY (IndexTextbox)));
+    DestroyLutControlsPiecewise(FALSE);
+    // MakeLutControls(FALSE, count*2, TRUE);
+
+    // The call to DestroyLutControlsPiecewise updated ValuesCache, so just read
+    // them out of there.
+    int i;
+    for(i = 0; i < count*2; i++) {
+        t->vals[i] = ValuesCache[i];
+    }
+    t->count = count;
+}
+
+void PiecewiseDialogPointTextbox (int count){
+    char* buf;
+    char *tmpBuf = (char*)gtk_entry_get_text (GTK_ENTRY (CountTextbox));
+    buf = (char*)malloc(strlen(tmpBuf));
+        strcpy (buf, tmpBuf);
+        if(atoi(buf) != count) {
+            count = atoi(buf);
+            if(count < 0 || count > 10) {
+                count = 0;
+                gtk_entry_set_text (GTK_ENTRY (CountTextbox), "");
+            }
+            DestroyLutControlsPiecewise();
+            MakeLutControls(FALSE, count*2, TRUE);
+        }
+        piecewiseTmpCount = count;
+}
+
+/// Dialog refresh function
+BOOL PiecewiseDialogRefresh(gpointer data)
+{
+    PiecewiseDialogPointTextbox (piecewiseTmpCount);
+    PiecewiseDialogGetData((gpointer) data);
+    return TRUE;
+}
+
+// Ok button call
+void PiecewiseDialogOk (HWID widget, gpointer data)
+{
+    PiecewiseDialogPointTextbox (piecewiseTmpCount);
+    PiecewiseDialogGetData((gpointer) data);
+
+    DestroyWindow (LutDialog);
+    gtk_widget_set_sensitive (MainWindow, TRUE);
+    g_source_remove (LUT_DIALOG_REFRESH_TIMER_ID_2);
+    LUT_DIALOG_REFRESH_TIMER_ID_2 = 0;
+}
+
+// Checks for the required key press
+gboolean PiecewiseDialogKeyPress (HWID widget, GdkEventKey* event, gpointer data){
+
+    if (event -> keyval == GDK_KEY_Return){
+        PiecewiseDialogPointTextbox (piecewiseTmpCount);
+        PiecewiseDialogGetData((gpointer) data);
+        DestroyWindow (LutDialog);
+        gtk_widget_set_sensitive (MainWindow, TRUE);
+        g_source_remove (LUT_DIALOG_REFRESH_TIMER_ID_2);
+        LUT_DIALOG_REFRESH_TIMER_ID_2 = 0;
+    }
+    else if (event -> keyval == GDK_KEY_Escape){
+        DestroyWindow (LutDialog);
+        gtk_widget_set_sensitive (MainWindow, TRUE);
+        g_source_remove (LUT_DIALOG_REFRESH_TIMER_ID_2);
+        LUT_DIALOG_REFRESH_TIMER_ID_2 = 0;
+    }
+    return FALSE;
+}
+
+// Cancel button call
+void PiecewiseCallCancel (HWID widget, gpointer data)
+{
+    DestroyWindow (LutDialog);
+    gtk_widget_set_sensitive (MainWindow, TRUE);
+    g_source_remove (LUT_DIALOG_REFRESH_TIMER_ID_2);
+    LUT_DIALOG_REFRESH_TIMER_ID_2 = 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -566,11 +677,18 @@ void ShowPiecewiseLinearDialog(ElemLeaf *l)
     // Now create the dialog's fixed controls, plus the changing (depending
     // on show style/entry count) controls for the initial configuration.
 
-    LutDialog = gtk_dialog_new_with_buttons ("Piecewise Linear Table", GTK_WINDOW (MainWindow),
-                    GTK_DIALOG_MODAL, "Ok", GTK_RESPONSE_ACCEPT,
-                    "Cancel", GTK_RESPONSE_REJECT, NULL);
+    LutGrid = gtk_grid_new();
+    LutPackingBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    
+    LutDialog = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title(GTK_WINDOW(LutDialog), "Piecewise Linear Table");
+    gtk_window_set_default_size(GTK_WINDOW(LutDialog), 100, 200);
+    gtk_window_set_resizable (GTK_WINDOW (LutDialog), FALSE);
+    gtk_box_pack_start(GTK_BOX(LutPackingBox), LutGrid, TRUE, TRUE, 0);
+    gtk_container_add(GTK_CONTAINER(LutDialog), LutPackingBox);
     gtk_widget_add_events (LutDialog, GDK_KEY_PRESS_MASK);
     gtk_widget_add_events (LutDialog, GDK_BUTTON_PRESS_MASK);
+
     MakeFixedControls(TRUE);
     MakeLutControls(FALSE, count*2, TRUE);
   
@@ -584,59 +702,17 @@ void ShowPiecewiseLinearDialog(ElemLeaf *l)
     // And show the window
     gtk_widget_set_sensitive (MainWindow, FALSE);
     gtk_widget_show_all (LutDialog);
-    gtk_widget_grab_focus (DestTextbox);
-//     SendMessage(DestTextbox, EM_SETSEL, 0, -1);
+    // gtk_widget_grab_focus (DestTextbox);
 
-//     MSG msg;
-//     DWORD ret;
-//     DialogDone = FALSE;
-//     DialogCancel = FALSE;
-    // while((ret = GetMessage(&msg, NULL, 0, 0)) && !DialogDone) {
-//         if(msg.message == WM_KEYDOWN) {
-//             if(msg.wParam == VK_RETURN) {
-//                 DialogDone = TRUE;
-//                 break;
-//             } else if(msg.wParam == VK_ESCAPE) {
-//                 DialogDone = TRUE;
-//                 DialogCancel = TRUE;
-//                 break;
-//             }
-//         }
+    piecewiseTmpCount = count;
 
-//         if(!IsDialogMessage(LutDialog, &msg)) {
-//             TranslateMessage(&msg);
-//             DispatchMessage(&msg);
-        // }
+    g_signal_connect (G_OBJECT (LutDialog), "key-press-event",
+                    G_CALLBACK(PiecewiseDialogKeyPress), (gpointer)l);
+    g_signal_connect (G_OBJECT (OkButton), "clicked",
+                    G_CALLBACK(PiecewiseDialogOk), (gpointer)l);
+    g_signal_connect (G_OBJECT (CancelButton), "clicked",
+                    G_CALLBACK(PiecewiseCallCancel), NULL);
 
-        // Watch the (user-editable) count field, and use that to
-        // determine how many textboxes to show.
-        char* buf;
-        strcpy (buf, gtk_entry_get_text (GTK_ENTRY (CountTextbox)));
-        // SendMessage(CountTextbox, WM_GETTEXT, (WPARAM)16, (LPARAM)buf);
-        if(atoi(buf) != count) {
-            count = atoi(buf);
-            if(count < 0 || count > 10) {
-                count = 0;
-                gtk_entry_set_text (GTK_ENTRY (CountTextbox), "");
-            }
-            // DestroyLutControls();
-            MakeLutControls(FALSE, count*2, TRUE);
-        }
-    }
-
-    if(!DialogCancel) {
-        SendMessage(DestTextbox, WM_GETTEXT, (WPARAM)16, (LPARAM)(t->dest));
-        SendMessage(IndexTextbox, WM_GETTEXT, (WPARAM)16, (LPARAM)(t->index));
-        DestroyLutControls();
-        // The call to DestroyLutControls updated ValuesCache, so just read
-        // them out of there.
-        int i;
-        for(i = 0; i < count*2; i++) {
-            t->vals[i] = ValuesCache[i];
-        }
-        t->count = count;
-    }
-
-    EnableWindow(MainWindow, TRUE);
-    DestroyWindow(LutDialog);
+    if (LUT_DIALOG_REFRESH_TIMER_ID_2 == 0)
+       LUT_DIALOG_REFRESH_TIMER_ID_2 = g_timeout_add(100, (GSourceFunc)PiecewiseDialogRefresh, (gpointer)l);
 }

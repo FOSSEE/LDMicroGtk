@@ -2,7 +2,7 @@
 LDmicro is a ladder logic editor, simulator and compiler for 8-bit microcontrollers. It can generate native code for Atmel AVR and Microchip PIC16 CPUs from a ladder diagram.
 
 # LDMicro for Linux
-This is a Linux compatible version of the original LDMicro program for windows created by Jonathan Westhues, and proted to Linux under [FOSSEE](https://github.com/FOSSEE) fellowship program 2018 by [R Ramana](https://github.com/Rr42) and [Rohit I](https://github.com/NatsuDrag9).
+This is a Linux compatible version of the original LDMicro program for windows created by Jonathan Westhues, and proted to Linux under [FOSSEE](https://github.com/FOSSEE) fellowship program 2018 by [R Ramana](https://github.com/Rr42) and [Rohit I](https://github.com/NatsuDrag9), under the mentorship of [Akshay C](https://github.com/akshay-c).
 
 GitHub repository of LDMicro for windows can be found [here](https://github.com/akshay-c/LDmicro).
 

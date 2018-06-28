@@ -530,99 +530,109 @@ void ShowLookUpTableDialog(ElemLeaf *l)
     // GLOBAL_LUT_DIALOG_TIMER = g_timeout_add(100, (GSourceFunc)LutRefreshDialog, (gpointer)l);
 }
 
+gboolean PiecewiseDialogKeyPress (HWID widget,
+            GdkEventKey* event, gpointer data){
+    if (event->keyval = GDK_KEY_Return){
+        PiecewiseDialogGetData();
+    }
+    else if (event->keyval = GDK_KEY_Return){
+        
+    }
+}
+
 //-----------------------------------------------------------------------------
 // Show the piecewise linear table dialog. This one can only be edited in
 // only a single format, which makes things easier than before.
 // //-----------------------------------------------------------------------------
-// void ShowPiecewiseLinearDialog(ElemLeaf *l)
-// {
-//     ElemPiecewiseLinear *t = &(l->d.piecewiseLinear);
+void ShowPiecewiseLinearDialog(ElemLeaf *l)
+{
+    ElemPiecewiseLinear *t = &(l->d.piecewiseLinear);
 
-//     // First copy over all the stuff from the leaf structure; in particular,
-//     // we need our own local copy of the table entries, because it would be
-//     // bad to update those in the leaf before the user clicks okay (as he
-//     // might cancel).
-//     int count = t->count;
-//     memset(ValuesCache, 0, sizeof(ValuesCache));
-//     int i;
-//     for(i = 0; i < count*2; i++) {
-//         ValuesCache[i] = t->vals[i];
-//     }
+    // First copy over all the stuff from the leaf structure; in particular,
+    // we need our own local copy of the table entries, because it would be
+    // bad to update those in the leaf before the user clicks okay (as he
+    // might cancel).
+    int count = t->count;
+    memset(ValuesCache, 0, sizeof(ValuesCache));
+    int i;
+    for(i = 0; i < count*2; i++) {
+        ValuesCache[i] = t->vals[i];
+    }
 
-//     // Now create the dialog's fixed controls, plus the changing (depending
-//     // on show style/entry count) controls for the initial configuration.
+    // Now create the dialog's fixed controls, plus the changing (depending
+    // on show style/entry count) controls for the initial configuration.
 
-//     LutDialog = gtk_dialog_new_with_buttons ("Piecewise Linear Table", GTK_WINDOW (MainWindow),
-//                     GTK_DIALOG_MODAL, "Ok", GTK_RESPONSE_ACCEPT,
-//                     "Cancel", GTK_RESPONSE_REJECT, NULL);
-//     gtk_widget_add_events (LutDialog, GDK_KEY_PRESS_MASK);
-//     gtk_widget_add_events (LutDialog, GDK_BUTTON_PRESS_MASK);
-//     MakeFixedControls(TRUE);
-//     MakeLutControls(FALSE, count*2, TRUE);
+    LutDialog = gtk_dialog_new_with_buttons ("Piecewise Linear Table", GTK_WINDOW (MainWindow),
+                    GTK_DIALOG_MODAL, "Ok", GTK_RESPONSE_ACCEPT,
+                    "Cancel", GTK_RESPONSE_REJECT, NULL);
+    gtk_widget_add_events (LutDialog, GDK_KEY_PRESS_MASK);
+    gtk_widget_add_events (LutDialog, GDK_BUTTON_PRESS_MASK);
+    MakeFixedControls(TRUE);
+    MakeLutControls(FALSE, count*2, TRUE);
   
-//     // Set up the controls to reflect the initial configuration.
-//     gtk_entry_set_text (GTK_ENTRY (DestTextbox), t->dest);
-//     gtk_entry_set_text (GTK_ENTRY (IndexTextbox), t->index);
-//     char buf[30];
-//     sprintf(buf, "%d", t->count);
-//     gtk_entry_set_text (GTK_ENTRY (CountTextbox), buf);
+    // Set up the controls to reflect the initial configuration.
+    gtk_entry_set_text (GTK_ENTRY (DestTextbox), t->dest);
+    gtk_entry_set_text (GTK_ENTRY (IndexTextbox), t->index);
+    char buf[30];
+    sprintf(buf, "%d", t->count);
+    gtk_entry_set_text (GTK_ENTRY (CountTextbox), buf);
 
-//     // And show the window
-//     gtk_widget_set_sensitive (MainWindow, FALSE);
-//     gtk_widget_show_all (LutDialog);
-//     gtk_widget_grab_focus (DestTextbox);
-// //     SendMessage(DestTextbox, EM_SETSEL, 0, -1);
+    // And show the window
+    gtk_widget_set_sensitive (MainWindow, FALSE);
+    gtk_widget_show_all (LutDialog);
+    gtk_widget_grab_focus (DestTextbox);
+//     SendMessage(DestTextbox, EM_SETSEL, 0, -1);
 
-// //     MSG msg;
-// //     DWORD ret;
-// //     DialogDone = FALSE;
-// //     DialogCancel = FALSE;
-// //     while((ret = GetMessage(&msg, NULL, 0, 0)) && !DialogDone) {
-// //         if(msg.message == WM_KEYDOWN) {
-// //             if(msg.wParam == VK_RETURN) {
-// //                 DialogDone = TRUE;
-// //                 break;
-// //             } else if(msg.wParam == VK_ESCAPE) {
-// //                 DialogDone = TRUE;
-// //                 DialogCancel = TRUE;
-// //                 break;
-// //             }
-// //         }
-
-// //         if(!IsDialogMessage(LutDialog, &msg)) {
-// //             TranslateMessage(&msg);
-// //             DispatchMessage(&msg);
-// //         }
-
-//         // Watch the (user-editable) count field, and use that to
-//         // determine how many textboxes to show.
-//         char* buf;
-//         buf = gtk_entry_get_text (GTK_ENTRY (CountTextbox));
-// //         SendMessage(CountTextbox, WM_GETTEXT, (WPARAM)16, (LPARAM)buf);
-//         if(atoi(buf) != count) {
-//             count = atoi(buf);
-//             if(count < 0 || count > 10) {
-//                 count = 0;
-//                 gtk_entry_set_text (GTK_ENTRY (CountTextbox), "");
+//     MSG msg;
+//     DWORD ret;
+//     DialogDone = FALSE;
+//     DialogCancel = FALSE;
+    // while((ret = GetMessage(&msg, NULL, 0, 0)) && !DialogDone) {
+//         if(msg.message == WM_KEYDOWN) {
+//             if(msg.wParam == VK_RETURN) {
+//                 DialogDone = TRUE;
+//                 break;
+//             } else if(msg.wParam == VK_ESCAPE) {
+//                 DialogDone = TRUE;
+//                 DialogCancel = TRUE;
+//                 break;
 //             }
-//             DestroyLutControls();
-//             MakeLutControls(FALSE, count*2, TRUE);
 //         }
-//     }
 
-// //     if(!DialogCancel) {
-// //         SendMessage(DestTextbox, WM_GETTEXT, (WPARAM)16, (LPARAM)(t->dest));
-// //         SendMessage(IndexTextbox, WM_GETTEXT, (WPARAM)16, (LPARAM)(t->index));
-// //         DestroyLutControls();
-// //         // The call to DestroyLutControls updated ValuesCache, so just read
-// //         // them out of there.
-// //         int i;
-// //         for(i = 0; i < count*2; i++) {
-// //             t->vals[i] = ValuesCache[i];
-// //         }
-// //         t->count = count;
-// //     }
+//         if(!IsDialogMessage(LutDialog, &msg)) {
+//             TranslateMessage(&msg);
+//             DispatchMessage(&msg);
+        // }
 
-// //     EnableWindow(MainWindow, TRUE);
-// //     DestroyWindow(LutDialog);
-// }
+        // Watch the (user-editable) count field, and use that to
+        // determine how many textboxes to show.
+        char* buf;
+        strcpy (buf, gtk_entry_get_text (GTK_ENTRY (CountTextbox)));
+        // SendMessage(CountTextbox, WM_GETTEXT, (WPARAM)16, (LPARAM)buf);
+        if(atoi(buf) != count) {
+            count = atoi(buf);
+            if(count < 0 || count > 10) {
+                count = 0;
+                gtk_entry_set_text (GTK_ENTRY (CountTextbox), "");
+            }
+            // DestroyLutControls();
+            MakeLutControls(FALSE, count*2, TRUE);
+        }
+    }
+
+    if(!DialogCancel) {
+        SendMessage(DestTextbox, WM_GETTEXT, (WPARAM)16, (LPARAM)(t->dest));
+        SendMessage(IndexTextbox, WM_GETTEXT, (WPARAM)16, (LPARAM)(t->index));
+        DestroyLutControls();
+        // The call to DestroyLutControls updated ValuesCache, so just read
+        // them out of there.
+        int i;
+        for(i = 0; i < count*2; i++) {
+            t->vals[i] = ValuesCache[i];
+        }
+        t->count = count;
+    }
+
+    EnableWindow(MainWindow, TRUE);
+    DestroyWindow(LutDialog);
+}

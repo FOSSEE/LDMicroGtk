@@ -422,15 +422,15 @@ void EditSelectedElement(void)
         case ELEM_TON:
         case ELEM_TOF:
         case ELEM_RTO:
-            // ShowTimerDialog(SelectedWhich, &(Selected->d.timer.delay),
-            //     Selected->d.timer.name); 
+            ShowTimerDialog(SelectedWhich, &(Selected->d.timer.delay),
+                Selected->d.timer.name); 
             break;
 
         case ELEM_CTU:
         case ELEM_CTD:
         case ELEM_CTC:
-            // ShowCounterDialog(SelectedWhich, &(Selected->d.counter.max),
-            //     Selected->d.counter.name);
+            ShowCounterDialog(SelectedWhich, &(Selected->d.counter.max),
+                Selected->d.counter.name);
             break;
 
         case ELEM_EQU:
@@ -439,16 +439,16 @@ void EditSelectedElement(void)
         case ELEM_GEQ:
         case ELEM_LES:
         case ELEM_LEQ:
-            // ShowCmpDialog(SelectedWhich, Selected->d.cmp.op1,
-            //     Selected->d.cmp.op2);
+            ShowCmpDialog(SelectedWhich, Selected->d.cmp.op1,
+                Selected->d.cmp.op2);
             break;
 
         case ELEM_ADD:
         case ELEM_SUB:
         case ELEM_MUL:
         case ELEM_DIV:
-            // ShowMathDialog(SelectedWhich, Selected->d.math.dest, 
-            //     Selected->d.math.op1, Selected->d.math.op2); 
+            ShowMathDialog(SelectedWhich, Selected->d.math.dest, 
+                Selected->d.math.op1, Selected->d.math.op2); 
             break;
 
         case ELEM_RES:
@@ -456,35 +456,35 @@ void EditSelectedElement(void)
             break;
 
         case ELEM_MOVE:
-            // ShowMoveDialog(Selected->d.move.dest, Selected->d.move.src);
+            ShowMoveDialog(Selected->d.move.dest, Selected->d.move.src);
             break;
 
         case ELEM_SET_PWM:
-            // ShowSetPwmDialog(Selected->d.setPwm.name,
-            //     &(Selected->d.setPwm.targetFreq));
+            ShowSetPwmDialog(Selected->d.setPwm.name,
+                &(Selected->d.setPwm.targetFreq));
             break;
 
         case ELEM_READ_ADC:
-            // ShowReadAdcDialog(Selected->d.readAdc.name+1);
+            ShowReadAdcDialog(Selected->d.readAdc.name+1);
             break;
 
         case ELEM_UART_RECV:
         case ELEM_UART_SEND:
-            // ShowUartDialog(SelectedWhich, Selected->d.uart.name);
+            ShowUartDialog(SelectedWhich, Selected->d.uart.name);
             break;
 
         case ELEM_PERSIST:
-            // ShowPersistDialog(Selected->d.persist.var);
+            ShowPersistDialog(Selected->d.persist.var);
             break;
 
         case ELEM_SHIFT_REGISTER:
-            // ShowShiftRegisterDialog(Selected->d.shiftRegister.name,
-            //     &(Selected->d.shiftRegister.stages));
+            ShowShiftRegisterDialog(Selected->d.shiftRegister.name,
+                &(Selected->d.shiftRegister.stages));
             break;
 
         case ELEM_FORMATTED_STRING:
-            // ShowFormattedStringDialog(Selected->d.fmtdStr.var,
-            //     Selected->d.fmtdStr.string);
+            ShowFormattedStringDialog(Selected->d.fmtdStr.var,
+                Selected->d.fmtdStr.string);
             break;
 
         case ELEM_PIECEWISE_LINEAR:

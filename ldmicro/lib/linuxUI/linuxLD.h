@@ -198,6 +198,17 @@ typedef struct _RECT {
   LONG bottom;
 } RECT, *PRECT;
 
+typedef struct SimpleDialogDataTag {
+    UINT uflag;
+    int boxes;
+    char **dests;
+    char *str1;
+    char *str2;
+    char *str3;
+    int *num1;
+    int *num2;
+} SimpleDialogData;
+
 /// Variables
 extern std::vector<HEAPRECORD> HeapRecord;
 

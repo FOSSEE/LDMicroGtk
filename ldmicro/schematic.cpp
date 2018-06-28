@@ -488,7 +488,7 @@ void EditSelectedElement(void)
             break;
 
         case ELEM_PIECEWISE_LINEAR:
-            // ShowPiecewiseLinearDialog(Selected);
+            ShowPiecewiseLinearDialog(Selected);
             break;
 
         case ELEM_LOOK_UP_TABLE:

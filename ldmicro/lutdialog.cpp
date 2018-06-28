@@ -58,8 +58,12 @@ static LONG_PTR PrevIndexProc;
 static LONG_PTR PrevCountProc;
 static HWID OkButton;
 static HWID CancelButton;
+<<<<<<< HEAD
 static int GLOBAL_LUT_DIALOG_TIMER;
 static bool destroyCheck;
+=======
+static UINT LUT_DIALOG_REFRESH_TIMER_ID = 0;
+>>>>>>> akshay-c-GUI_port
 
 HWID LutGrid;
 HWID LutPackingBox;
@@ -436,24 +440,32 @@ gboolean LookUpTableKeyPress (HWID widget, GdkEventKey* event, gpointer data){
     return FALSE;
 }
 
-BOOL LutRefreshDialog (gpointer data){
+/// Dialog refresh function
+BOOL LutDialogRefresh(gpointer data)
+{
     LookUpTableCheckMode ();
-    LookUpTableGetData((gpointer) data);
+    LookUpTableGetData(NULL, (gpointer) data);
     return TRUE;
 }
-
-// Mouse click callback
-void LutDialogMouseClick (HWID widget, gpointer data){
-    destroyCheck = TRUE;
+// Ok button call
+void LutDialogOk (HWID widget, gpointer data)
+{
     LookUpTableCheckMode ();
-    LookUpTableGetData((gpointer) data);
-}
+    LookUpTableGetData(NULL, (gpointer) data);
 
-// Calls DestroyWindow
-void LutCallDestroyWindow (HWID widget, gpointer data){
-    // g_source_remove (GLOBAL_LUT_DIALOG_TIMER);
     DestroyWindow (LutDialog);
     gtk_widget_set_sensitive (MainWindow, TRUE);
+    g_source_remove (LUT_DIALOG_REFRESH_TIMER_ID);
+    LUT_DIALOG_REFRESH_TIMER_ID = 0;
+}
+
+// Cancel button call
+void LutCallCancel (HWID widget, gpointer data)
+{
+    DestroyWindow (LutDialog);
+    gtk_widget_set_sensitive (MainWindow, TRUE);
+    g_source_remove (LUT_DIALOG_REFRESH_TIMER_ID);
+    LUT_DIALOG_REFRESH_TIMER_ID = 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -524,20 +536,12 @@ void ShowLookUpTableDialog(ElemLeaf *l)
     g_signal_connect (G_OBJECT (LutDialog), "key-press-event",
                     G_CALLBACK(LookUpTableKeyPress), (gpointer)l);
     g_signal_connect (G_OBJECT (OkButton), "clicked",
-                    G_CALLBACK(LutDialogMouseClick), (gpointer)l);
+                    G_CALLBACK(LutDialogOk), (gpointer)l);
     g_signal_connect (G_OBJECT (CancelButton), "clicked",
-                    G_CALLBACK(LutCallDestroyWindow), NULL);
-    // GLOBAL_LUT_DIALOG_TIMER = g_timeout_add(100, (GSourceFunc)LutRefreshDialog, (gpointer)l);
-}
+                    G_CALLBACK(LutCallCancel), NULL);
 
-gboolean PiecewiseDialogKeyPress (HWID widget,
-            GdkEventKey* event, gpointer data){
-    if (event->keyval = GDK_KEY_Return){
-        PiecewiseDialogGetData();
-    }
-    else if (event->keyval = GDK_KEY_Return){
-        
-    }
+    if (LUT_DIALOG_REFRESH_TIMER_ID == 0)
+       LUT_DIALOG_REFRESH_TIMER_ID = g_timeout_add(100, (GSourceFunc)LutDialogRefresh, (gpointer)l);
 }
 
 //-----------------------------------------------------------------------------

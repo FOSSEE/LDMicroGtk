@@ -195,6 +195,7 @@ static void DestroyLutControls(BOOL destroyFlag = TRUE)
                 DestroyWindow(ValuesLabel[i]);
             }
         }
+        ProgramChanged();
     }
 }
 
@@ -222,6 +223,7 @@ static void DestroyLutControlsPiecewise(BOOL destroyFlag = TRUE)
                 DestroyWindow(ValuesTextbox[i]);
                 DestroyWindow(ValuesLabel[i]);
         }
+        ProgramChanged();
     }
 }
 
@@ -434,12 +436,14 @@ void LookUpTableCheckMode (void){
                     DestroyWindow(ValuesLabel[i]);
                 }
             }
+            ProgramChanged();
         }
         else {
             DestroyLutControls();
             if (!x && GTK_IS_ENTRY(StringTextbox))
             {
                 DestroyWindow(StringTextbox);
+                ProgramChanged();
                 gtk_editable_set_editable (GTK_EDITABLE (CountTextbox), TRUE);
             }   
         }
@@ -456,12 +460,14 @@ gboolean LookUpTableKeyPress (HWID widget, GdkEventKey* event, gpointer data){
         LookUpTableCheckMode ();
         LookUpTableGetData((gpointer) data);
         DestroyWindow (LutDialog);
+        ProgramChanged();
         gtk_widget_set_sensitive (MainWindow, TRUE);
         g_source_remove (LUT_DIALOG_REFRESH_TIMER_ID_1);
         LUT_DIALOG_REFRESH_TIMER_ID_1 = 0;
     }
     else if (event -> keyval == GDK_KEY_Escape){
         DestroyWindow (LutDialog);
+        ProgramChanged();
         gtk_widget_set_sensitive (MainWindow, TRUE);
         g_source_remove (LUT_DIALOG_REFRESH_TIMER_ID_1);
         LUT_DIALOG_REFRESH_TIMER_ID_1 = 0;
@@ -483,6 +489,7 @@ void LutDialogOk (HWID widget, gpointer data)
     LookUpTableGetData((gpointer) data);
 
     DestroyWindow (LutDialog);
+    ProgramChanged();
     gtk_widget_set_sensitive (MainWindow, TRUE);
     g_source_remove (LUT_DIALOG_REFRESH_TIMER_ID_1);
     LUT_DIALOG_REFRESH_TIMER_ID_1 = 0;
@@ -492,6 +499,7 @@ void LutDialogOk (HWID widget, gpointer data)
 void LutCallCancel (HWID widget, gpointer data)
 {
     DestroyWindow (LutDialog);
+    ProgramChanged();
     gtk_widget_set_sensitive (MainWindow, TRUE);
     g_source_remove (LUT_DIALOG_REFRESH_TIMER_ID_1);
     LUT_DIALOG_REFRESH_TIMER_ID_1 = 0;
@@ -621,6 +629,7 @@ void PiecewiseDialogOk (HWID widget, gpointer data)
     PiecewiseDialogGetData((gpointer) data);
 
     DestroyWindow (LutDialog);
+    ProgramChanged();
     gtk_widget_set_sensitive (MainWindow, TRUE);
     g_source_remove (LUT_DIALOG_REFRESH_TIMER_ID_2);
     LUT_DIALOG_REFRESH_TIMER_ID_2 = 0;
@@ -633,12 +642,14 @@ gboolean PiecewiseDialogKeyPress (HWID widget, GdkEventKey* event, gpointer data
         PiecewiseDialogPointTextbox (piecewiseTmpCount);
         PiecewiseDialogGetData((gpointer) data);
         DestroyWindow (LutDialog);
+        ProgramChanged();
         gtk_widget_set_sensitive (MainWindow, TRUE);
         g_source_remove (LUT_DIALOG_REFRESH_TIMER_ID_2);
         LUT_DIALOG_REFRESH_TIMER_ID_2 = 0;
     }
     else if (event -> keyval == GDK_KEY_Escape){
         DestroyWindow (LutDialog);
+        ProgramChanged();
         gtk_widget_set_sensitive (MainWindow, TRUE);
         g_source_remove (LUT_DIALOG_REFRESH_TIMER_ID_2);
         LUT_DIALOG_REFRESH_TIMER_ID_2 = 0;
@@ -650,6 +661,7 @@ gboolean PiecewiseDialogKeyPress (HWID widget, GdkEventKey* event, gpointer data
 void PiecewiseCallCancel (HWID widget, gpointer data)
 {
     DestroyWindow (LutDialog);
+    ProgramChanged();
     gtk_widget_set_sensitive (MainWindow, TRUE);
     g_source_remove (LUT_DIALOG_REFRESH_TIMER_ID_2);
     LUT_DIALOG_REFRESH_TIMER_ID_2 = 0;

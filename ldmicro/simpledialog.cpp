@@ -303,12 +303,14 @@ void SimpleDialogWrapUp()
     }
 
     DestroyWindow(SimpleDialog);
+    ProgramChanged();
     SIMPLE_DIALOG_ACTIVE = FALSE;
 }
 
 void SimpleDialogCancelProc()
 {
     DestroyWindow(SimpleDialog);
+    ProgramChanged();
     SIMPLE_DIALOG_ACTIVE = FALSE;
 }
 

@@ -712,6 +712,7 @@ gboolean LD_WM_Close_call(GtkWidget *widget, GdkEvent *event, gpointer user_data
     FreezeDWORD(IoListHeight);
 
     gtk_main_quit();
+    gdk_threads_leave();
 }
 
 gboolean LD_GTK_mouse_click_hook(GtkWidget *widget, GdkEvent *event, gpointer user_data)
@@ -877,15 +878,15 @@ gboolean LD_WM_Paint_call(HWID widget, HCRDC cr, gpointer data)
     return FALSE;
 }
 
-void LD_WM_Destroy_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+gboolean LD_WM_Destroy_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)
 {
     /* Handles:
     * WM_DESTROY
     */
-    g_print("destroy called\n");
-    CheckSaveUserCancels();
 
-    return;
+    if(CheckSaveUserCancels())
+        return TRUE;
+
     FreezeWindowPos(MainWindow);
     FreezeDWORD(IoListHeight);
 

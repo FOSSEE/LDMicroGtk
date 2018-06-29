@@ -401,15 +401,18 @@ static gboolean AnalogSliderDialogKeyboardProc(GtkWidget* widget, GdkEventKey* e
     if (AnalogSliderDone == TRUE || AnalogSliderCancel == TRUE)
     {
         DestroyWindow (AnalogSliderMain);
+        ProgramChanged();
         return FALSE;
     }
 
     if (event->keyval == GDK_KEY_Return){
         DestroyWindow (AnalogSliderMain);
+        ProgramChanged();
         AnalogSliderDone = TRUE;
     }
     else if (event->keyval == GDK_KEY_Escape){
         DestroyWindow (AnalogSliderMain);
+        ProgramChanged();
         AnalogSliderDone = TRUE;
         AnalogSliderCancel = TRUE;
     }
@@ -423,6 +426,7 @@ static gboolean AnalogSliderDialogMouseProc(GtkWidget *widget, GdkEventButton *e
     SetAdcShadow((char*)name, v);
     if (event->button == 1 && event->type == GDK_BUTTON_RELEASE){
         DestroyWindow (AnalogSliderMain);
+        ProgramChanged();
         AnalogSliderDone = TRUE;
     }
 
@@ -558,6 +562,7 @@ static void IoDialogProc(BOOL DialogDone, int item)
     }
 
     DestroyWindow(IoDialog);
+    ProgramChanged();
 }
 
 void IoDialogRowActivateProc(GtkTreeView *tree_view, GtkTreePath *path, GtkTreeViewColumn *column, gpointer user_data)

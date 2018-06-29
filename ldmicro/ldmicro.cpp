@@ -719,6 +719,17 @@ gboolean LD_GTK_mouse_click_hook(GtkWidget *widget, GdkEvent *event, gpointer us
     * WM_LBUTTONDBLCLK, WM_LBUTTONDOWN
     */
 
+    RECT Rect;
+    GetWindowRect(ScrollWindow, &Rect);
+    int wy;
+    gtk_window_get_position(GTK_WINDOW(MainWindow), NULL, &wy);
+
+    // g_print("net: %i\n", wy + 30 + Rect.bottom);
+
+    /// Identify if mouse is clicked outside drawing area
+    if (wy + 30 + Rect.bottom < event->button.y_root)
+        return FALSE;
+
     GtkAdjustment *adjustment = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(ScrollWindow));
 
     switch(event->button.type)

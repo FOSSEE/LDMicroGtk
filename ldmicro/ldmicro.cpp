@@ -907,6 +907,15 @@ gboolean LD_WM_Command_call(GtkMenuItem* men, gpointer gpcode)
     return FALSE;
 }
 
+void ProcessorCall(GtkCheckMenuItem* men, gpointer gpcode)
+{
+    int tempcode = GPOINTER_TO_INT(gpcode);
+    if(gtk_check_menu_item_get_active(men))
+    {
+        ProcessMenu (tempcode);
+    }
+}
+
 gboolean LD_WM_SetFocus_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)
 {
     /* Handles:
@@ -1155,6 +1164,12 @@ inline void MenuHandler ()
  
     g_signal_connect(G_OBJECT(AboutMenu), "activate",
         G_CALLBACK(LD_WM_Command_call), GINT_TO_POINTER(MNU_ABOUT));
+    // Connect microcontroller signals automatically
+    for(int i = 0; i < NUM_SUPPORTED_MCUS; i++)
+    {
+        g_signal_connect(G_OBJECT(ProcessorMenuItems[i]), "toggled",
+            G_CALLBACK(ProcessorCall), GINT_TO_POINTER((MNU_PROCESSOR_0 + i)));
+    } 
 }
 
 //-----------------------------------------------------------------------------

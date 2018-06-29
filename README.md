@@ -26,11 +26,7 @@ Simply run `make` in the build directory of the project to compile.
 
 _Note_: In order to compile the Makefile must first be generated (see [Building the Makefile](#building-the-makefile)).
 
-Multiple Perl Scripts are executed during the build phase. In order to execute these scripts, you need perl. This project uses ActivePerl Community Edition, which can be obtained from the following website:
-
-http://www.activestate.com/activeperl
-
-or install the perl packages from the terminal (see [External package dependencies](#external-package-dependencies)).
+Multiple Perl Scripts are executed during the build phase. In order to execute these scripts, to install the perl packages from the terminal (see [External package dependencies](#external-package-dependencies)).
 
 ## External package dependencies
 The install commands for all the packages required to compile LDMicro for Linux are given below:

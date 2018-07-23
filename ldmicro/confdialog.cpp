@@ -203,6 +203,7 @@ void ConfDialogSignalCall () {
                     G_CALLBACK(ConfDialogGetData), NULL);
     g_signal_connect (G_OBJECT (CancelButton), "clicked",
                     G_CALLBACK(ConfCallDestroyWindow), NULL);
+    g_signal_connect (ConfDialog, "delete_event", G_CALLBACK (ConfCallDestroyWindow), NULL);
 }
 
 void ShowConfDialog(void)

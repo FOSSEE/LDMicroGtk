@@ -784,7 +784,6 @@ void IoListProc(NMHDR *h)
 {
     switch(h->code) {
         case LVN_GETDISPINFO: {
-            
             int item = h->item.iItem;
             /// Don't confuse people by displaying bogus pin assignments
             /// for the C target.
@@ -809,6 +808,17 @@ void IoListProc(NMHDR *h)
                 g_value_set_string(&val, (const char*)&IO_value_holder);                    
                 gtk_list_store_set_value (GTK_LIST_STORE(h->hlistFrom), h->hlistIter, LV_IO_PIN, &val);
             }
+
+            /// case LV_IO_STATE: 
+            if(InSimulationMode) {
+                char *name = Prog.io.assignment[item].name;
+                DescribeForIoList(name, IO_value_holder);
+            } else {
+                strcpy(IO_value_holder, "");
+            }
+            
+            g_value_set_string(&val, (const char*)IO_value_holder);                    
+            gtk_list_store_set_value (GTK_LIST_STORE(h->hlistFrom), h->hlistIter, LV_IO_STATE, &val);
             /// case LV_IO_TYPE: 
             char *s = IoTypeToString(Prog.io.assignment[item].type);
 
@@ -818,12 +828,14 @@ void IoListProc(NMHDR *h)
             /// case LV_IO_NAME:
             g_value_set_string(&val, (const char*)Prog.io.assignment[item].name);                    
             gtk_list_store_set_value (GTK_LIST_STORE(h->hlistFrom), h->hlistIter, LV_IO_NAME, &val);
-            
+
             /// case LV_IO_PORT: 
             /// Don't confuse people by displaying bogus pin assignments
             /// for the C target.
+
             if(Prog.mcu && Prog.mcu->whichIsa == ISA_ANSIC) {
                 strcpy(IO_value_holder, "");
+
                 break;
             }
 
@@ -840,7 +852,6 @@ void IoListProc(NMHDR *h)
                 strcpy(IO_value_holder, "");
                 break;
             }
-
             if(UartFunctionUsed() && Prog.mcu) {
                 if((Prog.mcu->uartNeeds.rxPin == pin) ||
                     (Prog.mcu->uartNeeds.txPin == pin))
@@ -873,17 +884,6 @@ void IoListProc(NMHDR *h)
 
             g_value_set_string(&val, (const char*)IO_value_holder);                    
             gtk_list_store_set_value (GTK_LIST_STORE(h->hlistFrom), h->hlistIter, LV_IO_PORT, &val);
-
-            /// case LV_IO_STATE: 
-            if(InSimulationMode) {
-                char *name = Prog.io.assignment[item].name;
-                DescribeForIoList(name, IO_value_holder);
-            } else {
-                strcpy(IO_value_holder, "");
-            }
-            
-            g_value_set_string(&val, (const char*)IO_value_holder);                    
-            gtk_list_store_set_value (GTK_LIST_STORE(h->hlistFrom), h->hlistIter, LV_IO_STATE, &val);
             
             break;
         }

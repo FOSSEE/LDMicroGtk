@@ -711,6 +711,7 @@ void SimulateOneCycle(BOOL forceRefresh)
 
     if(NeedRedraw || SimulateRedrawAfterNextCycle || forceRefresh) {
         InvalidateRect(DrawWindow, NULL, FALSE);
+        RefreshControlsToSettings();
         gtk_widget_queue_draw(DrawWindow);
         // ListView_RedrawItems(IoList, 0, Prog.io.count - 1);
     }

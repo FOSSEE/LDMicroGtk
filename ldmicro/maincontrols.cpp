@@ -946,6 +946,7 @@ void ToggleSimulationMode(void)
         }
 
     UpdateMainWindowTitleBar();
+    RefreshControlsToSettings();
 }
 
 //-----------------------------------------------------------------------------
@@ -955,7 +956,7 @@ void ToggleSimulationMode(void)
 // how many elements to populate.
 //-----------------------------------------------------------------------------
 void RefreshControlsToSettings(void)
-{   
+{
     GtkTreeIter iter;
     BOOL path_not_empty = gtk_tree_model_get_iter_first (GTK_TREE_MODEL(IoList), &iter);
     // g_print("path e = %i\n", path_not_empty);

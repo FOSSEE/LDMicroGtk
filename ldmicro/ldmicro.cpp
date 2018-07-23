@@ -66,7 +66,7 @@ char CurrentCompileFile[MAX_PATH];
 PlcProgram Prog;
 
 /// Function to safely quit program gtk main loop
-void LD_WM_Close_call(GtkWidget *widget, GdkEvent *event, gpointer user_data);
+gboolean LD_WM_Close_call(GtkWidget *widget, GdkEvent *event, gpointer user_data);
 
 //-----------------------------------------------------------------------------
 // Get a filename with a common dialog box and then save the program to that
@@ -699,18 +699,20 @@ gboolean LD_WM_KeyDown_call(GtkWidget *widget, GdkEventKey *event, gpointer user
     return FALSE;
 }
 
-void LD_WM_Close_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+gboolean LD_WM_Close_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)
 {
     /* Handles:
     * WM_CLOSE
     */
     
-    CheckSaveUserCancels();
+    if(CheckSaveUserCancels())
+        return TRUE;
 
     FreezeWindowPos(MainWindow);
     FreezeDWORD(IoListHeight);
 
     gtk_main_quit();
+    gdk_threads_leave();
 }
 
 gboolean LD_GTK_mouse_click_hook(GtkWidget *widget, GdkEvent *event, gpointer user_data)
@@ -876,18 +878,20 @@ gboolean LD_WM_Paint_call(HWID widget, HCRDC cr, gpointer data)
     return FALSE;
 }
 
-void LD_WM_Destroy_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+gboolean LD_WM_Destroy_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)
 {
     /* Handles:
     * WM_DESTROY
     */
 
-    CheckSaveUserCancels();
+    if(CheckSaveUserCancels())
+        return TRUE;
 
     FreezeWindowPos(MainWindow);
     FreezeDWORD(IoListHeight);
 
     gtk_main_quit();
+    gdk_threads_leave();
 }
 
 gboolean LD_WM_Size_call(GtkWidget *widget, GdkEvent *event, gpointer user_data)
@@ -1342,6 +1346,5 @@ int main(int argc, char** argv)
     // }
     
     gtk_main();
-    gdk_threads_leave();
     return EXIT_SUCCESS;
 }

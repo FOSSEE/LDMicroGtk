@@ -144,6 +144,7 @@ void CoilDialogGetData (char* name){
 
     gtk_widget_set_sensitive (MainWindow, TRUE);
     DestroyWindow (CoilDialog);
+    ProgramChanged();
 }
 
 // Mouse click callback
@@ -158,6 +159,7 @@ gboolean CoilDialogKeyPress (HWID widget, GdkEventKey* event, gpointer data){
     }
     else if (event -> keyval == GDK_KEY_Escape){
         DestroyWindow (CoilDialog);
+        ProgramChanged();
         gtk_widget_set_sensitive (MainWindow, TRUE);
     }
     return FALSE;
@@ -166,6 +168,7 @@ gboolean CoilDialogKeyPress (HWID widget, GdkEventKey* event, gpointer data){
 // Calls DestroyWindow
 void CoilCallDestroyWindow (HWID widget, gpointer data){
     DestroyWindow (CoilDialog);
+    ProgramChanged();
     gtk_widget_set_sensitive (MainWindow, TRUE);
 }
 

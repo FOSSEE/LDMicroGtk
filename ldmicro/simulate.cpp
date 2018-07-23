@@ -957,6 +957,7 @@ void DestroyUartSimulationWindow(void)
     FreezeDWORD(TerminalH);
 
     DestroyWindow(UartSimulationWindow);
+    ProgramChanged();
     UartSimulationWindow = NULL;
 }
 

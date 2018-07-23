@@ -59,6 +59,7 @@ void CommentDialogGetData (char* comment){
             MAX_COMMENT_LEN-1);
     gtk_widget_set_sensitive (MainWindow, TRUE);
     DestroyWindow (CommentDialog);
+    ProgramChanged();
 }
 
 // Mouse click callback
@@ -74,12 +75,14 @@ gboolean CommentDialogKeyPress (HWID widget, GdkEventKey* event, gpointer data){
     else if (event -> keyval == GDK_KEY_Escape){
         DestroyWindow (CommentDialog);
         gtk_widget_set_sensitive (MainWindow, TRUE);
+        ProgramChanged();
     }
     return FALSE;
 }
 
 void CommentCallDestroyWindow (HWID widget, gpointer data){
     DestroyWindow (CommentDialog);
+    ProgramChanged();
     gtk_widget_set_sensitive (MainWindow, TRUE);
 }
 

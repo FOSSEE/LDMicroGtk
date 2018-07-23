@@ -96,6 +96,7 @@ void ResetDialogGetData (char* name){
     strcpy (name+1, gtk_entry_get_text (GTK_ENTRY (NameTextbox)));
     gtk_widget_set_sensitive (MainWindow, TRUE);
     DestroyWindow (ResetDialog);
+    ProgramChanged();
 }
 
 // Mouse click callback
@@ -110,6 +111,7 @@ gboolean ResetDialogKeyPress (HWID widget, GdkEventKey* event, gpointer data){
     }
     else if (event -> keyval == GDK_KEY_Escape){
         DestroyWindow (ResetDialog);
+        ProgramChanged();
         gtk_widget_set_sensitive (MainWindow, TRUE);
     }
     return FALSE;
@@ -117,6 +119,7 @@ gboolean ResetDialogKeyPress (HWID widget, GdkEventKey* event, gpointer data){
 
 void ResetCallDestroyWindow (HWID widget, gpointer data){
     DestroyWindow (ResetDialog);
+    ProgramChanged();
     gtk_widget_set_sensitive (MainWindow, TRUE);
 }
 

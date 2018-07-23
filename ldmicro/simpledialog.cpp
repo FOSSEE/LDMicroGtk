@@ -240,7 +240,7 @@ void SimpleDialogWrapUp()
         {
             SDdata.str1[0] = 'T';
             strcpy(SDdata.str1+1, SDdata.dests[0]);
-            g_print("%s, %s\n", SDdata.str1, SDdata.dests[0]);
+            //g_print("%s, %s\n", SDdata.str1, SDdata.dests[0]);
             double del = atof(SDdata.dests[1]);
             if(del > 2140000) { // 2**31/1000, don't overflow signed int
                 Error(_("Delay too long; maximum is 2**31 us."));

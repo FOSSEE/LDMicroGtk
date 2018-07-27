@@ -195,6 +195,8 @@ extern HMENU CompileAsMenu;
 extern HMENU ManualMenu;
 extern HMENU AboutMenu;
 
+extern HWID PinList;
+
 // extern HMENU MNU_ADV_SIMULATION;
 
 // Columns within the I/O etc. listview.

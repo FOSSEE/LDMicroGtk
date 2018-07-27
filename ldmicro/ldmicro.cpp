@@ -237,6 +237,7 @@ BOOL CheckSaveUserCancels(void)
             return TRUE;
 
         default:
+            return TRUE;
             oops();
     }
     
@@ -707,9 +708,12 @@ gboolean LD_WM_Close_call(GtkWidget *widget, GdkEvent *event, gpointer user_data
     
     if(CheckSaveUserCancels())
         return TRUE;
-
+    GdkRectangle allocation;
+    gtk_widget_get_allocation(GTK_WIDGET(view), &allocation); 
+    IoListHeight = allocation.height;
     FreezeWindowPos(MainWindow);
     FreezeDWORD(IoListHeight);
+    g_print("List Height close: %d\n",IoListHeight);
 
     gtk_main_quit();
     gdk_threads_leave();
@@ -851,7 +855,7 @@ gboolean LD_WM_Paint_call(HWID widget, HCRDC cr, gpointer data)
 
     static BOOL Paint_call_first = TRUE;
 
-    if (Paint_call_first)
+    //if (Paint_call_first)
     {        
         gtk_widget_override_background_color(GTK_WIDGET(widget), 
                     GTK_STATE_FLAG_NORMAL, (HBRUSH)GetStockObject(BLACK_BRUSH));
@@ -859,7 +863,7 @@ gboolean LD_WM_Paint_call(HWID widget, HCRDC cr, gpointer data)
         gint width = gtk_widget_get_allocated_width (widget);
         gint height = gtk_widget_get_allocated_height (widget);
 
-        gtk_widget_set_size_request(widget, width, height+1);
+        gtk_widget_set_size_request(widget, width, height);
 
         gdk_cairo_set_source_rgba (cr, (HBRUSH)GetStockObject(BLACK_BRUSH));
 
@@ -1267,9 +1271,8 @@ int main(int argc, char** argv)
     InitForDrawing();
 
     ThawWindowPos(MainWindow);
-    IoListHeight = 100;
     ThawDWORD(IoListHeight);
-
+    g_print("IoListHeight start: %d\n", IoListHeight);
     MakeMainWindowControls(); /// takes care of MakeMainWindowMenus()
     MainWindowResized();
 

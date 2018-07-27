@@ -48,7 +48,7 @@ static BOOL DialogCancel;
 
 static HWID IoDialog;
 
-static HWID PinList;
+HWID PinList;
 static HWID OkButton;
 static HWID CancelButton;
 

@@ -855,7 +855,7 @@ gboolean LD_WM_Paint_call(HWID widget, HCRDC cr, gpointer data)
 
     static BOOL Paint_call_first = TRUE;
 
-    //if (Paint_call_first)
+    if (Paint_call_first)
     {        
         gtk_widget_override_background_color(GTK_WIDGET(widget), 
                     GTK_STATE_FLAG_NORMAL, (HBRUSH)GetStockObject(BLACK_BRUSH));
@@ -1258,7 +1258,7 @@ int main(int argc, char** argv)
     gtk_window_resize (GTK_WINDOW(MainWindow), 800, 600);
     gtk_window_move(GTK_WINDOW(MainWindow), 10, 10);
     gtk_widget_override_background_color(GTK_WIDGET(MainWindow), 
-                            GTK_STATE_FLAG_NORMAL, ((HBRUSH)GetStockObject(DKGRAY_BRUSH)));
+                            GTK_STATE_FLAG_NORMAL, ((HBRUSH)GetStockObject(BLACK_BRUSH)));
     gtk_window_set_default_icon(LoadImage(Instance, LDMICRO_ICON,
                             IMAGE_ICON, 32, 32, 0));
     gtk_window_set_icon(GTK_WINDOW(MainWindow), LoadImage(Instance, LDMICRO_ICON,

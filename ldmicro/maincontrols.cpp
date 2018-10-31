@@ -617,6 +617,8 @@ void MakeMainWindowControls(void)
     HWID StatusGrid = gtk_grid_new();
     gtk_widget_override_background_color(GTK_WIDGET(StatusGrid), 
                             GTK_STATE_FLAG_NORMAL, ((HBRUSH)GetStockObject(DKGRAY_BRUSH)));
+    gtk_widget_override_background_color(GTK_WIDGET(view), 
+                            GTK_STATE_FLAG_NORMAL, ((HBRUSH)GetStockObject(WHITE_BRUSH)));
     /// Creating Status Bar 1 and attaching to grid
     StatusBar[0] = gtk_statusbar_new();
    

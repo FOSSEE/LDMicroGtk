@@ -333,8 +333,8 @@ void SetBkColor(HWID widget, HCRDC hcr, COLORREF bkCol)
     if (hcr == NULL)
         return;
     
-    gtk_widget_override_background_color(GTK_WIDGET(widget), 
-                        GTK_STATE_FLAG_NORMAL, &bkCol);
+    /*gtk_widget_override_background_color(GTK_WIDGET(widget), 
+                        GTK_STATE_FLAG_NORMAL, &bkCol);*/
 
     gint width = gtk_widget_get_allocated_width (widget);
     gint height = gtk_widget_get_allocated_height (widget);

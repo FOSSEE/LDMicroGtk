@@ -20,8 +20,6 @@ std::vector<TimerRecord> timerRecords;
 /// EnableMenuItem Variables
 const UINT MF_ENABLED = 0;
 const UINT MF_GRAYED = 1;
-const UINT MF_CHECKED = 2;
-const UINT MF_UNCHECKED = 3;
 
 /// Accelerators (keyboard shortcuts)
 GtkAccelGroup* AccelGroup;
@@ -241,18 +239,6 @@ void EnableMenuItem(HMENU MenuName, HMENU MenuItem, UINT CheckEnabledItem)
         case MF_GRAYED :
            gtk_widget_set_sensitive (MenuItem, false);
         break; 
-    }
-}
-
-void CheckMenuItem(HMENU MenuName, HMENU MenuItem, UINT Check)
-{
-    switch (Check){
-        case MF_CHECKED :
-            gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM(MenuItem), true);
-        break;
-        case MF_UNCHECKED :
-            gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM(MenuItem), false);
-        break;
     }
 }
 

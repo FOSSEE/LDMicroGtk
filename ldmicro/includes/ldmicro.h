@@ -121,6 +121,9 @@ typedef signed long SDWORD;
 #define MNU_MANUAL              0x80
 #define MNU_ABOUT               0x81
 
+#define MF_CHECKED      2
+#define MF_UNCHECKED    3
+
 // #define MNU_ADV_SIMULATION
 
 // New menu items here
@@ -600,6 +603,7 @@ extern McuIoInfo SupportedMcus[NUM_SUPPORTED_MCUS];
 void CheckHeap(char *file, int line);
 #define ok() CheckHeap(__FILE__, __LINE__)
 
+
 // maincontrols.cpp
 void MakeMainWindowControls(void);
 HMENU MakeMainWindowMenus(void);
@@ -612,6 +616,8 @@ void ToggleSimulationMode(void);
 void StopSimulation(void);
 void StartSimulation(void);
 void UpdateMainWindowTitleBar(void);
+gboolean LD_WM_Command_call(GtkMenuItem* men, gpointer gpcode);
+void CheckMenuItem(HMENU MenuName, HMENU MenuItem, UINT  Check);
 extern int ScrollWidth;
 extern int ScrollHeight;
 extern BOOL NeedHoriz;

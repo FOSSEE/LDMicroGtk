@@ -112,8 +112,6 @@ extern const COLORREF DKGRAY_BR;
 /// EnableMenuItem variables
 extern const UINT MF_ENABLED;
 extern const UINT MF_GRAYED;
-extern const UINT MF_CHECKED;
-extern const UINT MF_UNCHECKED;
 
 /// Accelerators (keyboard shortcuts)
 extern GtkAccelGroup* AccelGroup;
@@ -169,10 +167,6 @@ void EnableMenuItem(
     HMENU MenuItem, 
     UINT  CheckEnabledItem);
 
-void CheckMenuItem(
-    HMENU MenuName, 
-    HMENU MenuItem, 
-    UINT  Check);
 
 HANDLE GetStockObject(int fnObject);
 

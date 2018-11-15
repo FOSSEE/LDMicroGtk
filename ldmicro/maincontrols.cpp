@@ -135,6 +135,22 @@ int                 IoListTop;
 // whether the simulation is running in real time
 static BOOL         RealTimeSimulationRunning;
 
+void CheckMenuItem(HMENU MenuName, HMENU MenuItem, UINT Check)
+{
+    g_signal_handlers_block_matched(MenuItem, G_SIGNAL_MATCH_FUNC,NULL,NULL,NULL,
+        (void*)LD_WM_Command_call, (void*)NULL);
+    switch (Check){
+        case MF_CHECKED :
+            gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM(MenuItem), true);
+        break;
+        case MF_UNCHECKED :
+            gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM(MenuItem), false);
+        break;
+    }
+    g_signal_handlers_unblock_matched(G_OBJECT(MenuItem), G_SIGNAL_MATCH_FUNC,NULL,NULL,NULL,
+        (void*)LD_WM_Command_call, GINT_TO_POINTER(MNU_SIMULATION_MODE));
+}
+
 // Displaying keyboard shortcuts for each menu item
 void AddMenuAccelerators (void){
     // Declaring the accelerator group for keyboard shortcuts

@@ -933,12 +933,13 @@ void ToggleSimulationMode(void)
 
         CheckMenuItem(SimulateMenu, SimulationModeMenu, MF_CHECKED);
 
-        ClearSimulationData(); // simulation.cpp, ldmicro.h
-        // Recheck InSimulationMode, because there could have been a Compile
-        // error, which would have kicked us out of simulation mode.
         if(UartFunctionUsed() && InSimulationMode) {
             ShowUartSimulationWindow(); // simulate.cpp
         }
+
+        ClearSimulationData(); // simulation.cpp, ldmicro.h
+        // Recheck InSimulationMode, because there could have been a Compile
+        // error, which would have kicked us out of simulation mode.
     }
     else {
         RealTimeSimulationRunning = FALSE;

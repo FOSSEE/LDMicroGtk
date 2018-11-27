@@ -67,14 +67,21 @@ IF(UNIX)
         COMMAND perl txt2c.pl  > ${OBJDIR}/helptext.cpp
         DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/manual*.txt")
 
+    add_custom_command( 
+        OUTPUT ldlogo.h
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/includes
+        COMMAND gdk-pixbuf-csource --raw --name=LD_LOGO ${CMAKE_CURRENT_SOURCE_DIR}/ldmicro.ico > ldlogo.h
+        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/ldmicro.ico")
+
     set(SCRIPT_GENERATED_FILES ${OBJDIR}/helptext.cpp
-                            ${OBJDIR}/lang-tables.h)
+                            ${OBJDIR}/lang-tables.h
+                            ldlogo.h)
 
     add_custom_target(LDMicro_SCRIPT_GENERATED_FILES DEPENDS ${SCRIPT_GENERATED_FILES})
 
     ## Version control
-    set (LDMicro_VERSION_MAJOR 1)
-    set (LDMicro_VERSION_MINOR 0)
+    set (LDMicro_VERSION_MAJOR 2)
+    set (LDMicro_VERSION_MINOR 2)
 
     ## configure a header file to pass some of the CMake settings
     ## to the source code
@@ -143,6 +150,21 @@ IF(UNIX)
     target_link_libraries (LDMicro LinuxUI)
     target_link_libraries (LDMicro FreezeLD)
 
+    INSTALL(TARGETS LDMicro DESTINATION /usr/local/bin/ldmicro)
+    INSTALL(FILES ldmicro.ico DESTINATION /usr/local/bin/ldmicro)
+    INSTALL(FILES LDMicro.desktop DESTINATION /usr/share/applications)
+
+    ##Debian package creation
+    set(CPACK_GENERATOR "DEB")
+    set(CPACK_PACKAGE_VERSION_MAJOR "2")
+    set(CPACK_PACKAGE_VERSION_MINOR "2")
+    set(CPACK_PACKAGE_VERSION_PATCH "0")
+    set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+    set(CPACK_PACKAGE_DESCRIPTION "Ladder Logic editor, simulator and compiler for 8 bit microcontrollers")
+    set(CPACK_PACKAGE_CONTACT "Akshay Chipkar akshaychipkar@yahoo.co.in")
+    set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_CURRENT_SOURCE_DIR}/Debian/postinst")
+
+    include(CPack)
     ## Add tests
     MESSAGE( STATUS "Adding tests.." )
     add_custom_command(

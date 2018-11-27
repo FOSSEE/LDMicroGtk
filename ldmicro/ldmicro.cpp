@@ -25,7 +25,7 @@
 // Jonathan Westhues, Oct 2004
 //-----------------------------------------------------------------------------
 #include "linuxUI.h"
-
+#include <ldlogo.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "ldmicro.h"
@@ -1255,10 +1255,11 @@ int main(int argc, char** argv)
     gtk_window_move(GTK_WINDOW(MainWindow), 10, 10);
     /*gtk_widget_override_background_color(GTK_WIDGET(MainWindow), 
                             GTK_STATE_FLAG_NORMAL, ((HBRUSH)GetStockObject(BLACK_BRUSH)));*/
-    gtk_window_set_default_icon(LoadImage(Instance, LDMICRO_ICON,
-                            IMAGE_ICON, 32, 32, 0));
-    gtk_window_set_icon(GTK_WINDOW(MainWindow), LoadImage(Instance, LDMICRO_ICON,
-                            IMAGE_ICON, 32, 32, 0));
+    GdkPixbuf* pixbuf = gdk_pixbuf_new_from_inline (-1, LD_LOGO, FALSE, NULL);
+// GtkWidget* logo = gtk_image_new_from_pixbuf(pixbuf);
+
+    gtk_window_set_default_icon(pixbuf);
+    gtk_window_set_icon(GTK_WINDOW(MainWindow), pixbuf);
     /// Make main window - end
 
     MakeMainWindowMenus();

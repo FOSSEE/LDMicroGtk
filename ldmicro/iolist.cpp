@@ -353,6 +353,7 @@ BOOL LoadIoListFromFile(FILE *f)
     char name[MAX_NAME_LEN];
     int pin;
     while(fgets(line, sizeof(line), f)) {
+        ManageLineEnding(line);
         if(strcmp(line, "END\n")==0) {
             return TRUE;
         }

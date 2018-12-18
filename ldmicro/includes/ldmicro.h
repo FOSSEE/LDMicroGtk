@@ -730,6 +730,7 @@ BOOL CanUndo(void);
 // loadsave.cpp
 BOOL LoadProjectFromFile(char *filename);
 BOOL SaveProjectToFile(char *filename);
+void ManageLineEnding(char* line);
 
 // iolist.cpp
 int GenerateIoList(int prevSel);

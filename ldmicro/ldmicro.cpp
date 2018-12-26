@@ -764,6 +764,7 @@ gboolean LD_GTK_mouse_click_hook(GtkWidget *widget, GdkEvent *event, gpointer us
                 } else {
                     CHANGING_PROGRAM(EditElementMouseDoubleclick(x, y));
                 }
+                RefreshControlsToSettings();
                 gtk_widget_queue_draw(DrawWindow);
             }
             break;
@@ -947,6 +948,8 @@ void LD_WM_Notify_Row_Activate_call(GtkTreeView *tree_view, GtkTreePath *path, G
     h.hlistFrom = IoList;
 
     IoListProc(&h);
+        RefreshControlsToSettings();
+        // gtk_widget_queue_draw(DrawWindow);
 }
 
 void LD_WM_Notify_Cursor_Change_call(GtkTreeView *tree_view, gpointer user_data)

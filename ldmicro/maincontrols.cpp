@@ -528,6 +528,9 @@ HMENU MakeMainWindowMenus(void)
     // Packing the menu bar into the box for alignment
     gtk_box_pack_start(GTK_BOX(MenuBox), TopMenu, FALSE, FALSE, 0);
     AddMenuAccelerators ();
+    EnableMenuItem(SimulateMenu, StartSimulationMenu, MF_GRAYED);
+    EnableMenuItem(SimulateMenu, StopSimulationMenu, MF_GRAYED);
+    EnableMenuItem(SimulateMenu, SingleCycleMenu, MF_GRAYED);
     
     return MenuBox;
 }

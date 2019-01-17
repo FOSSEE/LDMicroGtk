@@ -234,6 +234,7 @@ BOOL CheckSaveUserCancels(void)
             return FALSE;
 
         case IDCANCEL:
+        case GTK_RESPONSE_DELETE_EVENT:
             return TRUE;
 
         default:
@@ -1326,28 +1327,6 @@ int main(int argc, char** argv)
     GenerateIoListDontLoseSelection(); 
     RefreshScrollbars();
     UpdateMainWindowTitleBar();
-
-    // MSG msg;
-    // DWORD ret;
-    // while(ret = GetMessage(&msg, NULL, 0, 0)) {
-    //     if(msg.hwnd == IoList && msg.message == WM_KEYDOWN) {
-    //         if(msg.wParam == VK_TAB) {
-    //             SetFocus(MainWindow);
-    //             continue;
-    //         }
-    //     }
-    //     if(msg.message == WM_KEYDOWN && msg.wParam != VK_UP &&
-    //         msg.wParam != VK_DOWN && msg.wParam != VK_RETURN && msg.wParam
-    //         != VK_SHIFT)
-    //     {
-    //         if(msg.hwnd == IoList) {
-    //             msg.hwnd = MainWindow;
-    //             SetFocus(MainWindow);
-    //         }
-    //     }
-    //     TranslateMessage(&msg);
-    //     DispatchMessage(&msg);
-    // }
     
     gtk_main();
     return EXIT_SUCCESS;

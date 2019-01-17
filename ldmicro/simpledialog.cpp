@@ -305,6 +305,7 @@ void SimpleDialogWrapUp()
     DestroyWindow(SimpleDialog);
     ProgramChanged();
     SIMPLE_DIALOG_ACTIVE = FALSE;
+    gtk_widget_set_sensitive (MainWindow, TRUE);
 }
 
 void SimpleDialogCancelProc()
@@ -312,6 +313,7 @@ void SimpleDialogCancelProc()
     DestroyWindow(SimpleDialog);
     ProgramChanged();
     SIMPLE_DIALOG_ACTIVE = FALSE;
+    gtk_widget_set_sensitive (MainWindow, TRUE);
 }
 
 static gboolean SimpleDialogKeyPressProc(HWID widget, GdkEventKey* event, gpointer data)
@@ -371,6 +373,7 @@ void ShowSimpleDialog(char *title, int boxes, char **labels, DWORD numOnlyMask,
             //     (LONG_PTR)MyAlnumOnlyProc);
         }
     }
+    gtk_widget_show_all(SimpleDialog);
 
     g_signal_connect (CancelButton, "clicked", G_CALLBACK (SimpleDialogCancelProc), NULL);
     g_signal_connect (OkButton, "clicked", G_CALLBACK (SimpleDialogWrapUp), NULL);
@@ -378,7 +381,6 @@ void ShowSimpleDialog(char *title, int boxes, char **labels, DWORD numOnlyMask,
 
     // EnableWindow(MainWindow, FALSE);
     // ShowWindow(SimpleDialog, TRUE);
-    gtk_widget_show_all(SimpleDialog);
     // SetFocus(Textboxes[0]);
     // SendMessage(Textboxes[0], EM_SETSEL, 0, -1);
 

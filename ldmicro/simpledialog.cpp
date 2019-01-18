@@ -93,6 +93,14 @@ static void MyAlnumOnlyProc (GtkEditable *editable, gchar *NewText, gint length,
     // oops();
 }
 
+
+//Set the closing parameters
+
+gboolean SimpleDialogClosing(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+{
+    SIMPLE_DIALOG_ACTIVE = FALSE;
+}
+
 //-----------------------------------------------------------------------------
 // Don't allow any characters other than -0-9. in the box.
 //-----------------------------------------------------------------------------
@@ -378,6 +386,7 @@ void ShowSimpleDialog(char *title, int boxes, char **labels, DWORD numOnlyMask,
     g_signal_connect (CancelButton, "clicked", G_CALLBACK (SimpleDialogCancelProc), NULL);
     g_signal_connect (OkButton, "clicked", G_CALLBACK (SimpleDialogWrapUp), NULL);
     g_signal_connect (SimpleDialog, "key_press_event", G_CALLBACK (SimpleDialogKeyPressProc), NULL);
+    g_signal_connect (SimpleDialog, "destroy_event", G_CALLBACK (SimpleDialogClosing), NULL);
 
     // EnableWindow(MainWindow, FALSE);
     // ShowWindow(SimpleDialog, TRUE);

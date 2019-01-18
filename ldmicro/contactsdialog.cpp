@@ -71,6 +71,22 @@ void ContactsDialogMyNameProc (GtkEditable *editable, gchar *NewText, gint lengt
     }
 }
 
+//Set the closing parameters
+
+gboolean ContactsDialogClosing(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+{
+    DestroyWindow (ContactsDialog);
+    ProgramChanged();
+    gtk_widget_set_sensitive (MainWindow, TRUE);
+}
+
+gboolean ContactsDialogDestroyed(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+{
+    DestroyWindow (ContactsDialog);
+    ProgramChanged();
+    gtk_widget_set_sensitive (MainWindow, TRUE);
+}
+
 static void MakeControls(void)
 {
     SourceInternalRelayRadio = gtk_radio_button_new_with_label (NULL, "Internal Relay");
@@ -199,5 +215,7 @@ void ShowContactsDialog(BOOL *negated, char *name)
                     G_CALLBACK(ContactsDialogMouseClick), NULL);
     g_signal_connect (G_OBJECT (CancelButton), "clicked",
                     G_CALLBACK(ContactsCallDestroyWindow), NULL);
+    g_signal_connect (ContactsDialog, "destroy_event", G_CALLBACK (ContactsDialogClosing), NULL);
+    g_signal_connect (ContactsDialog, "delete_event", G_CALLBACK (ContactsDialogDestroyed), NULL);
 
 }

@@ -86,6 +86,24 @@ void LutDialogMyNumberProc (GtkEditable *editable, gchar *NewText, gint length,
     }
 }
 
+gboolean LutDialogClosing(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+{
+    DestroyWindow (LutDialog);
+    ProgramChanged();
+    gtk_widget_set_sensitive (MainWindow, TRUE);
+    g_source_remove (LUT_DIALOG_REFRESH_TIMER_ID_1);
+    LUT_DIALOG_REFRESH_TIMER_ID_1 = 0;
+}
+
+gboolean LutDialogDestroyed(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+{
+    DestroyWindow (LutDialog);
+    ProgramChanged();
+    gtk_widget_set_sensitive (MainWindow, TRUE);
+    g_source_remove (LUT_DIALOG_REFRESH_TIMER_ID_1);
+    LUT_DIALOG_REFRESH_TIMER_ID_1 = 0;
+}
+
 //-----------------------------------------------------------------------------
 // Don't allow any characters other than 0-9 in the count.
 //-----------------------------------------------------------------------------
@@ -571,6 +589,8 @@ void ShowLookUpTableDialog(ElemLeaf *l)
                     G_CALLBACK(LutDialogOk), (gpointer)l);
     g_signal_connect (G_OBJECT (CancelButton), "clicked",
                     G_CALLBACK(LutCallCancel), NULL);
+    g_signal_connect (LutDialog, "destroy_event", G_CALLBACK (LutDialogClosing), NULL);
+    g_signal_connect (LutDialog, "delete_event", G_CALLBACK (LutDialogDestroyed), NULL);
 
     if (LUT_DIALOG_REFRESH_TIMER_ID_1 == 0)
        LUT_DIALOG_REFRESH_TIMER_ID_1 = g_timeout_add(100, (GSourceFunc)LutDialogRefresh, (gpointer)l);

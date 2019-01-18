@@ -98,7 +98,18 @@ static void MyAlnumOnlyProc (GtkEditable *editable, gchar *NewText, gint length,
 
 gboolean SimpleDialogClosing(GtkWidget *widget, GdkEvent *event, gpointer user_data)
 {
+    DestroyWindow(SimpleDialog);
+    ProgramChanged();
     SIMPLE_DIALOG_ACTIVE = FALSE;
+    gtk_widget_set_sensitive (MainWindow, TRUE);
+}
+
+gboolean SimpleDialogDestroyed(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+{
+    DestroyWindow(SimpleDialog);
+    ProgramChanged();
+    SIMPLE_DIALOG_ACTIVE = FALSE;
+    gtk_widget_set_sensitive (MainWindow, TRUE);
 }
 
 //-----------------------------------------------------------------------------
@@ -387,6 +398,7 @@ void ShowSimpleDialog(char *title, int boxes, char **labels, DWORD numOnlyMask,
     g_signal_connect (OkButton, "clicked", G_CALLBACK (SimpleDialogWrapUp), NULL);
     g_signal_connect (SimpleDialog, "key_press_event", G_CALLBACK (SimpleDialogKeyPressProc), NULL);
     g_signal_connect (SimpleDialog, "destroy_event", G_CALLBACK (SimpleDialogClosing), NULL);
+    g_signal_connect (SimpleDialog, "delete_event", G_CALLBACK (SimpleDialogDestroyed), NULL);
 
     // EnableWindow(MainWindow, FALSE);
     // ShowWindow(SimpleDialog, TRUE);

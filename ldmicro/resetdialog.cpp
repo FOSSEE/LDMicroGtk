@@ -57,6 +57,20 @@ void ResetDialogMyNameProc (GtkEditable *editable, gchar *NewText, gint length,
     }
 }
 
+gboolean ResetDialogClosing(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+{
+    DestroyWindow (ResetDialog);
+    ProgramChanged();
+    gtk_widget_set_sensitive (MainWindow, TRUE);
+}
+
+gboolean ResetDialogDestroyed(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+{
+    DestroyWindow (ResetDialog);
+    ProgramChanged();
+    gtk_widget_set_sensitive (MainWindow, TRUE);
+}
+
 static void MakeControls(void)
 {
     TypeTimerRadio = gtk_radio_button_new_with_label (NULL, "Timer");
@@ -156,4 +170,6 @@ void ShowResetDialog(char *name)
                     G_CALLBACK(ResetDialogMouseClick), (gpointer)name);
     g_signal_connect (G_OBJECT (CancelButton), "clicked",
                     G_CALLBACK(ResetCallDestroyWindow), NULL);
+    g_signal_connect (ResetDialog, "destroy_event", G_CALLBACK (ResetDialogClosing), NULL);
+    g_signal_connect (ResetDialog, "delete_event", G_CALLBACK (ResetDialogDestroyed), NULL);
 }

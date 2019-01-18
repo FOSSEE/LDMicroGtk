@@ -62,6 +62,22 @@ void CoilDialogMyNameProc (GtkEditable *editable, gchar *NewText, gint length,
     }
 }
 
+//Set the closing parameters
+
+gboolean CoilDialogClosing(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+{
+    DestroyWindow (CoilDialog);
+    ProgramChanged();
+    gtk_widget_set_sensitive (MainWindow, TRUE);
+}
+
+gboolean CoilDialogDestroyed(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+{
+    DestroyWindow (CoilDialog);
+    ProgramChanged();
+    gtk_widget_set_sensitive (MainWindow, TRUE);
+}
+
 static void MakeControls(void)
 {
     NormalRadio = gtk_radio_button_new_with_label (NULL, "( ) Normal");
@@ -221,6 +237,8 @@ void ShowCoilDialog(BOOL *negated, BOOL *setOnly, BOOL *resetOnly, char *name)
                     G_CALLBACK(CoilDialogMouseClick), (gpointer)name);
     g_signal_connect (G_OBJECT (CancelButton), "clicked",
                     G_CALLBACK(CoilCallDestroyWindow), NULL);
+    g_signal_connect (CoilDialog, "destroy_event", G_CALLBACK (CoilDialogClosing), NULL);
+    g_signal_connect (CoilDialog, "delete_event", G_CALLBACK (CoilDialogDestroyed), NULL);
 
     return;
 }

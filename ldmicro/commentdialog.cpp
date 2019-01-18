@@ -36,6 +36,20 @@ static HWID CommentPackingBox;
 static HWID OkButton;
 static HWID CancelButton;
 
+gboolean CommentDialogClosing(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+{
+    DestroyWindow (CommentDialog);
+    ProgramChanged();
+    gtk_widget_set_sensitive (MainWindow, TRUE);
+}
+
+gboolean CommentDialogDestroyed(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+{
+    DestroyWindow (CommentDialog);
+    ProgramChanged();
+    gtk_widget_set_sensitive (MainWindow, TRUE);
+}
+
 static void MakeControls(void)
 {
     CommentTextbox = gtk_entry_new();
@@ -111,6 +125,8 @@ void ShowCommentDialog(char *comment)
                     G_CALLBACK(CommentDialogMouseClick), (gpointer)comment);
     g_signal_connect (G_OBJECT (CancelButton), "clicked",
                     G_CALLBACK(CommentCallDestroyWindow), NULL);
+    g_signal_connect (CommentDialog, "destroy_event", G_CALLBACK (CommentDialogClosing), NULL);
+    g_signal_connect (CommentDialog, "delete_event", G_CALLBACK (CommentDialogDestroyed), NULL);
 
     return;
 }

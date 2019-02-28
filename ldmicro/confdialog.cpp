@@ -171,6 +171,7 @@ void ConfDialogGetData (GtkWidget* widget, gpointer data){
     Prog.baudRate = atoi(buf);        
     DestroyWindow (ConfDialog);
     ProgramChanged();
+    gtk_widget_set_sensitive (MainWindow, TRUE);
 }
 
 // Checks for the required key press
@@ -206,7 +207,8 @@ void ConfDialogSignalCall () {
                     G_CALLBACK(ConfDialogGetData), NULL);
     g_signal_connect (G_OBJECT (CancelButton), "clicked",
                     G_CALLBACK(ConfCallDestroyWindow), NULL);
-    g_signal_connect (ConfDialog, "delete_event", G_CALLBACK (ConfCallDestroyWindow), NULL);
+    g_signal_connect (ConfDialog, "delete_event",
+                    G_CALLBACK (ConfCallDestroyWindow), NULL);
 }
 
 void ShowConfDialog(void)

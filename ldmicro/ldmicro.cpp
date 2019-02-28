@@ -861,7 +861,7 @@ gboolean LD_WM_Paint_call(HWID widget, HCRDC cr, gpointer data)
         gint width = gtk_widget_get_allocated_width (widget);
         gint height = gtk_widget_get_allocated_height (widget);
 
-        gtk_widget_set_size_request(widget, width, height+1);
+        gtk_widget_set_size_request(widget, width, height + 1);
 
         gdk_cairo_set_source_rgba (cr, (HBRUSH)GetStockObject(BLACK_BRUSH));
 

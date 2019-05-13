@@ -117,7 +117,13 @@ void FreezeWindowPosF(HWID hwid, char *subKey, char *name)
         return;
     }
     newKey.type = 'b';
-    newKey.val.b = gtk_window_is_maximized(GTK_WINDOW(hwid));
+
+    #if defined(__UBUNTU_16_)
+        newKey.val.b = gtk_window_is_maximized(GTK_WINDOW(hwid));
+    #elif defined(__UBUNTU_14_)
+        newKey.val.b = false;
+    #endif
+    
     Register.write((char*) &newKey, sizeof(newKey));
     Register.close();
 
